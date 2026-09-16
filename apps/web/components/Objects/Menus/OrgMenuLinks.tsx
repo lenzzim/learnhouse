@@ -67,7 +67,12 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
 
   return (
     <div className="ps-1">
-      <ul className="flex space-x-5">
+      {/* `flex-wrap` porque no drawer mobile a lista é mais estreita que a
+          linha de itens e os últimos ficavam cortados fora da tela. Usa `gap`
+          em vez de `space-x`: com wrap, o margin-left do `space-x` desalinha a
+          segunda linha. No desktop os itens continuam cabendo em uma linha, e
+          o resultado é idêntico ao anterior. */}
+      <ul className="flex flex-wrap justify-center gap-x-5 gap-y-3">
         {rendered.map((it) => {
           const content = (
             <li className={`flex space-x-2 items-center ${colors.text} font-semibold`}>
