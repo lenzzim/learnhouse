@@ -71,6 +71,32 @@
 .dark .bg-neutral-300,
 .dark .bg-slate-300        { background-color: #2b2b2b; }
 
+/* Fundos claros COM OPACIDADE.
+   `bg-white/90` e `bg-gray-50/30` sao classes distintas de `bg-white` e
+   `bg-gray-50`, entao nao herdam as regras acima. Sem isto o header
+   (`bg-white/90`) e os cards vazios (`bg-gray-50/30`) ficavam claros ou
+   cinza-medio sobre o fundo preto.
+
+   Faixa 40-100% = superficie solida, precisa inverter.
+   Faixa 5-20% fica de fora de proposito: `bg-white/5` e `bg-white/10` sao
+   overlays de destaque e ja funcionam como esperado sobre fundo escuro. */
+.dark .bg-white\/95,
+.dark .bg-white\/90,
+.dark .bg-white\/80         { background-color: rgb(17 17 17 / 0.92); }
+.dark .bg-white\/70,
+.dark .bg-white\/60,
+.dark .bg-white\/50,
+.dark .bg-white\/40         { background-color: rgb(17 17 17 / 0.7); }
+
+.dark .bg-gray-50\/60,
+.dark .bg-gray-50\/50,
+.dark .bg-gray-50\/30,
+.dark .bg-neutral-50\/50,
+.dark .bg-neutral-50\/30    { background-color: rgb(255 255 255 / 0.04); }
+.dark .bg-gray-100\/80,
+.dark .bg-gray-100\/50,
+.dark .bg-neutral-100\/80   { background-color: rgb(255 255 255 / 0.06); }
+
 /* Escuros -> claros.
    Estes são os botões e badges de contraste (ex.: "Novo Curso"). Se ficassem
    escuros, sumiriam contra o fundo escuro. Ao clarear o fundo, o `text-white`
@@ -100,9 +126,45 @@
 .dark .bg-neutral-800 > .text-white,
 .dark .bg-neutral-900 > .text-white { color: var(--lh-bg); }
 
+/* `bg-black` é o botão PRIMÁRIO do produto (427 usos: Entrar, Cadastrar-se,
+   Salvar). Preto sobre fundo preto desaparece, então precisa inverter para
+   claro — e o `text-white` que vem junto escurece, igual aos cinzas acima. */
+.dark .bg-black                  { background-color: var(--lh-text-strong); }
+.dark .bg-black.text-white,
+.dark .bg-black .text-white      { color: var(--lh-bg); }
+.dark .hover\:bg-black:hover     { background-color: var(--lh-text); }
+.dark .hover\:bg-black\/90:hover,
+.dark .hover\:bg-black\/85:hover { background-color: var(--lh-text); }
+
+/* Overlays escuros translúcidos usados como realce sobre fundo CLARO. No
+   escuro eles somem, então viram realce claro. */
+.dark .bg-black\/5,
+.dark .hover\:bg-black\/5:hover  { background-color: rgb(255 255 255 / 0.06); }
+.dark .bg-black\/10             { background-color: rgb(255 255 255 / 0.08); }
+
+.dark .border-black             { border-color: var(--lh-border-strong); }
+.dark .border-black\/5,
+.dark .border-black\/10,
+.dark .border-black\/15,
+.dark .border-black\/20,
+.dark .border-black\/25         { border-color: var(--lh-border); }
+
 /* ----------------------------------------------------------------- textos */
 /* `text-white` fica intacto de propósito: está sobre botões coloridos. */
 .dark .text-black          { color: var(--lh-text); }
+
+/* Texto preto translúcido (300+ usos) — rótulos de formulário, textos de
+   apoio, links secundários. Sobre fundo escuro ficavam ilegíveis.
+   As opacidades sobem um pouco em relação ao original: texto claro sobre
+   escuro precisa de mais alfa para a mesma legibilidade percebida. */
+.dark .text-black\/70      { color: rgb(232 232 232 / 0.78); }
+.dark .text-black\/60      { color: rgb(232 232 232 / 0.70); }
+.dark .text-black\/50      { color: rgb(232 232 232 / 0.62); }
+.dark .text-black\/45      { color: rgb(232 232 232 / 0.58); }
+.dark .text-black\/40      { color: rgb(232 232 232 / 0.55); }
+.dark .text-black\/35      { color: rgb(232 232 232 / 0.50); }
+.dark .text-black\/30      { color: rgb(232 232 232 / 0.48); }
+.dark .text-black\/25      { color: rgb(232 232 232 / 0.45); }
 .dark .text-gray-900,
 .dark .text-neutral-900,
 .dark .text-slate-900      { color: var(--lh-text-strong); }
@@ -187,6 +249,19 @@
 }
 .dark input::placeholder,
 .dark textarea::placeholder { color: var(--lh-text-faint); }
+
+/* Placeholders definidos por utilitário (placeholder:text-black/40) vencem a
+   regra de elemento acima, por especificidade. */
+.dark .placeholder\:text-black\/40::placeholder,
+.dark .placeholder\:text-black\/50::placeholder,
+.dark .placeholder\:text-gray-400::placeholder,
+.dark .placeholder\:text-gray-500::placeholder { color: var(--lh-text-faint); }
+
+/* Anéis e bordas de foco pretos são invisíveis no escuro. */
+.dark .focus\:ring-black\/5:focus,
+.dark .focus\:ring-black\/10:focus  { --tw-ring-color: rgb(255 255 255 / 0.10); }
+.dark .focus\:border-black\/20:focus,
+.dark .focus\:border-black\/10:focus { border-color: var(--lh-border-strong); }
 
 /* Autofill do Chrome força fundo azul-claro; o inset shadow é a única
    forma de sobrescrever. */
