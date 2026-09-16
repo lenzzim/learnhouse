@@ -1,0 +1,205 @@
+/* ==========================================================================
+   Tema escuro Discipulei
+   --------------------------------------------------------------------------
+   Mantido em arquivo separado de propósito: o único ponto de contato com o
+   upstream é a linha de @import no globals.css, então um merge do repositório
+   oficial não conflita aqui.
+
+   POR QUE OVERRIDE POR CLASSE E NÃO POR TOKEN:
+   O Tailwind v4 resolve `bg-white` e `text-white` a partir da MESMA variável
+   (--color-white). Redefinir esse token inverteria também as 1.451 ocorrências
+   de `text-white`, que quase sempre estão sobre botões coloridos e precisam
+   continuar brancas. Por isso o escopo aqui é `.dark .<classe>`, que separa
+   fundo de texto e tem especificidade maior que a classe original.
+
+   Base: paleta do discipulei.com.br (#0d0d0c, #171614, #f39c12, #ddb46a).
+   ========================================================================== */
+
+:root {
+  /* superfícies (do mais fundo ao mais elevado) */
+  --lh-bg:          #0d0d0c;
+  --lh-surface:     #12100e;
+  --lh-surface-2:   #171614;
+  --lh-surface-3:   #1f1d1a;
+  --lh-surface-4:   #262320;
+
+  /* bordas */
+  --lh-border:        #2a2724;
+  --lh-border-strong: #3a3530;
+
+  /* texto (do mais fraco ao mais forte) */
+  --lh-text-faint:  #6b645c;
+  --lh-text-muted:  #8a8177;
+  --lh-text-soft:   #b8afa3;
+  --lh-text:        #e5e2e1;
+  --lh-text-strong: #f5f1ea;
+
+  /* marca */
+  --lh-accent:      #f39c12;
+  --lh-accent-soft: #ddb46a;
+}
+
+/* Fundo base da página. O <body> do upstream não declara cor própria,
+   então sem isto o branco do user-agent aparece nas bordas da viewport. */
+.dark,
+.dark body {
+  background-color: var(--lh-bg);
+  color: var(--lh-text);
+}
+
+/* ---------------------------------------------------------------- fundos  */
+/* Claros -> escuros. `bg-white` é o fundo dominante (1.359 usos): cards,
+   header, modais, painéis. */
+.dark .bg-white            { background-color: var(--lh-surface); }
+.dark .bg-gray-50,
+.dark .bg-neutral-50,
+.dark .bg-slate-50,
+.dark .bg-zinc-50          { background-color: var(--lh-surface-2); }
+.dark .bg-gray-100,
+.dark .bg-neutral-100,
+.dark .bg-slate-100,
+.dark .bg-zinc-100         { background-color: var(--lh-surface-3); }
+.dark .bg-gray-200,
+.dark .bg-neutral-200,
+.dark .bg-slate-200,
+.dark .bg-zinc-200         { background-color: var(--lh-surface-4); }
+.dark .bg-gray-300,
+.dark .bg-neutral-300,
+.dark .bg-slate-300        { background-color: #2f2b27; }
+
+/* Escuros -> claros.
+   Estes são os botões e badges de contraste (ex.: "Novo Curso"). Se ficassem
+   escuros, sumiriam contra o fundo escuro. Ao clarear o fundo, o `text-white`
+   que costuma acompanhá-los ficaria ilegível — corrigido logo abaixo. */
+.dark .bg-gray-700,
+.dark .bg-neutral-700      { background-color: var(--lh-text-soft); }
+.dark .bg-gray-800,
+.dark .bg-neutral-800      { background-color: var(--lh-text); }
+.dark .bg-gray-900,
+.dark .bg-neutral-900,
+.dark .bg-gray-950,
+.dark .bg-neutral-950      { background-color: var(--lh-text-strong); }
+
+/* Texto claro sobre fundo que acabou de virar claro (mesmo elemento). */
+.dark .bg-gray-700.text-white,
+.dark .bg-gray-800.text-white,
+.dark .bg-gray-900.text-white,
+.dark .bg-gray-950.text-white,
+.dark .bg-neutral-700.text-white,
+.dark .bg-neutral-800.text-white,
+.dark .bg-neutral-900.text-white,
+.dark .bg-neutral-950.text-white { color: var(--lh-bg); }
+
+/* Mesmo caso, quando o texto está em um filho. */
+.dark .bg-gray-800 > .text-white,
+.dark .bg-gray-900 > .text-white,
+.dark .bg-neutral-800 > .text-white,
+.dark .bg-neutral-900 > .text-white { color: var(--lh-bg); }
+
+/* ----------------------------------------------------------------- textos */
+/* `text-white` fica intacto de propósito: está sobre botões coloridos. */
+.dark .text-black          { color: var(--lh-text); }
+.dark .text-gray-900,
+.dark .text-neutral-900,
+.dark .text-slate-900      { color: var(--lh-text-strong); }
+.dark .text-gray-800,
+.dark .text-neutral-800,
+.dark .text-slate-800      { color: var(--lh-text); }
+.dark .text-gray-700,
+.dark .text-neutral-700,
+.dark .text-slate-700      { color: var(--lh-text); }
+.dark .text-gray-600,
+.dark .text-neutral-600,
+.dark .text-slate-600      { color: var(--lh-text-soft); }
+.dark .text-gray-500,
+.dark .text-neutral-500,
+.dark .text-slate-500      { color: var(--lh-text-muted); }
+.dark .text-gray-400,
+.dark .text-neutral-400,
+.dark .text-slate-400      { color: var(--lh-text-muted); }
+.dark .text-gray-300,
+.dark .text-neutral-300    { color: var(--lh-text-soft); }
+
+/* ----------------------------------------------------------------- bordas */
+.dark .border-white        { border-color: var(--lh-border); }
+.dark .border-gray-50,
+.dark .border-gray-100,
+.dark .border-neutral-100  { border-color: var(--lh-border); }
+.dark .border-gray-200,
+.dark .border-neutral-200,
+.dark .border-slate-200    { border-color: var(--lh-border); }
+.dark .border-gray-300,
+.dark .border-neutral-300  { border-color: var(--lh-border-strong); }
+.dark .border-gray-400,
+.dark .border-neutral-400  { border-color: var(--lh-border-strong); }
+
+/* Divisores (divide-*) resolvem na borda do irmão. */
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-neutral-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--lh-border);
+}
+
+/* ------------------------------------------------------------ interações */
+/* Variantes hover/focus geram seletores próprios e não herdam os overrides
+   acima; precisam ser declaradas. */
+.dark .hover\:bg-white:hover        { background-color: var(--lh-surface-2); }
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-neutral-50:hover   { background-color: var(--lh-surface-2); }
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-neutral-100:hover  { background-color: var(--lh-surface-3); }
+.dark .hover\:bg-gray-200:hover,
+.dark .hover\:bg-neutral-200:hover  { background-color: var(--lh-surface-4); }
+.dark .hover\:bg-gray-800:hover,
+.dark .hover\:bg-gray-900:hover     { background-color: var(--lh-text); }
+
+.dark .hover\:text-gray-900:hover,
+.dark .hover\:text-black:hover      { color: var(--lh-text-strong); }
+.dark .hover\:text-gray-700:hover,
+.dark .hover\:text-gray-600:hover   { color: var(--lh-text); }
+
+.dark .hover\:border-gray-200:hover,
+.dark .hover\:border-gray-300:hover { border-color: var(--lh-border-strong); }
+
+/* ---------------------------------------------------------------- sombras */
+/* As sombras do upstream usam cinza claro com outline claro — invisíveis e
+   "lavadas" no escuro. Trocadas por sombra preta com outline sutil. */
+.dark .nice-shadow {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  outline: 1px solid var(--lh-border);
+}
+.dark .light-shadow {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.45);
+  outline: 1px solid var(--lh-border);
+}
+
+/* ------------------------------------------------------------ formulários */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--lh-surface-2);
+  color: var(--lh-text);
+  border-color: var(--lh-border);
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: var(--lh-text-faint); }
+
+/* Autofill do Chrome força fundo azul-claro; o inset shadow é a única
+   forma de sobrescrever. */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--lh-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--lh-surface-2) inset;
+}
+
+/* ------------------------------------------------------------------ extras */
+.dark hr { border-color: var(--lh-border); }
+
+/* Scrollbar acompanhando o tema */
+.dark * {
+  scrollbar-color: var(--lh-border-strong) var(--lh-surface);
+}
+
+/* O editor de conteúdo (tiptap) herda fundo branco do prose. */
+.dark .ProseMirror { color: var(--lh-text); }

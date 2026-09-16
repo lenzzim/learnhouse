@@ -8,6 +8,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Tema escuro Discipulei. Fica fora de @layer de propósito: CSS não-layered
+   tem precedência sobre as utilities do Tailwind, que vivem em layer. */
+@import './discipulei-dark.css';
+
 /* Root layout fade-in (replaces framer-motion) */
 @keyframes fadeIn {
   from { opacity: 0; }

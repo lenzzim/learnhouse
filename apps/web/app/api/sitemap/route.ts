@@ -3,6 +3,7 @@ import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { getOrgFolders } from '@services/folders/folders'
 import { getOrgPodcasts } from '@services/podcasts/podcasts'
 import { getCommunities } from '@services/communities/communities'
+import { getDiscussions } from '@services/communities/discussions'
 import { NextRequest, NextResponse } from 'next/server'
 
 function getBaseUrlFromRequest(request: NextRequest): string {
@@ -119,12 +120,39 @@ export async function GET(request: NextRequest) {
     case 'communities': {
       const communities = await getCommunities(orgInfo.id, 1, 1000, null).catch(() => [])
       for (const community of communities) {
+        const communitySlug = community.community_uuid.replace('community_', '')
         sitemapUrls.push({
-          loc: `${baseUrl}community/${community.community_uuid.replace('community_', '')}`,
+          loc: `${baseUrl}community/${communitySlug}`,
           priority: 0.6,
           changefreq: 'weekly',
           lastmod: community.update_date,
         })
+
+        // Discussions carry the actual indexable prose — their pages already set
+        // robots index/follow and build a description from the post body. Without
+        // them here they are only reachable by crawling links from the community
+        // page, so a post that scrolled off the first page never gets discovered.
+        //
+        // Private communities are skipped: their pages 404 for anonymous callers,
+        // and listing URLs that return 404 to Googlebot is a crawl-budget leak.
+        if (!community.public) continue
+
+        const discussions = await getDiscussions(
+          community.community_uuid,
+          'recent',
+          1,
+          1000,
+          null
+        ).catch(() => [])
+
+        for (const discussion of discussions) {
+          sitemapUrls.push({
+            loc: `${baseUrl}community/${communitySlug}/discussion/${discussion.discussion_uuid.replace('discussion_', '')}`,
+            priority: 0.5,
+            changefreq: 'weekly',
+            lastmod: discussion.update_date,
+          })
+        }
       }
       break
     }

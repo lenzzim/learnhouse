@@ -39,7 +39,7 @@ export default function RootLayout({
   // no-JS baseline for crawlers; the script overwrites it for everyone else.
   return (
     <html
-      className={`${wixMadeforText.variable} ${tajawal.variable}`}
+      className={`${wixMadeforText.variable} ${tajawal.variable} dark`}
       lang="en"
       suppressHydrationWarning
     >
@@ -48,6 +48,11 @@ export default function RootLayout({
             RTL locale never flashes an LTR layout. Must run first. */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="/dir-init.js" />
+        {/* Synchronous script — applies the viewer's theme before body paints so
+            dark never flashes white. `dark` is on <html> above as the no-JS
+            baseline; this script removes it only when the viewer chose light. */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/theme-init.js" />
         {/* Synchronous script — blocks parsing to guarantee window.__RUNTIME_CONFIG__ exists before any JS runs.
             Next.js <Script strategy="beforeInteractive"> is not truly blocking in all browsers (Safari). */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
