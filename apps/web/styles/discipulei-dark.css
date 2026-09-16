@@ -304,3 +304,12 @@
 
 /* O editor de conteúdo (tiptap) herda fundo branco do prose. */
 .dark .ProseMirror { color: var(--lh-text); }
+
+/* ------------------------------------------------------------------- logo */
+/* O logo da organização é branco, porque o escuro é o tema padrão. No tema
+   claro ele desapareceria contra o header claro. A arte é monocromática, então
+   inverter resolve sem precisar de um segundo arquivo — o LearnHouse guarda
+   apenas um logo por organização. */
+html:not(.dark) .logo img {
+  filter: invert(1);
+}
