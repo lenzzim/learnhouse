@@ -12,31 +12,35 @@
    continuar brancas. Por isso o escopo aqui é `.dark .<classe>`, que separa
    fundo de texto e tem especificidade maior que a classe original.
 
-   Base: paleta do discipulei.com.br (#0d0d0c, #171614, #f39c12, #ddb46a).
+   Base: neutros puros (preto e branco), com o dourado do Discipulei reservado
+   para acento. Referência de tratamento visual: eden.so — cinzas neutros, sem
+   viés quente nas superfícies, e cor aplicada com parcimônia.
    ========================================================================== */
 
 :root {
-  /* superfícies (do mais fundo ao mais elevado) */
-  --lh-bg:          #0d0d0c;
-  --lh-surface:     #12100e;
-  --lh-surface-2:   #171614;
-  --lh-surface-3:   #1f1d1a;
-  --lh-surface-4:   #262320;
+  /* Superfícies — cinzas NEUTROS de propósito (sem componente quente). Um
+     marrom sutil aqui "suja" a página inteira; o calor fica só no acento. */
+  --lh-bg:          #0a0a0a;
+  --lh-surface:     #111111;
+  --lh-surface-2:   #161616;
+  --lh-surface-3:   #1c1c1c;
+  --lh-surface-4:   #232323;
 
   /* bordas */
-  --lh-border:        #2a2724;
-  --lh-border-strong: #3a3530;
+  --lh-border:        #262626;
+  --lh-border-strong: #333333;
 
   /* texto (do mais fraco ao mais forte) */
-  --lh-text-faint:  #6b645c;
-  --lh-text-muted:  #8a8177;
-  --lh-text-soft:   #b8afa3;
-  --lh-text:        #e5e2e1;
-  --lh-text-strong: #f5f1ea;
+  --lh-text-faint:  #6b6b6b;
+  --lh-text-muted:  #969696;
+  --lh-text-soft:   #a8a8a8;
+  --lh-text:        #e8e8e8;
+  --lh-text-strong: #f5f5f5;
 
-  /* marca */
-  --lh-accent:      #f39c12;
-  --lh-accent-soft: #ddb46a;
+  /* Acento — dourado do Discipulei, usado com parcimônia (links, foco,
+     detalhes), nunca como cor de superfície. */
+  --lh-accent:      #ddb46a;
+  --lh-accent-soft: #eadec9;
 }
 
 /* Fundo base da página. O <body> do upstream não declara cor própria,
@@ -65,7 +69,7 @@
 .dark .bg-zinc-200         { background-color: var(--lh-surface-4); }
 .dark .bg-gray-300,
 .dark .bg-neutral-300,
-.dark .bg-slate-300        { background-color: #2f2b27; }
+.dark .bg-slate-300        { background-color: #2b2b2b; }
 
 /* Escuros -> claros.
    Estes são os botões e badges de contraste (ex.: "Novo Curso"). Se ficassem
@@ -192,6 +196,28 @@
   -webkit-text-fill-color: var(--lh-text);
   -webkit-box-shadow: 0 0 0 1000px var(--lh-surface-2) inset;
 }
+
+/* ------------------------------------------------------------------ acento */
+/* O dourado entra só aqui: foco, seleção e marcação de texto. Superfícies e
+   texto corrido permanecem neutros — é o que mantém a página preto-e-branco
+   com o dourado lendo como detalhe, e não como cor de fundo. */
+.dark ::selection {
+  background-color: var(--lh-accent);
+  color: var(--lh-bg);
+}
+
+.dark :focus-visible {
+  outline: 2px solid var(--lh-accent);
+  outline-offset: 2px;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: var(--lh-accent);
+}
+
+.dark mark { background-color: var(--lh-accent); color: var(--lh-bg); }
 
 /* ------------------------------------------------------------------ extras */
 .dark hr { border-color: var(--lh-border); }
