@@ -4,6 +4,7 @@ import { getOrgFolders } from '@services/folders/folders'
 import { getOrgPodcasts } from '@services/podcasts/podcasts'
 import { getCommunities } from '@services/communities/communities'
 import { getDiscussions } from '@services/communities/discussions'
+import { getOrgSeoConfig } from '@/lib/seo/utils'
 import { NextRequest, NextResponse } from 'next/server'
 
 function getBaseUrlFromRequest(request: NextRequest): string {
@@ -35,6 +36,11 @@ export async function GET(request: NextRequest) {
 
   const orgInfo = await getOrganizationContextInfo(orgSlug, null)
 
+  // Mirrors the robots meta on the community and discussion pages: when the org
+  // keeps communities out of search, the sitemap must not advertise them either.
+  // Otherwise the sitemap hands Google the exact URLs the pages ask it to skip.
+  const noindexCommunities = !!getOrgSeoConfig(orgInfo).noindex_communities
+
   let sitemapUrls: SitemapUrl[] = []
 
   switch (sitemapType) {
@@ -44,8 +50,10 @@ export async function GET(request: NextRequest) {
         { loc: `${baseUrl}courses`, priority: 0.9, changefreq: 'weekly' },
         { loc: `${baseUrl}library`, priority: 0.9, changefreq: 'weekly' },
         { loc: `${baseUrl}podcasts`, priority: 0.9, changefreq: 'weekly' },
-        { loc: `${baseUrl}communities`, priority: 0.9, changefreq: 'weekly' },
       ]
+      if (!noindexCommunities) {
+        sitemapUrls.push({ loc: `${baseUrl}communities`, priority: 0.9, changefreq: 'weekly' })
+      }
       break
     }
     case 'courses': {
@@ -118,6 +126,7 @@ export async function GET(request: NextRequest) {
       break
     }
     case 'communities': {
+      if (noindexCommunities) break
       const communities = await getCommunities(orgInfo.id, 1, 1000, null).catch(() => [])
       for (const community of communities) {
         const communitySlug = community.community_uuid.replace('community_', '')

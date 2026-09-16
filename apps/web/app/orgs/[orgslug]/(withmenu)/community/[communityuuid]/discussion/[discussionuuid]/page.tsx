@@ -6,6 +6,7 @@ import { getCommunity } from '@services/communities/communities'
 import { getDiscussion } from '@services/communities/discussions'
 import { getOrgThumbnailMediaDirectory } from '@services/media/media'
 import DiscussionPageClient from './discussion'
+import { getOrgSeoConfig } from '@/lib/seo/utils'
 
 /**
  * Extract plain text from discussion content for SEO metadata
@@ -58,15 +59,21 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const contentText = discussion ? getContentDescription(discussion.content) : ''
   const description = contentText ? contentText.substring(0, 160) : `Discussion from ${org.name}`
 
+  // The community pages honour `noindex_communities`, but this page hardcoded
+  // `index: true` — so turning the toggle on hid the community listing while
+  // every individual post (with its author) stayed indexable. Posts are the
+  // most personal content on the platform, so they must follow the same switch.
+  const noindex = !!getOrgSeoConfig(org).noindex_communities
+
   return {
     title,
     description,
     robots: {
-      index: true,
+      index: !noindex,
       follow: true,
       nocache: true,
       googleBot: {
-        index: true,
+        index: !noindex,
         follow: true,
         'max-image-preview': 'large',
       },
