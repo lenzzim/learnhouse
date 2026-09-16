@@ -380,12 +380,18 @@ export const OrgMenu = (props: any) => {
         </div>
       </nav>
       <div
-        className={`fixed inset-x-0 bg-white/80 backdrop-blur-lg md:hidden shadow-lg transition-all duration-300 ease-in-out ${
+        className={`fixed inset-x-0 bg-white/80 backdrop-blur-lg md:hidden shadow-lg transition-all duration-300 ease-in-out overflow-y-auto overscroll-contain ${
           isMenuOpen ? 'opacity-100' : '-top-full opacity-0'
         }`}
         style={{
           zIndex: 'var(--z-nav-menu)',
-          top: isMenuOpen ? topOffset + 60 : undefined
+          top: isMenuOpen ? topOffset + 60 : undefined,
+          // The drawer had no height bound, so on short screens (or once the
+          // org adds menu entries) the items below the fold were simply cut
+          // off with no way to reach them. Cap it to what is left under the
+          // header and let it scroll. `dvh` rather than `vh` so the mobile
+          // browser's collapsing URL bar doesn't hide the last item.
+          maxHeight: isMenuOpen ? `calc(100dvh - ${topOffset + 60}px)` : undefined,
         }}
       >
         <div className="flex flex-col px-4 py-3 space-y-4 justify-center items-center">

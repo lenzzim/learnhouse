@@ -259,7 +259,21 @@ function LandingCustom({ landing, orgslug }: LandingCustomProps) {
 
   return (
     <div className="flex flex-col items-center justify-between w-full max-w-(--breakpoint-2xl) mx-auto px-4 sm:px-6 lg:px-16 h-full">
-      {landing.sections.map((section) => renderSection(section))}
+      {/* `lh-reveal` is the hook for the scroll-driven reveal in globals.css.
+          The wrapper exists because the section markup is shared with the
+          dashboard preview — styling it here would animate that too. The
+          animation is pure CSS (`animation-timeline: view()`), so it costs no
+          JS and degrades to "always visible" where unsupported, including for
+          anyone with prefers-reduced-motion. */}
+      {landing.sections.map((section, index) => (
+        <div
+          key={`section-${index}`}
+          className="lh-reveal w-full flex flex-col items-center"
+          style={{ ['--lh-reveal-index' as any]: index }}
+        >
+          {renderSection(section)}
+        </div>
+      ))}
     </div>
   )
 }
