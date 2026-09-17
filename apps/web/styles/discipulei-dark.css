@@ -305,6 +305,83 @@
 /* O editor de conteúdo (tiptap) herda fundo branco do prose. */
 .dark .ProseMirror { color: var(--lh-text); }
 
+/* ------------------------------------------------ discussões da comunidade */
+/* DiscussionContent e DiscussionEditor declaram cores fixas do tema claro
+   num <style jsx global> (texto #374151, título #111827, citação #6b7280,
+   borda #d1d5db, código #f3f4f6). Esses seletores têm uma classe e um tipo a
+   mais que o `.dark .ProseMirror` acima, então vencem ele. Os daqui repetem o
+   seletor original com `.dark` na frente e ganham por especificidade. */
+.dark .discussion-content-readonly .ProseMirror h2,
+.dark .discussion-content-readonly .ProseMirror h3,
+.dark .discussion-editor-content .ProseMirror h2,
+.dark .discussion-editor-content .ProseMirror h3 {
+  color: var(--lh-text-strong);
+}
+
+.dark .discussion-content-readonly .ProseMirror p,
+.dark .discussion-content-readonly .ProseMirror li,
+.dark .discussion-content-readonly .ProseMirror .discussion-bullet-list,
+.dark .discussion-content-readonly .ProseMirror .discussion-ordered-list,
+.dark .discussion-editor-content .ProseMirror p,
+.dark .discussion-editor-content .ProseMirror li {
+  color: var(--lh-text);
+}
+
+.dark .discussion-content-readonly .ProseMirror li::marker,
+.dark .discussion-editor-content .ProseMirror li::marker {
+  color: var(--lh-text-muted);
+}
+
+/* Citação: texto um passo abaixo do corpo e fio dourado no lugar do cinza
+   claro, que brilhava demais sobre o fundo escuro. */
+.dark .discussion-content-readonly .ProseMirror .discussion-blockquote,
+.dark .discussion-content-readonly .ProseMirror .discussion-blockquote p,
+.dark .discussion-editor-content .ProseMirror .discussion-blockquote,
+.dark .discussion-editor-content .ProseMirror .discussion-blockquote p {
+  color: var(--lh-text-soft);
+}
+
+.dark .discussion-content-readonly .ProseMirror .discussion-blockquote,
+.dark .discussion-editor-content .ProseMirror .discussion-blockquote {
+  border-inline-start-color: var(--lh-accent);
+}
+
+.dark .discussion-content-readonly .ProseMirror code,
+.dark .discussion-editor-content .ProseMirror code {
+  background-color: var(--lh-surface-3);
+  color: var(--lh-text);
+}
+
+.dark .discussion-content-readonly .ProseMirror .discussion-code-block,
+.dark .discussion-editor-content .ProseMirror .discussion-code-block {
+  background-color: var(--lh-surface-2);
+  border: 1px solid var(--lh-border);
+  color: var(--lh-text);
+}
+
+.dark .discussion-content-readonly .ProseMirror .discussion-code-block code,
+.dark .discussion-editor-content .ProseMirror .discussion-code-block code {
+  background: none;
+}
+
+.dark .discussion-content-readonly .ProseMirror .discussion-link,
+.dark .discussion-editor-content .ProseMirror .discussion-link {
+  color: var(--lh-accent);
+}
+
+.dark .discussion-content-readonly .ProseMirror .discussion-link:hover,
+.dark .discussion-editor-content .ProseMirror .discussion-link:hover {
+  color: var(--lh-accent-soft);
+}
+
+.dark .discussion-editor-content {
+  border-color: var(--lh-border);
+}
+
+.dark .discussion-editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--lh-text-faint);
+}
+
 /* ------------------------------------------------------------------- logo */
 /* O logo da organização é branco, porque o escuro é o tema padrão. No tema
    claro ele desapareceria contra o header claro. A arte é monocromática, então

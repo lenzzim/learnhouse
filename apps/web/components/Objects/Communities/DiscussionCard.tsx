@@ -236,7 +236,7 @@ export function DiscussionCard({
               )}
 
               {isSelectMode ? (
-                <h3 className="text-sm font-medium text-gray-900 line-clamp-1" dir="auto">
+                <h3 className="text-sm font-medium text-gray-900 break-words sm:line-clamp-1" dir="auto">
                   {discussion.title}
                 </h3>
               ) : (
@@ -245,7 +245,7 @@ export function DiscussionCard({
                   onClick={onClick}
                   className="block group flex-1 min-w-0"
                 >
-                  <h3 className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1" dir="auto">
+                  <h3 className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors break-words sm:line-clamp-1" dir="auto">
                     {discussion.title}
                   </h3>
                 </Link>

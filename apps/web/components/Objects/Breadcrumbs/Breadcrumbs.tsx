@@ -29,8 +29,11 @@ const ChevronDivider = () => (
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
-    <nav className="flex items-center">
-      <ol className="flex items-center text-[13px] font-medium rounded-lg bg-white overflow-hidden nice-shadow">
+    // min-w-0 em toda a cadeia: sem ele, os itens não encolhem abaixo do
+    // max-w e, no celular, o último item (o título da página) saía cortado
+    // pela borda em vez de ganhar reticências.
+    <nav className="flex items-center min-w-0 max-w-full">
+      <ol className="flex items-center min-w-0 max-w-full text-[13px] font-medium rounded-lg bg-white overflow-hidden nice-shadow">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
           const isFirst = index === 0
@@ -38,26 +41,26 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
           return (
             <React.Fragment key={index}>
               {index > 0 && (
-                <li className="flex items-center h-8">
+                <li className="flex items-center h-8 shrink-0">
                   <ChevronDivider />
                 </li>
               )}
-              <li className="flex items-center h-8">
+              <li className="flex items-center h-8 min-w-0">
                 {item.href && !isLast ? (
                   <Link
                     href={item.href}
-                    className={`flex items-center h-full text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors ${
+                    className={`flex items-center h-full min-w-0 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors ${
                       isFirst && item.icon ? 'gap-1.5 px-2.5' : 'px-2.5'
                     }`}
                   >
-                    {item.icon}
+                    {item.icon && <span className="shrink-0">{item.icon}</span>}
                     <span className="truncate max-w-[150px]">{item.label}</span>
                   </Link>
                 ) : (
-                  <span className={`flex items-center h-full text-gray-900 ${
+                  <span className={`flex items-center h-full min-w-0 text-gray-900 ${
                     isFirst && item.icon ? 'gap-1.5 px-2.5' : 'px-2.5'
                   }`}>
-                    {item.icon}
+                    {item.icon && <span className="shrink-0">{item.icon}</span>}
                     <span className="truncate max-w-[200px]">{item.label}</span>
                   </span>
                 )}
