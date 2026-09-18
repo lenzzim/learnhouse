@@ -522,6 +522,25 @@ export default async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
+  // 9b. Raiz para quem já entrou (Discipulei, tenancy single)
+  //
+  //     A raiz é a página de apresentação: ela existe para convencer quem
+  //     ainda não tem conta. Quem já está logado quer a comunidade, não o
+  //     convite de novo. O cookie LH_session é só um marcador (a página
+  //     confere de verdade), então errar aqui não abre acesso a nada: no
+  //     máximo mostra a apresentação a quem já entrou.
+  //
+  //     Para voltar atrás, apague este bloco.
+  // -------------------------------------------------------------------------
+  if (
+    instance.tenancy === 'single'
+    && pathname === '/'
+    && !!req.cookies.get('LH_session')?.value
+  ) {
+    return NextResponse.redirect(new URL(`/communities${search}`, req.url))
+  }
+
+  // -------------------------------------------------------------------------
   // 10. Apex root (multi tenancy only) — login-first, then org picker.
   //
   //     The bare apex (learnhouse.io) is NOT org-scoped. An unauthenticated
