@@ -307,6 +307,14 @@ export default async function proxy(req: NextRequest) {
   //    layout additionally enforces SaaS gating. We set instance cookies so the
   //    hub's client components can read tenancy/mode/top-domain.
   // -------------------------------------------------------------------------
+  // Discipulei: com uma organização só, `/home` é um seletor de um item, e a
+  // pessoa cai numa tela que não entrega nada. As comunidades são o destino.
+  // Vale para quem digita /home, para os bookmarks antigos e para todo
+  // redirecionamento interno que ainda aponte para lá.
+  if (instance.tenancy === 'single' && (pathname === '/home' || pathname.startsWith('/home/'))) {
+    return NextResponse.redirect(new URL(`/communities${search}`, req.url))
+  }
+
   const HUB_ROOT_PATHS = ['/home', '/organizations', '/account', '/billing', '/subscriptions', '/new']
   const isHubRoot = HUB_ROOT_PATHS.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
@@ -339,7 +347,8 @@ export default async function proxy(req: NextRequest) {
     // A logged-in user has no business on /login — bounce them to the hub (the
     // page itself re-verifies, so this is a best-effort UX shortcut).
     if (pathname === '/login' && hasSession) {
-      return NextResponse.redirect(new URL('/home', req.url))
+      const destino = instance.tenancy === 'single' ? '/communities' : '/home'
+      return NextResponse.redirect(new URL(destino, req.url))
     }
 
     const resolved = await resolveTenant(req, instance)
