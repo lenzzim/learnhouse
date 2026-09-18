@@ -17,6 +17,17 @@
     if (stored === 'light' || stored === 'dark') theme = stored;
   } catch { /* private mode / sandboxed iframe */ }
 
+  // O painel (/dash e /admin) é desenhado no upstream só para o tema claro:
+  // as telas de configuração usam fundos claros fixos, e com a sobreposição
+  // escura o texto fica claro sobre claro. Enquanto o upstream não tiver tema
+  // escuro nessa área, o painel abre sempre claro — a escolha do visitante
+  // continua valendo em todo o resto do site.
+  var caminho = location.pathname;
+  if (caminho === '/dash' || caminho.indexOf('/dash/') === 0 ||
+      caminho === '/admin' || caminho.indexOf('/admin/') === 0) {
+    theme = 'light';
+  }
+
   var el = document.documentElement;
   if (theme === 'dark') {
     el.classList.add('dark');

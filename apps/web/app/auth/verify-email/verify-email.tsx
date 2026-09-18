@@ -65,7 +65,7 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
                     // fresh, now-verified user lands somewhere useful. A full
                     // navigation lets auth bootstrap from the new cookies.
                     setTimeout(() => {
-                        window.location.assign('/home')
+                        window.location.assign('/communities')
                     }, 1200)
                 } else {
                     track(AnalyticsEvent.EmailVerificationCompleted, { result: 'fail' })

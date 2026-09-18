@@ -40,7 +40,7 @@ function SignUpClient(props: SignUpClientProps) {
 
   useEffect(() => {
     if (isAuthenticated && !hasOrgToJoin) {
-      router.replace('/home')
+      router.replace('/communities')
     }
   }, [isAuthenticated, hasOrgToJoin, router])
 
