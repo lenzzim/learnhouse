@@ -24,7 +24,12 @@ export async function generateMetadata({
     const faviconImage = org?.config?.config?.customization?.general?.favicon_image || org?.config?.config?.general?.favicon_image
     if (faviconImage) {
       return {
-        icons: { icon: getOrgFaviconMediaDirectory(org.org_uuid, faviconImage) },
+        // `icons` substitui o objeto inteiro do layout raiz, então o ícone
+        // da Tela de Início (Discipulei) precisa ser repetido aqui.
+        icons: {
+          icon: getOrgFaviconMediaDirectory(org.org_uuid, faviconImage),
+          apple: '/icons/apple-touch-icon.png',
+        },
       }
     }
   } catch {

@@ -1,7 +1,43 @@
 import '../styles/globals.css'
 import React from 'react'
+import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
 import { Inter, Newsreader, Tajawal } from 'next/font/google'
+
+// Discipulei como app instalável (decisão N20). O manifesto está em
+// app/manifest.ts; o Next injeta o <link rel="manifest"> sozinho.
+// `viewportFit: 'cover'` + barra 'black-translucent' fazem a página ocupar a
+// tela toda no iOS; os recuos de área segura estão em discipulei-dark.css.
+// O favicon por organização (app/orgs/[orgslug]/layout.tsx) continua
+// substituindo estes ícones quando a org tem um configurado.
+export const metadata: Metadata = {
+  applicationName: 'Discipulei',
+  appleWebApp: {
+    capable: true,
+    title: 'Discipulei',
+    statusBarStyle: 'black-translucent',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/favicon.ico', sizes: 'any' },
+      { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/favicon-16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  // O Next emite só `mobile-web-app-capable`; iOS anterior ao 16.4 ainda lê
+  // a versão com prefixo da Apple.
+  other: {
+    'apple-mobile-web-app-capable': 'yes',
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#121211',
+}
 
 // Discipulei P&B: Inter no corpo e na interface, Newsreader 400 nos títulos
 // (ver styles/discipulei-dark.css, que liga --font-default a --font-sans e

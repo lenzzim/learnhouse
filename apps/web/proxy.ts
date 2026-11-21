@@ -218,8 +218,11 @@ export const config = {
      * 7. /embed (activity embeds)
      * 8. /ingest (PostHog reverse proxy — must reach the next.config rewrite
      *    untouched; otherwise the middleware mis-routes it and ingestion 404s)
+     * 9. /icons/ (Discipulei: PWA icons in /public/icons — being in a
+     *    subfolder, rule 6 doesn't catch them and the tenant catch-all would
+     *    rewrite them to /orgs/{slug}/icons/… and 404)
      */
-    '/((?!api|_next|fonts|umami|ingest|examples|embed|monitoring|[\\w-]+\\.\\w+).*)',
+    '/((?!api|_next|fonts|icons/|umami|ingest|examples|embed|monitoring|[\\w-]+\\.\\w+).*)',
     '/sitemap.xml',
     '/robots.txt',
     '/payments/stripe/connect/oauth',
