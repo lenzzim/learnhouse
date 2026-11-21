@@ -98,8 +98,12 @@ export default function LeitorBiblia() {
       const m = /^#v(\d+)$/.exec(window.location.hash)
       if (m) alvo = Number(m[1])
     }
-    if (alvo !== undefined) {
-      document.getElementById(`v${alvo}`)?.scrollIntoView({ block: 'center' })
+    const el = alvo !== undefined ? document.getElementById(`v${alvo}`) : null
+    if (el) {
+      // clicar num versículo já visível só destaca, sem pular a página
+      const r = el.getBoundingClientRect()
+      const visivel = r.top >= 80 && r.bottom <= window.innerHeight
+      if (!visivel) el.scrollIntoView({ block: 'center' })
     }
   }, [estado.tipo, atual.livroId, atual.capitulo, ini])
 

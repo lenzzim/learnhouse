@@ -273,7 +273,9 @@ function numeroDoPrefixo(p: string): number {
   return 1
 }
 
-const LETRA = /\p{L}/u
+// via construtor (e não literal): o tsconfig mira es2017 e o TypeScript checa
+// a sintaxe de regex literais contra o target (\p{...} é ES2018)
+const LETRA = new RegExp('\\p{L}', 'u')
 
 function ehDigito(c: string | undefined): boolean {
   return c !== undefined && c >= '0' && c <= '9'

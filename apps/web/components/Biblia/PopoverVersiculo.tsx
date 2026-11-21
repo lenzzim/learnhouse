@@ -16,7 +16,7 @@ interface Props {
   ancora: HTMLElement
   id: string
   /** recebe o elemento raiz (para o host saber o que é "dentro" do popover) */
-  popoverRef: React.MutableRefObject<HTMLDivElement | null>
+  popoverRef: React.RefObject<HTMLDivElement | null>
   onMouseEnter: () => void
   onMouseLeave: () => void
   onNavegar: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void
