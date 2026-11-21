@@ -149,7 +149,7 @@ export function itemMenuChamada(rotulo: string) {
   return {
     key: 'discipulei-estudar',
     label: (
-      <span className="inline-flex items-center rounded-full border border-[var(--line-strong)] px-2.5 py-0.5">
+      <span className="inline-flex items-center rounded-full border border-current px-2.5 py-0.5">
         {rotulo}
       </span>
     ),
