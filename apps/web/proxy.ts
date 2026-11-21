@@ -221,8 +221,12 @@ export const config = {
      * 9. /icons/ (Discipulei: PWA icons in /public/icons — being in a
      *    subfolder, rule 6 doesn't catch them and the tenant catch-all would
      *    rewrite them to /orgs/{slug}/icons/… and 404)
+     * 10. /biblia-dados/ (Discipulei: JSON da Bíblia em /public/biblia-dados —
+     *    mesmo caso do /icons/: subpasta, a regra 6 não pega e o catch-all
+     *    reescreveria para /orgs/{slug}/biblia-dados/… e daria 404. A barra
+     *    final importa: a PÁGINA /biblia continua passando pelo proxy)
      */
-    '/((?!api|_next|fonts|icons/|umami|ingest|examples|embed|monitoring|[\\w-]+\\.\\w+).*)',
+    '/((?!api|_next|fonts|icons/|biblia-dados/|umami|ingest|examples|embed|monitoring|[\\w-]+\\.\\w+).*)',
     '/sitemap.xml',
     '/robots.txt',
     '/payments/stripe/connect/oauth',
