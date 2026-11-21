@@ -4,8 +4,8 @@ import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
 import { Inter, Newsreader, Tajawal } from 'next/font/google'
 
-// Discipulei como app instalável (decisão N20). O manifesto está em
-// app/manifest.ts; o Next injeta o <link rel="manifest"> sozinho.
+// Sem manifesto de propósito (21/11/2026): o dono não quer o aviso de
+// "Instalar app" do navegador; o app de verdade vai para as lojas.
 // `viewportFit: 'cover'` + barra 'black-translucent' fazem a página ocupar a
 // tela toda no iOS; os recuos de área segura estão em discipulei-dark.css.
 // O favicon por organização (app/orgs/[orgslug]/layout.tsx) continua
