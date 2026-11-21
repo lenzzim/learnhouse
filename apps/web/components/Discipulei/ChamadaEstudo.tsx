@@ -29,14 +29,19 @@ import { useTranslation } from 'react-i18next'
 import { ArrowUpRight, BookOpen, X } from 'lucide-react'
 import { BookOpen as BookOpenMenu } from '@phosphor-icons/react'
 import { URL_DISCIPULADO, urlAgendar, type LugarAgendar } from '@/lib/discipulei/nav'
+import { useIdiomaDiscipulei } from './useIdioma'
 
 export const URL_ESTUDO = URL_DISCIPULADO
 
 export type LugarChamada = LugarAgendar
 
 /** Link para a página do discipulado com a origem para atribuição. */
-export function urlEstudo(lugar: LugarChamada, ancora?: 'agendar' | 'como-funciona'): string {
-  return urlAgendar(lugar, ancora ?? 'agendar')
+export function urlEstudo(
+  lugar: LugarChamada,
+  ancora?: 'agendar' | 'como-funciona',
+  idioma?: string | null
+): string {
+  return urlAgendar(lugar, ancora ?? 'agendar', idioma)
 }
 
 const SERIF: React.CSSProperties = {
@@ -68,11 +73,12 @@ function Titulo({ id, className }: { id: string; className: string }) {
 
 function Acoes({ lugar, larguraTotal }: { lugar: LugarChamada; larguraTotal?: boolean }) {
   const { t } = useTranslation()
+  const idioma = useIdiomaDiscipulei()
   const novaAba = <span className="sr-only"> ({t('chamada_estudo.nova_aba')})</span>
   return (
     <div className={larguraTotal ? 'flex flex-col items-stretch gap-1' : 'flex flex-wrap items-center gap-x-3 gap-y-1'}>
       <a
-        href={urlEstudo(lugar, 'agendar')}
+        href={urlEstudo(lugar, 'agendar', idioma)}
         target="_blank"
         rel="noopener"
         className={`${BOTAO_PRIMARIO} ${larguraTotal ? 'w-full' : ''}`}
@@ -81,7 +87,7 @@ function Acoes({ lugar, larguraTotal }: { lugar: LugarChamada; larguraTotal?: bo
         <ArrowUpRight size={16} aria-hidden="true" className="rtl:-scale-x-100" />
         {novaAba}
       </a>
-      <a href={urlEstudo(lugar, 'como-funciona')} target="_blank" rel="noopener" className={LINK_SECUNDARIO}>
+      <a href={urlEstudo(lugar, 'como-funciona', idioma)} target="_blank" rel="noopener" className={LINK_SECUNDARIO}>
         {t('chamada_estudo.como_funciona')}
         {novaAba}
       </a>
@@ -147,7 +153,7 @@ export default function ChamadaEstudo(props: Props) {
  * que o OrgMenuLinks renderiza. O rótulo já vem com o destaque (contorno em
  * pílula), para o OrgMenuLinks não precisar de nenhum ramo novo no render.
  */
-export function itemMenuChamada(rotulo: string) {
+export function itemMenuChamada(rotulo: string, idioma?: string | null) {
   return {
     key: 'discipulei-estudar',
     label: (
@@ -156,7 +162,7 @@ export function itemMenuChamada(rotulo: string) {
       </span>
     ),
     Icon: BookOpenMenu,
-    href: urlEstudo('menu', 'agendar'),
+    href: urlEstudo('menu', 'agendar', idioma),
     external: true,
   }
 }
@@ -176,6 +182,7 @@ export function ConviteEstudo({
   aoFechar?: () => void
 }) {
   const { t } = useTranslation()
+  const idioma = useIdiomaDiscipulei()
   const id = useId()
   return (
     <section
@@ -189,7 +196,7 @@ export function ConviteEstudo({
         <p className="mt-1 text-sm leading-snug text-[var(--text-2)]">{t('chamada_estudo.convite_descricao')}</p>
       </div>
       <a
-        href={urlEstudo(lugar, 'agendar')}
+        href={urlEstudo(lugar, 'agendar', idioma)}
         target="_blank"
         rel="noopener"
         className={`${BOTAO_PRIMARIO} shrink-0 self-start sm:self-auto`}

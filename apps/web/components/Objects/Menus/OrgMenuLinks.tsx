@@ -5,6 +5,7 @@ import { menuIcon } from '@components/Objects/Menus/menuIcons'
 import Link from 'next/link'
 import React from 'react'
 import { itemMenuChamada } from '@components/Discipulei/ChamadaEstudo' // Discipulei
+import { useIdiomaDiscipulei } from '@components/Discipulei/useIdioma' // Discipulei
 import { useTranslation } from 'react-i18next'
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
@@ -26,6 +27,7 @@ const DEFAULT_ORDER = ['courses', 'library', 'podcasts', 'communities', 'biblia'
 
 function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   const { t } = useTranslation()
+  const idioma = useIdiomaDiscipulei()
   const org = useOrg() as any
   const colors = getMenuColorClasses(props.primaryColor || '')
 
@@ -80,7 +82,7 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   // Ver components/Discipulei/ChamadaEstudo.tsx.
   {
     const posComunidades = rendered.findIndex((it) => it.key === 'communities')
-    rendered.splice(posComunidades >= 0 ? posComunidades + 1 : rendered.length, 0, itemMenuChamada(t('chamada_estudo.menu')))
+    rendered.splice(posComunidades >= 0 ? posComunidades + 1 : rendered.length, 0, itemMenuChamada(t('chamada_estudo.menu'), idioma))
   }
 
   return (

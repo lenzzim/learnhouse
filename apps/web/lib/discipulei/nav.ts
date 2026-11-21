@@ -22,8 +22,32 @@ export const ROTA_INICIAL = '/hoje'
 /** Chave do último capítulo lido, gravada pelo leitor da Bíblia ("JHN.3"). */
 export const CHAVE_ULTIMO_CAPITULO = 'discipulei_biblia_ultimo'
 
-/** Página do discipulado no site, com o agendamento. */
+/* --------------------------------------------------------------------------
+   Idiomas (dono, 21/11/2026): português é o padrão para todos; o seletor
+   oferece só PT, EN e ES nesta comunidade (os outros locales continuam no
+   repositório, só não aparecem). A escolha fica em 'discipulei_lng'
+   (LANGUAGE_STORAGE_KEY em lib/i18n.ts).
+   -------------------------------------------------------------------------- */
+
+/** Idiomas oferecidos no seletor, nesta ordem. */
+export const IDIOMAS_DISCIPULEI = ['pt', 'en', 'es'] as const
+export type IdiomaDiscipulei = (typeof IDIOMAS_DISCIPULEI)[number]
+
+/** Código de idioma do i18next ("pt-BR", "en-US", "es") -> pt | en | es (padrão pt). */
+export function idiomaDiscipulei(lng: string | null | undefined): IdiomaDiscipulei {
+  const base = String(lng || '').split('-')[0].toLowerCase()
+  return (IDIOMAS_DISCIPULEI as readonly string[]).includes(base) ? (base as IdiomaDiscipulei) : 'pt'
+}
+
+/** Página do discipulado no site, com o agendamento (português). */
 export const URL_DISCIPULADO = 'https://www.discipulei.com.br/discipulado-biblico/'
+
+/** A mesma página em cada idioma do seletor. */
+export const URL_DISCIPULADO_POR_IDIOMA: Record<IdiomaDiscipulei, string> = {
+  pt: URL_DISCIPULADO,
+  en: 'https://www.discipulei.com.br/en/discipulado-biblico/',
+  es: 'https://www.discipulei.com.br/es/discipulado-biblico/',
+}
 
 /**
  * Lugares de onde o "Agendar estudo" é aberto. Vão no `?o=comunidade-<lugar>`
@@ -38,8 +62,17 @@ export type LugarAgendar =
   | 'devocional'
   | 'biblia'
 
-export function urlAgendar(lugar: LugarAgendar, ancora: 'agendar' | 'como-funciona' = 'agendar'): string {
-  return `${URL_DISCIPULADO}?o=comunidade-${lugar}#${ancora}`
+/**
+ * Link do "Agendar estudo" — o único lugar que monta essa URL. Em inglês e
+ * espanhol aponta para a página do site no idioma (/en/, /es/); o `o=` da
+ * atribuição vai sempre.
+ */
+export function urlAgendar(
+  lugar: LugarAgendar,
+  ancora: 'agendar' | 'como-funciona' = 'agendar',
+  idioma?: string | null
+): string {
+  return `${URL_DISCIPULADO_POR_IDIOMA[idiomaDiscipulei(idioma)]}?o=comunidade-${lugar}#${ancora}`
 }
 
 export type AbaId = 'inicio' | 'biblia' | 'caderno' | 'comunidades'
