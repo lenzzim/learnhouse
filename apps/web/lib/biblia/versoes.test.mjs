@@ -7,8 +7,11 @@ import {
   VERSOES,
   VERSAO_PADRAO,
   VERSOES_EXTERNAS,
+  VERSOES_LICENCIADAS,
+  ehLicenciada,
   urlYouVersion,
   versaoPorId,
+  versaoPorSigla,
   versaoValida,
 } from './versoes.ts'
 
@@ -44,9 +47,27 @@ test('YouVersion: versículo, intervalo e capítulo', () => {
   assert.equal(urlYouVersion({ livroId: '1CO', capitulo: 13, versoIni: 4 }, NVI), 'https://www.bible.com/pt/bible/129/1CO.13.4.NVI')
 })
 
-test('YouVersion: ids conferidos das cinco versões', () => {
+test('YouVersion: só as versões sem licença no app (NVI e NAA)', () => {
   const ids = Object.fromEntries(VERSOES_EXTERNAS.map((v) => [v.sigla, v.idYouVersion]))
-  assert.deepEqual(ids, { NVI: 129, ARA: 1608, ARC: 212, NTLH: 211, NAA: 1840 })
-  const ara = VERSOES_EXTERNAS.find((v) => v.sigla === 'ARA')
-  assert.equal(urlYouVersion({ livroId: 'GEN', capitulo: 1, versoIni: 1 }, ara), 'https://www.bible.com/pt/bible/1608/GEN.1.1.ARA')
+  assert.deepEqual(ids, { NVI: 129, NAA: 1840 })
+  const naa = VERSOES_EXTERNAS.find((v) => v.sigla === 'NAA')
+  assert.equal(urlYouVersion({ livroId: 'GEN', capitulo: 1, versoIni: 1 }, naa), 'https://www.bible.com/pt/bible/1840/GEN.1.1.NAA')
+})
+
+test('licenciadas: fora do catálogo estático, mas reconhecidas por id e sigla', () => {
+  assert.deepEqual(
+    VERSOES_LICENCIADAS.map((v) => v.id),
+    ['ara', 'arc', 'rc69', 'ntlh', 'niv', 'nkjv']
+  )
+  for (const v of VERSOES_LICENCIADAS) {
+    assert.equal(v.fonte, 'licenciada')
+    assert.ok(!VERSOES.some((a) => a.id === v.id), `${v.id} não pode estar no catálogo estático`)
+  }
+  assert.equal(ehLicenciada('ara'), true)
+  assert.equal(ehLicenciada('blivre'), false)
+  assert.equal(versaoPorId('ntlh').sigla, 'NTLH')
+  assert.equal(versaoPorSigla('ara').id, 'ara')
+  assert.equal(versaoPorSigla('BLIVRE').id, 'blivre')
+  assert.equal(versaoPorSigla('NVI'), undefined)
+  assert.equal(versaoValida('arc'), 'arc')
 })
