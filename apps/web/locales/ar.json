@@ -418,10 +418,17 @@
     "magic_subtitle": "أدخل بريدك الإلكتروني وسنرسل إليك رابطًا يسجّل دخولك — دون الحاجة إلى كلمة مرور.",
     "magic_send": "أرسل لي رابط تسجيل الدخول",
     "magic_use_password": "تسجيل الدخول بكلمة مرور بدلًا من ذلك",
+    "magic_missing_token": "This link is missing its token. Request a new one to sign in.",
+    "magic_expired": "This link has expired or was already used. Request a new one to sign in.",
+    "magic_invalid_title": "This link isn’t valid anymore",
+    "magic_request_new": "Request a new link",
+    "magic_signing_in": "Signing you in...",
+    "magic_please_wait": "Please wait while we verify your link.",
     "choose_sign_in_method": "اختر طريقة تسجيل الدخول التي تفضّلها.",
     "no_sign_in_method_available": "قيّدت هذه المؤسسة طرق تسجيل الدخول، ولا تتوفر أي من الطرق المسموح بها هنا. تواصل مع أحد المسؤولين.",
     "complete_profile": {
-      "title": "أكمل ملفك الشخصي"
+      "title": "أكمل ملفك الشخصي",
+      "subtitle": "{{org}} needs a little more information before you continue."
     }
   },
   "verify_email": {
@@ -442,7 +449,10 @@
     "title_required": "العنوان مطلوب",
     "content_required": "المحتوى مطلوب",
     "invalid_number": "يجب أن يكون رقمًا",
-    "invalid_option": "اختر أحد الخيارات المتاحة"
+    "invalid_option": "اختر أحد الخيارات المتاحة",
+    "min_value": "Must be at least {{value}}",
+    "max_value": "Must be at most {{value}}",
+    "too_long": "Must be {{max}} characters or fewer"
   },
   "courses": {
     "my_courses": "دوراتي",
@@ -858,11 +868,40 @@
       "clear_filter": "مسح الفلتر"
     },
     "labels": {
+      "devocional": "Devotional",
+      "testemunho": "Testimony",
+      "oracao": "Prayer request",
       "general": "عام",
       "question": "سؤال",
       "idea": "فكرة",
       "announcement": "إعلان",
       "showcase": "عرض"
+    },
+    "devotional_template": {
+      "passage": "Passage",
+      "learned": "What I learned",
+      "apply": "How to apply it",
+      "prayer": "Prayer"
+    },
+    "visibility": {
+      "label": "Who can see it",
+      "private_option": "Only me (notebook)",
+      "private_hint": "Stays in your notebook. Nobody else can see it, not even moderators.",
+      "public_option": "Publish to the community",
+      "public_hint": "Every community member can read and comment.",
+      "private_badge": "Private",
+      "private_notice": "This note is private: only you can see it. Publish it whenever you want to share it with the community.",
+      "publish": "Publish",
+      "publish_title": "Publish to the community?",
+      "publish_confirm": "Community members will be able to read, react and comment.",
+      "publish_button": "Publish now",
+      "cancel": "Cancel",
+      "make_private": "Make private",
+      "published": "Published to the community",
+      "made_private": "Only you can see this discussion now",
+      "failed": "Could not change the visibility",
+      "submit_private": "Save to notebook",
+      "comments_private": "Replies become available once you publish."
     },
     "create_discussion": {
       "title": "بدء نقاش",
@@ -3145,7 +3184,8 @@
           "title": "أنجز المزيد مع خطة أعلى",
           "subtitle": "قم بالترقية لرفع حدودك وفتح المزيد من الميزات.",
           "popular": "الأكثر شيوعًا",
-          "compare": "قارن جميع الخطط"
+          "compare": "قارن جميع الخطط",
+          "upgrade_to": "Upgrade to {{plan}}"
         }
       },
       "general": {
@@ -4823,7 +4863,8 @@
         "select_all_that_apply": "اختر كل ما ينطبق",
         "response_type_single": "إجابة واحدة",
         "response_type_multiple": "إجابات متعددة",
-        "no_correct_answer_warning": "لا توجد إجابة صحيحة — سيتم تخطي هذا السؤال"
+        "no_correct_answer_warning": "لا توجد إجابة صحيحة — سيتم تخطي هذا السؤال",
+        "generate_with_ai": "Generate with AI"
       },
       "math_block": {
         "templates": "القوالب",
@@ -5869,6 +5910,7 @@
     "manage_access": "إدارة الوصول",
     "delete_folder": "حذف المجلد",
     "delete_folder_confirm": "هل أنت متأكد من حذف هذا المجلد وكل ما بداخله؟",
+    "delete_folder_title": "Delete \"{{name}}\"?",
     "folder_name": "اسم المجلد",
     "enter_folder_name": "أدخل اسم المجلد",
     "create_folder": "إنشاء مجلد",
@@ -5960,6 +6002,7 @@
     "media_url": "URL",
     "delete_media": "حذف الوسائط",
     "delete_media_confirm": "هل أنت متأكد من حذف هذه الوسائط؟",
+    "delete_media_title": "Delete \"{{name}}\"?",
     "choose_file": "اختر ملفًا",
     "deleting_media": "جارٍ الحذف…",
     "description": "الوصف",
@@ -6157,7 +6200,9 @@
     "invoice_history": "سجل الفواتير",
     "view": "عرض",
     "checkout_settling": "تم استلام الدفعة — يجري تطبيق خطتك الجديدة وستظهر قريبًا.",
-    "checkout_settling_delayed": "تم استلام الدفعة، لكن لم يتم تحديث خطتك بعد. حدّث الصفحة بعد لحظات — وتواصل مع الدعم إذا استمرت المشكلة."
+    "checkout_settling_delayed": "تم استلام الدفعة، لكن لم يتم تحديث خطتك بعد. حدّث الصفحة بعد لحظات — وتواصل مع الدعم إذا استمرت المشكلة.",
+    "cancels_on": "Your subscription will cancel on {{periodEnd}}. Access continues until then.",
+    "add_pack": "Add {{pack}}"
   },
   "hub_new": {
     "useType": {
@@ -6320,6 +6365,53 @@
     "item_count": "{{count}} عناصر",
     "item_count_one": "{{count}} عنصر"
   },
+  "biblia": {
+    "titulo": "Bible",
+    "livro": "Book",
+    "capitulo": "Chapter",
+    "capitulo_n": "Chapter {{n}}",
+    "antigo_testamento": "Old Testament",
+    "novo_testamento": "New Testament",
+    "anterior": "Previous chapter",
+    "proximo": "Next chapter",
+    "carregando": "Loading…",
+    "erro_carregar": "Could not load the text.",
+    "tentar_novamente": "Try again",
+    "licenca_n": "{{licenca}} license",
+    "abrir_na_biblia": "Open in the Bible",
+    "inserir_versiculo": "Insert verse",
+    "referencia": "Reference",
+    "referencia_placeholder": "e.g. John 3:16-18",
+    "referencia_invalida": "Reference not recognized.",
+    "informe_versiculo": "Also enter the verse (e.g. Ps 23:1-6).",
+    "limite_versiculos": "Choose at most {{max}} verses.",
+    "inserir": "Insert",
+    "cancelar": "Cancel",
+    "versao": "Version",
+    "comparar_com": "Compare with",
+    "idioma_pt": "Portuguese",
+    "idioma_en": "English",
+    "idioma_es": "Spanish",
+    "outras_traducoes": "Read in another translation",
+    "abre_youversion": "Opens on YouVersion (bible.com) in a new tab",
+    "original": "Original",
+    "mostrar_original": "Show original",
+    "original_indisponivel": "Original text unavailable for this verse.",
+    "hebraico": "Hebrew",
+    "grego": "Greek",
+    "titulo_salmo": "Psalm title",
+    "strong": "Strong",
+    "no_texto": "In the text",
+    "morfologia": "Morphology",
+    "glosa": "Gloss (English)",
+    "glosa_espanhol": "Spanish gloss",
+    "texto_base": "Base text",
+    "so_na": "Only in the critical text (Nestle-Aland)",
+    "so_tr": "Only in the Textus Receptus (KJV base)",
+    "definicao_ingles": "Definition (English)",
+    "credito_stepbible": "Data from STEPBible.org (Tyndale House, Cambridge), CC BY 4.0",
+    "fechar": "Close"
+  },
   "mfa": {
     "policy": {
       "banner_message_overdue": "تشترط {{org}} التحقق بخطوتين وقد انقضى الموعد النهائي. فعّله أدناه لاستعادة الوصول.",
@@ -6362,6 +6454,7 @@
     "perfil_conta": "Profile and account",
     "painel_admin": "Admin dashboard",
     "sair": "Sign out",
+    "idioma": "Language",
     "escrever": {
       "rotulo": "Write",
       "titulo": "Write",
