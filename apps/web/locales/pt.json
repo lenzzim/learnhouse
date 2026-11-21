@@ -213,16 +213,16 @@
     "disabled": "Desativado",
     "store": "Loja",
     "organizations": "Organizações",
-    "billing": "Faturação",
+    "billing": "Cobrança",
     "create_organization": "Criar organização",
     "copyright": "© {{year}} LearnHouse, Inc.",
-    "delete_organization_error": "Não foi possível eliminar esta organização. Tente novamente.",
+    "delete_organization_error": "Não foi possível excluir esta organização. Tente novamente.",
     "org_actions": "Ações da organização",
-    "manage_upgrade": "Gerir / Fazer upgrade",
-    "delete_organization": "Eliminar organização",
-    "delete_organization_warning": "Isto elimina permanentemente {{name}} e todos os seus dados. Esta ação não pode ser revertida.",
+    "manage_upgrade": "Gerenciar / Fazer upgrade",
+    "delete_organization": "Excluir organização",
+    "delete_organization_warning": "Isso exclui permanentemente {{name}} e todos os seus dados. Esta ação não pode ser desfeita.",
     "delete_organization_confirm_label": "Escreva {{slug}} para confirmar",
-    "deleting": "A eliminar…",
+    "deleting": "Excluindo…",
     "retry": "Tentar novamente",
     "leave_organization": "Sair da organização",
     "leave_organization_title": "Sair da organização?",
@@ -364,16 +364,16 @@
     "terms_of_service": "Termos de Serviço",
     "and": "e a",
     "privacy_policy": "Política de Privacidade",
-    "image_title_forgot": "Redefina a sua palavra-passe.",
+    "image_title_forgot": "Redefina sua senha.",
     "image_subtitle_forgot": "Vamos ajudá-lo a voltar à sua conta num instante.",
     "image_title_login": "Bem-vindo de volta ao LearnHouse.",
-    "image_subtitle_login": "Continue de onde parou — os seus cursos, alunos e ferramentas estão à sua espera.",
+    "image_subtitle_login": "Continue de onde parou — seus cursos, alunos e ferramentas estão esperando por você.",
     "image_title_reset": "Está quase.",
-    "image_subtitle_reset": "Crie uma palavra-passe forte para manter a sua conta segura.",
+    "image_subtitle_reset": "Crie uma senha forte para manter sua conta segura.",
     "image_title_signup": "Comece a ensinar com o LearnHouse.",
-    "image_subtitle_signup": "Crie a sua conta e lance o seu primeiro curso em minutos.",
-    "image_title_verify": "Verifique o seu e-mail.",
-    "image_subtitle_verify": "Um passo rápido para proteger a sua conta e começar.",
+    "image_subtitle_signup": "Crie sua conta e lance seu primeiro curso em minutos.",
+    "image_title_verify": "Verifique seu e-mail.",
+    "image_subtitle_verify": "Um passo rápido para proteger sua conta e começar.",
     "turnstile_failed": "Verificação falhou. Tente novamente.",
     "resend_verification": "Não recebeu? Reenviar email",
     "no_sign_up_method_available": "Esta organização restringiu as formas de entrada dos membros, por isso não é possível criar contas aqui. Fale com um administrador.",
@@ -1075,7 +1075,7 @@
       "half": "Metade",
       "zero": "Zero"
     },
-    "task_feedback_placeholder": "Nota para esta tarefa (guardada com a classificação)",
+    "task_feedback_placeholder": "Observação para esta tarefa (salva junto com a nota)",
     "attempt_label": "Tentativa",
     "attempt_count": "Tentativa {{current}}",
     "attempt_count_bounded": "Tentativa {{current}} de {{max}}",
@@ -1201,20 +1201,20 @@
     "purchased_courses_description": "Os cursos que você comprou ou assinou aparecerão aqui",
     "purchases": "Compras",
     "back_home": "Voltar às organizações",
-    "subtitle": "Faça a gestão do seu perfil, segurança e conta",
+    "subtitle": "Gerencie seu perfil, sua segurança e sua conta",
     "section": {
       "profile": "Perfil",
       "security": "Segurança",
       "danger": "Zona de perigo"
     },
     "delete": {
-      "success": "A sua conta foi eliminada.",
-      "error": "Não foi possível eliminar a sua conta. Tente novamente.",
-      "title": "Eliminar conta",
-      "description": "Elimine permanentemente a sua conta e remova o seu acesso. Esta ação não pode ser revertida.",
-      "warning": "Isto elimina permanentemente a sua conta e todos os dados associados. Esta ação não pode ser revertida.",
+      "success": "Sua conta foi excluída.",
+      "error": "Não foi possível excluir sua conta. Tente novamente.",
+      "title": "Excluir conta",
+      "description": "Exclua permanentemente sua conta e remova seu acesso. Esta ação não pode ser desfeita.",
+      "warning": "Isso exclui permanentemente sua conta e todos os dados associados. Esta ação não pode ser desfeita.",
       "confirm_label": "Escreva {{username}} para confirmar",
-      "deleting": "A eliminar…",
+      "deleting": "Excluindo…",
       "zone_subtitle": "Exclua sua conta permanentemente. Esta ação não pode ser desfeita.",
       "zone_body": "Isso remove sua conta e seu acesso. Qualquer organização da qual você seja o único administrador — e todos os seus cursos e conteúdos — também será excluída. Organizações com outros administradores serão mantidas; você apenas será removido delas."
     }
@@ -1558,7 +1558,7 @@
         },
         "organization": {
           "title": "Organização",
-          "description": "Configurar as definições gerais da sua organização"
+          "description": "Defina as configurações gerais da sua organização"
         },
         "users": {
           "title": "Usuários",
@@ -1566,7 +1566,7 @@
         },
         "account_settings": {
           "title": "Configurações da conta",
-          "description": "Configurar suas definições pessoais, senhas e e-mail"
+          "description": "Defina suas configurações pessoais, senha e e-mail"
         }
       },
       "learnhouse_university": "Universidade LearnHouse",
@@ -1976,7 +1976,7 @@
           },
           "moderation": {
             "title": "Moderação",
-            "subtitle": "Configurar definições de moderação de conteúdo"
+            "subtitle": "Defina as configurações de moderação de conteúdo"
           },
           "access": {
             "subtitle": "Controle quem pode acessar esta comunidade",
@@ -2026,7 +2026,7 @@
         },
         "thumbnail": {
           "title": "Miniatura da Comunidade",
-          "subtitle": "Carregue uma imagem de capa para sua comunidade",
+          "subtitle": "Envie uma imagem de capa para sua comunidade",
           "no_thumbnail": "Nenhuma miniatura definida",
           "upload_image": "Carregar Imagem",
           "browse_unsplash": "Explorar Unsplash",
@@ -2035,7 +2035,7 @@
           "toasts": {
             "update_success": "Miniatura atualizada com sucesso",
             "update_error": "Falha ao atualizar miniatura",
-            "invalid_type": "Tipo de arquivo inválido. Por favor, carregue apenas imagens PNG ou JPG/JPEG",
+            "invalid_type": "Tipo de arquivo inválido. Envie apenas imagens PNG ou JPG/JPEG",
             "file_too_large": "Tamanho do arquivo excede o limite de 8MB"
           }
         },
@@ -2937,19 +2937,19 @@
       "seo": {
         "org_seo": {
           "quick_links": "Links rapidos",
-          "important_seo_urls": "URLs SEO importantes para sua organizacao",
+          "important_seo_urls": "URLs de SEO importantes para sua organização",
           "sitemap": "Sitemap:",
           "robots_txt": "Robots.txt:",
-          "default_meta_tags": "Meta tags padrao",
-          "set_default_metadata": "Definir metadados padrao para todas as paginas",
-          "title_suffix": "Sufixo do titulo",
+          "default_meta_tags": "Meta tags padrão",
+          "set_default_metadata": "Defina metadados padrão para todas as páginas",
+          "title_suffix": "Sufixo do título",
           "title_suffix_hint": "Adicionado a todos os titulos, ex. \" | Minha Academia\"",
-          "default_description": "Descricao padrao",
-          "default_description_hint": "Descricao de fallback quando uma pagina nao tem uma",
+          "default_description": "Descrição padrão",
+          "default_description_hint": "Descrição usada quando uma página não tem a sua própria",
           "social_open_graph": "Redes sociais e Open Graph",
-          "social_open_graph_hint": "Controle como suas paginas aparecem ao compartilhar nas redes sociais",
-          "default_og_image": "Imagem OG padrao",
-          "default_og_image_hint": "Imagem padrao para redes sociais (1200x630 recomendado)",
+          "social_open_graph_hint": "Controle como suas páginas aparecem ao serem compartilhadas nas redes sociais",
+          "default_og_image": "Imagem OG padrão",
+          "default_og_image_hint": "Imagem padrão para redes sociais (1200x630 recomendado)",
           "twitter_handle": "Conta do Twitter",
           "twitter_handle_hint": "Mostrado nos cards do Twitter como conta do site",
           "search_engine_verification": "Verificacao de motores de busca",
@@ -3027,8 +3027,8 @@
       },
       "automations": {
         "webhooks_title": "Webhooks",
-        "webhooks_subtitle": "Enviar notificacoes em tempo real para servicos externos",
-        "webhooks_description": "Os endpoints webhook recebem requisicoes HTTP POST quando eventos ocorrem na sua organizacao."
+        "webhooks_subtitle": "Envie notificações em tempo real para serviços externos",
+        "webhooks_description": "Os endpoints de webhook recebem requisições HTTP POST quando eventos ocorrem na sua organização."
       },
       "usage": {
         "plan_resource_usage": "Plano e uso de recursos",
@@ -4154,10 +4154,10 @@
         "download_to_review": "Baixe o arquivo para revisar o que o aluno entregou."
       },
       "analytics": {
-        "loading": "A carregar análises...",
+        "loading": "Carregando análises...",
         "empty": {
           "title": "Ainda não há entregas",
-          "description": "As análises aparecerão assim que os alunos começarem a enviar os seus trabalhos."
+          "description": "As análises aparecerão assim que os alunos começarem a enviar seus trabalhos."
         },
         "kpis": {
           "average": "Média da turma",
@@ -4196,7 +4196,7 @@
         },
         "top": {
           "title": "Melhores desempenhos",
-          "subtitle": "Os seus alunos com melhores notas neste trabalho",
+          "subtitle": "Seus alunos com as melhores notas neste trabalho",
           "empty": "Ainda não há entregas classificadas"
         },
         "attention": {
@@ -5241,7 +5241,7 @@
     "done": "Pronto, estou preparado!",
     "steps": {
       "create_course": {
-        "title": "O seu primeiro curso está no ar",
+        "title": "Seu primeiro curso está no ar",
         "description": "Publique um curso para que os alunos tenham algo real onde se inscrever.",
         "action": "Criar um curso"
       },
@@ -5294,22 +5294,22 @@
       },
       "brand_school": {
         "title": "Uma escola em que os alunos confiam",
-        "description": "Adicione o seu logótipo e cores para que pareça uma escola credível e profissional.",
+        "description": "Adicione seu logo e suas cores para ter uma cara confiável e profissional.",
         "action": "Personalizar marca"
       },
       "share_grow": {
         "title": "A porta de entrada da sua escola",
-        "description": "Coloque no ar e obtenha o seu link partilhável — o lugar para onde vai enviar todos os alunos.",
+        "description": "Publique e pegue seu link de compartilhamento — o lugar para onde você vai mandar todos os alunos.",
         "action": "Abrir a minha escola"
       },
       "invite_learners": {
         "title": "Dê as boas-vindas ao seu primeiro aluno",
-        "description": "Partilhe o seu link de adesão ou convide pessoas — traga esse primeiro aluno para dentro.",
+        "description": "Compartilhe seu link de entrada ou convide pessoas — traga o primeiro aluno para dentro.",
         "action": "Convidar alunos"
       },
       "build_community": {
         "title": "Mantenha os alunos a voltar",
-        "description": "Abra um espaço de comunidade para que os seus alunos se mantenham ativos — e tragam os amigos.",
+        "description": "Abra um espaço de comunidade para que seus alunos continuem ativos — e tragam os amigos.",
         "action": "Abrir comunidade"
       }
     },
@@ -5954,53 +5954,53 @@
     "upgrade": "Fazer upgrade"
   },
   "billing": {
-    "no_billing_account": "Nenhuma conta de faturação encontrada. Subscreva primeiro um plano.",
-    "portal_error": "Não foi possível abrir o portal de faturação. Tente novamente.",
-    "cancel_success": "A subscrição será cancelada no final do período de faturação.",
-    "cancel_error": "Falha ao cancelar a subscrição. Tente novamente.",
+    "no_billing_account": "Nenhuma conta de cobrança encontrada. Assine um plano primeiro.",
+    "portal_error": "Não foi possível abrir o portal de cobrança. Tente novamente.",
+    "cancel_success": "A assinatura será cancelada no final do período de cobrança.",
+    "cancel_error": "Falha ao cancelar a assinatura. Tente novamente.",
     "checkout_error": "Falha ao iniciar o pagamento.",
-    "plan_and_usage": "Plano e Utilização",
-    "plan_and_usage_subtitle": "Faça a gestão da sua subscrição e acompanhe a utilização de recursos.",
-    "billing": "Faturação",
-    "org_inactive": "A sua organização está inativa. Faça upgrade do plano para restaurar o acesso.",
+    "plan_and_usage": "Plano e uso",
+    "plan_and_usage_subtitle": "Gerencie sua assinatura e acompanhe o uso de recursos.",
+    "billing": "Cobrança",
+    "org_inactive": "Sua organização está inativa. Faça upgrade do plano para restaurar o acesso.",
     "upgrade": "Fazer upgrade",
     "on_free_plan": "Está no plano gratuito",
     "free_upsell": "Faça upgrade para desbloquear funcionalidades de IA, domínios personalizados e muito mais.",
-    "managed_outside": "Este plano é gerido fora da faturação do Stripe.",
+    "managed_outside": "Este plano é gerenciado fora da cobrança do Stripe.",
     "active": "Ativo",
     "inactive": "Inativo",
     "current_plan": "Plano atual",
-    "canceling": "A cancelar",
+    "canceling": "Cancelando",
     "billed_annually": "faturado anualmente",
     "billed_monthly": "faturado mensalmente",
     "change_plan": "Alterar plano",
-    "canceling_ellipsis": "A cancelar...",
+    "canceling_ellipsis": "Cancelando...",
     "cancel_plan": "Cancelar plano",
     "cycle": "Ciclo",
     "access_until": "Acesso até",
     "next_payment": "Próximo pagamento",
     "status": "Estado",
-    "usage": "Utilização",
+    "usage": "Uso",
     "courses": "Cursos",
     "members": "Membros",
     "admin_seats": "Lugares de administrador",
     "ai_credits": "Créditos de IA",
     "addons": "Extras",
     "addons_subtitle": "Compre créditos de IA adicionais como assinaturas mensais.",
-    "active_subscriptions": "Subscrições ativas",
+    "active_subscriptions": "Assinaturas ativas",
     "credits": "créditos",
     "seats": "lugares",
     "available": "Disponível",
     "per_pack": "por pacote",
     "add": "Adicionar",
-    "recurring_subscription": "subscrição recorrente",
-    "what_youre_getting": "O que vai receber",
+    "recurring_subscription": "assinatura recorrente",
+    "what_youre_getting": "O que você vai receber",
     "pack_immediate": "Entra em vigor imediatamente após o pagamento",
-    "pack_cancel_anytime": "Cancele quando quiser — permanece ativo até ao final do período de faturação",
-    "pack_credits_reset": "Os créditos são reiniciados a cada ciclo de faturação",
+    "pack_cancel_anytime": "Cancele quando quiser — continua ativo até o final do período de cobrança",
+    "pack_credits_reset": "Os créditos são renovados a cada ciclo de cobrança",
     "after_purchase": "Após a compra",
     "unlimited": "Ilimitado",
-    "pack_redirect_notice": "Será redirecionado para o Stripe para concluir o pagamento. Pode comprar vários pacotes do mesmo tipo.",
+    "pack_redirect_notice": "Você será redirecionado para o Stripe para concluir o pagamento. É possível comprar vários pacotes do mesmo tipo.",
     "cancel": "Cancelar",
     "continue_to_payment": "Continuar para o pagamento",
     "step_choose_plan": "Escolher plano",
@@ -6011,7 +6011,7 @@
     "upgrade_plan": "Fazer upgrade do plano",
     "switch_subtitle": "Escolha um novo plano. As alterações são calculadas proporcionalmente de forma automática.",
     "upgrade_subtitle": "Escolha um plano para começar.",
-    "your_plan": "O seu plano",
+    "your_plan": "Seu plano",
     "downgrade": "Fazer downgrade",
     "upgrade_summary": "Resumo do upgrade",
     "downgrade_summary": "Resumo do downgrade",
@@ -6019,20 +6019,20 @@
     "new": "Novo",
     "annual_total": "Total anual",
     "monthly_total": "Total mensal",
-    "prorated_billing": "Faturação proporcional",
-    "prorated_desc": "Receberá um crédito pelo tempo não utilizado do seu plano atual e será cobrada a diferença para o novo plano. A alteração entra em vigor imediatamente.",
-    "subscription_cancellation": "Cancelamento da subscrição",
+    "prorated_billing": "Cobrança proporcional",
+    "prorated_desc": "Você receberá um crédito pelo tempo não usado do seu plano atual e a diferença para o novo plano será cobrada. A alteração entra em vigor imediatamente.",
+    "subscription_cancellation": "Cancelamento da assinatura",
     "end_of_cycle_switch": "Mudança no final do ciclo",
-    "cancel_desc": "A sua subscrição será cancelada no final do período de faturação atual. Manterá o acesso total até lá.",
-    "downgrade_desc": "Manterá o seu plano atual até ao final do período de faturação. O novo plano entrará em vigor automaticamente quando o ciclo atual terminar.",
+    "cancel_desc": "Sua assinatura será cancelada no final do período de cobrança atual. Você manterá o acesso total até lá.",
+    "downgrade_desc": "Você manterá seu plano atual até o final do período de cobrança. O novo plano entrará em vigor automaticamente quando o ciclo atual terminar.",
     "whats_included": "O que está incluído",
     "discount_code": "Código de desconto",
     "enter_code": "Introduza o código",
-    "checking": "A verificar...",
+    "checking": "Verificando...",
     "apply": "Aplicar",
     "code_applied": "Código aplicado",
     "invalid_code": "Código inválido ou expirado",
-    "canceling_subscription": "A cancelar a subscrição...",
+    "canceling_subscription": "Cancelando a assinatura...",
     "switching_plan": "A mudar de plano...",
     "redirecting": "A redirecionar para o Stripe...",
     "confirm_cancellation": "Confirmar cancelamento",
@@ -6041,10 +6041,10 @@
     "secure_checkout": "Pagamento seguro com tecnologia Stripe",
     "back_to_plans": "Voltar aos planos",
     "plan_updated": "Plano atualizado!",
-    "subscription_canceled": "Subscrição cancelada",
+    "subscription_canceled": "Assinatura cancelada",
     "downgrade_scheduled": "Downgrade agendado",
-    "canceled_desc": "A sua subscrição será cancelada no final do período de faturação atual. Manterá o acesso total até lá.",
-    "back_to_plan_usage": "Voltar a Plano e Utilização",
+    "canceled_desc": "Sua assinatura será cancelada no final do período de cobrança atual. Você manterá o acesso total até lá.",
+    "back_to_plan_usage": "Voltar para Plano e uso",
     "back_to_orgs": "Voltar às organizações",
     "pack_purchased": "Complemento adquirido — seus limites foram atualizados.",
     "checkout_success": "Assinatura atualizada — bem-vindo ao seu novo plano!",
@@ -6090,12 +6090,12 @@
     "useType": {
       "personal": {
         "label": "Pessoal",
-        "subtitle": "Aprenda e crie o seu próprio espaço.",
+        "subtitle": "Aprenda e crie seu próprio espaço.",
         "badge": "Novo"
       },
       "organization": {
         "label": "Organização",
-        "subtitle": "Ensine uma equipa, escola ou público."
+        "subtitle": "Ensine uma equipe, escola ou público."
       }
     },
     "useCases": {
@@ -6109,7 +6109,7 @@
       },
       "business": {
         "title": "Empresas",
-        "description": "Forme os seus colaboradores."
+        "description": "Capacite sua equipe."
       }
     },
     "personalGoals": {
@@ -6129,7 +6129,7 @@
       "gaming": "Jogos"
     },
     "personalUsage": {
-      "title": "O que gostaria de aprender?",
+      "title": "O que você gostaria de aprender?",
       "subtitle": "Selecione todas as opções aplicáveis."
     },
     "teamSizes": {
@@ -6140,7 +6140,7 @@
       "200plus": "200+"
     },
     "orgUseCases": {
-      "employeeTraining": "Formação de colaboradores",
+      "employeeTraining": "Treinamento de equipe",
       "onlineCourses": "Cursos online",
       "customerEducation": "Educação de clientes",
       "academicPrograms": "Programas académicos",
@@ -6148,8 +6148,8 @@
       "communityLearning": "Aprendizagem em comunidade"
     },
     "orgUsage": {
-      "teamSizeTitle": "Qual é o tamanho da sua equipa?",
-      "useCaseTitle": "Para que vai utilizá-lo?"
+      "teamSizeTitle": "Qual é o tamanho da sua equipe?",
+      "useCaseTitle": "Para que você vai usar?"
     },
     "createOrg": {
       "testHint": {
@@ -6172,28 +6172,28 @@
       },
       "placeholders": {
         "name": "Academia Acme",
-        "description": "Sobre o que é a sua organização?"
+        "description": "Sobre o que é sua organização?"
       },
-      "submitting": "A criar…",
+      "submitting": "Criando…",
       "submitPaid": "Criar e continuar para o pagamento",
       "submit": "Criar organização"
     },
     "success": {
-      "title": "A sua organização está pronta",
-      "description": "Comece já a criar os seus cursos.",
+      "title": "Sua organização está pronta",
+      "description": "Comece agora a criar seus cursos.",
       "goToOrg": "Ir para a organização",
       "cta": "Voltar às organizações"
     },
     "toast": {
       "creating": "A criar organização…",
       "created": "Organização criada!",
-      "checkoutFailed": "Organização criada — pode fazer upgrade em Plano e Utilização.",
+      "checkoutFailed": "Organização criada — você pode fazer upgrade em Plano e uso.",
       "failed": "Falha ao criar a organização"
     },
     "steps": {
       "useType": {
-        "title": "O que está a criar?",
-        "subtitle": "Isto ajuda-nos a personalizar o seu espaço."
+        "title": "O que você está criando?",
+        "subtitle": "Isso nos ajuda a personalizar seu espaço."
       },
       "usage": {
         "title": "Conte-nos um pouco mais",
@@ -6201,7 +6201,7 @@
       },
       "choosePlan": {
         "title": "Escolha um plano",
-        "subtitle": "Pode alterar isto quando quiser."
+        "subtitle": "Você pode mudar isso quando quiser."
       },
       "createOrg": {
         "title": "Dê um nome à sua organização",
@@ -6222,7 +6222,7 @@
     }
   },
   "subscriptions": {
-    "no_subscription": "Sem subscrição",
+    "no_subscription": "Sem assinatura",
     "cancels_on": "Cancela a {{date}}",
     "cancels": "Cancela no final do período",
     "status_active": "Ativa",
@@ -6231,13 +6231,13 @@
     "status_canceled": "Cancelada",
     "status_unpaid": "Por pagar",
     "renews_on": "Renova a {{date}}",
-    "manage_plan": "Gerir plano",
-    "portal_error": "Não foi possível abrir o portal de faturação. Tente novamente.",
+    "manage_plan": "Gerenciar plano",
+    "portal_error": "Não foi possível abrir o portal de cobrança. Tente novamente.",
     "back_home": "Voltar ao início",
-    "title": "Subscrições",
-    "subtitle": "Planos e faturação nas suas organizações",
-    "opening": "A abrir…",
-    "manage_billing": "Gerir faturação"
+    "title": "Assinaturas",
+    "subtitle": "Planos e cobrança das suas organizações",
+    "opening": "Abrindo…",
+    "manage_billing": "Gerenciar cobrança"
   },
   "mfa": {
     "policy": {
