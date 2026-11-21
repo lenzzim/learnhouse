@@ -490,6 +490,43 @@ html:not(.dark) body { background-color: var(--page); }
   color: var(--lh-text-faint);
 }
 
+/* ---------------------------------------------------------- áreas seguras */
+/* App instalado (PWA): o layout raiz usa `viewport-fit=cover` e a barra de
+   status 'black-translucent' do iOS, então a página passa por baixo do
+   relógio, do entalhe e da barra de gestos. env(safe-area-inset-*) vale 0
+   no navegador comum em retrato, então nada disto muda o site fora do app.
+
+   O <body> desce o conteúdo do fluxo (inclui o painel /dash e o espaçador
+   do header). O header fixo e a gaveta mobile do OrgMenu são `fixed` e não
+   sentem o padding do body, então recebem o recuo eles mesmos. Os seletores
+   usam o aria-label que o upstream já põe nesses <nav>, para não editar os
+   componentes. A barra flutuante do /dash já trata o recuo inferior. */
+body {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+nav[aria-label='Top navigation'] {
+  height: calc(60px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Gaveta mobile: irmã logo depois do <nav>, posicionada com `top` inline. */
+nav[aria-label='Top navigation'] + div.fixed {
+  margin-top: env(safe-area-inset-top, 0px);
+}
+
+/* Barras de ação fixas no rodapé (comunidade e conta, só no mobile). */
+nav[aria-label='Community mobile actions'],
+nav[aria-label='Account mobile actions'] {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
 /* ------------------------------------------------------------------- logo */
 /* O logo da organização é branco, porque o escuro é o tema padrão. No tema
    claro ele desapareceria contra o header claro. A arte é monocromática, então
