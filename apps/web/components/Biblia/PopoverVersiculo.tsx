@@ -42,7 +42,7 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
   // o seletor troca só neste popover. O popover só existe no cliente, depois
   // de uma interação, então ler o idioma direto do i18next não quebra a
   // hidratação.
-  const padrao = versaoPadraoDoIdioma(idiomaDiscipulei(i18n.resolvedLanguage || i18n.language))
+  const padrao = versaoPadraoDoIdioma(idiomaDiscipulei(i18n.language))
   const [escolhida, setVersao] = useState<string | null>(null)
   const versao = escolhida ?? padrao
   const nomes = useNomesLivros(versao)

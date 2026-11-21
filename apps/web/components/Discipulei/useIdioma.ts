@@ -15,7 +15,7 @@ export function useIdiomaDiscipulei(): IdiomaDiscipulei {
   const { i18n } = useTranslation()
   const [montado, setMontado] = useState(false)
   useEffect(() => setMontado(true), [])
-  return montado ? idiomaDiscipulei(i18n.resolvedLanguage || i18n.language) : 'pt'
+  return montado ? idiomaDiscipulei(i18n.language) : 'pt'
 }
 
 export default useIdiomaDiscipulei
