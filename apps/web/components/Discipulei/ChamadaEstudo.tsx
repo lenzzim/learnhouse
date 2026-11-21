@@ -23,7 +23,7 @@
    uma linha de import e uma de uso.
    ========================================================================== */
 
-import React from 'react'
+import React, { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowUpRight, BookOpen } from 'lucide-react'
 import { BookOpen as BookOpenMenu } from '@phosphor-icons/react'
@@ -99,9 +99,11 @@ type Props =
  */
 export default function ChamadaEstudo(props: Props) {
   const { t } = useTranslation()
+  // useId: a discussão monta o cartão duas vezes (coluna no desktop, fim da
+  // página no celular), e ids repetidos quebrariam o aria-labelledby.
+  const id = useId()
 
   if (props.variante === 'lateral') {
-    const id = 'chamada-estudo-lateral'
     return (
       <section
         aria-labelledby={id}
@@ -120,7 +122,6 @@ export default function ChamadaEstudo(props: Props) {
     )
   }
 
-  const id = `chamada-estudo-${props.lugar}`
   return (
     <div className="max-w-(--breakpoint-2xl) mx-auto px-4 sm:px-6 lg:px-8 pt-5 relative" style={{ zIndex: 'var(--z-content)' }}>
       <section
