@@ -866,11 +866,18 @@
       "open": "Meu caderno",
       "description": "Seus devocionais e anotações de estudo. Só você vê o que está aqui.",
       "empty_title": "Seu caderno está vazio",
-      "empty_description": "Ao criar uma discussão, escolha \"Só eu (caderno)\" para guardar aqui.",
+      "empty_description": "Escreva o seu devocional ou uma anotação de estudo. Só você vê.",
       "load_more": "Carregar mais",
       "login_required": "Entre na sua conta para ver o seu caderno.",
       "in_community": "em {{community}}",
-      "error": "Não foi possível carregar o seu caderno."
+      "error": "Não foi possível carregar o seu caderno.",
+      "new_note": "Nova nota",
+      "new_note_description": "Fica no seu caderno. Escreva com calma.",
+      "community_label": "Comunidade",
+      "community_hint": "A nota fica guardada nesta comunidade. Se publicar depois, é aqui que ela aparece.",
+      "no_community": "Você ainda não participa de nenhuma comunidade.",
+      "private_lock_note": "Só você vê. Você pode publicar depois.",
+      "created": "Nota salva no seu caderno"
     },
     "create_discussion": {
       "title": "Iniciar uma discussão",

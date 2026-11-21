@@ -732,6 +732,24 @@
     "sign_in_to_see_courses_description": "قد لا تظهر الدورات في هذه الأكاديمية إلا بعد تسجيل الدخول."
   },
   "communities": {
+    "notebook": {
+      "title": "My notebook",
+      "open": "My notebook",
+      "description": "Your devotionals and study notes. Only you can see what is here.",
+      "empty_title": "Your notebook is empty",
+      "empty_description": "Write your devotional or a study note. Only you can see it.",
+      "load_more": "Load more",
+      "login_required": "Sign in to see your notebook.",
+      "in_community": "in {{community}}",
+      "error": "Could not load your notebook.",
+      "new_note": "New note",
+      "new_note_description": "It stays in your notebook. Take your time.",
+      "community_label": "Community",
+      "community_hint": "The note is kept in this community. If you publish it later, this is where it appears.",
+      "no_community": "You are not part of any community yet.",
+      "private_lock_note": "Only you can see it. You can publish it later.",
+      "created": "Note saved to your notebook"
+    },
     "title": "المجتمعات",
     "new_community": "مجتمع جديد",
     "no_communities": "لا توجد مجتمعات بعد",

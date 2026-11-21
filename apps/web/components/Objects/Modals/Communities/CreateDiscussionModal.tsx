@@ -9,6 +9,7 @@ import {
   createDiscussion,
   DISCUSSION_LABELS,
   DiscussionVisibility,
+  DiscussionWithAuthor,
 } from '@services/communities/discussions'
 import { useMutateDiscussions } from '@components/Hooks/useDiscussions'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
@@ -18,11 +19,30 @@ import { Loader2, AlertCircle, Check, Lock, Globe } from 'lucide-react'
 import { getLabelIcon } from '@components/Objects/Communities/labelIcons'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 
+export interface CommunityOption {
+  community_uuid: string
+  name: string
+}
+
 interface CreateDiscussionModalProps {
   isOpen: boolean
   onClose: () => void
-  communityUuid: string
+  /** Comunidade fixa. Opcional quando `communityOptions` é passado. */
+  communityUuid?: string
   orgSlug: string
+  /**
+   * Discipulei ("Meu caderno"): mostra um seletor de comunidade com estas
+   * opções. A inicial é `defaultCommunityUuid` (ou a primeira).
+   */
+  communityOptions?: CommunityOption[]
+  defaultCommunityUuid?: string
+  /** Fixa a visibilidade e troca o seletor por um aviso. */
+  lockVisibility?: DiscussionVisibility
+  /** Categoria inicial; "devocional" já abre com o template. */
+  initialLabel?: string
+  dialogTitle?: string
+  dialogDescription?: string
+  onCreated?: (discussion: DiscussionWithAuthor, communityUuid: string) => void
 }
 
 // Rótulo cuja nota nasce no caderno (privada) e ganha o template devocional.
@@ -46,26 +66,54 @@ export function CreateDiscussionModal({
   onClose,
   communityUuid,
   orgSlug: _orgSlug,
+  communityOptions,
+  defaultCommunityUuid,
+  lockVisibility,
+  initialLabel = 'general',
+  dialogTitle,
+  dialogDescription,
+  onCreated,
 }: CreateDiscussionModalProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const _router = useRouter()
   const mutateDiscussions = useMutateDiscussions()
   const { track } = useLHAnalytics('learner')
+
+  const devotionalTemplate = () =>
+    buildDevotionalTemplate({
+      passage: t('communities.devotional_template.passage'),
+      learned: t('communities.devotional_template.learned'),
+      apply: t('communities.devotional_template.apply'),
+      prayer: t('communities.devotional_template.prayer'),
+    })
+  const initialContent = () => (initialLabel === DEVOTIONAL_LABEL ? devotionalTemplate() : null)
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState<any>(null)
+  const [content, setContent] = useState<any>(initialContent)
   const [titleError, setTitleError] = useState<string | null>(null)
-  const [selectedLabel, setSelectedLabel] = useState<string>('general')
+  const [selectedLabel, setSelectedLabel] = useState<string>(initialLabel)
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
-  const [visibility, setVisibility] = useState<DiscussionVisibility>(defaultVisibilityFor('general'))
+  const [pickedCommunity, setPickedCommunity] = useState<string | null>(null)
+  const [visibility, setVisibility] = useState<DiscussionVisibility>(defaultVisibilityFor(initialLabel))
   // Depois que a pessoa escolhe a visibilidade, trocar a categoria não a altera mais.
   const [visibilityTouched, setVisibilityTouched] = useState(false)
   // O DiscussionEditor só lê `content` ao montar; trocar a key remonta com o template.
   const [editorKey, setEditorKey] = useState(0)
 
   const accessToken = session?.data?.tokens?.access_token
+  const hasCommunityPicker = !!communityOptions
+  const targetCommunity =
+    (pickedCommunity && communityOptions?.some((c) => c.community_uuid === pickedCommunity)
+      ? pickedCommunity
+      : null) ||
+    communityUuid ||
+    defaultCommunityUuid ||
+    communityOptions?.[0]?.community_uuid ||
+    ''
+  const effectiveVisibility: DiscussionVisibility = lockVisibility ?? visibility
 
   const validateTitle = (value: string) => {
     if (!value.trim()) {
@@ -86,14 +134,7 @@ export function CreateDiscussionModal({
       setVisibility(defaultVisibilityFor(labelId))
     }
     if (labelId === DEVOTIONAL_LABEL && !editorHasText(content)) {
-      setContent(
-        buildDevotionalTemplate({
-          passage: t('communities.devotional_template.passage'),
-          learned: t('communities.devotional_template.learned'),
-          apply: t('communities.devotional_template.apply'),
-          prayer: t('communities.devotional_template.prayer'),
-        })
-      )
+      setContent(devotionalTemplate())
       setEditorKey((k) => k + 1)
     }
   }
@@ -105,10 +146,10 @@ export function CreateDiscussionModal({
 
   const resetForm = () => {
     setTitle('')
-    setContent(null)
-    setSelectedLabel('general')
+    setContent(initialContent())
+    setSelectedLabel(initialLabel)
     setSelectedEmoji(null)
-    setVisibility(defaultVisibilityFor('general'))
+    setVisibility(defaultVisibilityFor(initialLabel))
     setVisibilityTouched(false)
     setEditorKey((k) => k + 1)
   }
@@ -128,17 +169,22 @@ export function CreateDiscussionModal({
       return
     }
 
+    if (!targetCommunity) {
+      setError(t('communities.notebook.no_community'))
+      return
+    }
+
     setIsSubmitting(true)
     setError(null)
     try {
       const result = await createDiscussion(
-        communityUuid,
+        targetCommunity,
         {
           title: title.trim(),
           content: content ? JSON.stringify(content) : null,
           label: selectedLabel,
           emoji: selectedEmoji,
-          visibility,
+          visibility: effectiveVisibility,
         },
         accessToken
       )
@@ -150,7 +196,8 @@ export function CreateDiscussionModal({
           title_length: title.trim().length,
         })
         // Revalidate SWR cache to show new discussion immediately
-        mutateDiscussions(communityUuid)
+        mutateDiscussions(targetCommunity)
+        onCreated?.(result, targetCommunity)
         resetForm()
         onClose()
       }
@@ -181,11 +228,37 @@ export function CreateDiscussionModal({
           onClose()
         }
       }}
-      dialogTitle={t('communities.create_discussion.title')}
-      dialogDescription={t('communities.create_discussion.description')}
+      dialogTitle={dialogTitle ?? t('communities.create_discussion.title')}
+      dialogDescription={dialogDescription ?? t('communities.create_discussion.description')}
       minWidth="lg"
       dialogContent={
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Comunidade onde a nota fica guardada (só no "Meu caderno") */}
+          {hasCommunityPicker && (
+            <div>
+              <label htmlFor="discussion-community" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('communities.notebook.community_label')}
+              </label>
+              {communityOptions && communityOptions.length > 0 ? (
+                <select
+                  id="discussion-community"
+                  value={targetCommunity}
+                  onChange={(e) => setPickedCommunity(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none h-11"
+                >
+                  {communityOptions.map((c) => (
+                    <option key={c.community_uuid} value={c.community_uuid}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-sm text-gray-500">{t('communities.notebook.no_community')}</p>
+              )}
+              <p className="mt-1.5 text-xs text-gray-500">{t('communities.notebook.community_hint')}</p>
+            </div>
+          )}
+
           {/* Label Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -273,7 +346,16 @@ export function CreateDiscussionModal({
             </p>
           </div>
 
+          {/* Visibilidade fixa (ex.: nova nota do caderno): só um aviso */}
+          {lockVisibility === 'private' && (
+            <div className="flex items-start gap-2 p-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+              <Lock size={16} className="mt-0.5 shrink-0 text-gray-500" aria-hidden="true" />
+              <span>{t('communities.notebook.private_lock_note')}</span>
+            </div>
+          )}
+
           {/* Visibilidade: caderno (só eu) ou comunidade */}
+          {!lockVisibility && (
           <fieldset>
             <legend className="block text-sm font-medium text-gray-700 mb-2">
               {t('communities.visibility.label')}
@@ -310,6 +392,7 @@ export function CreateDiscussionModal({
               })}
             </div>
           </fieldset>
+          )}
 
           {/* Error message */}
           {error && (
@@ -330,11 +413,11 @@ export function CreateDiscussionModal({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !isValid}
+              disabled={isSubmitting || !isValid || !targetCommunity}
               className="px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-              {visibility === 'private'
+              {effectiveVisibility === 'private'
                 ? t('communities.visibility.submit_private')
                 : t('communities.create_discussion.submit')}
             </button>
