@@ -12,35 +12,81 @@
    continuar brancas. Por isso o escopo aqui é `.dark .<classe>`, que separa
    fundo de texto e tem especificidade maior que a classe original.
 
-   Base: neutros puros (preto e branco), com o dourado do Discipulei reservado
-   para acento. Referência de tratamento visual: eden.so — cinzas neutros, sem
-   viés quente nas superfícies, e cor aplicada com parcimônia.
+   Identidade "Discipulei P&B" (decisão N19): só preto e branco quentes.
+   Sem dourado, sem âmbar. O acento é o CONTRASTE: botão primário claro sobre
+   página escura (e o inverso no tema claro), links na cor do texto com
+   sublinhado discreto, estados ativos por borda ou superfície, nunca por cor.
+
+   Fonte única dos valores: discipulei-site/assets/css/tokens.css. Os tokens
+   abaixo repetem os mesmos nomes e valores; as variáveis --lh-* são o
+   vocabulário antigo deste arquivo, agora derivadas desses tokens.
    ========================================================================== */
 
+/* ------------------------------------------------------------------ tokens */
+/* Tema claro (painel /dash via PainelTemaClaro, ou quem escolheu claro). */
 :root {
-  /* Superfícies — cinzas NEUTROS de propósito (sem componente quente). Um
-     marrom sutil aqui "suja" a página inteira; o calor fica só no acento. */
-  --lh-bg:          #0a0a0a;
-  --lh-surface:     #111111;
-  --lh-surface-2:   #161616;
-  --lh-surface-3:   #1c1c1c;
-  --lh-surface-4:   #232323;
+  --page: #fbfaf7;
+  --panel: #ffffff;
+  --surface: #f3f1ec;
+  --text: #141413;
+  --text-2: #54524d;
+  --text-3: #75726c;
+  --line: rgb(0 0 0 / 0.08);
+  --line-2: rgb(0 0 0 / 0.04);
+  --line-strong: rgb(0 0 0 / 0.16);
+  --cta-bg: #141413;
+  --cta-fg: #fbfaf7;
+  --cta-bg-hover: #2b2b2a;
+  --overlay: rgb(251 250 247 / 0.72);
+  --focus: rgb(20 20 19 / 0.45);
+  --link-underline: rgb(20 20 19 / 0.35);
+  /* Sombras com nome próprio: --shadow-md/--shadow-lg são tokens do
+     Tailwind v4 e não podem ser redefinidos aqui. */
+  --sombra-lg: 0 28px 60px -28px rgb(0 0 0 / 0.18);
+  --sombra-md: 0 12px 32px -18px rgb(0 0 0 / 0.14);
 
-  /* bordas */
-  --lh-border:        #262626;
-  --lh-border-strong: #333333;
+  /* Forma. --radius-sm/md/lg pertencem ao @theme do globals.css. */
+  --radius-pill: 9999px;
+  --radius-card: 16px;
+}
 
-  /* texto (do mais fraco ao mais forte) */
-  --lh-text-faint:  #6b6b6b;
-  --lh-text-muted:  #969696;
-  --lh-text-soft:   #a8a8a8;
-  --lh-text:        #e8e8e8;
-  --lh-text-strong: #f5f5f5;
+/* Tema escuro, o padrão. */
+.dark {
+  --page: #121211;
+  --panel: #1a1a19;
+  --surface: #232322;
+  --text: #f4f3f0;
+  --text-2: #a3a19c;
+  --text-3: #75736e;
+  --line: rgb(255 255 255 / 0.08);
+  --line-2: rgb(255 255 255 / 0.04);
+  --line-strong: rgb(255 255 255 / 0.16);
+  --cta-bg: #f4f3f0;
+  --cta-fg: #121211;
+  --cta-bg-hover: #ffffff;
+  --overlay: rgb(18 18 17 / 0.72);
+  --focus: rgb(244 243 240 / 0.55);
+  --link-underline: rgb(244 243 240 / 0.35);
+  --sombra-lg: 0 28px 60px -22px rgb(0 0 0 / 0.7);
+  --sombra-md: 0 12px 32px -16px rgb(0 0 0 / 0.6);
 
-  /* Acento — dourado do Discipulei, usado com parcimônia (links, foco,
-     detalhes), nunca como cor de superfície. */
-  --lh-accent:      #ddb46a;
-  --lh-accent-soft: #eadec9;
+  /* Vocabulário antigo deste arquivo, derivado dos tokens. O upstream tem
+     mais degraus de cinza que a marca; os intermediários (surface-2,
+     surface-4, text-soft, text) são interpolações quentes entre tokens. */
+  --lh-bg:          var(--page);      /* #121211 */
+  --lh-surface:     var(--panel);     /* #1a1a19 */
+  --lh-surface-2:   #1e1e1d;
+  --lh-surface-3:   var(--surface);   /* #232322 */
+  --lh-surface-4:   #2b2b2a;
+
+  --lh-border:        var(--line);
+  --lh-border-strong: var(--line-strong);
+
+  --lh-text-faint:  var(--text-3);    /* #75736e */
+  --lh-text-muted:  var(--text-2);    /* #a3a19c */
+  --lh-text-soft:   #c4c2bd;
+  --lh-text:        #e6e4e0;
+  --lh-text-strong: var(--text);      /* #f4f3f0 */
 }
 
 /* Fundo base da página. O <body> do upstream não declara cor própria,
@@ -69,7 +115,7 @@
 .dark .bg-zinc-200         { background-color: var(--lh-surface-4); }
 .dark .bg-gray-300,
 .dark .bg-neutral-300,
-.dark .bg-slate-300        { background-color: #2b2b2b; }
+.dark .bg-slate-300        { background-color: #323230; }
 
 /* Fundos claros COM OPACIDADE.
    `bg-white/90` e `bg-gray-50/30` sao classes distintas de `bg-white` e
@@ -82,11 +128,11 @@
    overlays de destaque e ja funcionam como esperado sobre fundo escuro. */
 .dark .bg-white\/95,
 .dark .bg-white\/90,
-.dark .bg-white\/80         { background-color: rgb(17 17 17 / 0.92); }
+.dark .bg-white\/80         { background-color: rgb(26 26 25 / 0.92); }
 .dark .bg-white\/70,
 .dark .bg-white\/60,
 .dark .bg-white\/50,
-.dark .bg-white\/40         { background-color: rgb(17 17 17 / 0.7); }
+.dark .bg-white\/40         { background-color: rgb(26 26 25 / 0.7); }
 
 .dark .bg-gray-50\/60,
 .dark .bg-gray-50\/50,
@@ -128,13 +174,14 @@
 
 /* `bg-black` é o botão PRIMÁRIO do produto (427 usos: Entrar, Cadastrar-se,
    Salvar). Preto sobre fundo preto desaparece, então precisa inverter para
-   claro — e o `text-white` que vem junto escurece, igual aos cinzas acima. */
-.dark .bg-black                  { background-color: var(--lh-text-strong); }
+   claro — e o `text-white` que vem junto escurece, igual aos cinzas acima.
+   Cores = tokens de CTA da marca (#f4f3f0 sobre #121211). */
+.dark .bg-black                  { background-color: var(--cta-bg); }
 .dark .bg-black.text-white,
-.dark .bg-black .text-white      { color: var(--lh-bg); }
-.dark .hover\:bg-black:hover     { background-color: var(--lh-text); }
+.dark .bg-black .text-white      { color: var(--cta-fg); }
+.dark .hover\:bg-black:hover     { background-color: var(--cta-bg-hover); }
 .dark .hover\:bg-black\/90:hover,
-.dark .hover\:bg-black\/85:hover { background-color: var(--lh-text); }
+.dark .hover\:bg-black\/85:hover { background-color: var(--cta-bg-hover); }
 
 /* Overlays escuros translúcidos usados como realce sobre fundo CLARO. No
    escuro eles somem, então viram realce claro. */
@@ -157,14 +204,14 @@
    apoio, links secundários. Sobre fundo escuro ficavam ilegíveis.
    As opacidades sobem um pouco em relação ao original: texto claro sobre
    escuro precisa de mais alfa para a mesma legibilidade percebida. */
-.dark .text-black\/70      { color: rgb(232 232 232 / 0.78); }
-.dark .text-black\/60      { color: rgb(232 232 232 / 0.70); }
-.dark .text-black\/50      { color: rgb(232 232 232 / 0.62); }
-.dark .text-black\/45      { color: rgb(232 232 232 / 0.58); }
-.dark .text-black\/40      { color: rgb(232 232 232 / 0.55); }
-.dark .text-black\/35      { color: rgb(232 232 232 / 0.50); }
-.dark .text-black\/30      { color: rgb(232 232 232 / 0.48); }
-.dark .text-black\/25      { color: rgb(232 232 232 / 0.45); }
+.dark .text-black\/70      { color: rgb(230 228 224 / 0.78); }
+.dark .text-black\/60      { color: rgb(230 228 224 / 0.70); }
+.dark .text-black\/50      { color: rgb(230 228 224 / 0.62); }
+.dark .text-black\/45      { color: rgb(230 228 224 / 0.58); }
+.dark .text-black\/40      { color: rgb(230 228 224 / 0.55); }
+.dark .text-black\/35      { color: rgb(230 228 224 / 0.50); }
+.dark .text-black\/30      { color: rgb(230 228 224 / 0.48); }
+.dark .text-black\/25      { color: rgb(230 228 224 / 0.45); }
 .dark .text-gray-900,
 .dark .text-neutral-900,
 .dark .text-slate-900      { color: var(--lh-text-strong); }
@@ -229,15 +276,47 @@
 
 /* ---------------------------------------------------------------- sombras */
 /* As sombras do upstream usam cinza claro com outline claro — invisíveis e
-   "lavadas" no escuro. Trocadas por sombra preta com outline sutil. */
+   "lavadas" no escuro. Trocadas pelas sombras difusas da marca, com fio de
+   1px na cor --line (sem brilho, sem glow). Vale nos dois temas. */
+.nice-shadow,
 .dark .nice-shadow {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
-  outline: 1px solid var(--lh-border);
+  box-shadow: var(--sombra-md);
+  outline: 1px solid var(--line);
 }
+.light-shadow,
 .dark .light-shadow {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.45);
-  outline: 1px solid var(--lh-border);
+  box-shadow: var(--sombra-lg);
+  outline: 1px solid var(--line);
 }
+
+/* ------------------------------------------------------------------ forma */
+/* Cards: os do upstream são `rounded-xl` (12px) com uma das sombras acima.
+   Só esse par vira 16px — avatares, chips e ícones redondos que também usam
+   `nice-shadow` ficam como estão. */
+.rounded-xl.nice-shadow,
+.rounded-xl.light-shadow,
+.rounded-2xl.nice-shadow,
+.rounded-2xl.light-shadow { border-radius: var(--radius-card); }
+
+/* Botão primário em pílula. Restrito a <button>/<a> com o fundo de CTA, para
+   não arredondar blocos que usam `bg-black` como superfície (vídeo, mídia). */
+button.bg-black,
+a.bg-black,
+button.bg-neutral-900,
+a.bg-neutral-900 { border-radius: var(--radius-pill); }
+
+/* No tema claro o preto puro do upstream vira o preto quente da marca. */
+html:not(.dark) .bg-black,
+html:not(.dark) .bg-neutral-900    { background-color: var(--cta-bg); }
+html:not(.dark) .hover\:bg-black:hover,
+html:not(.dark) .hover\:bg-black\/90:hover,
+html:not(.dark) .hover\:bg-black\/85:hover,
+html:not(.dark) .hover\:bg-neutral-800:hover { background-color: var(--cta-bg-hover); }
+
+/* Fundo de página do tema claro: papel quente em vez de branco puro; cards
+   (`bg-white`) continuam #fff = --panel. */
+html:not(.dark),
+html:not(.dark) body { background-color: var(--page); }
 
 /* ------------------------------------------------------------ formulários */
 .dark input,
@@ -272,27 +351,31 @@
   -webkit-box-shadow: 0 0 0 1000px var(--lh-surface-2) inset;
 }
 
-/* ------------------------------------------------------------------ acento */
-/* O dourado entra só aqui: foco, seleção e marcação de texto. Superfícies e
-   texto corrido permanecem neutros — é o que mantém a página preto-e-branco
-   com o dourado lendo como detalhe, e não como cor de fundo. */
-.dark ::selection {
-  background-color: var(--lh-accent);
-  color: var(--lh-bg);
+/* --------------------------------------------------------------- contraste */
+/* Não há cor de acento. Foco, seleção e marcação usam o próprio contraste
+   do tema (texto sobre página, invertido). A seleção vale nos dois temas;
+   foco e <mark> continuam só no escuro, onde o upstream não dá conta — no
+   claro o foco do upstream já é legível. */
+::selection {
+  background-color: var(--text);
+  color: var(--page);
 }
 
 .dark :focus-visible {
-  outline: 2px solid var(--lh-accent);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
 .dark input:focus,
 .dark textarea:focus,
 .dark select:focus {
-  border-color: var(--lh-accent);
+  border-color: var(--text-3);
 }
 
-.dark mark { background-color: var(--lh-accent); color: var(--lh-bg); }
+.dark mark {
+  background-color: var(--line-strong);
+  color: var(--text);
+}
 
 /* ------------------------------------------------------------------ extras */
 .dark hr { border-color: var(--lh-border); }
@@ -332,8 +415,8 @@
   color: var(--lh-text-muted);
 }
 
-/* Citação: texto um passo abaixo do corpo e fio dourado no lugar do cinza
-   claro, que brilhava demais sobre o fundo escuro. */
+/* Citação: texto um passo abaixo do corpo e fio --line-strong no lugar do
+   cinza claro, que brilhava demais sobre o fundo escuro. */
 .dark .discussion-content-readonly .ProseMirror .discussion-blockquote,
 .dark .discussion-content-readonly .ProseMirror .discussion-blockquote p,
 .dark .discussion-editor-content .ProseMirror .discussion-blockquote,
@@ -343,7 +426,7 @@
 
 .dark .discussion-content-readonly .ProseMirror .discussion-blockquote,
 .dark .discussion-editor-content .ProseMirror .discussion-blockquote {
-  border-inline-start-color: var(--lh-accent);
+  border-inline-start-color: var(--line-strong);
 }
 
 .dark .discussion-content-readonly .ProseMirror code,
@@ -364,14 +447,19 @@
   background: none;
 }
 
+/* Links: cor do texto, sublinhado a 35% que acende no hover. */
 .dark .discussion-content-readonly .ProseMirror .discussion-link,
 .dark .discussion-editor-content .ProseMirror .discussion-link {
-  color: var(--lh-accent);
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--link-underline);
+  text-underline-offset: 0.18em;
 }
 
 .dark .discussion-content-readonly .ProseMirror .discussion-link:hover,
 .dark .discussion-editor-content .ProseMirror .discussion-link:hover {
-  color: var(--lh-accent-soft);
+  color: var(--text);
+  text-decoration-color: currentColor;
 }
 
 .dark .discussion-editor-content {
