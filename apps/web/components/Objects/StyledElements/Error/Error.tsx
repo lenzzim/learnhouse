@@ -2,8 +2,37 @@
 import { classifyError } from '@lib/errors/classify'
 import type { ResolutionKind } from '@lib/errors/types'
 import { AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ErrorActions from './ErrorActions'
+
+/**
+ * Discipulei: a API dorme quando fica parada e o primeiro acesso pode
+ * devolver 502/503 enquanto ela acorda. Nesses casos a página tenta de novo
+ * sozinha, uma vez, depois de 3 s (guardado na sessionStorage por 60 s para
+ * nunca entrar em laço).
+ */
+const ESPERA_AQUECIMENTO_MS = 3000
+const CHAVE_RETRY = 'discipulei_erro_retry'
+
+function ehAquecimento(status: number | undefined, kind: string | undefined, detail: string | undefined): boolean {
+  if (status === 502 || status === 503) return true
+  if (kind === 'service_unavailable') return true
+  const msg = (detail || '').toLowerCase()
+  return msg.includes('bad gateway') || msg.includes('service unavailable')
+}
+
+function podeTentarSozinho(): boolean {
+  try {
+    const chave = `${CHAVE_RETRY}:${window.location.pathname}`
+    const ultimo = Number(window.sessionStorage.getItem(chave) || 0)
+    if (Date.now() - ultimo < 60_000) return false
+    window.sessionStorage.setItem(chave, String(Date.now()))
+    return true
+  } catch {
+    return false
+  }
+}
 
 interface ErrorUIProps {
   /** The actual error — when given we classify it for a meaningful message. */
@@ -40,7 +69,9 @@ function ErrorUI({
   loginNext,
   compact,
 }: ErrorUIProps) {
+  const { t } = useTranslation()
   const [showDetails, setShowDetails] = useState(false)
+  const [tentandoDeNovo, setTentandoDeNovo] = useState(false)
 
   const classified = useMemo(
     () => (error !== undefined ? classifyError(error) : undefined),
@@ -49,11 +80,32 @@ function ErrorUI({
 
   // Headline + body: explicit props win, else the classified category, else a
   // meaningful default (never a bare "Something went wrong").
-  const title = message || classified?.category.title || 'Something unexpected happened'
+  const kind = classified?.category.kind
+  const aquecendo = !message && ehAquecimento(classified?.status, kind, classified?.detail)
+  const title =
+    message ||
+    (aquecendo
+      ? t('erros.aquecimento.titulo')
+      : kind
+        ? t(`erros.${kind}.titulo`, { defaultValue: classified?.category.title })
+        : t('erros.unknown.titulo', { defaultValue: 'Something unexpected happened' }))
   const description =
     submessage ||
-    classified?.category.description ||
-    "We ran into an error. It's been logged automatically — retrying or heading home usually helps."
+    (aquecendo
+      ? t('erros.aquecimento.descricao')
+      : kind
+        ? t(`erros.${kind}.descricao`, { defaultValue: classified?.category.description })
+        : t('erros.unknown.descricao', {
+            defaultValue: "We ran into an error. It's been logged automatically — retrying or heading home usually helps.",
+          }))
+
+  // 502/503 durante o aquecimento da API: uma tentativa automática.
+  useEffect(() => {
+    if (!aquecendo || !podeTentarSozinho()) return
+    setTentandoDeNovo(true)
+    const timer = window.setTimeout(() => window.location.reload(), ESPERA_AQUECIMENTO_MS)
+    return () => window.clearTimeout(timer)
+  }, [aquecendo])
 
   const actions: ResolutionKind[] =
     resolutions ||
@@ -80,9 +132,9 @@ function ErrorUI({
           <p className={`font-bold text-rose-700 ${compact ? 'text-xl' : 'text-2xl md:text-3xl'}`}>
             {title}
           </p>
-          {classified?.category.kind && (
-            <span className="text-[11px] uppercase tracking-wide font-semibold text-rose-400">
-              {classified.category.kind.replace(/_/g, ' ')}
+          {tentandoDeNovo && (
+            <span className="text-sm font-medium text-gray-500" role="status">
+              {t('erros.aquecimento.tentando')}
             </span>
           )}
         </div>
@@ -98,10 +150,10 @@ function ErrorUI({
         <div className="w-full max-w-lg">
           <button
             onClick={() => setShowDetails((s) => !s)}
-            className="flex items-center gap-1 mx-auto text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors"
+            className="flex min-h-11 items-center gap-1 mx-auto text-xs font-semibold text-gray-500 hover:text-gray-700 transition-colors"
           >
             {showDetails ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            <span>{showDetails ? 'Hide technical details' : 'Show technical details'}</span>
+            <span>{showDetails ? t('erros.esconder_detalhes') : t('erros.mostrar_detalhes')}</span>
           </button>
           {showDetails && (
             <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-4 text-start">

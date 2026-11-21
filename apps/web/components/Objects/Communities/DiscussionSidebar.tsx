@@ -3,7 +3,7 @@ import React from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
-import { parseApiDate } from '@/lib/datas'
+import { parseApiDate, formatarDataCurta } from '@/lib/datas'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import {
   MessageCircle,
@@ -40,10 +40,10 @@ export function DiscussionSidebar({
   community,
   orgslug,
 }: DiscussionSidebarProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const communityId = community.community_uuid.replace('community_', '')
   const timeAgo = parseApiDate(discussion.creation_date).fromNow()
-  const createdDate = parseApiDate(discussion.creation_date).format('MMM D, YYYY')
+  const createdDate = formatarDataCurta(discussion.creation_date, i18n.language)
   const labelInfo = getLabelInfo(discussion.label || 'general')
   // Nota privada: sem votos/reações (não há público).
   const isPrivate = isPrivateDiscussion(discussion)

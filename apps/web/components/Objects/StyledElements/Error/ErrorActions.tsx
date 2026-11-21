@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 type Variant = 'primary' | 'neutral' | 'danger' | 'ghost'
 
@@ -38,7 +39,7 @@ function ActionButton({
   variant?: Variant
   disabled?: boolean
 }) {
-  const cls = `flex space-x-2 items-center rounded-full px-4 py-1.5 transition-all ease-linear shadow-sm disabled:opacity-50 ${VARIANT_CLASSES[variant]}`
+  const cls = `flex space-x-2 items-center rounded-full px-4 min-h-11 transition-all ease-linear shadow-sm disabled:opacity-50 ${VARIANT_CLASSES[variant]}`
   if (href) {
     return (
       <a href={href} className={cls}>
@@ -74,6 +75,7 @@ export interface ErrorActionsProps {
  */
 export default function ErrorActions({ resolutions, reset, eventId, loginNext }: ErrorActionsProps) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [signingOut, setSigningOut] = useState(false)
 
   // Dedupe while preserving order.
@@ -108,38 +110,38 @@ export default function ErrorActions({ resolutions, reset, eventId, loginNext }:
         switch (kind) {
           case 'retry':
             return (
-              <ActionButton key={kind} onClick={retry} variant="primary" label="Retry"
+              <ActionButton key={kind} onClick={retry} variant="primary" label={t('erros.acoes.tentar', { defaultValue: 'Retry' })}
                 icon={<RefreshCcw size={16} />} />
             )
           case 'reload':
             return (
-              <ActionButton key={kind} onClick={() => window.location.reload()} variant="primary" label="Reload"
+              <ActionButton key={kind} onClick={() => window.location.reload()} variant="primary" label={t('erros.acoes.recarregar', { defaultValue: 'Reload' })}
                 icon={<RefreshCcw size={16} />} />
             )
           case 'login':
             return (
-              <ActionButton key={kind} href={loginHref} variant="primary" label="Log back in"
+              <ActionButton key={kind} href={loginHref} variant="primary" label={t('erros.acoes.entrar', { defaultValue: 'Log back in' })}
                 icon={<LogIn size={16} />} />
             )
           case 'home':
             return (
-              <ActionButton key={kind} href={getUriWithoutOrg('/home')} variant="neutral" label="Home"
+              <ActionButton key={kind} href={getUriWithoutOrg('/home')} variant="neutral" label={t('erros.acoes.inicio', { defaultValue: 'Home' })}
                 icon={<HomeIcon size={16} />} />
             )
           case 'signout':
             return (
               <ActionButton key={kind} onClick={doSignOut} disabled={signingOut} variant="ghost"
-                label={signingOut ? 'Signing out…' : 'Sign out'} icon={<LogOut size={16} />} />
+                label={signingOut ? t('erros.acoes.saindo', { defaultValue: 'Signing out…' }) : t('erros.acoes.sair', { defaultValue: 'Sign out' })} icon={<LogOut size={16} />} />
             )
           case 'report':
             if (!isReportingAvailable()) return null
             return (
               <ActionButton key={kind} onClick={() => openFeedbackDialog({ eventId })} variant="danger"
-                label="Report this problem" icon={<MessageSquareWarning size={16} />} />
+                label={t('erros.acoes.reportar', { defaultValue: 'Report this problem' })} icon={<MessageSquareWarning size={16} />} />
             )
           case 'contact_support':
             return (
-              <ActionButton key={kind} href={supportHref} variant="ghost" label="Contact support"
+              <ActionButton key={kind} href={supportHref} variant="ghost" label={t('erros.acoes.suporte', { defaultValue: 'Contact support' })}
                 icon={<LifeBuoy size={16} />} />
             )
           case 'wait':

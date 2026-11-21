@@ -6482,5 +6482,96 @@
     "primeira_nota_descricao": "Fica no seu caderno. Só você vê.",
     "anonimo_titulo": "Seu dia com a Palavra",
     "anonimo_descricao": "Entre para continuar a leitura, ver seus rascunhos e o que há de novo nas suas comunidades."
+  },
+  "erros": {
+    "version_mismatch": {
+      "titulo": "O app acabou de ser atualizado",
+      "descricao": "Uma versão nova foi publicada enquanto esta página estava aberta. Recarregue para usar a versão mais recente."
+    },
+    "chunk_load": {
+      "titulo": "Parte da página não carregou",
+      "descricao": "Seu navegador guardou uma cópia antiga do app e não conseguiu carregar um pedaço dela. Recarregar costuma resolver."
+    },
+    "auth_session": {
+      "titulo": "Sua sessão expirou",
+      "descricao": "Você saiu da conta ou o acesso precisa ser renovado. Entre de novo para continuar."
+    },
+    "plan_limit": {
+      "titulo": "Este recurso não está disponível",
+      "descricao": "Este recurso não está ativo para a comunidade. Fale com a equipe se achar que deveria estar."
+    },
+    "permission": {
+      "titulo": "Você não tem acesso a isto",
+      "descricao": "Sua conta não tem permissão para esta página ou ação. Se achar que deveria ter, fale com a equipe da comunidade."
+    },
+    "rate_limit": {
+      "titulo": "Vamos com calma por um instante",
+      "descricao": "Foram muitas ações em pouco tempo, então pausamos rapidinho para proteger sua conta. Logo libera."
+    },
+    "not_found": {
+      "titulo": "Não encontramos isso",
+      "descricao": "O que você procura pode ter sido movido, apagado ou não estar disponível para você. Não foi nada que você fez de errado."
+    },
+    "conflict": {
+      "titulo": "Isso já existe",
+      "descricao": "Já existe algo igual, por exemplo uma conta com o mesmo e-mail ou um item com o mesmo nome."
+    },
+    "validation": {
+      "titulo": "Falta ajustar um campo",
+      "descricao": "Um campo está vazio, fora do limite ou no formato errado. Corrija o campo destacado e tente de novo."
+    },
+    "org_config": {
+      "titulo": "A comunidade ainda está sendo configurada",
+      "descricao": "A organização ainda não está pronta. A equipe precisa terminar a configuração."
+    },
+    "payment": {
+      "titulo": "Não conseguimos concluir o pagamento",
+      "descricao": "Algo interrompeu o pagamento ou a assinatura. Nada foi cobrado a mais; pode tentar de novo com segurança."
+    },
+    "upload": {
+      "titulo": "O envio não deu certo",
+      "descricao": "O arquivo pode ser grande demais, estar num formato não aceito, ou a conexão caiu no meio. Confira o arquivo e tente de novo."
+    },
+    "ai": {
+      "titulo": "O assistente teve um problema",
+      "descricao": "A resposta foi interrompida ou veio incompleta. Costuma ser passageiro; tente de novo."
+    },
+    "offline": {
+      "titulo": "Parece que você está sem internet",
+      "descricao": "Não conseguimos falar com o servidor. Confira sua conexão e tente de novo."
+    },
+    "service_unavailable": {
+      "titulo": "Um serviço está fora do ar",
+      "descricao": "Algo de que dependemos não está respondendo agora. É do nosso lado e costuma voltar sozinho."
+    },
+    "timeout": {
+      "titulo": "Demorou demais",
+      "descricao": "O pedido levou tempo demais para terminar. O servidor pode estar ocupado; tentar de novo costuma funcionar."
+    },
+    "server": {
+      "titulo": "Tivemos um problema do nosso lado",
+      "descricao": "O servidor devolveu um erro inesperado. A culpa é nossa, não sua; tente de novo em instantes."
+    },
+    "unknown": {
+      "titulo": "Algo não saiu como esperado",
+      "descricao": "Tivemos um problema inesperado. Ele já foi registrado e costuma ser passageiro; tentar de novo geralmente resolve. Se continuar, conte para a gente o que você estava fazendo."
+    },
+    "aquecimento": {
+      "titulo": "Estamos acordando o servidor",
+      "descricao": "A comunidade estava parada e o servidor leva alguns segundos para voltar. Vamos tentar de novo sozinhos.",
+      "tentando": "Tentando de novo em 3 segundos…"
+    },
+    "mostrar_detalhes": "Mostrar detalhes técnicos",
+    "esconder_detalhes": "Esconder detalhes técnicos",
+    "acoes": {
+      "tentar": "Tentar de novo",
+      "recarregar": "Recarregar",
+      "entrar": "Entrar de novo",
+      "inicio": "Início",
+      "sair": "Sair",
+      "saindo": "Saindo…",
+      "reportar": "Avisar sobre o problema",
+      "suporte": "Falar com o suporte"
+    }
   }
 }

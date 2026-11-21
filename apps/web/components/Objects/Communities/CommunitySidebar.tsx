@@ -21,7 +21,7 @@ import { getCourseById } from '@services/courses/courses'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { parseApiDate } from '@/lib/datas'
+import { formatarDataCurta } from '@/lib/datas'
 import { SafeImage } from '@components/Objects/SafeImage'
 
 interface CommunitySidebarProps {
@@ -37,7 +37,7 @@ export function CommunitySidebar({
   orgslug,
   onCreateDiscussion,
 }: CommunitySidebarProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { canManageCommunity, canCreateDiscussion } = useCommunityRights(community.community_uuid)
   const org = useOrg() as any
   const session = useLHSession() as any
@@ -51,7 +51,7 @@ export function CommunitySidebar({
     staleTime: 60_000,
   })
 
-  const createdDate = parseApiDate(community.creation_date).format('MMM D, YYYY')
+  const createdDate = formatarDataCurta(community.creation_date, i18n.language)
 
   const thumbnailUrl = community.thumbnail_image && org?.org_uuid
     ? getCommunityThumbnailMediaDirectory(

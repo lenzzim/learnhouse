@@ -6482,5 +6482,96 @@
     "primeira_nota_descricao": "It stays in your notebook. Only you can see it.",
     "anonimo_titulo": "Your day with the Word",
     "anonimo_descricao": "Sign in to keep reading, see your drafts and what's new in your communities."
+  },
+  "erros": {
+    "version_mismatch": {
+      "titulo": "The app just updated",
+      "descricao": "A new version was released while this page was open, so it briefly fell out of sync. Reloading will pick up the latest version."
+    },
+    "chunk_load": {
+      "titulo": "Part of the page didn't load",
+      "descricao": "Your browser was holding onto an older copy of the app and couldn't load a piece of it. A quick reload usually clears it right up."
+    },
+    "auth_session": {
+      "titulo": "Your session expired",
+      "descricao": "You've been signed out or your sign-in needs refreshing. Logging back in will restore your access."
+    },
+    "plan_limit": {
+      "titulo": "This needs a plan upgrade",
+      "descricao": "The feature you tried to use isn't included on your current plan, or it's turned off for your organization. Upgrading or enabling it unlocks access."
+    },
+    "permission": {
+      "titulo": "You don't have access to this",
+      "descricao": "Your account doesn't have permission for this page or action. If you think it should, an admin for your organization can grant access."
+    },
+    "rate_limit": {
+      "titulo": "Let's slow down for a moment",
+      "descricao": "You've made a lot of requests in a short time, so we've paused things briefly to keep your account safe. It'll free up shortly."
+    },
+    "not_found": {
+      "titulo": "We couldn't find that",
+      "descricao": "The item you're looking for may have been moved, deleted, or isn't available to your organization. It's not something you did wrong."
+    },
+    "conflict": {
+      "titulo": "That already exists",
+      "descricao": "This conflicts with something that's already there — for example an account or item with the same name or email already exists."
+    },
+    "validation": {
+      "titulo": "Something needs a quick fix",
+      "descricao": "A field is missing, out of range, or in the wrong format. Adjust the highlighted input and try again."
+    },
+    "org_config": {
+      "titulo": "This workspace needs setup",
+      "descricao": "This organization isn't fully configured yet. An administrator may need to finish setting it up before it can be used."
+    },
+    "payment": {
+      "titulo": "We couldn't complete that billing step",
+      "descricao": "Something interrupted checkout, the billing portal, or a subscription change. No charge is lost; you can safely try again."
+    },
+    "upload": {
+      "titulo": "That upload didn't go through",
+      "descricao": "Your file may be too large or in an unsupported format, or the connection dropped mid-upload. Check the file and give it another try."
+    },
+    "ai": {
+      "titulo": "The AI assistant ran into trouble",
+      "descricao": "An AI or generation request was interrupted or returned an incomplete response. These can be temporary, so trying again often works."
+    },
+    "offline": {
+      "titulo": "You appear to be offline",
+      "descricao": "We couldn't reach our servers, which usually means a network hiccup on the way. Check your connection and try again."
+    },
+    "service_unavailable": {
+      "titulo": "A service is temporarily down",
+      "descricao": "A feature we rely on isn't responding or hasn't been set up for your deployment yet. It's on our side and usually clears on its own."
+    },
+    "timeout": {
+      "titulo": "That took too long",
+      "descricao": "The request timed out before it finished. The server may be busy — trying again usually works."
+    },
+    "server": {
+      "titulo": "We hit a snag on our end",
+      "descricao": "Our servers returned an unexpected error while handling your request. This is on us, not you; trying again in a moment usually helps."
+    },
+    "unknown": {
+      "titulo": "Something didn't go as planned",
+      "descricao": "We ran into an unexpected problem completing your request. It's been logged automatically and is likely temporary — trying again often clears it. If it keeps happening, tell us exactly what you were doing below."
+    },
+    "aquecimento": {
+      "titulo": "Waking up the server",
+      "descricao": "The community was idle and the server takes a few seconds to come back. We will try again on our own.",
+      "tentando": "Trying again in 3 seconds…"
+    },
+    "mostrar_detalhes": "Show technical details",
+    "esconder_detalhes": "Hide technical details",
+    "acoes": {
+      "tentar": "Retry",
+      "recarregar": "Reload",
+      "entrar": "Log back in",
+      "inicio": "Home",
+      "sair": "Sign out",
+      "saindo": "Signing out…",
+      "reportar": "Report this problem",
+      "suporte": "Contact support"
+    }
   }
 }
