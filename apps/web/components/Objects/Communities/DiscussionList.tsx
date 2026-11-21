@@ -236,7 +236,7 @@ export function DiscussionList({
             type="button"
             onClick={toggleSelectMode}
             aria-pressed={isSelectMode}
-            className={`flex items-center gap-1.5 px-3 min-h-11 md:min-h-0 md:h-8 text-xs font-medium rounded-md transition-colors ${
+            className={`flex items-center gap-1.5 px-3 min-h-11 md:min-h-0 md:h-8 whitespace-nowrap text-xs font-medium rounded-md transition-colors ${
               isSelectMode
                 ? 'bg-gray-900 text-white'
                 : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
@@ -261,7 +261,7 @@ export function DiscussionList({
             {/* Desktop e tablet (>= 768px): barra completa */}
             <div className="hidden md:block p-4 border-b border-gray-100 space-y-3">
               {campoBusca}
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <LabelFilter value={selectedLabel} onChange={handleLabelChange} />
                   <SortDropdown value={sortBy} onChange={handleSortChange} />
@@ -272,7 +272,7 @@ export function DiscussionList({
                   {canCreateDiscussion && onCreateClick && !isSelectMode && (
                     <button
                       onClick={() => handleCreateClick('header')}
-                      className="flex items-center gap-2 px-3 py-2 h-8 bg-neutral-900 hover:bg-neutral-800 text-white rounded-md transition-colors text-xs font-medium"
+                      className="flex items-center gap-2 px-3 py-2 h-8 whitespace-nowrap bg-neutral-900 hover:bg-neutral-800 text-white rounded-md transition-colors text-xs font-medium"
                     >
                       <Plus size={14} />
                       {t('communities.discussion_list.new_discussion')}

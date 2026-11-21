@@ -73,7 +73,7 @@ export function BuscaDialogo({ orgslug, aberta, aoMudar }: BuscaDialogoProps) {
         >
           <DialogPrimitive.Title className="sr-only">{t('nav.buscar')}</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">{t('nav.busca.descricao')}</DialogPrimitive.Description>
-          <form onSubmit={buscarTudo} role="search" className="flex items-center gap-3 border-b border-[var(--line)] px-4">
+          <form onSubmit={buscarTudo} role="search" className="flex items-center gap-3 border-b border-[var(--line)] px-4 focus-within:border-[var(--line-strong)]">
             <MagnifyingGlass size={20} aria-hidden="true" className="shrink-0 text-[var(--text-3)]" />
             <input
               autoFocus
@@ -83,7 +83,10 @@ export function BuscaDialogo({ orgslug, aberta, aoMudar }: BuscaDialogoProps) {
               placeholder={t('nav.busca.placeholder')}
               aria-label={t('nav.buscar')}
               enterKeyHint="search"
-              className="h-14 min-w-0 flex-1 bg-transparent text-base text-[var(--text)] placeholder:text-[var(--text-3)] outline-none"
+              // O contorno global de foco (discipulei-dark.css) não cabe aqui: o campo
+              // é o próprio diálogo e já abre focado.
+              style={{ outline: 'none' }}
+              className="h-14 min-w-0 flex-1 border-0 bg-transparent text-base text-[var(--text)] placeholder:text-[var(--text-3)] shadow-none outline-none ring-0 focus:border-0 focus:shadow-none focus:outline-none focus:ring-0 focus-visible:outline-none"
             />
             <kbd className="hidden shrink-0 rounded border border-[var(--line-strong)] px-1.5 py-0.5 font-sans text-xs text-[var(--text-3)] sm:inline">
               Esc

@@ -624,9 +624,3 @@ html:not(.dark) .logo img {
     to   { opacity: 0; }
   }
 }
-
-/* Seleção de texto e cursor na paleta da marca, sem o azul do sistema. */
-::selection {
-  background-color: var(--text);
-  color: var(--page);
-}
