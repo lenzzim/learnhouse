@@ -50,6 +50,16 @@ function OrgFooter() {
             />
           </Link>
         )}
+        {/* Discipulei: AGPL-3.0, seção 13 — quem usa pela rede tem acesso ao
+            código-fonte desta versão modificada. */}
+        <a
+          href="https://github.com/lenzzim/learnhouse"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          Código-fonte
+        </a>
       </div>
     </footer>
   )
