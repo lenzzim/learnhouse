@@ -168,6 +168,27 @@ class NoteShare(SQLModel, table=True):
     revoked_at: Optional[str] = Field(default=None, sa_column=Column(String(40), nullable=True))
 
 
+TEMPLATE_NAME_MAX = 120
+TEMPLATES_PER_USER_ORG = 100
+
+
+class NoteTemplate(SQLModel, table=True):
+    """Modelo de nota salvo pela pessoa (privado ao dono, como as notas)."""
+
+    __tablename__ = "note_template"
+    __table_args__ = (Index("ix_note_template_user_org", "user_id", "org_id"),)
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    template_uuid: str = Field(sa_column=Column(String(64), nullable=False, unique=True, index=True))
+    user_id: int = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False))
+    org_id: int = Field(sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"), nullable=False))
+    name: str = Field(sa_column=Column(String(TEMPLATE_NAME_MAX), nullable=False))
+    content_json: str = Field(default="", sa_column=Column(Text, nullable=False, default=""))
+    kind: Optional[str] = Field(default=None, sa_column=Column(String(10), nullable=True))
+    created_at: str = Field(default="", sa_column=Column(String(40), nullable=False, default=""))
+    updated_at: str = Field(default="", sa_column=Column(String(40), nullable=False, default=""))
+
+
 # ---------------------------------------------------------------------------
 # Esquemas de entrada/saída
 # ---------------------------------------------------------------------------
@@ -326,3 +347,25 @@ class PublishResult(BaseModel):
 
 class MigrateLegacyResult(BaseModel):
     copied: int
+
+
+class TemplateRead(BaseModel):
+    template_uuid: str
+    name: str
+    kind: Optional[str] = None
+    content_json: str
+    created_at: str
+    updated_at: str
+
+
+class TemplateCreate(BaseModel):
+    org_id: int
+    name: str
+    content_json: str = ""
+    kind: Optional[str] = None
+
+
+class TemplateUpdate(BaseModel):
+    name: Optional[str] = None
+    content_json: Optional[str] = None
+    kind: Optional[str] = None

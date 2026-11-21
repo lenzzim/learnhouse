@@ -31,9 +31,13 @@ from src.db.notes import (
     TagRename,
     TcdCalendar,
     TcdRequest,
+    TemplateCreate,
+    TemplateRead,
+    TemplateUpdate,
 )
 from src.security.auth import get_current_user
 from src.services.notes import notes as svc
+from src.services.notes import templates as tpl_svc
 
 router = APIRouter()
 
@@ -88,6 +92,30 @@ async def api_tcd_calendar(org_id: int = Query(...), month: str = Query(...), to
 async def api_get_tcd(date: str, org_id: int = Query(...), current_user=Depends(get_current_user),
                       db: AsyncSession = Depends(get_db_session)):
     return await svc.get_tcd(db, current_user, org_id, date)
+
+
+@router.get("/templates", response_model=List[TemplateRead], summary="List my note templates")
+async def api_list_templates(org_id: int = Query(...), current_user=Depends(get_current_user),
+                             db: AsyncSession = Depends(get_db_session)):
+    return await tpl_svc.list_templates(db, current_user, org_id)
+
+
+@router.post("/templates", response_model=TemplateRead, summary="Save a note template")
+async def api_create_template(body: TemplateCreate, current_user=Depends(get_current_user),
+                              db: AsyncSession = Depends(get_db_session)):
+    return await tpl_svc.create_template(db, current_user, body)
+
+
+@router.put("/templates/{template_uuid}", response_model=TemplateRead, summary="Update my note template")
+async def api_update_template(template_uuid: str, body: TemplateUpdate, current_user=Depends(get_current_user),
+                              db: AsyncSession = Depends(get_db_session)):
+    return await tpl_svc.update_template(db, current_user, template_uuid, body)
+
+
+@router.delete("/templates/{template_uuid}", summary="Delete my note template")
+async def api_delete_template(template_uuid: str, current_user=Depends(get_current_user),
+                              db: AsyncSession = Depends(get_db_session)):
+    return await tpl_svc.delete_template(db, current_user, template_uuid)
 
 
 @router.get("/collections", response_model=List[CollectionRead], summary="List my collections")
