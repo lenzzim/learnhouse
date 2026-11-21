@@ -6410,6 +6410,17 @@
     "so_tr": "Só no Textus Receptus (base da KJV)",
     "definicao_ingles": "Definição (em inglês)",
     "credito_stepbible": "Dados do STEPBible.org (Tyndale House, Cambridge), CC BY 4.0",
+    "grupo_licenciadas": "Licenciadas",
+    "grupo_licenciadas_idioma": "Licenciadas · {{idioma}}",
+    "nota_licenciadas": "Versão licenciada (API.Bible): só para quem entrou na conta. O texto é carregado na hora e não fica salvo no app.",
+    "licenciada_entrar": "Entre na sua conta para ler a {{sigla}}.",
+    "licenciada_indisponivel": "A {{sigla}} não está disponível no momento.",
+    "licenciada_limite": "Muitas leituras agora. Tente de novo em instantes.",
+    "entrar": "Entrar",
+    "fornecido_api_bible": "Texto fornecido pela API.Bible.",
+    "verso_ausente": "Versículo ausente nesta versão",
+    "verso_incluido": "(no v. {{n}})",
+    "nota_citacao_licenciada": "Versão licenciada: o post guarda só a referência e a versão; o texto aparece na hora para quem lê.",
     "fechar": "Fechar"
   },
   "nav": {
