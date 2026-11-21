@@ -13,10 +13,6 @@ import {
   Lock,
   MoreVertical,
   Trash2,
-  HelpCircle,
-  Lightbulb,
-  Megaphone,
-  Star,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { getUriWithOrg } from '@services/config/config'
@@ -27,7 +23,14 @@ import {
   pinDiscussion,
   lockDiscussion,
   deleteDiscussion,
+  isPrivateDiscussion,
 } from '@services/communities/discussions'
+import { getLabelIcon } from './labelIcons'
+import {
+  PrivateBadge,
+  PublishDiscussionButton,
+  useChangeVisibility,
+} from './DiscussionVisibilityControls'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { UpvoteButton } from './UpvoteButton'
 import {
@@ -54,22 +57,6 @@ function getAvatarUrl(author: DiscussionAuthor | null): string | null {
 
   // Otherwise construct the media URL
   return getUserAvatarMediaDirectory(author.user_uuid, author.avatar_image)
-}
-
-// Get the icon component for a label
-function getLabelIcon(iconName: string, size: number = 12) {
-  switch (iconName) {
-    case 'HelpCircle':
-      return <HelpCircle size={size} />
-    case 'Lightbulb':
-      return <Lightbulb size={size} />
-    case 'Megaphone':
-      return <Megaphone size={size} />
-    case 'Star':
-      return <Star size={size} />
-    default:
-      return <MessageSquare size={size} />
-  }
 }
 
 interface DiscussionCardProps {
@@ -121,7 +108,11 @@ export function DiscussionCard({
 
   const labelInfo = getLabelInfo(discussion.label || 'general')
   const isOwner = discussion.author_id === currentUserId
-  const showActions = canManage || isOwner
+  // Nota privada: só o autor a recebe da API; moderação não se aplica.
+  const isPrivate = isPrivateDiscussion(discussion)
+  const canModerate = canManage && !isPrivate
+  const showActions = canModerate || isOwner
+  const { changeVisibility } = useChangeVisibility()
 
   const handleClick = (e: React.MouseEvent) => {
     if (isSelectMode && onToggleSelect) {
@@ -154,6 +145,11 @@ export function DiscussionCard({
     } catch (err: any) {
       toast.error(getErrorMessage(err, t('communities.discussion_card.lock_failed')))
     }
+  }
+
+  const handleMakePrivate = async () => {
+    const updated = await changeVisibility(discussion, 'private')
+    if (updated) onDiscussionUpdate?.(updated)
   }
 
   const handleDelete = async () => {
@@ -194,8 +190,13 @@ export function DiscussionCard({
         </div>
       )}
 
-      {/* Upvote Section */}
-      {!isSelectMode && (
+      {/* Upvote Section (nota privada não recebe votos) */}
+      {!isSelectMode && isPrivate && (
+        <div className="flex-shrink-0 w-12 flex justify-center text-gray-400" aria-hidden="true">
+          <Lock size={16} />
+        </div>
+      )}
+      {!isSelectMode && !isPrivate && (
         <div className="flex-shrink-0 w-12">
           <UpvoteButton
             discussionUuid={discussion.discussion_uuid}
@@ -263,6 +264,7 @@ export function DiscussionCard({
               >
                 {t(`communities.labels.${discussion.label || 'general'}`)}
               </span>
+              {isPrivate && <PrivateBadge />}
               {isSelectMode ? (
                 <span>{authorName}</span>
               ) : (
@@ -295,6 +297,15 @@ export function DiscussionCard({
             />
           </div>
 
+          {/* Publicar (autor de nota privada) */}
+          {isPrivate && isOwner && (
+            <PublishDiscussionButton
+              discussion={discussion}
+              onUpdated={onDiscussionUpdate}
+              size="sm"
+            />
+          )}
+
           {/* Comment Count */}
           <div className="flex items-center gap-1 text-gray-400 min-w-[40px] justify-end">
             <MessageSquare size={14} />
@@ -313,7 +324,16 @@ export function DiscussionCard({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
-                {canManage && (
+                {isOwner && !isPrivate && (
+                  <>
+                    <DropdownMenuItem onClick={handleMakePrivate} className="cursor-pointer">
+                      <Lock size={14} className="me-2" />
+                      {t('communities.visibility.make_private')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                {canModerate && (
                   <>
                     <DropdownMenuItem onClick={handlePin} className="cursor-pointer">
                       <Pin size={14} className="me-2" />

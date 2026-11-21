@@ -72,6 +72,7 @@ const DiscussionPageClient = ({
             communityUuid={community.community_uuid}
             orgslug={orgslug}
             onEdit={() => setIsEditModalOpen(true)}
+            onDiscussionUpdated={handleDiscussionUpdated}
           />
         </div>
       </div>

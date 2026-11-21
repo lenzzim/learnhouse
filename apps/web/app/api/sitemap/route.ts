@@ -155,6 +155,9 @@ export async function GET(request: NextRequest) {
         ).catch(() => [])
 
         for (const discussion of discussions) {
+          // Caderno privado: a API já filtra (chamada anônima), mas uma nota
+          // privada nunca pode ir para o sitemap.
+          if (discussion.visibility === 'private') continue
           sitemapUrls.push({
             loc: `${baseUrl}community/${communitySlug}/discussion/${discussion.discussion_uuid.replace('discussion_', '')}`,
             priority: 0.5,

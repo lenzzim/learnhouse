@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.extend(relativeTime)
-import { MessageCircle, ArrowRight, ChevronUp } from 'lucide-react'
+import { MessageCircle, ArrowRight, ChevronUp, Lock } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { Community, getCommunityByCourse } from '@services/communities/communities'
 import { DiscussionWithAuthor, getDiscussions } from '@services/communities/discussions'
@@ -105,7 +105,11 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 line-clamp-1" dir="auto">
+                      <h4 className="font-medium text-gray-900 line-clamp-1 flex items-center gap-1.5" dir="auto">
+                        {/* Caderno privado: só o autor recebe a própria nota aqui */}
+                        {discussion.visibility === 'private' && (
+                          <Lock size={12} className="flex-shrink-0 text-gray-400" aria-label={t('communities.visibility.private_badge')} />
+                        )}
                         {discussion.title}
                       </h4>
                       <p className="text-xs text-gray-400 mt-1">

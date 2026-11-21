@@ -10,7 +10,8 @@ import {
   Lock,
 } from 'lucide-react'
 import { Community } from '@services/communities/communities'
-import { DiscussionWithAuthor, DiscussionAuthor, getLabelInfo } from '@services/communities/discussions'
+import { DiscussionWithAuthor, DiscussionAuthor, getLabelInfo, isPrivateDiscussion } from '@services/communities/discussions'
+import { PrivateBadge } from './DiscussionVisibilityControls'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { getUriWithOrg } from '@services/config/config'
 import { UpvoteButton } from './UpvoteButton'
@@ -43,6 +44,8 @@ export function DiscussionSidebar({
   const timeAgo = dayjs(discussion.creation_date).fromNow()
   const createdDate = dayjs(discussion.creation_date).format('MMM D, YYYY')
   const labelInfo = getLabelInfo(discussion.label || 'general')
+  // Nota privada: sem votos/reações (não há público).
+  const isPrivate = isPrivateDiscussion(discussion)
 
   const authorName = discussion.author
     ? `${discussion.author.first_name} ${discussion.author.last_name}`.trim() || discussion.author.username
@@ -76,15 +79,22 @@ export function DiscussionSidebar({
         {/* Stats */}
         <div className="px-4 py-3 space-y-3">
           {/* Upvotes */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">{t('communities.sidebar.upvotes')}</span>
-            <UpvoteButton
-              discussionUuid={discussion.discussion_uuid}
-              initialVoteCount={discussion.upvote_count}
-              initialHasVoted={discussion.has_voted}
-              compact
-            />
-          </div>
+          {isPrivate ? (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">{t('communities.visibility.label')}</span>
+              <PrivateBadge />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">{t('communities.sidebar.upvotes')}</span>
+              <UpvoteButton
+                discussionUuid={discussion.discussion_uuid}
+                initialVoteCount={discussion.upvote_count}
+                initialHasVoted={discussion.has_voted}
+                compact
+              />
+            </div>
+          )}
 
           {/* Label */}
           <div className="flex items-center justify-between">
@@ -127,12 +137,14 @@ export function DiscussionSidebar({
       </div>
 
       {/* Reactions Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
-        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
-          {t('communities.sidebar.reactions')}
+      {!isPrivate && (
+        <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
+          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+            {t('communities.sidebar.reactions')}
+          </div>
+          <ReactionButton discussionUuid={discussion.discussion_uuid} />
         </div>
-        <ReactionButton discussionUuid={discussion.discussion_uuid} />
-      </div>
+      )}
 
       {/* Community Link */}
       <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">

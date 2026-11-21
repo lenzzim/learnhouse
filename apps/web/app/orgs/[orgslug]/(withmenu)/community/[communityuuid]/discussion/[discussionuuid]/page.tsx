@@ -50,9 +50,15 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const discussionUuid = `discussion_${params.discussionuuid}`
   let discussion = null
   try {
+    // Sem token de propósito: os metadados (título, descrição, OG) só podem
+    // vir do que é público. Uma nota privada (caderno) responde 404 aqui.
     discussion = await getDiscussion(discussionUuid, { revalidate: 120, tags: ['discussions'] })
   } catch (error) {
     // Discussion might not exist or user doesn't have access
+  }
+  // Defesa extra caso a API devolva uma privada: nunca expor seu conteúdo.
+  if (discussion && discussion.visibility === 'private') {
+    discussion = null
   }
 
   const title = discussion ? `${discussion.title} — ${org.name}` : `Discussion — ${org.name}`
@@ -63,7 +69,9 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   // `index: true` — so turning the toggle on hid the community listing while
   // every individual post (with its author) stayed indexable. Posts are the
   // most personal content on the platform, so they must follow the same switch.
-  const noindex = !!getOrgSeoConfig(org).noindex_communities
+  // Caderno privado: o que não carrega anonimamente (nota privada, removida ou
+  // de comunidade fechada) também não pode ser indexado.
+  const noindex = !!getOrgSeoConfig(org).noindex_communities || !discussion
 
   return {
     title,
