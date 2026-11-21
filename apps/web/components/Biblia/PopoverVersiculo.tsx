@@ -4,7 +4,10 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { formatarReferencia, lerCodigoReferencia } from '@/lib/biblia/referencias'
 import { hrefLeitor, versiculosDaReferencia, type Versiculo } from '@/lib/biblia/dados'
+import { VERSAO_PADRAO, versaoPorId } from '@/lib/biblia/versoes'
 import { Z_INDEX } from '@/lib/z-index'
+import { SeletorVersao } from './SeletorVersao'
+import { OutrasTraducoes } from './OutrasTraducoes'
 
 /** Quantos versículos o popover mostra antes de cortar com "…". */
 const MAX_VERSOS = 8
@@ -33,6 +36,8 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
   const { t } = useTranslation()
   const ref = lerCodigoReferencia(codigo)
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
+  // começa sempre na BLIVRE; o seletor troca só neste popover
+  const [versao, setVersao] = useState(VERSAO_PADRAO)
   const [pos, setPos] = useState<{ top: number; left: number; largura: number } | null>(null)
   const localRef = useRef<HTMLDivElement | null>(null)
 
@@ -41,13 +46,13 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
     if (!r) return
     let vivo = true
     setEstado({ tipo: 'carregando' })
-    versiculosDaReferencia(r)
+    versiculosDaReferencia(r, versao)
       .then((versos) => vivo && setEstado({ tipo: 'pronto', versos }))
       .catch(() => vivo && setEstado({ tipo: 'erro' }))
     return () => {
       vivo = false
     }
-  }, [codigo])
+  }, [codigo, versao])
 
   // posiciona abaixo do link (ou acima, se não couber), dentro da viewport
   useLayoutEffect(() => {
@@ -73,7 +78,8 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
 
   if (!ref || typeof document === 'undefined') return null
   const titulo = formatarReferencia(ref)
-  const href = hrefLeitor(codigo)
+  const href = hrefLeitor(codigo, versao)
+  const info = versaoPorId(versao)
   const versos = estado.tipo === 'pronto' ? estado.versos : []
   const visiveis = versos.slice(0, MAX_VERSOS)
   const mostrarNumeros = versos.length > 1
@@ -100,9 +106,18 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
       }}
       className="rounded-xl border border-[var(--line-strong)] bg-[var(--panel)] p-4 text-[var(--text)]"
     >
-      <p className="mb-2 text-sm font-semibold">{titulo}</p>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-sm font-semibold">{titulo}</p>
+        <SeletorVersao
+          curto
+          rotulo={t('biblia.versao')}
+          valor={versao}
+          onChange={setVersao}
+          className="h-7 rounded-md border border-[var(--line)] bg-[var(--panel)] px-1.5 text-xs text-[var(--text-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
+        />
+      </div>
       <div
-        lang="pt-BR"
+        lang={info?.idioma ?? 'pt'}
         className="max-h-60 overflow-y-auto text-[0.975rem] leading-relaxed text-[var(--text)]"
         style={{ fontFamily: "var(--font-serif), Georgia, 'Times New Roman', serif" }}
       >
@@ -131,8 +146,11 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
           {t('biblia.abrir_na_biblia')} →
         </a>
         <a href={href} onClick={(e) => onNavegar(href, e)} className="text-[var(--text-3)] hover:text-[var(--text-2)]">
-          Bíblia Livre (BLIVRE)
+          {info ? `${info.nome} (${info.sigla})` : ''}
         </a>
+      </div>
+      <div className="mt-2">
+        <OutrasTraducoes referencia={ref} />
       </div>
     </div>,
     document.body

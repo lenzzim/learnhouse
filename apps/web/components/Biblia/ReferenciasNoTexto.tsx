@@ -208,7 +208,10 @@ export function ReferenciasNoTexto({ children, className }: { children: React.Re
             id={popoverId}
             popoverRef={popoverRef}
             onMouseEnter={limparTimer}
-            onMouseLeave={() => agendar(fechar, ATRASO_FECHAR)}
+            onMouseLeave={() => {
+              // com o foco dentro (seletor de versão aberto, menu de traduções), não fecha
+              if (!popoverRef.current?.contains(document.activeElement)) agendar(fechar, ATRASO_FECHAR)
+            }}
             onNavegar={navegar}
           />
         </div>
