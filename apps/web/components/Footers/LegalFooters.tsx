@@ -15,6 +15,9 @@ import { getPlatformUrl } from '@services/config/config'
 
 const TERMS_URL = getPlatformUrl('/terms') || 'https://www.learnhouse.io/terms'
 const PRIVACY_URL = getPlatformUrl('/privacy') || 'https://www.learnhouse.io/privacy'
+// Discipulei: AGPL-3.0, seção 13 — quem usa pela rede tem acesso ao
+// código-fonte desta versão modificada. Link discreto na linha legal do login.
+const SOURCE_URL = 'https://github.com/lenzzim/learnhouse'
 
 export function AuthFooter({ className = '' }: { className?: string }) {
   const { t } = useTranslation()
@@ -39,7 +42,15 @@ export function AuthFooter({ className = '' }: { className?: string }) {
         >
           {t('auth.privacy_policy', { defaultValue: 'Privacy Policy' })}
         </Link>
-        .
+        .{' · '}
+        <a
+          href={SOURCE_URL}
+          target="_blank"
+          rel="noopener"
+          className="text-black/50 hover:text-black/70 transition-colors"
+        >
+          {t('auth.source_code', { defaultValue: 'Source code' })}
+        </a>
       </p>
     </div>
   )
