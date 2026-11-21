@@ -204,7 +204,8 @@ export default function NotebookClient({ orgslug }: NotebookClientProps) {
                 id={`nota-${note.discussion_uuid}`}
                 href={href}
                 className={`flex items-center gap-4 px-4 py-3 border-b border-gray-100 last:border-b-0 transition-colors ${
-                  isNew ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-gray-50'
+                  // Translúcido + contorno: legível no tema claro e no escuro.
+                  isNew ? 'bg-amber-400/10 ring-2 ring-inset ring-amber-400/70' : 'hover:bg-gray-50'
                 }`}
               >
                 <span
