@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
+import { parseApiDate } from '@/lib/datas'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Loader2, Lock, NotebookPen, ChevronRight } from 'lucide-react'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
@@ -146,7 +147,7 @@ export default function NotebookClient({ orgslug }: NotebookClientProps) {
                     <PrivateBadge />
                     <span>{t('communities.notebook.in_community', { community: note.community_name })}</span>
                     <span className="text-gray-300">·</span>
-                    <span>{dayjs(note.update_date || note.creation_date).fromNow()}</span>
+                    <span>{parseApiDate(note.update_date || note.creation_date).fromNow()}</span>
                   </span>
                 </span>
                 <ChevronRight size={16} className="shrink-0 text-gray-300" />

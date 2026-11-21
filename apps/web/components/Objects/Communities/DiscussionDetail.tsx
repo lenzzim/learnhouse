@@ -2,6 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
+import { parseApiDate } from '@/lib/datas'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.extend(relativeTime)
@@ -82,7 +83,7 @@ export function DiscussionDetail({
   const accessToken = session?.data?.tokens?.access_token
   const currentUserId = session?.data?.user?.id
 
-  const timeAgo = dayjs(discussion.creation_date).fromNow()
+  const timeAgo = parseApiDate(discussion.creation_date).fromNow()
   const isAuthor = currentUserId === discussion.author_id
   const labelInfo = getLabelInfo(discussion.label || 'general')
   const isPrivate = isPrivateDiscussion(discussion)

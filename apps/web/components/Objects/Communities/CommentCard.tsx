@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
+import { parseApiDate } from '@/lib/datas'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { MoreHorizontal, Pencil, Trash2, X, Check, Loader2, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -62,7 +63,7 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
   const isAuthor = currentUserId === comment.author_id
   const canDelete = isAuthor || canManage
   const showMenu = isAuthor || canManage
-  const timeAgo = dayjs(comment.creation_date).fromNow()
+  const timeAgo = parseApiDate(comment.creation_date).fromNow()
   const authorName = comment.author
     ? `${comment.author.first_name} ${comment.author.last_name}`.trim() || comment.author.username
     : t('common.unknown')
