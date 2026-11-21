@@ -20,10 +20,10 @@ export function PrivateBadge({ className = '' }: { className?: string }) {
   const { t } = useTranslation()
   return (
     <span
-      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 ${className}`}
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 ${className}`}
       title={t('communities.visibility.private_notice')}
     >
-      <Lock size={10} />
+      <Lock size={12} aria-hidden="true" />
       {t('communities.visibility.private_badge')}
     </span>
   )
@@ -124,7 +124,7 @@ export function PublishDiscussionButton({
     }
   }
 
-  const sizeClasses = size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-sm'
+  const sizeClasses = size === 'sm' ? 'min-h-9 px-3 text-xs' : 'min-h-10 px-3 text-sm'
 
   return (
     <div ref={containerRef} className="relative inline-block">

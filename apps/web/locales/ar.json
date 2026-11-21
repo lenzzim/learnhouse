@@ -801,7 +801,11 @@
       "no_discussions": "لا توجد نقاشات بعد",
       "no_discussions_description": "كن أول من يبدأ نقاشًا في هذا المجتمع!",
       "start_discussion": "بدء نقاش",
-      "delete_failed": "فشل حذف النقاش"
+      "delete_failed": "فشل حذف النقاش",
+      "filter": "Filter",
+      "clear_filters": "Clear",
+      "show_results_one": "Show {{count}} result",
+      "show_results_other": "Show {{count}} results"
     },
     "discussion_detail": {
       "edit": "تعديل",
@@ -823,7 +827,12 @@
       "votes": "أصوات",
       "delete_failed": "فشل حذف النقاش",
       "lock_failed": "فشل تحديث حالة القفل",
-      "pin_failed": "فشل تحديث حالة التثبيت"
+      "pin_failed": "فشل تحديث حالة التثبيت",
+      "actions": "Discussion actions",
+      "comment_count_one": "{{count}} comment",
+      "comment_count_other": "{{count}} comments",
+      "pinned": "Pinned",
+      "locked": "Closed for comments"
     },
     "comments": {
       "no_replies": "لا توجد ردود بعد",
@@ -891,6 +900,13 @@
       "view_all": "عرض الكل",
       "no_discussions": "لا توجد نقاشات بعد",
       "start_first": "ابدأ أول نقاش"
+    },
+    "manage_community": "Manage community",
+    "mobile_actions": "Community actions",
+    "upvote": {
+      "add": "Upvote",
+      "remove": "Remove upvote",
+      "join": "Join the organization to vote"
     }
   },
   "podcasts": {

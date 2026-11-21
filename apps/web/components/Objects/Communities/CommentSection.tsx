@@ -149,9 +149,9 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
             <p className="text-sm text-gray-600">{t('communities.visibility.comments_private')}</p>
           </div>
         ) : isLocked ? (
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-md">
-            <Lock size={14} className="text-amber-600" />
-            <p className="text-sm text-amber-700">{t('communities.comments.locked')}</p>
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-md">
+            <Lock size={14} className="text-gray-500" />
+            <p className="text-sm text-gray-700">{t('communities.comments.locked')}</p>
           </div>
         ) : canComment ? (
           <div>
@@ -205,9 +205,9 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
             </form>
           </div>
         ) : isAuthenticated && !isUserPartOfTheOrg ? (
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-md">
-            <UserPlus size={14} className="text-amber-600" />
-            <p className="text-sm text-amber-700">
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-md">
+            <UserPlus size={14} className="text-gray-500" />
+            <p className="text-sm text-gray-700">
               {t('communities.comments.join_org_to_reply')}
             </p>
           </div>

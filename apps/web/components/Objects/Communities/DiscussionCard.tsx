@@ -163,26 +163,100 @@ export function DiscussionCard({
     }
   }
 
+  // Menu de ações (moderação e "tornar privado"): o mesmo nas duas posições.
+  const menuAcoes = showActions ? (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="inline-flex h-11 w-11 sm:h-8 sm:w-8 items-center justify-center hover:bg-gray-100 rounded-md transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
+          onClick={(e) => e.stopPropagation()}
+          aria-label={t('communities.discussion_card.actions')}
+        >
+          <MoreVertical size={16} className="text-gray-400" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        {isOwner && !isPrivate && (
+          <>
+            <DropdownMenuItem onClick={handleMakePrivate} className="cursor-pointer">
+              <Lock size={14} className="me-2" />
+              {t('communities.visibility.make_private')}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        {canModerate && (
+          <>
+            <DropdownMenuItem onClick={handlePin} className="cursor-pointer">
+              <Pin size={14} className="me-2" />
+              {discussion.is_pinned ? t('communities.discussion_card.unpin_discussion') : t('communities.discussion_card.pin_discussion')}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLock} className="cursor-pointer">
+              <Lock size={14} className="me-2" />
+              {discussion.is_locked ? t('communities.discussion_card.unlock_discussion') : t('communities.discussion_card.lock_discussion')}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+        <ConfirmationModal
+          confirmationMessage={t('communities.discussion_card.delete_confirm')}
+          confirmationButtonText={t('communities.comments.delete')}
+          dialogTitle={t('communities.discussion_card.delete_title')}
+          dialogTrigger={
+            <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-sm transition-colors cursor-pointer">
+              <Trash2 size={14} className="me-2" />
+              {t('communities.discussion_card.delete_discussion')}
+            </button>
+          }
+          functionToExecute={handleDelete}
+          status="warning"
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ) : null
+
+  const contagemComentarios = (
+    <span
+      className="flex items-center gap-1 text-gray-400"
+      title={t('communities.discussion_card.comment_count', { count: commentCount })}
+    >
+      <MessageSquare size={14} aria-hidden="true" />
+      <span className="text-xs">{commentCount}</span>
+      <span className="sr-only">{t('communities.discussion_card.comment_count', { count: commentCount })}</span>
+    </span>
+  )
+
+  const marcadores = (
+    <>
+      {discussion.is_pinned && (
+        <Pin size={12} className="inline me-1 -mt-0.5 text-gray-500" aria-label={t('communities.discussion_card.pinned')} />
+      )}
+      {discussion.is_locked && (
+        <Lock size={12} className="inline me-1 -mt-0.5 text-gray-400" aria-label={t('communities.discussion_card.locked')} />
+      )}
+    </>
+  )
+
   return (
     <div
       onClick={isSelectMode ? handleClick : undefined}
-      className={`flex items-center gap-4 py-3 px-4 transition-colors border-b border-gray-100 last:border-b-0 ${
+      className={`flex items-start sm:items-center gap-3 sm:gap-4 py-3 px-4 transition-colors border-b border-gray-100 last:border-b-0 ${
         isSelectMode ? 'cursor-pointer' : ''
       } ${
         isSelected
-          ? 'bg-indigo-50/50'
+          ? 'bg-gray-100'
           : discussion.is_pinned
-          ? 'bg-amber-50/30'
+          ? 'bg-gray-50'
           : 'hover:bg-gray-50/50'
       }`}
     >
       {/* Checkbox for Select Mode */}
       {isSelectMode && (
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 mt-1 sm:mt-0">
           <div
             className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
               isSelected
-                ? 'bg-indigo-600 border-indigo-600'
+                ? 'bg-gray-900 border-gray-900'
                 : 'border-gray-300 bg-white'
             }`}
           >
@@ -191,14 +265,14 @@ export function DiscussionCard({
         </div>
       )}
 
-      {/* Upvote Section (nota privada não recebe votos) */}
+      {/* Voto à esquerda só a partir de 640px; no celular vai para a linha de ações */}
       {!isSelectMode && isPrivate && (
-        <div className="flex-shrink-0 w-12 flex justify-center text-gray-400" aria-hidden="true">
+        <div className="hidden sm:flex flex-shrink-0 w-12 justify-center text-gray-400" aria-hidden="true">
           <Lock size={16} />
         </div>
       )}
       {!isSelectMode && !isPrivate && (
-        <div className="flex-shrink-0 w-12">
+        <div className="hidden sm:block flex-shrink-0 w-12">
           <UpvoteButton
             discussionUuid={discussion.discussion_uuid}
             initialVoteCount={discussion.upvote_count}
@@ -213,8 +287,8 @@ export function DiscussionCard({
         <div className="flex items-start gap-3">
           {/* Discussion Icon - Custom emoji or Label icon */}
           <div
-            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5"
-            style={{ backgroundColor: discussion.emoji ? '#f3f4f6' : `${labelInfo.color}15` }}
+            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5 bg-gray-100"
+            aria-hidden="true"
           >
             {discussion.emoji ? (
               <span className="text-base">{discussion.emoji}</span>
@@ -225,41 +299,32 @@ export function DiscussionCard({
             )}
           </div>
 
-          {/* Title and Meta */}
+          {/* Título numa linha própria; metadados e ações embaixo */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              {/* Pinned indicator */}
-              {discussion.is_pinned && (
-                <Pin size={12} className="text-amber-500 flex-shrink-0" />
-              )}
-              {/* Locked indicator */}
-              {discussion.is_locked && (
-                <Lock size={12} className="text-gray-400 flex-shrink-0" />
-              )}
-
-              {isSelectMode ? (
-                <h3 className="text-sm font-medium text-gray-900 break-words sm:line-clamp-1" dir="auto">
+            {isSelectMode ? (
+              <h3 className="text-[15px] sm:text-sm font-medium leading-snug text-gray-900 break-words sm:line-clamp-1" dir="auto">
+                {marcadores}
+                {discussion.title}
+              </h3>
+            ) : (
+              <Link
+                href={discussionLink}
+                onClick={onClick}
+                className="block group rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
+              >
+                <h3 className="text-[15px] sm:text-sm font-medium leading-snug text-gray-900 group-hover:underline underline-offset-2 decoration-[var(--link-underline)] break-words sm:line-clamp-1" dir="auto">
+                  {marcadores}
                   {discussion.title}
                 </h3>
-              ) : (
-                <Link
-                  href={discussionLink}
-                  onClick={onClick}
-                  className="block group flex-1 min-w-0"
-                >
-                  <h3 className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors break-words sm:line-clamp-1" dir="auto">
-                    {discussion.title}
-                  </h3>
-                </Link>
-              )}
-            </div>
+              </Link>
+            )}
 
             <div className="mt-1 flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500">
               {/* Label badge */}
               <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium"
                 style={{
-                  backgroundColor: `${labelInfo.color}15`,
+                  backgroundColor: `${labelInfo.color}1f`,
                   color: labelInfo.color,
                 }}
               >
@@ -273,18 +338,43 @@ export function DiscussionCard({
                   {authorName}
                 </Link>
               )}
-              <span className="text-gray-300">·</span>
+              <span className="text-gray-300" aria-hidden="true">·</span>
               <span>{timeAgo}</span>
+              {isSelectMode && (
+                <span className="text-gray-400">
+                  · {discussion.upvote_count} {t('communities.discussion_card.votes')}
+                </span>
+              )}
             </div>
+
+            {/* Celular: ações na linha de baixo, longe do título */}
+            {!isSelectMode && (
+              <div className="mt-2 flex items-center gap-3 sm:hidden">
+                {isPrivate ? (
+                  isOwner && (
+                    <PublishDiscussionButton discussion={discussion} onUpdated={onDiscussionUpdate} size="sm" />
+                  )
+                ) : (
+                  <UpvoteButton
+                    discussionUuid={discussion.discussion_uuid}
+                    initialVoteCount={discussion.upvote_count}
+                    initialHasVoted={discussion.has_voted}
+                    compact
+                  />
+                )}
+                {contagemComentarios}
+                <span className="flex-1" />
+                {menuAcoes}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Right Side - Author Avatar & Comment Count */}
+      {/* A partir de 640px: avatar, publicar, comentários e menu à direita */}
       {!isSelectMode && (
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Author Avatar */}
-          <div className="hidden sm:block">
+        <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
+          <div className="hidden md:block">
             <UserAvatar
               width={24}
               rounded="rounded-full"
@@ -298,7 +388,6 @@ export function DiscussionCard({
             />
           </div>
 
-          {/* Publicar (autor de nota privada) */}
           {isPrivate && isOwner && (
             <PublishDiscussionButton
               discussion={discussion}
@@ -307,69 +396,9 @@ export function DiscussionCard({
             />
           )}
 
-          {/* Comment Count */}
-          <div className="flex items-center gap-1 text-gray-400 min-w-[40px] justify-end">
-            <MessageSquare size={14} />
-            <span className="text-xs">{commentCount}</span>
-          </div>
+          <div className="min-w-[40px] flex justify-end">{contagemComentarios}</div>
 
-          {/* Actions Menu */}
-          {showActions && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="p-1 hover:bg-gray-100 rounded transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical size={16} className="text-gray-400" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                {isOwner && !isPrivate && (
-                  <>
-                    <DropdownMenuItem onClick={handleMakePrivate} className="cursor-pointer">
-                      <Lock size={14} className="me-2" />
-                      {t('communities.visibility.make_private')}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                {canModerate && (
-                  <>
-                    <DropdownMenuItem onClick={handlePin} className="cursor-pointer">
-                      <Pin size={14} className="me-2" />
-                      {discussion.is_pinned ? t('communities.discussion_card.unpin_discussion') : t('communities.discussion_card.pin_discussion')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLock} className="cursor-pointer">
-                      <Lock size={14} className="me-2" />
-                      {discussion.is_locked ? t('communities.discussion_card.unlock_discussion') : t('communities.discussion_card.lock_discussion')}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                <ConfirmationModal
-                  confirmationMessage={t('communities.discussion_card.delete_confirm')}
-                  confirmationButtonText={t('communities.comments.delete')}
-                  dialogTitle={t('communities.discussion_card.delete_title')}
-                  dialogTrigger={
-                    <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-sm transition-colors cursor-pointer">
-                      <Trash2 size={14} className="me-2" />
-                      {t('communities.discussion_card.delete_discussion')}
-                    </button>
-                  }
-                  functionToExecute={handleDelete}
-                  status="warning"
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      )}
-
-      {/* Show upvote count in select mode */}
-      {isSelectMode && (
-        <div className="flex items-center gap-1 text-gray-400 flex-shrink-0">
-          <span className="text-xs">{discussion.upvote_count} {t('communities.discussion_card.votes')}</span>
+          {menuAcoes}
         </div>
       )}
     </div>

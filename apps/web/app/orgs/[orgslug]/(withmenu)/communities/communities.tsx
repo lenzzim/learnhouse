@@ -79,7 +79,7 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
     >
       <button
         onClick={() => setIsCreateModalOpen(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-black/90 text-white rounded-lg transition-colors text-sm font-medium"
+        className="flex items-center gap-2 px-4 min-h-11 md:min-h-10 bg-black hover:bg-black/90 text-white rounded-lg transition-colors text-sm font-medium"
       >
         <Plus size={16} />
         {t('communities.new_community')}
@@ -91,15 +91,17 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
     <FeatureGate feature="communities" orgslug={orgslug} context="public">
     <GeneralWrapperStyled>
       <div className="flex flex-col space-y-2 mb-6">
-        <div className="flex items-center justify-between">
+        {/* flex-wrap: em 390px os botões descem para a linha de baixo em vez
+            de empurrar a página para o lado (crítica 21/11, P0). */}
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <TypeOfContentTitle title={t('communities.title')} type="col" />
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {session?.status === 'authenticated' && (
               <Link
                 href={getUriWithOrg(orgslug, '/caderno')}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 min-h-11 md:min-h-10 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors text-sm font-medium"
               >
-                <NotebookPen size={16} />
+                <NotebookPen size={16} aria-hidden="true" />
                 {t('communities.notebook.open')}
               </Link>
             )}
@@ -112,8 +114,8 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
             comunidades; a lista mostra muito mais de uma vez. Tudo acontece no
             navegador: a página já recebe as comunidades do servidor. */}
         {communities.length > 0 && (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 pb-2">
-            <div className="relative flex-1">
+          <div className="flex flex-wrap items-center gap-2 pb-2">
+            <div className="relative w-full sm:w-auto sm:flex-1">
               <Search size={15} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="search"
@@ -121,7 +123,7 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder={t('communities.search_placeholder', 'Pesquisar comunidades...')}
                 aria-label={t('communities.search_placeholder', 'Pesquisar comunidades...')}
-                className="w-full bg-white border border-gray-200 rounded-lg ps-9 pe-3 py-2 text-sm outline-none focus:border-gray-400"
+                className="w-full min-h-11 md:min-h-10 bg-white border border-gray-200 rounded-lg ps-9 pe-3 py-2 text-base md:text-sm outline-none focus:border-gray-400 focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
               />
             </div>
 
@@ -129,20 +131,20 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
               value={ordem}
               onChange={(e) => setOrdem(e.target.value as Ordem)}
               aria-label={t('communities.sort_label', 'Ordenar por')}
-              className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400"
+              className="min-h-11 md:min-h-10 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400 focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
             >
               <option value="recentes">{t('communities.sort_recent', 'Mais recentes')}</option>
               <option value="nome">{t('communities.sort_name', 'Nome (A–Z)')}</option>
             </select>
 
-            <div className="flex items-center bg-white border border-gray-200 rounded-lg p-0.5 self-start">
+            <div className="flex items-center bg-white border border-gray-200 rounded-lg p-0.5">
               <button
                 type="button"
                 onClick={() => trocarVisualizacao('lista')}
                 aria-pressed={visualizacao === 'lista'}
                 aria-label={t('communities.view_list', 'Ver em lista')}
                 title={t('communities.view_list', 'Ver em lista')}
-                className={`p-1.5 rounded-md transition-colors ${visualizacao === 'lista' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors ${visualizacao === 'lista' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
               >
                 <List size={16} />
               </button>
@@ -152,7 +154,7 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
                 aria-pressed={visualizacao === 'grade'}
                 aria-label={t('communities.view_grid', 'Ver em grade')}
                 title={t('communities.view_grid', 'Ver em grade')}
-                className={`p-1.5 rounded-md transition-colors ${visualizacao === 'grade' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
+                className={`inline-flex h-10 w-10 items-center justify-center rounded-md transition-colors ${visualizacao === 'grade' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-700'}`}
               >
                 <LayoutGrid size={16} />
               </button>
@@ -169,7 +171,7 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
                 className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
               >
                 <span className="shrink-0 text-gray-400">
-                  {community.public ? <Globe size={16} /> : <Lock size={16} />}
+                  {community.public ? <Globe size={16} aria-hidden="true" /> : <Lock size={16} aria-label={t('nav.restrita')} />}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold text-gray-900 truncate">{community.name}</span>

@@ -1,9 +1,7 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, Plus, Loader2, Search, X, Trash2, CheckSquare, Square, NotebookPen } from 'lucide-react'
-import Link from 'next/link'
-import { getUriWithOrg } from '@services/config/config'
+import { MessageCircle, Plus, Loader2, Search, X, Trash2, CheckSquare, Square, SlidersHorizontal, Check } from 'lucide-react'
 import { DiscussionCard } from './DiscussionCard'
 import { SortDropdown } from './SortDropdown'
 import { LabelFilter } from './LabelFilter'
@@ -12,7 +10,9 @@ import {
   getCommentCount,
   DiscussionSortBy,
   DiscussionWithAuthor,
+  DISCUSSION_LABELS,
 } from '@services/communities/discussions'
+import { FolhaInferior } from '@components/Discipulei/Navegacao/FolhaInferior'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
@@ -48,6 +48,8 @@ export function DiscussionList({
   const [searchQuery, setSearchQuery] = useState('')
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({})
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
+  // Celular: busca, categoria, ordem e seleção ficam numa folha "Filtrar".
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false)
 
   // Selection state
   const [isSelectMode, setIsSelectMode] = useState(false)
@@ -199,90 +201,210 @@ export function DiscussionList({
   return (
     <div>
       {/* Header with Search and Filters */}
-      <div className="p-4 border-b border-gray-100 space-y-3">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input dir="auto"
-            type="text"
-            placeholder={t('communities.discussion_list.search_placeholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full ps-9 pe-9 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 transition-all"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      {(() => {
+        const filtrosAtivos = (searchQuery.trim() ? 1 : 0) + (selectedLabel ? 1 : 0) + (sortBy !== 'recent' ? 1 : 0)
+        const contagem = (
+          <span className="text-xs text-gray-500">
+            {filteredDiscussions.length} {filteredDiscussions.length === 1 ? t('communities.discussion') : t('communities.discussions')}
+          </span>
+        )
+        const campoBusca = (
+          <div className="relative">
+            <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+            <input dir="auto"
+              type="search"
+              placeholder={t('communities.discussion_list.search_placeholder')}
+              aria-label={t('communities.discussion_list.search_placeholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full min-h-11 md:min-h-0 ps-9 pe-11 py-2 text-base md:text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400/30 focus:border-gray-400 transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                aria-label={t('communities.discussion_list.clear_search')}
+                className="absolute end-1 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-400 hover:text-gray-600"
+              >
+                <X size={14} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        )
+        const botaoSelecionar = canManageCommunity && filteredDiscussions.length > 0 && (
+          <button
+            type="button"
+            onClick={toggleSelectMode}
+            aria-pressed={isSelectMode}
+            className={`flex items-center gap-1.5 px-3 min-h-11 md:min-h-0 md:h-8 text-xs font-medium rounded-md transition-colors ${
+              isSelectMode
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <CheckSquare size={14} aria-hidden="true" />
+            {isSelectMode ? t('communities.discussion_list.cancel') : t('communities.discussion_list.select')}
+          </button>
+        )
+        const ordens: { value: DiscussionSortBy; label: string }[] = [
+          { value: 'recent', label: t('communities.discussion_list.latest_activity') },
+          { value: 'upvotes', label: t('communities.discussion_list.top') },
+          { value: 'hot', label: t('communities.discussion_list.hot') },
+        ]
+        const chip = (ativo: boolean) =>
+          `inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3.5 text-sm transition-colors ${
+            ativo ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+          }`
+
+        return (
+          <>
+            {/* Desktop e tablet (>= 768px): barra completa */}
+            <div className="hidden md:block p-4 border-b border-gray-100 space-y-3">
+              {campoBusca}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <LabelFilter value={selectedLabel} onChange={handleLabelChange} />
+                  <SortDropdown value={sortBy} onChange={handleSortChange} />
+                  {contagem}
+                </div>
+                <div className="flex items-center gap-2">
+                  {botaoSelecionar}
+                  {canCreateDiscussion && onCreateClick && !isSelectMode && (
+                    <button
+                      onClick={() => handleCreateClick('header')}
+                      className="flex items-center gap-2 px-3 py-2 h-8 bg-neutral-900 hover:bg-neutral-800 text-white rounded-md transition-colors text-xs font-medium"
+                    >
+                      <Plus size={14} />
+                      {t('communities.discussion_list.new_discussion')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Celular: um botão "Filtrar" abre a folha com tudo */}
+            <div className="md:hidden flex items-center gap-3 px-4 py-2 border-b border-gray-100">
+              <button
+                type="button"
+                onClick={() => setFiltrosAbertos(true)}
+                aria-haspopup="dialog"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-gray-200 px-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                <SlidersHorizontal size={16} aria-hidden="true" />
+                {t('communities.discussion_list.filter')}
+                {filtrosAtivos > 0 && (
+                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gray-900 px-1.5 text-xs font-semibold text-white">
+                    {filtrosAtivos}
+                  </span>
+                )}
+              </button>
+              {contagem}
+              <span className="flex-1" />
+              {isSelectMode && botaoSelecionar}
+            </div>
+
+            <FolhaInferior
+              aberta={filtrosAbertos}
+              aoMudar={setFiltrosAbertos}
+              titulo={t('communities.discussion_list.filter')}
             >
-              <X size={14} />
-            </button>
-          )}
-        </div>
+              <div className="flex flex-col gap-5">
+                {campoBusca}
 
-        {/* Filters and Actions Row */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <LabelFilter value={selectedLabel} onChange={handleLabelChange} />
-            <SortDropdown value={sortBy} onChange={handleSortChange} />
-            <span className="text-xs text-gray-400">
-              {filteredDiscussions.length} {filteredDiscussions.length === 1 ? t('communities.discussion') : t('communities.discussions')}
-            </span>
-          </div>
+                <fieldset>
+                  <legend className="mb-2 text-sm font-medium text-gray-700">{t('communities.label_filter.label')}</legend>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => handleLabelChange(null)} aria-pressed={!selectedLabel} className={chip(!selectedLabel)}>
+                      {!selectedLabel && <Check size={14} aria-hidden="true" />}
+                      {t('communities.label_filter.all')}
+                    </button>
+                    {DISCUSSION_LABELS.map((label) => (
+                      <button
+                        key={label.id}
+                        type="button"
+                        onClick={() => handleLabelChange(label.id)}
+                        aria-pressed={selectedLabel === label.id}
+                        className={chip(selectedLabel === label.id)}
+                      >
+                        {selectedLabel === label.id && <Check size={14} aria-hidden="true" />}
+                        {t(`communities.labels.${label.id}`)}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
 
-          <div className="flex items-center gap-2">
-            {/* Select Mode Toggle for Admins */}
-            {canManageCommunity && filteredDiscussions.length > 0 && (
-              <button
-                onClick={toggleSelectMode}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md transition-colors h-8 ${
-                  isSelectMode
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <CheckSquare size={14} />
-                {isSelectMode ? t('communities.discussion_list.cancel') : t('communities.discussion_list.select')}
-              </button>
-            )}
+                <fieldset>
+                  <legend className="mb-2 text-sm font-medium text-gray-700">{t('communities.discussion_list.sort_by')}</legend>
+                  <div className="flex flex-wrap gap-2">
+                    {ordens.map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        onClick={() => handleSortChange(o.value)}
+                        aria-pressed={sortBy === o.value}
+                        className={chip(sortBy === o.value)}
+                      >
+                        {sortBy === o.value && <Check size={14} aria-hidden="true" />}
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
 
-            {/* Meu caderno: notas privadas do usuário (entrada para /caderno) */}
-            {session?.status === 'authenticated' && isUserPartOfTheOrg && !isSelectMode && (
-              <Link
-                href={getUriWithOrg(orgslug, '/caderno')}
-                className="flex items-center gap-1.5 px-3 py-2 h-8 text-xs font-medium rounded-md transition-colors bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100"
-              >
-                <NotebookPen size={14} />
-                {t('communities.notebook.open')}
-              </Link>
-            )}
-
-            {/* Desktop create button */}
-            {canCreateDiscussion && onCreateClick && !isSelectMode && (
-              <button
-                onClick={() => handleCreateClick('header')}
-                className="hidden md:flex items-center gap-2 px-3 py-2 h-8 bg-neutral-900 hover:bg-neutral-800 text-white rounded-md transition-colors text-xs font-medium"
-              >
-                <Plus size={14} />
-                {t('communities.discussion_list.new_discussion')}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+                <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
+                  {!isSelectMode && canManageCommunity && filteredDiscussions.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toggleSelectMode()
+                        setFiltrosAbertos(false)
+                      }}
+                      className="flex items-center gap-1.5 px-3 min-h-11 text-sm font-medium rounded-md bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100"
+                    >
+                      <CheckSquare size={14} aria-hidden="true" />
+                      {t('communities.discussion_list.select')}
+                    </button>
+                  )}
+                  <span className="flex-1" />
+                  {filtrosAtivos > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('')
+                        handleLabelChange(null)
+                        handleSortChange('recent')
+                      }}
+                      className="min-h-11 px-3 text-sm font-medium text-gray-600 underline underline-offset-4"
+                    >
+                      {t('communities.discussion_list.clear_filters')}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setFiltrosAbertos(false)}
+                    className="min-h-11 rounded-lg bg-neutral-900 px-5 text-sm font-semibold text-white hover:bg-neutral-800"
+                  >
+                    {t('communities.discussion_list.show_results', { count: filteredDiscussions.length })}
+                  </button>
+                </div>
+              </div>
+            </FolhaInferior>
+          </>
+        )
+      })()}
 
       {/* Selection Action Bar */}
       {isSelectMode && selectedIds.size > 0 && (
-        <div className="px-4 py-3 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between">
+        <div className="px-4 py-3 bg-gray-100 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={selectAll}
-              className="flex items-center gap-1.5 text-xs text-indigo-700 hover:text-indigo-800"
+              className="flex items-center gap-1.5 text-xs text-gray-900 hover:text-gray-900"
             >
               {allSelected ? <CheckSquare size={14} /> : <Square size={14} />}
               {allSelected ? t('communities.discussion_list.deselect_all') : t('communities.discussion_list.select_all')}
             </button>
-            <span className="text-xs text-indigo-600 font-medium">
+            <span className="text-xs text-gray-900 font-medium">
               {selectedIds.size} {t('communities.discussion_list.selected')}
             </span>
           </div>
@@ -325,7 +447,7 @@ export function DiscussionList({
                 </p>
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  className="text-sm text-gray-900 underline underline-offset-4 font-medium"
                 >
                   {t('communities.discussion_list.clear_search')}
                 </button>

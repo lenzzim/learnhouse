@@ -59,7 +59,7 @@ export function CommunityActions({
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <MessageCircle className="w-6 h-6 text-indigo-500" />
+                    <MessageCircle className="w-6 h-6 text-gray-900" />
                   </div>
                 </div>
                 <div className="flex-1">

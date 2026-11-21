@@ -6,6 +6,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { upvoteComment, removeCommentUpvote } from '@services/communities/discussions'
 import { cn } from '@/lib/utils'
+import { useTranslation } from 'react-i18next'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CommentUpvoteButtonProps {
@@ -21,6 +22,7 @@ export function CommentUpvoteButton({
   initialHasVoted,
   onVoteChange,
 }: CommentUpvoteButtonProps) {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const { isUserPartOfTheOrg } = useOrgMembership()
   const { track } = useLHAnalytics('learner')
@@ -75,20 +77,21 @@ export function CommentUpvoteButton({
       onClick={handleVote}
       disabled={!canVote || isLoading}
       className={cn(
-        'flex items-center gap-1 px-2 py-1 rounded-md transition-all duration-200 text-xs',
+        'flex items-center gap-1 min-h-9 px-2.5 rounded-md transition-all duration-200 text-xs',
         hasVoted
-          ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+          ? 'bg-gray-900 text-white hover:bg-gray-800'
           : 'bg-gray-50 text-gray-500 hover:bg-gray-100',
         !canVote && 'opacity-50 cursor-not-allowed',
         isLoading && 'opacity-70'
       )}
-      title={canVote ? (hasVoted ? 'Remove upvote' : 'Upvote this reply') : 'Join organization to vote'}
+      title={canVote ? (hasVoted ? t('communities.upvote.remove', 'Remover voto') : t('communities.upvote.add', 'Votar')) : t('communities.upvote.join', 'Entre na organização para votar')}
+        aria-pressed={hasVoted}
     >
       <ChevronUp
         size={14}
         className={cn(
           'transition-transform',
-          hasVoted && 'text-indigo-600',
+          
           isLoading && 'animate-pulse'
         )}
       />

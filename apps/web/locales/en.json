@@ -782,7 +782,11 @@
       "no_discussions": "No discussions yet",
       "no_discussions_description": "Be the first to start a discussion in this community!",
       "start_discussion": "Start Discussion",
-      "delete_failed": "Failed to delete discussion"
+      "delete_failed": "Failed to delete discussion",
+      "filter": "Filter",
+      "clear_filters": "Clear",
+      "show_results_one": "Show {{count}} result",
+      "show_results_other": "Show {{count}} results"
     },
     "discussion_detail": {
       "edit": "Edit",
@@ -804,7 +808,12 @@
       "votes": "votes",
       "delete_failed": "Failed to delete discussion",
       "lock_failed": "Failed to update lock state",
-      "pin_failed": "Failed to update pin state"
+      "pin_failed": "Failed to update pin state",
+      "actions": "Discussion actions",
+      "comment_count_one": "{{count}} comment",
+      "comment_count_other": "{{count}} comments",
+      "pinned": "Pinned",
+      "locked": "Closed for comments"
     },
     "comments": {
       "no_replies": "No replies yet",
@@ -920,6 +929,13 @@
       "view_all": "View All",
       "no_discussions": "No discussions yet",
       "start_first": "Start the first discussion"
+    },
+    "manage_community": "Manage community",
+    "mobile_actions": "Community actions",
+    "upvote": {
+      "add": "Upvote",
+      "remove": "Remove upvote",
+      "join": "Join the organization to vote"
     }
   },
   "boards": {

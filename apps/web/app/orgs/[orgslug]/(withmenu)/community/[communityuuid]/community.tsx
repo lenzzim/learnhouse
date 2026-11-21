@@ -4,14 +4,16 @@ import React, { useState } from 'react'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { CommunitySidebar } from '@components/Objects/Communities/CommunitySidebar'
-import { MessageCircle } from 'lucide-react'
+import { MessageCircle, Plus, Settings, Lock } from 'lucide-react'
+import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
+import { useCommunityRights } from '@components/Hooks/useCommunityRights'
+import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
-import { CommunityActionsMobile } from '@components/Objects/Communities/CommunityActionsMobile'
 import { DiscussionList } from '@components/Objects/Communities/DiscussionList'
 import { CreateDiscussionModal } from '@components/Objects/Modals/Communities/CreateDiscussionModal'
 import { Community } from '@services/communities/communities'
 import { DiscussionWithAuthor } from '@services/communities/discussions'
-import { useMediaQuery } from 'usehooks-ts'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
 
 interface CommunityClientProps {
@@ -26,8 +28,10 @@ const CommunityClient = ({
   initialDiscussions,
   orgslug,
 }: CommunityClientProps) => {
+  const { t } = useTranslation()
   const [isCreateDiscussionModalOpen, setIsCreateDiscussionModalOpen] = useState(false)
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  const { canManageCommunity, canCreateDiscussion } = useCommunityRights(community.community_uuid)
+  const { isUserPartOfTheOrg } = useOrgMembership()
 
   useTrackView(AnalyticsEvent.CommunityViewed, {
     is_public: community.public,
@@ -40,7 +44,7 @@ const CommunityClient = ({
         {/* Breadcrumbs */}
         <div className="pb-4">
           <Breadcrumbs items={[
-            { label: 'Communities', href: getUriWithOrg(orgslug, '/communities'), icon: <MessageCircle size={14} /> },
+            { label: t('communities.title'), href: getUriWithOrg(orgslug, '/communities'), icon: <MessageCircle size={14} /> },
             { label: community.name }
           ]} />
         </div>
@@ -61,14 +65,41 @@ const CommunityClient = ({
 
           {/* Main Content - Discussions Feed */}
           <div className="flex-1 min-w-0">
-            {/* Mobile only shows community name */}
+            {/* Celular: nome, descrição e ações no fluxo da página (sem barra
+                fixa, que brigaria com a barra de abas do app). */}
             <div className="md:hidden mb-4">
-              <h1 className="text-xl font-bold text-gray-900">{community.name}</h1>
+              <h1 className="text-2xl leading-tight text-gray-900 flex items-center gap-2">
+                {!community.public && <Lock size={18} className="shrink-0 text-gray-500" aria-label={t('nav.restrita')} />}
+                {community.name}
+              </h1>
               {community.description && (
-                <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                <p className="mt-1 text-sm text-gray-500 line-clamp-3">
                   {community.description}
                 </p>
               )}
+              {(canCreateDiscussion && isUserPartOfTheOrg) || canManageCommunity ? (
+                <div className="mt-3 flex items-center gap-2">
+                  {canCreateDiscussion && isUserPartOfTheOrg && (
+                    <button
+                      type="button"
+                      onClick={() => setIsCreateDiscussionModalOpen(true)}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-neutral-900 px-4 text-sm font-semibold text-white hover:bg-neutral-800"
+                    >
+                      <Plus size={16} aria-hidden="true" />
+                      {t('communities.discussion_list.new_discussion')}
+                    </button>
+                  )}
+                  {canManageCommunity && (
+                    <Link
+                      href={getUriWithOrg(orgslug, '/dash/communities')}
+                      aria-label={t('communities.manage_community')}
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    >
+                      <Settings size={18} aria-hidden="true" />
+                    </Link>
+                  )}
+                </div>
+              ) : null}
             </div>
 
             {/* Discussions List */}
@@ -82,19 +113,7 @@ const CommunityClient = ({
             </div>
           </div>
         </div>
-
-        {/* Bottom padding for mobile action bar */}
-        {isMobile && <div className="h-24" />}
       </GeneralWrapperStyled>
-
-      {/* Mobile Actions Bar */}
-      {isMobile && (
-        <CommunityActionsMobile
-          community={community}
-          orgslug={orgslug}
-          onCreateDiscussion={() => setIsCreateDiscussionModalOpen(true)}
-        />
-      )}
 
       {/* Modals */}
       <CreateDiscussionModal

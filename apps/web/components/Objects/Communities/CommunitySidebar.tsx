@@ -150,7 +150,7 @@ export function CommunitySidebar({
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors truncate">
+                  <h4 className="text-sm font-medium text-gray-900 group-hover:text-gray-900 transition-colors truncate">
                     {linkedCourse.name}
                   </h4>
                   {linkedCourse.description && (
@@ -159,7 +159,7 @@ export function CommunitySidebar({
                     </p>
                   )}
                 </div>
-                <ChevronRight size={16} className="text-gray-400 group-hover:text-indigo-600 transition-colors flex-shrink-0" />
+                <ChevronRight size={16} className="text-gray-400 group-hover:text-gray-900 transition-colors flex-shrink-0" />
               </div>
             </Link>
           </div>

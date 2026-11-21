@@ -98,7 +98,7 @@ export function ReactionButton({ discussionUuid, compact = false }: ReactionButt
                 disabled={isLoading || !isAuthenticated}
                 className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all ${
                   reaction.has_reacted
-                    ? 'bg-indigo-100 border border-indigo-300 text-indigo-700'
+                    ? 'bg-gray-100 border border-gray-400 text-gray-900'
                     : 'bg-gray-100 border border-gray-200 text-gray-600 hover:bg-gray-200'
                 } ${!isAuthenticated ? 'cursor-default' : 'cursor-pointer'}`}
               >
@@ -142,7 +142,7 @@ export function ReactionButton({ discussionUuid, compact = false }: ReactionButt
                     disabled={isLoading}
                     className={`w-9 h-9 flex items-center justify-center text-xl rounded-lg transition-colors ${
                       existing?.has_reacted
-                        ? 'bg-indigo-100'
+                        ? 'bg-gray-100'
                         : 'hover:bg-gray-100'
                     }`}
                   >

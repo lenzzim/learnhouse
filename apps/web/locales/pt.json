@@ -782,7 +782,11 @@
       "no_discussions": "Nenhuma discussão ainda",
       "no_discussions_description": "Seja o primeiro a iniciar uma discussão nesta comunidade!",
       "start_discussion": "Iniciar discussão",
-      "delete_failed": "Falha ao excluir a discussão"
+      "delete_failed": "Falha ao excluir a discussão",
+      "filter": "Filtrar",
+      "clear_filters": "Limpar",
+      "show_results_one": "Ver {{count}} resultado",
+      "show_results_other": "Ver {{count}} resultados"
     },
     "discussion_detail": {
       "edit": "Editar",
@@ -804,7 +808,12 @@
       "votes": "votos",
       "delete_failed": "Falha ao excluir a discussão",
       "lock_failed": "Falha ao atualizar o estado de bloqueio",
-      "pin_failed": "Falha ao atualizar o estado de fixação"
+      "pin_failed": "Falha ao atualizar o estado de fixação",
+      "actions": "Ações da discussão",
+      "comment_count_one": "{{count}} comentário",
+      "comment_count_other": "{{count}} comentários",
+      "pinned": "Fixada",
+      "locked": "Fechada para comentários"
     },
     "comments": {
       "no_replies": "Nenhuma resposta ainda",
@@ -920,6 +929,13 @@
       "view_all": "Ver tudo",
       "no_discussions": "Ainda não há discussões",
       "start_first": "Inicie a primeira discussão"
+    },
+    "manage_community": "Gerenciar comunidade",
+    "mobile_actions": "Ações da comunidade",
+    "upvote": {
+      "add": "Votar",
+      "remove": "Remover voto",
+      "join": "Entre na organização para votar"
     }
   },
   "podcasts": {

@@ -121,7 +121,7 @@ export function DiscussionSidebar({
           {(discussion.is_pinned || discussion.is_locked) && (
             <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
               {discussion.is_pinned && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
                   <Pin size={10} />
                   {t('communities.sidebar.pinned')}
                 </span>
@@ -154,9 +154,9 @@ export function DiscussionSidebar({
         </div>
         <Link
           href={getUriWithOrg(orgslug, `/community/${communityId}`)}
-          className="group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors"
+          className="group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-gray-900 transition-colors"
         >
-          <MessageCircle size={14} className="text-gray-400 group-hover:text-indigo-500" />
+          <MessageCircle size={14} className="text-gray-400 group-hover:text-gray-900" />
           {community.name}
         </Link>
       </div>
