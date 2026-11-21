@@ -1,5 +1,5 @@
 """
-Proxy das versões licenciadas da Bíblia (API.Bible).
+Proxy das versões licenciadas da Bíblia (API.Bible e YouVersion Platform).
 
     GET /api/v1/biblia/versoes                                   público (sem texto bíblico)
     GET /api/v1/biblia/{versao}/capitulo/{livro}/{capitulo}      só com sessão
@@ -11,7 +11,13 @@ cota mensal de chamadas e evita que o endpoint vire um espelho público do
 texto protegido. Tokens de API também são recusados (só pessoas, no app).
 As versões abertas continuam estáticas e públicas (apps/web/public/biblia-dados).
 
-A chave (BIBLE_API_KEY) nunca sai do servidor.
+Cada versão tem um provedor (services/biblia/versoes.py): ARA/ARC/RC69/NTLH/
+NIV/NKJV vêm da API.Bible (BIBLE_API_KEY); NVI vem da YouVersion
+(YOUVERSION_API_KEY, versões ligadas em YOUVERSION_BIBLES). Mesmo formato de
+resposta, mesmo cache (7/14 dias), mesma exigência de login e limite por
+pessoa; cada provedor tem o seu teto diário.
+
+As chaves nunca saem do servidor.
 """
 
 import logging
@@ -20,7 +26,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
 
 from src.security.api_token_utils import get_authenticated_non_api_token_user
-from src.services.biblia import apibible
+from src.services.biblia import apibible, youversion
 from src.services.biblia.apibible import ErroBiblia
 from src.services.security.rate_limiting import check_rate_limit
 
@@ -56,12 +62,21 @@ def _limitar_usuario(user) -> JSONResponse | None:
     return _erro(ErroBiblia(429, "limite_usuario", "Muitas leituras em pouco tempo. Tente de novo mais tarde.", espera))
 
 
+def _provedor(versao: str):
+    """Cliente que atende a versão (YouVersion ou API.Bible)."""
+    return youversion if youversion.atende(versao) else apibible
+
+
 @router.get("/versoes")
 async def listar_versoes():
     """Catálogo das versões licenciadas: sigla, nome, idioma, copyright e se está disponível."""
-    versoes = await apibible.listar_versoes()
+    yv = await youversion.listar_versoes()
+    ab = await apibible.listar_versoes()
+    for item in ab:
+        item.setdefault("provedor", "apibible")
+    provedores = {"apibible": apibible.chave_configurada(), "youversion": youversion.chave_configurada()}
     return JSONResponse(
-        content={"ativo": apibible.chave_configurada(), "versoes": versoes},
+        content={"ativo": any(provedores.values()), "provedores": provedores, "versoes": yv + ab},
         headers={"Cache-Control": "public, max-age=3600"},
     )
 
@@ -78,7 +93,7 @@ async def capitulo(
     if bloqueio:
         return bloqueio
     try:
-        res = await apibible.obter_capitulo(versao, livro, capitulo)
+        res = await _provedor(versao).obter_capitulo(versao, livro, capitulo)
     except ErroBiblia as e:
         return _erro(e)
     return JSONResponse(content=res.dados, headers={**CABECALHOS_TEXTO, "X-Biblia-Cache": res.origem})
@@ -98,7 +113,7 @@ async def versiculos(
     if bloqueio:
         return bloqueio
     try:
-        res = await apibible.obter_versiculos(versao, livro, capitulo, ini, fim or ini)
+        res = await _provedor(versao).obter_versiculos(versao, livro, capitulo, ini, fim or ini)
     except ErroBiblia as e:
         return _erro(e)
     return JSONResponse(content=res.dados, headers={**CABECALHOS_TEXTO, "X-Biblia-Cache": res.origem})

@@ -31,10 +31,10 @@ import httpx
 from src.core.redis import get_redis_client
 from src.services.biblia.normalizar import normalizar_conteudo, recortar
 from src.services.biblia.versoes import (
-    VERSOES_LICENCIADAS,
     VersaoLicenciada,
     id_capitulo_api,
     versao_por_id,
+    versoes_do_provedor,
 )
 
 logger = logging.getLogger(__name__)
@@ -138,10 +138,13 @@ def limpar_cache_memoria() -> None:
     _memoria.clear()
 
 
-def _consumir_cota() -> bool:
-    """Conta uma chamada à API no dia (UTC). False se o teto diário estourou."""
+def _consumir_cota(nome: str = "cota", limite: int | None = None) -> bool:
+    """
+    Conta uma chamada ao provedor no dia (UTC). False se o teto diário estourou.
+    `nome` separa os contadores ("cota" = API.Bible, "cota-yv" = YouVersion).
+    """
     dia = time.strftime("%Y%m%d", time.gmtime())
-    chave = f"{PREFIXO}:cota:{dia}"
+    chave = f"{PREFIXO}:{nome}:{dia}"
     r = get_redis_client()
     try:
         if r is not None:
@@ -154,7 +157,7 @@ def _consumir_cota() -> bool:
             _memoria[chave] = (expira, str(n))
     except Exception:
         return True  # sem contador não bloqueamos a leitura
-    return n <= _limite_diario()
+    return n <= (limite if limite is not None else _limite_diario())
 
 
 # ---------------------------------------------------------------------------
@@ -245,7 +248,7 @@ async def listar_versoes() -> list[dict[str, Any]]:
     """Versões licenciadas com copyright e disponibilidade (sem texto bíblico)."""
     ativo = chave_configurada()
     saida = []
-    for v in VERSOES_LICENCIADAS:
+    for v in versoes_do_provedor("apibible"):
         item: dict[str, Any] = {
             "id": v.id,
             "sigla": v.sigla,
@@ -280,7 +283,7 @@ class Resultado:
 
 def _versao_ou_erro(versao_id: str) -> VersaoLicenciada:
     versao = versao_por_id(versao_id)
-    if not versao:
+    if not versao or versao.provedor != "apibible":
         raise ErroBiblia(404, "versao_desconhecida", "Versão desconhecida.")
     return versao
 

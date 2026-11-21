@@ -116,6 +116,8 @@ def redis_falso(monkeypatch):
     from src.services.security import rate_limiting
 
     monkeypatch.setattr(rate_limiting, "_get_redis_pool_client", lambda: r)
+    # a YouVersion fica desligada nestes testes (ver test_biblia_youversion.py)
+    monkeypatch.delenv("YOUVERSION_API_KEY", raising=False)
     apibible.limpar_cache_memoria()
     return r
 

@@ -1,5 +1,5 @@
 """
-Catálogo das versões licenciadas (API.Bible) e dos livros aceitos.
+Catálogo das versões licenciadas (API.Bible e YouVersion) e dos livros aceitos.
 
 As versões abertas (BLIVRE, KJV...) NÃO passam por aqui: são JSON estáticos
 servidos pelo front (apps/web/public/biblia-dados). Este módulo só conhece as
@@ -7,9 +7,17 @@ versões protegidas, cujo texto vem da API.Bible sob a licença da chave
 configurada em BIBLE_API_KEY.
 
 O `id` é o id interno usado nas URLs do app (?v=ara); `api_id` é o id da
-Bíblia na API.Bible. A disponibilidade real depende da chave: se a API
-responder 403 para uma versão, ela some da lista (ver apibible.py).
+Bíblia no provedor (API.Bible: "afc24de218ef6e38-01"; YouVersion: "129").
+`provedor` diz qual cliente atende a versão (apibible.py ou youversion.py).
+A disponibilidade real depende da chave: se o provedor responder 401/403 para
+uma versão, ela some da lista.
+
+YouVersion: só as versões listadas em YOUVERSION_BIBLES (ids numéricos
+separados por vírgula; padrão "129" = NVI) ficam ativas; as demais da tabela
+existem só para poderem ser ligadas por configuração, sem mudar código.
 """
+
+import os
 
 from dataclasses import dataclass
 
@@ -21,16 +29,41 @@ class VersaoLicenciada:
     sigla: str
     nome: str
     idioma: str  # 'pt' | 'en' | 'es'
+    provedor: str = "apibible"  # 'apibible' | 'youversion'
 
 
 VERSOES_LICENCIADAS: tuple[VersaoLicenciada, ...] = (
+    # YouVersion Platform (X-YVP-App-Key). Ordem = ordem de exibição.
+    VersaoLicenciada("nvi", "129", "NVI", "Nova Versão Internacional", "pt", "youversion"),
     VersaoLicenciada("ara", "afc24de218ef6e38-01", "ARA", "Almeida Revista e Atualizada", "pt"),
     VersaoLicenciada("arc", "3129f41d6c0103b0-01", "ARC", "Almeida Revista e Corrigida", "pt"),
     VersaoLicenciada("rc69", "a45adb20f641ce8d-01", "RC69", "Almeida Revista e Corrigida 1969", "pt"),
     VersaoLicenciada("ntlh", "acef2bc597c450a1-01", "NTLH", "Nova Tradução na Linguagem de Hoje", "pt"),
     VersaoLicenciada("niv", "78a9f6124f344018-01", "NIV", "New International Version", "en"),
     VersaoLicenciada("nkjv", "63097d2a0a2f7db3-01", "NKJV", "New King James Version", "en"),
+    # YouVersion opcionais: desligadas até entrarem em YOUVERSION_BIBLES.
+    VersaoLicenciada("nvi2011", "4360", "NVI2011", "Nova Versão Internacional (2011)", "pt", "youversion"),
+    VersaoLicenciada("nbvp", "1966", "NBVP", "Nova Bíblia Viva (Portugal)", "pt", "youversion"),
+    VersaoLicenciada("olivro", "1967", "OL", "O Livro", "pt", "youversion"),
 )
+
+YOUVERSION_PADRAO = "129"
+
+
+def youversion_habilitadas() -> set[str]:
+    """Ids YouVersion ligados por YOUVERSION_BIBLES (padrão: só a NVI, 129)."""
+    bruto = os.environ.get("YOUVERSION_BIBLES", YOUVERSION_PADRAO)
+    return {p.strip() for p in bruto.split(",") if p.strip().isdigit()}
+
+
+def versao_habilitada(versao: "VersaoLicenciada") -> bool:
+    if versao.provedor != "youversion":
+        return True
+    return versao.api_id in youversion_habilitadas()
+
+
+def versoes_do_provedor(provedor: str) -> list["VersaoLicenciada"]:
+    return [v for v in VERSOES_LICENCIADAS if v.provedor == provedor and versao_habilitada(v)]
 
 _POR_ID = {v.id: v for v in VERSOES_LICENCIADAS}
 

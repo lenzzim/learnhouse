@@ -88,3 +88,38 @@ def test_recortar_inclui_combinado_que_toca_o_intervalo_e_filtra_titulos():
     assert titulos == {"3": "Outro título"}
     versos, _ = recortar(r["versos"], r["titulos"], 5, 5)
     assert [v["numero"] for v in versos] == [4]
+
+
+# ---------------------------------------------------------------------------
+# YouVersion (HTML)
+# ---------------------------------------------------------------------------
+from src.services.biblia.normalizar import normalizar_html_youversion  # noqa: E402
+
+
+def test_youversion_versos_titulos_e_notas():
+    html = (
+        '<div><div class="s1 yv-h">Seção A</div><div class="p">'
+        '<span class="yv-v" v="1"></span><span class="yv-vlbl">1</span>Um'
+        '<span class="yv-n f"><span class="ft">nota</span></span> fim.'
+        '<span class="yv-v" v="2"></span><span class="yv-vlbl">2</span>Dois<br>quebra.</div></div>'
+    )
+    r = normalizar_html_youversion(html)
+    assert r["versos"] == [{"numero": 1, "texto": "Um fim."}, {"numero": 2, "texto": "Dois quebra."}]
+    assert r["titulos"] == {"1": "Seção A"}
+
+
+def test_youversion_combinado_e_titulos_seguidos():
+    html = (
+        '<div class="ms yv-h">Livro I</div><div class="s1 yv-h">Salmo</div><div class="d">Para o mestre</div>'
+        '<div class="q1"><span class="yv-v" v="25-26"></span><span class="yv-vlbl">25-26</span>Junto.</div>'
+        '<div class="r">(Mt 1.1)</div>'
+    )
+    r = normalizar_html_youversion(html)
+    assert r["versos"] == [{"numero": 25, "ate": 26, "texto": "Junto."}]
+    assert r["titulos"] == {"25": "Livro I — Salmo — Para o mestre"}
+
+
+def test_youversion_html_vazio_ou_malformado():
+    assert normalizar_html_youversion("") == {"versos": [], "titulos": {}}
+    r = normalizar_html_youversion('<div class="p"><span class="yv-v" v="3"></span>Sem fechar <b>negrito')
+    assert r["versos"] == [{"numero": 3, "texto": "Sem fechar negrito"}]
