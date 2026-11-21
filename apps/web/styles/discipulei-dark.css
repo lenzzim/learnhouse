@@ -48,6 +48,11 @@
   /* Forma. --radius-sm/md/lg pertencem ao @theme do globals.css. */
   --radius-pill: 9999px;
   --radius-card: 16px;
+
+  /* --font-sans (Inter) e --font-serif (Newsreader) vêm do next/font, como
+     classes no <html> (app/layout.tsx). O globals.css do upstream lê
+     --font-default para html/body; aqui ele passa a apontar para a Inter. */
+  --font-default: var(--font-sans);
 }
 
 /* Tema escuro, o padrão. */
@@ -95,6 +100,21 @@
 .dark body {
   background-color: var(--lh-bg);
   color: var(--lh-text);
+}
+
+/* ------------------------------------------------------------- tipografia */
+/* Títulos em Newsreader 400 — serifa, nunca negrito (o `font-bold` do
+   upstream perde para esta regra, que está fora de @layer). Corpo e
+   interface seguem em Inter via --font-default.
+
+   Fica de fora tudo o que é CONTEÚDO escrito por alguém: editor e leitura
+   de atividades/discussões (.ProseMirror), quadros (.board-editor), prose
+   e qualquer área editável. Também fica de fora o árabe (dir=rtl), onde o
+   upstream força a Tajawal e a Newsreader não tem os glifos. */
+html:not([dir='rtl']) :is(h1, h2, h3):not(.ProseMirror *, .board-editor *, .prose *, [contenteditable] *) {
+  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 /* ---------------------------------------------------------------- fundos  */

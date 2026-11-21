@@ -1,15 +1,26 @@
 import '../styles/globals.css'
 import React from 'react'
 import Providers from '@components/Providers'
-import { Wix_Madefor_Text, Tajawal } from 'next/font/google'
+import { Inter, Newsreader, Tajawal } from 'next/font/google'
 
-const wixMadeforText = Wix_Madefor_Text({
+// Discipulei P&B: Inter no corpo e na interface, Newsreader 400 nos títulos
+// (ver styles/discipulei-dark.css, que liga --font-default a --font-sans e
+// aplica --font-serif em h1-h3). Inter é variável, então sem `weight`.
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-default',
+  variable: '--font-sans',
 })
 
-// Wix Madefor Text has no Arabic subset, so Arabic would otherwise fall back to
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-serif',
+})
+
+// Inter has no Arabic subset, so Arabic would otherwise fall back to
 // whatever the OS provides — Geeza Pro, Segoe UI, Noto — and look like a
 // different product on every platform.
 //
@@ -39,7 +50,7 @@ export default function RootLayout({
   // no-JS baseline for crawlers; the script overwrites it for everyone else.
   return (
     <html
-      className={`${wixMadeforText.variable} ${tajawal.variable} dark`}
+      className={`${inter.variable} ${newsreader.variable} ${tajawal.variable} dark`}
       lang="en"
       suppressHydrationWarning
     >
