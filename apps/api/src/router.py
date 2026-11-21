@@ -8,6 +8,7 @@ from src.routers import health
 from src.routers import demo as demo_router_module
 from src.routers import instance
 from src.routers import plans
+from src.routers import biblia as biblia_router_module
 from src.routers import usergroups
 from src.routers import dev, trail, users, auth, orgs, roles, search
 from src.routers import mfa as mfa_router_module
@@ -388,6 +389,10 @@ v1_router.include_router(
 
 # Plan limits (public, no auth — used by frontend pricing pages)
 v1_router.include_router(plans.router, prefix="/plans", tags=["plans"])
+
+# Discipulei: versões licenciadas da Bíblia (proxy da API.Bible com cache).
+# /versoes é público; o texto exige sessão (dependência por rota).
+v1_router.include_router(biblia_router_module.router, prefix="/biblia", tags=["biblia"])
 
 # Register EE Routers if available
 register_ee_routers(v1_router)

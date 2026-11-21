@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { codigoReferencia, encontrarReferencias } from '@/lib/biblia/referencias'
 import { hrefLeitor } from '@/lib/biblia/dados'
+import { versaoCitadaApos } from './extensaoReferencias'
+import { useAcessoBiblia } from './useFonteBiblia'
 import { PopoverVersiculo } from './PopoverVersiculo'
 import { useIdiomaDiscipulei } from '@components/Discipulei/useIdioma'
 import { CLASSE_REF } from './extensaoReferencias'
@@ -34,8 +36,9 @@ export function TextoComReferencias({ texto }: { texto: string }) {
   for (const r of achados) {
     if (r.inicio > cursor) partes.push(texto.slice(cursor, r.inicio))
     const codigo = codigoReferencia(r)
+    const versao = versaoCitadaApos(texto, r.fim)
     partes.push(
-      <a key={r.inicio} href={hrefLeitor(codigo)} className={CLASSE_REF} data-biblia-ref={codigo}>
+      <a key={r.inicio} href={hrefLeitor(codigo, versao)} className={CLASSE_REF} data-biblia-ref={codigo} data-biblia-versao={versao}>
         {r.texto}
       </a>
     )
@@ -45,10 +48,11 @@ export function TextoComReferencias({ texto }: { texto: string }) {
   return <>{partes}</>
 }
 
-type Aberto = { codigo: string; ancora: HTMLAnchorElement }
+type Aberto = { codigo: string; ancora: HTMLAnchorElement; versao?: string }
 
 export function ReferenciasNoTexto({ children, className }: { children: React.ReactNode; className?: string }) {
   const router = useRouter()
+  useAcessoBiblia() // deixa o token da sessão para as citações vivas (versões licenciadas)
   const raizRef = useRef<HTMLDivElement | null>(null)
   const popoverRef = useRef<HTMLDivElement | null>(null)
   const [aberto, setAbertoState] = useState<Aberto | null>(null)
@@ -78,7 +82,7 @@ export function ReferenciasNoTexto({ children, className }: { children: React.Re
       const codigo = ancora.getAttribute('data-biblia-ref')
       if (!codigo) return
       if (abertoRef.current?.ancora === ancora) return
-      setAberto({ codigo, ancora })
+      setAberto({ codigo, ancora, versao: ancora.getAttribute('data-biblia-versao') || undefined })
     },
     [limparTimer, setAberto]
   )
@@ -208,6 +212,7 @@ export function ReferenciasNoTexto({ children, className }: { children: React.Re
             key={aberto.codigo + aberto.ancora.textContent}
             codigo={aberto.codigo}
             ancora={aberto.ancora}
+            versaoInicial={aberto.versao}
             id={popoverId}
             popoverRef={popoverRef}
             onMouseEnter={limparTimer}

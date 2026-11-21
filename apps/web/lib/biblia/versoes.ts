@@ -1,13 +1,19 @@
 /**
  * Versões da Bíblia disponíveis no leitor e links para versões protegidas.
  *
- * VERSOES espelha public/biblia-dados/catalogo.json (o teste
+ * VERSOES (abertas) espelha public/biblia-dados/catalogo.json (o teste
  * versoes.test.mjs garante que os dois batem) para ficar disponível de forma
- * síncrona. Sem imports de valor: roda direto no Node (`node --test`).
+ * síncrona. VERSOES_LICENCIADAS são as protegidas servidas pelo proxy da
+ * API.Bible (apps/api/src/routers/biblia.py): o texto NUNCA fica em arquivo
+ * estático; quem diz se cada uma está ativa é o endpoint /biblia/versoes.
+ * Sem imports de valor: roda direto no Node (`node --test`).
  */
 import type { Referencia } from './referencias'
 
 export type Idioma = 'pt' | 'en' | 'es'
+
+/** 'aberta': JSON estático em /biblia-dados; 'licenciada': proxy da API.Bible (só com sessão). */
+export type FonteVersao = 'aberta' | 'licenciada'
 
 export interface VersaoInfo {
   id: string
@@ -17,6 +23,8 @@ export interface VersaoInfo {
   licenca: string
   licencaUrl: string | null
   credito: string
+  /** ausente = 'aberta' */
+  fonte?: FonteVersao
 }
 
 const CC_BY = 'https://creativecommons.org/licenses/by/4.0/deed.pt-br'
@@ -92,6 +100,26 @@ export const VERSOES: VersaoInfo[] = [
   },
 ]
 
+// ---------------------------------------------------------------------------
+// Versões licenciadas (API.Bible). Mesmos ids de apps/api/src/services/biblia/versoes.py.
+// `credito` é só o texto de reserva: o copyright exibido vem de cada resposta
+// da API (campo `copyright`), como pedem os termos.
+// ---------------------------------------------------------------------------
+const LICENCA_API_BIBLE = 'Licenciada (API.Bible)'
+
+function licenciada(id: string, sigla: string, nome: string, idioma: Idioma, credito: string): VersaoInfo {
+  return { id, sigla, nome, idioma, licenca: LICENCA_API_BIBLE, licencaUrl: null, credito, fonte: 'licenciada' }
+}
+
+export const VERSOES_LICENCIADAS: VersaoInfo[] = [
+  licenciada('ara', 'ARA', 'Almeida Revista e Atualizada', 'pt', 'ARA © 1993 Sociedade Bíblica do Brasil.'),
+  licenciada('arc', 'ARC', 'Almeida Revista e Corrigida', 'pt', 'ARC © 2009 Sociedade Bíblica do Brasil. Todos os direitos reservados.'),
+  licenciada('rc69', 'RC69', 'Almeida Revista e Corrigida 1969', 'pt', 'RC69 © 1969 Sociedade Bíblica do Brasil. Todos os direitos reservados.'),
+  licenciada('ntlh', 'NTLH', 'Nova Tradução na Linguagem de Hoje', 'pt', 'Nova Tradução na Linguagem de Hoje © Copyright © 2000 Sociedade Bíblica do Brasil. Todos os direitos reservados.'),
+  licenciada('niv', 'NIV', 'New International Version', 'en', 'Holy Bible, New International Version® NIV® © Biblica, Inc.®'),
+  licenciada('nkjv', 'NKJV', 'New King James Version', 'en', 'New King James Version® © 1982 Thomas Nelson.'),
+]
+
 export const VERSAO_PADRAO = 'blivre'
 
 /**
@@ -111,7 +139,19 @@ export function versaoPadraoDoIdioma(lng: string | null | undefined): string {
 }
 
 export function versaoPorId(id: string | null | undefined): VersaoInfo | undefined {
-  return id ? VERSOES.find((v) => v.id === id) : undefined
+  if (!id) return undefined
+  return VERSOES.find((v) => v.id === id) ?? VERSOES_LICENCIADAS.find((v) => v.id === id)
+}
+
+export function ehLicenciada(id: string | null | undefined): boolean {
+  return versaoPorId(id)?.fonte === 'licenciada'
+}
+
+/** Sigla ("ARA", "BLIVRE"...) -> versão; usado para ler citações "— Jo 3:16 (ARA)". */
+export function versaoPorSigla(sigla: string | null | undefined): VersaoInfo | undefined {
+  if (!sigla) return undefined
+  const s = sigla.toUpperCase()
+  return VERSOES.find((v) => v.sigla === s) ?? VERSOES_LICENCIADAS.find((v) => v.sigla === s)
 }
 
 /** Id de versão válido ou o padrão. */
@@ -120,8 +160,10 @@ export function versaoValida(id: string | null | undefined): string {
 }
 
 // ---------------------------------------------------------------------------
-// Versões protegidas: NUNCA embutidas — só link para a mesma passagem na
-// YouVersion (bible.com). Ids conferidos em bible.com/pt/bible/<id>/JHN.3.16.<SIGLA>.
+// Versões protegidas SEM licença aqui: NUNCA embutidas — só link para a mesma
+// passagem na YouVersion (bible.com). ARA, ARC e NTLH saíram desta lista
+// porque agora são lidas no próprio app (VERSOES_LICENCIADAS).
+// Ids conferidos em bible.com/pt/bible/<id>/JHN.3.16.<SIGLA>.
 // ---------------------------------------------------------------------------
 export interface VersaoExterna {
   sigla: string
@@ -131,9 +173,6 @@ export interface VersaoExterna {
 
 export const VERSOES_EXTERNAS: VersaoExterna[] = [
   { sigla: 'NVI', nome: 'Nova Versão Internacional', idYouVersion: 129 },
-  { sigla: 'ARA', nome: 'Almeida Revista e Atualizada', idYouVersion: 1608 },
-  { sigla: 'ARC', nome: 'Almeida Revista e Corrigida', idYouVersion: 212 },
-  { sigla: 'NTLH', nome: 'Nova Tradução na Linguagem de Hoje', idYouVersion: 211 },
   { sigla: 'NAA', nome: 'Nova Almeida Atualizada', idYouVersion: 1840 },
 ]
 
