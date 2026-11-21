@@ -44,8 +44,21 @@ export function TextoComReferencias({ texto }: { texto: string }) {
 
 type Aberto = { codigo: string; ancora: HTMLAnchorElement }
 
-export function ReferenciasNoTexto({ children, className }: { children: React.ReactNode; className?: string }) {
+export function ReferenciasNoTexto({
+  children,
+  className,
+  aoClicar,
+}: {
+  children: React.ReactNode
+  className?: string
+  /** Se definido, o clique na referência chama isto em vez de abrir o leitor (ex.: painel do Caderno). */
+  aoClicar?: (codigo: string) => void
+}) {
   const router = useRouter()
+  const aoClicarRef = useRef(aoClicar)
+  useEffect(() => {
+    aoClicarRef.current = aoClicar
+  }, [aoClicar])
   const raizRef = useRef<HTMLDivElement | null>(null)
   const popoverRef = useRef<HTMLDivElement | null>(null)
   const [aberto, setAbertoState] = useState<Aberto | null>(null)
@@ -119,6 +132,13 @@ export function ReferenciasNoTexto({ children, className }: { children: React.Re
         // primeiro toque: mostra o versículo; o segundo (ou "Abrir na Bíblia") navega
         e.preventDefault()
         abrir(link)
+        return
+      }
+      const codigo = link.getAttribute('data-biblia-ref')
+      if (aoClicarRef.current && codigo && e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
+        e.preventDefault()
+        fechar()
+        aoClicarRef.current(codigo)
         return
       }
       navegar(link.getAttribute('href') || '/biblia', e)
