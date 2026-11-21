@@ -58,7 +58,7 @@ const SEGMENTOS_BLOQUEADOS = new Set([
 ])
 
 /** Rotas com barra de ações fixa no rodapé (só no mobile, < md). */
-const SEGMENTOS_COM_BARRA_INFERIOR = new Set(['community', 'account'])
+const SEGMENTOS_COM_BARRA_INFERIOR = new Set(['account'])
 
 function dispensadoRecentemente(): boolean {
   try {
@@ -187,6 +187,8 @@ export default function ConviteInstalar() {
   if (!autenticado || dispensado || rotaBloqueada || podcastAberto || !podeMostrar) return null
 
   // Barra de ações mobile: ~76px de altura + margem; o aviso fica acima dela.
+  // Fica sempre acima da barra de abas do shell (--altura-barra-inferior,
+  // que já inclui a área segura) e, na conta, também acima da barra de ações.
   const recuoExtra = temBarraInferior ? '5.5rem' : '0px'
 
   return (
@@ -194,7 +196,7 @@ export default function ConviteInstalar() {
       aria-label={t('instalar.rotulo')}
       className="fixed inset-x-0 mx-auto w-auto max-w-md"
       style={{
-        bottom: `calc(${recuoExtra} + 12px + env(safe-area-inset-bottom, 0px))`,
+        bottom: `calc(max(var(--altura-barra-inferior, 0px), env(safe-area-inset-bottom, 0px)) + ${recuoExtra} + 12px)`,
         // Físico de propósito (rtl-ok): os recuos de área segura são físicos.
         paddingLeft: 'calc(12px + env(safe-area-inset-left, 0px))',
         paddingRight: 'calc(12px + env(safe-area-inset-right, 0px))',
@@ -235,7 +237,7 @@ export default function ConviteInstalar() {
           <button
             type="button"
             onClick={dispensar}
-            className="rounded-full px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+            className="min-h-11 rounded-full px-3 text-xs font-medium transition-opacity hover:opacity-80 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--text)]"
             style={{ color: 'var(--text-2)', border: '1px solid var(--line)' }}
           >
             {t('instalar.agora_nao')}
@@ -244,7 +246,7 @@ export default function ConviteInstalar() {
             <button
               type="button"
               onClick={instalar}
-              className="rounded-full px-3 py-1.5 text-xs font-semibold transition-opacity hover:opacity-90"
+              className="min-h-11 rounded-full px-3 text-xs font-semibold transition-opacity hover:opacity-90 outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--text)]"
               style={{ background: 'var(--cta-bg)', color: 'var(--cta-fg)' }}
             >
               {t('instalar.botao_instalar')}

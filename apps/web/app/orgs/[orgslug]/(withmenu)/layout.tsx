@@ -3,7 +3,6 @@ import { use, useEffect, type ReactNode } from "react";
 import '@styles/globals.css'
 import Watermark from '@components/Objects/Watermark'
 import { SessionGate } from '@components/Contexts/LHSessionContext'
-import { OrgMenu } from '@components/Objects/Menus/OrgMenu'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { OrgJoinBanner, OrgJoinBannerProvider } from '@components/Objects/Banners/OrgJoinBanner'
 import { OrgMFAPolicyGate } from '@components/Objects/Banners/OrgMFAPolicyGate'
@@ -17,6 +16,10 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { usePlan } from '@components/Hooks/usePlan'
 import { getGoogleFontUrl, DEFAULT_FONT } from '@/lib/fonts'
 import ConviteInstalar from '@components/Discipulei/ConviteInstalar'
+// Discipulei: shell de app (barra lateral / barra de abas) no lugar do OrgMenu.
+import ShellDiscipulei from '@components/Discipulei/Navegacao/ShellDiscipulei'
+import useAdminStatus from '@components/Hooks/useAdminStatus'
+import { MARCA_LEARNHOUSE_SO_ADMIN } from '@/lib/discipulei/nav'
 
 // Helper to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number): string => {
@@ -33,12 +36,15 @@ function OrgFooter() {
   const plan = usePlan()
   const watermarkConfig = org?.config?.config?.customization?.general?.watermark ?? org?.config?.config?.general?.watermark
   const isFree = plan === 'free'
-  const showWatermark = isFree || watermarkConfig !== false
+  const { rights } = useAdminStatus()
+  // Discipulei: o logo do LearnHouse no rodapé só aparece para admin.
+  const marcaPermitida = !MARCA_LEARNHOUSE_SO_ADMIN || !!rights?.dashboard?.action_access
+  const showWatermark = (isFree || watermarkConfig !== false) && marcaPermitida
 
   return (
     <footer className="w-full py-8 mt-12">
       <div className="flex flex-col items-center justify-center space-y-4">
-        {footerText && <p className="text-sm text-gray-500">{footerText}</p>}
+        {footerText && <p className="text-sm text-gray-500 text-center px-4">{footerText}</p>}
         {showWatermark && (
           <Link href="https://learnhouse.app" target="_blank" rel="noopener noreferrer">
             <Image
@@ -101,6 +107,10 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
   }, [customFont])
 
   const pathParts = pathname?.split('/').filter(Boolean) || []
+  const { rights } = useAdminStatus()
+  // Discipulei: o selo "Feito com LearnHouse" só aparece para admin (e só no
+  // desktop, para não cobrir a barra de abas).
+  const mostrarSelo = !MARCA_LEARNHOUSE_SO_ADMIN || !!rights?.dashboard?.action_access
 
   // Pages that use a full-bleed layout (no footer/watermark)
   const noFooterPaths = ['copilot']
@@ -112,7 +122,7 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
       // font-family in Arabic, where Tajawal replaces the org's custom face
       // outright. An inline style beats any normal rule, so the override has to
       // target this element specifically.
-      className="lh-org-font-root flex flex-col min-h-screen"
+      className="lh-org-font-root discipulei-app flex flex-col min-h-screen"
       style={{
         backgroundColor: primaryColor ? hexToRgba(primaryColor, 0.05) : 'transparent',
         ...(customFont ? { fontFamily: `'${customFont}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif` } : {}),
@@ -120,14 +130,25 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
     >
       <PageViewTracker />
       {!chromeless && <OrgJoinBanner />}
-      {!chromeless && <OrgMenu orgslug={orgslug} />}
-      {/* Org-wide 2FA policy: renders nothing unless this user is non-compliant. */}
-      {!chromeless && <OrgMFAPolicyGate />}
-      <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
-        {children}
-      </div>
-      {!isFullBleedPage && !chromeless && <OrgFooter />}
-      {!isFullBleedPage && !chromeless && <Watermark />}
+      {chromeless ? (
+        <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
+          {children}
+        </div>
+      ) : (
+        <ShellDiscipulei orgslug={orgslug}>
+          {/* Org-wide 2FA policy: renders nothing unless this user is non-compliant. */}
+          <OrgMFAPolicyGate />
+          <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
+            {children}
+          </div>
+          {!isFullBleedPage && <OrgFooter />}
+        </ShellDiscipulei>
+      )}
+      {!isFullBleedPage && !chromeless && mostrarSelo && (
+        <div className="hidden lg:block">
+          <Watermark />
+        </div>
+      )}
       {/* Discipulei: convite para instalar o app, só para quem está logado. */}
       {!chromeless && <ConviteInstalar />}
     </div>

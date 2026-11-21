@@ -575,3 +575,58 @@ html:not(.dark) .logo img {
   }
   .lh-reveal img:hover { transform: scale(1.02); }
 }
+
+/* ------------------------------------------------------- shell de app */
+/* Altura da barra de abas do celular/tablet (components/Discipulei/
+   Navegacao). Quem fica fixo no rodapé (convite de instalar, barras de ação)
+   sobe esta altura para nunca cobrir as abas. No desktop a barra some. */
+.discipulei-app {
+  --altura-barra-inferior: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 1024px) {
+  .discipulei-app {
+    --altura-barra-inferior: 0px;
+  }
+}
+
+/* Barras de ação próprias das páginas (conta) ficam acima da barra de abas. */
+.discipulei-app nav[aria-label='Account mobile actions'] {
+  bottom: var(--altura-barra-inferior, 0px);
+  padding-bottom: 0;
+}
+
+/* Folha inferior (Escrever, Filtrar): sobe de baixo no celular e aparece
+   com um leve deslocamento no desktop. `transform` aqui não briga com o
+   `translate` que centraliza o diálogo no desktop. */
+@media (prefers-reduced-motion: no-preference) {
+  .folha-inferior[data-state='open'] {
+    animation: folha-sobe 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .folha-inferior[data-state='closed'] {
+    animation: folha-desce 160ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+}
+@keyframes folha-sobe {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes folha-desce {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(100%); opacity: 0.6; }
+}
+@media (min-width: 1024px) {
+  @keyframes folha-sobe {
+    from { transform: translateY(12px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes folha-desce {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+}
+
+/* Seleção de texto e cursor na paleta da marca, sem o azul do sistema. */
+::selection {
+  background-color: var(--text);
+  color: var(--page);
+}

@@ -42,6 +42,8 @@ interface CreateDiscussionModalProps {
   initialLabel?: string
   dialogTitle?: string
   dialogDescription?: string
+  /** Texto de apoio do seletor de comunidade (padrão: o do caderno). */
+  communityHint?: string
   onCreated?: (discussion: DiscussionWithAuthor, communityUuid: string) => void
 }
 
@@ -72,6 +74,7 @@ export function CreateDiscussionModal({
   initialLabel = 'general',
   dialogTitle,
   dialogDescription,
+  communityHint,
   onCreated,
 }: CreateDiscussionModalProps) {
   const { t } = useTranslation()
@@ -255,7 +258,7 @@ export function CreateDiscussionModal({
               ) : (
                 <p className="text-sm text-gray-500">{t('communities.notebook.no_community')}</p>
               )}
-              <p className="mt-1.5 text-xs text-gray-500">{t('communities.notebook.community_hint')}</p>
+              <p className="mt-1.5 text-xs text-gray-500">{communityHint ?? t('communities.notebook.community_hint')}</p>
             </div>
           )}
 
@@ -351,6 +354,12 @@ export function CreateDiscussionModal({
             <div className="flex items-start gap-2 p-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
               <Lock size={16} className="mt-0.5 shrink-0 text-gray-500" aria-hidden="true" />
               <span>{t('communities.notebook.private_lock_note')}</span>
+            </div>
+          )}
+          {lockVisibility === 'public' && (
+            <div className="flex items-start gap-2 p-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+              <Globe size={16} className="mt-0.5 shrink-0 text-gray-500" aria-hidden="true" />
+              <span>{t('communities.notebook.public_lock_note')}</span>
             </div>
           )}
 

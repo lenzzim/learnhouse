@@ -877,7 +877,8 @@
       "community_hint": "A nota fica guardada nesta comunidade. Se publicar depois, é aqui que ela aparece.",
       "no_community": "Você ainda não participa de nenhuma comunidade.",
       "private_lock_note": "Só você vê. Você pode publicar depois.",
-      "created": "Nota salva no seu caderno"
+      "created": "Nota salva no seu caderno",
+      "public_lock_note": "Todos da comunidade veem e podem responder."
     },
     "create_discussion": {
       "title": "Iniciar uma discussão",
@@ -6390,5 +6391,46 @@
     "definicao_ingles": "Definição (em inglês)",
     "credito_stepbible": "Dados do STEPBible.org (Tyndale House, Cambridge), CC BY 4.0",
     "fechar": "Fechar"
+  },
+  "nav": {
+    "inicio": "Início",
+    "biblia": "Bíblia",
+    "caderno": "Caderno",
+    "comunidades": "Comunidades",
+    "navegacao_principal": "Navegação principal",
+    "ir_inicio": "{{nome}}: ir para o início",
+    "fechar": "Fechar",
+    "buscar": "Buscar",
+    "busca": {
+      "descricao": "Busque comunidades, notas, discussões e pessoas.",
+      "placeholder": "Buscar comunidades, notas, discussões…",
+      "buscar_por": "Buscar “{{termo}}” em tudo",
+      "nada_rapido": "Nada nas suas comunidades e notas recentes. Aperte Enter para buscar em tudo.",
+      "dica": "Enter busca em todas as discussões e pessoas."
+    },
+    "nova_nota": "Nova nota",
+    "notas_recentes": "Notas recentes",
+    "caderno_vazio": "Suas notas recentes aparecem aqui.",
+    "restrita": "área restrita",
+    "expandir": "Mostrar itens de {{item}}",
+    "recolher": "Esconder itens de {{item}}",
+    "agendar_estudo": "Agendar estudo",
+    "menu_conta": "Menu da conta",
+    "perfil_conta": "Perfil e conta",
+    "painel_admin": "Painel admin",
+    "sair": "Sair",
+    "escrever": {
+      "rotulo": "Escrever",
+      "titulo": "Escrever",
+      "descricao": "O que você quer escrever agora?",
+      "nota": "Nota privada",
+      "nota_descricao": "Uma anotação de estudo. Só você vê.",
+      "devocional": "Devocional",
+      "devocional_descricao": "Passagem, o que aprendi, como aplicar e oração. Fica no seu caderno.",
+      "pergunta": "Pergunta na comunidade",
+      "pergunta_descricao": "Escolha uma comunidade e pergunte. Todos de lá veem.",
+      "pergunta_modal_descricao": "Sua pergunta fica visível para quem participa da comunidade.",
+      "pergunta_comunidade_dica": "A pergunta aparece nesta comunidade."
+    }
   }
 }

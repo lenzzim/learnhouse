@@ -877,7 +877,8 @@
       "community_hint": "The note is kept in this community. If you publish it later, this is where it appears.",
       "no_community": "You are not part of any community yet.",
       "private_lock_note": "Only you can see it. You can publish it later.",
-      "created": "Note saved to your notebook"
+      "created": "Note saved to your notebook",
+      "public_lock_note": "Everyone in the community can see and reply."
     },
     "create_discussion": {
       "title": "Start a Discussion",
@@ -6390,5 +6391,46 @@
     "definicao_ingles": "Definition",
     "credito_stepbible": "Data from STEPBible.org (Tyndale House, Cambridge), CC BY 4.0",
     "fechar": "Close"
+  },
+  "nav": {
+    "inicio": "Home",
+    "biblia": "Bible",
+    "caderno": "Notebook",
+    "comunidades": "Communities",
+    "navegacao_principal": "Main navigation",
+    "ir_inicio": "{{nome}}: go to home",
+    "fechar": "Close",
+    "buscar": "Search",
+    "busca": {
+      "descricao": "Search communities, notes, discussions and people.",
+      "placeholder": "Search communities, notes, discussions…",
+      "buscar_por": "Search everything for “{{termo}}”",
+      "nada_rapido": "Nothing in your communities or recent notes. Press Enter to search everything.",
+      "dica": "Enter searches every discussion and person."
+    },
+    "nova_nota": "New note",
+    "notas_recentes": "Recent notes",
+    "caderno_vazio": "Your recent notes show up here.",
+    "restrita": "restricted area",
+    "expandir": "Show {{item}} items",
+    "recolher": "Hide {{item}} items",
+    "agendar_estudo": "Schedule a study",
+    "menu_conta": "Account menu",
+    "perfil_conta": "Profile and account",
+    "painel_admin": "Admin dashboard",
+    "sair": "Sign out",
+    "escrever": {
+      "rotulo": "Write",
+      "titulo": "Write",
+      "descricao": "What do you want to write now?",
+      "nota": "Private note",
+      "nota_descricao": "A study note. Only you can see it.",
+      "devocional": "Devotional",
+      "devocional_descricao": "Passage, what I learned, how to apply it and a prayer. Stays in your notebook.",
+      "pergunta": "Ask the community",
+      "pergunta_descricao": "Pick a community and ask. Everyone there can see it.",
+      "pergunta_modal_descricao": "Your question is visible to everyone in the community.",
+      "pergunta_comunidade_dica": "The question shows up in this community."
+    }
   }
 }

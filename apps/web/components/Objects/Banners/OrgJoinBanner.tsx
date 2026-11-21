@@ -41,13 +41,14 @@ export function OrgJoinBanner() {
 
   return (
     <div
-      className="fixed top-0 start-0 end-0 bg-gradient-to-r from-yellow-500 to-amber-500 text-white"
+      // Discipulei: faixa em P&B (sem amarelo/âmbar, decisão N19).
+      className="fixed top-0 start-0 end-0 border-b border-[var(--line-strong)] bg-[var(--surface)] text-[var(--text)]"
       style={{ zIndex: 'var(--z-nav-menu)', height: JOIN_BANNER_HEIGHT }}
     >
       <div className="w-full max-w-(--breakpoint-2xl) mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-full">
         <div className="flex items-center space-x-3">
           <UserPlus size={20} className="flex-shrink-0" />
-          <p className="text-sm font-medium">
+          <p className="text-sm font-medium truncate">
             {t('banner.viewing_as_guest', { name: org?.name })}{' '}
             <a
               href={getUriWithOrg(orgslug, '/signup')}
