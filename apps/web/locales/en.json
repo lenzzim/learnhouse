@@ -238,6 +238,16 @@
     "less": "Less",
     "more": "More"
   },
+  "chamada_estudo": {
+    "rotulo": "Discipleship Path",
+    "titulo_inicio": "Study the Bible",
+    "titulo_destaque": "with our team",
+    "descricao": "Eight studies, free, in a small group of 2 or 3 people. Online or in person.",
+    "cta": "I want to study",
+    "como_funciona": "How it works",
+    "menu": "Study with our team",
+    "nova_aba": "opens in a new tab"
+  },
   "banner": {
     "viewing_as_guest": "You're viewing {{name}} as a guest.",
     "join_organization": "Join this organization",

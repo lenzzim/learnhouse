@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { DiscussionDetail } from '@components/Objects/Communities/DiscussionDetail'
 import { DiscussionSidebar } from '@components/Objects/Communities/DiscussionSidebar'
+import ChamadaEstudo from '@components/Discipulei/ChamadaEstudo'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { EditDiscussionModal } from '@components/Objects/Modals/Communities/EditDiscussionModal'
 import { Community } from '@services/communities/communities'
@@ -56,6 +57,9 @@ const DiscussionPageClient = ({
       <div className="flex flex-col md:flex-row gap-6 pt-2">
         {/* Left Sidebar - Discussion Info (Desktop only) */}
         <div className="hidden md:block w-full md:w-72 lg:w-80 flex-shrink-0">
+          {/* Discipulei: chamada para estudar com a equipe. Fora do bloco sticky,
+              para a coluna fixa não passar da altura da tela. */}
+          <ChamadaEstudo variante="lateral" className="mb-4" />
           <div className="sticky top-24">
             <DiscussionSidebar
               discussion={discussion}
@@ -73,6 +77,8 @@ const DiscussionPageClient = ({
             orgslug={orgslug}
             onEdit={() => setIsEditModalOpen(true)}
           />
+          {/* Discipulei: no celular não há coluna lateral; a chamada vem no fim da discussão. */}
+          <ChamadaEstudo variante="lateral" className="md:hidden mt-6" />
         </div>
       </div>
 

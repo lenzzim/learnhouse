@@ -238,6 +238,16 @@
     "less": "Menos",
     "more": "Mais"
   },
+  "chamada_estudo": {
+    "rotulo": "Trilha do Discipulado",
+    "titulo_inicio": "Estude a Bíblia",
+    "titulo_destaque": "com a equipe",
+    "descricao": "Oito estudos, de graça, em grupo pequeno de 2 ou 3 pessoas. Online ou presencial.",
+    "cta": "Quero estudar",
+    "como_funciona": "Como funciona",
+    "menu": "Estudar com a equipe",
+    "nova_aba": "abre em nova aba"
+  },
   "banner": {
     "viewing_as_guest": "Você está visualizando {{name}} como convidado.",
     "join_organization": "Junte-se a esta organização",

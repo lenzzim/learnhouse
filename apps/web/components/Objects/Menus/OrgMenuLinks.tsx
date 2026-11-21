@@ -4,6 +4,7 @@ import { Books, FolderSimple, ChatsCircle, Headphones, Cube, ShoppingBag, BookOp
 import { menuIcon } from '@components/Objects/Menus/menuIcons'
 import Link from 'next/link'
 import React from 'react'
+import { itemMenuChamada } from '@components/Discipulei/ChamadaEstudo' // Discipulei
 import { useTranslation } from 'react-i18next'
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
@@ -73,6 +74,14 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
       }
     })
     .filter(Boolean) as any[]
+
+  // Discipulei: "Estudar com a equipe" logo depois de Comunidades (ou no fim,
+  // se Comunidades não estiver no menu). Link externo com ?o=comunidade-menu.
+  // Ver components/Discipulei/ChamadaEstudo.tsx.
+  {
+    const posComunidades = rendered.findIndex((it) => it.key === 'communities')
+    rendered.splice(posComunidades >= 0 ? posComunidades + 1 : rendered.length, 0, itemMenuChamada(t('chamada_estudo.menu')))
+  }
 
   return (
     <div className="ps-1">
