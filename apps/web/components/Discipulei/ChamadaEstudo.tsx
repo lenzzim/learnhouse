@@ -141,7 +141,7 @@ export default function ChamadaEstudo(props: Props) {
 }
 
 /**
- * Item do menu principal da organização ("Estudar com a equipe"), no formato
+ * Item do menu principal da organização ("Agendar estudo"), no formato
  * que o OrgMenuLinks renderiza. O rótulo já vem com o destaque (contorno em
  * pílula), para o OrgMenuLinks não precisar de nenhum ramo novo no render.
  */

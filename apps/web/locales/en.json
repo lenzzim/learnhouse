@@ -240,12 +240,12 @@
   },
   "chamada_estudo": {
     "rotulo": "Discipleship Path",
-    "titulo_inicio": "Study the Bible",
-    "titulo_destaque": "with our team",
-    "descricao": "Eight studies, free, in a small group of 2 or 3 people. Online or in person.",
-    "cta": "I want to study",
+    "titulo_inicio": "Live your faith",
+    "titulo_destaque": "in practice",
+    "descricao": "Look at your life in the light of the Bible, with someone by your side, in a small group of 2 or 3 people. Eight studies, free, online or in person.",
+    "cta": "Schedule a study",
     "como_funciona": "How it works",
-    "menu": "Study with our team",
+    "menu": "Schedule a study",
     "nova_aba": "opens in a new tab"
   },
   "banner": {
