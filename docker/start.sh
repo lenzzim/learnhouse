@@ -14,6 +14,23 @@ if [ -n "$LEARNHOUSE_SQL_CONNECTION_STRING" ]; then
     fi
 fi
 
+# Discipulei: aplica as migrações do banco antes de subir a API.
+# O LearnHouse original pede para rodar o Alembic à mão a cada atualização;
+# esquecer isso derrubou as discussões em produção (coluna `visibility`
+# ausente). Só migra se o banco já tem versão registrada no Alembic; um banco
+# sem versão (instalação nova, tabelas criadas pelo próprio app) é pulado com
+# aviso, para não tentar recriar tabelas existentes. Falha não impede a
+# subida: fica no log para alguém olhar.
+if [ -x /app/api/.venv/bin/alembic ]; then
+    ATUAL=$(cd /app/api && .venv/bin/alembic current 2>/dev/null | grep -Eo '^[0-9a-f]{12}' | head -1)
+    if [ -n "$ATUAL" ]; then
+        echo "Migrações: banco em $ATUAL, aplicando até a head..."
+        (cd /app/api && .venv/bin/alembic upgrade head) || echo "AVISO: migração automática falhou; veja o log acima."
+    else
+        echo "AVISO: banco sem versão do Alembic; migração automática pulada."
+    fi
+fi
+
 # Start the services
 # Use server-wrapper.js for runtime environment variable injection
 pm2 start server-wrapper.js --cwd /app/web --name learnhouse-web > /dev/null 2>&1
