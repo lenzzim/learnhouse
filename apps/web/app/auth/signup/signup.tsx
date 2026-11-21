@@ -22,6 +22,20 @@ interface SignUpClientProps {
   org: any
 }
 
+// Discipulei: o site manda todo mundo para /signup?inviteCode=...&next=...
+// Quem já está logado e já é membro não deve ver "Entrar na organização"
+// (dava erro "User is already part of that organization"): vai direto ao
+// destino. Só aceita caminhos internos, para o `next` não virar redirect aberto.
+function destinoSeguro(next: string | null): string | null {
+  if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return null
+  return next
+}
+
+function jaEhMembro(session: any, org: any): boolean {
+  const roles = session?.data?.roles
+  return !!org?.id && Array.isArray(roles) && roles.some((r: any) => r?.org?.id === org.id)
+}
+
 function SignUpClient(props: SignUpClientProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
@@ -37,12 +51,18 @@ function SignUpClient(props: SignUpClientProps) {
   // signed-in visitor has nothing to sign up for and no org to join → send them to
   // the hub instead of a broken "Join <nothing>" screen.
   const hasOrgToJoin = !!props.org
+  const destino = destinoSeguro(searchParams.get('next'))
+  const membro = isAuthenticated && hasOrgToJoin && jaEhMembro(session, props.org)
 
   useEffect(() => {
     if (isAuthenticated && !hasOrgToJoin) {
       router.replace('/communities')
     }
   }, [isAuthenticated, hasOrgToJoin, router])
+
+  useEffect(() => {
+    if (membro) router.replace(destino || '/communities')
+  }, [membro, destino, router])
 
   useEffect(() => {
     // On the org-less apex (learn.io/signup) props.org is null — guard it and
@@ -69,17 +89,17 @@ function SignUpClient(props: SignUpClientProps) {
         defaultValue: 'Create your account and launch your first course in minutes.',
       })}
     >
-      {session.status === 'loading' && (
+      {(session.status === 'loading' || membro) && (
         // Don't flash the open/invite signup form while the session is still
         // resolving — a logged-in user would otherwise briefly see it.
         <div className="flex-1 flex items-center justify-center px-6 md:px-12 lg:px-20">
           <Loader2 size={22} className="animate-spin text-black/30" />
         </div>
       )}
-      {session.status !== 'loading' && joinMethod == 'open' &&
+      {session.status !== 'loading' && !membro && joinMethod == 'open' &&
         (isAuthenticated ? (
           hasOrgToJoin ? (
-            <LoggedInJoinScreen inviteCode={inviteCode} org={props.org} />
+            <LoggedInJoinScreen inviteCode={inviteCode} org={props.org} destino={destino} />
           ) : (
             // Signed in on the org-less apex — the effect above redirects to /home.
             <div className="flex-1 flex items-center justify-center px-6 md:px-12 lg:px-20">
@@ -91,10 +111,10 @@ function SignUpClient(props: SignUpClientProps) {
             <OpenSignUpComponent org={props.org} />
           </div>
         ))}
-      {session.status !== 'loading' && joinMethod == 'inviteOnly' &&
+      {session.status !== 'loading' && !membro && joinMethod == 'inviteOnly' &&
         (inviteCode ? (
           session.status == 'authenticated' ? (
-            <LoggedInJoinScreen inviteCode={inviteCode} org={props.org} />
+            <LoggedInJoinScreen inviteCode={inviteCode} org={props.org} destino={destino} />
           ) : (
             <div className="flex-1 flex items-center justify-center px-6 md:px-12 lg:px-20">
               <InviteOnlySignUpComponent inviteCode={inviteCode} org={props.org} />
@@ -110,9 +130,10 @@ function SignUpClient(props: SignUpClientProps) {
 interface JoinScreenProps {
   inviteCode: string
   org: any
+  destino?: string | null
 }
 
-const LoggedInJoinScreen = ({ inviteCode, org }: JoinScreenProps) => {
+const LoggedInJoinScreen = ({ inviteCode, org, destino }: JoinScreenProps) => {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const contextOrg = useOrg() as any
@@ -147,8 +168,12 @@ const LoggedInJoinScreen = ({ inviteCode, org }: JoinScreenProps) => {
         // Refresh session so the new org membership appears in session.data.roles
         await session.update?.(true)
         redirectTimeoutRef.current = setTimeout(() => {
-          router.push(getUriWithOrg(activeOrg.slug, '/'))
+          router.push(destino || getUriWithOrg(activeOrg.slug, '/'))
         }, 2000)
+      } else if (String(res.data?.detail || '').includes('already part of that organization')) {
+        // Já é membro (sessão desatualizada): não é erro, é só seguir em frente.
+        await session.update?.(true)
+        router.replace(destino || '/communities')
       } else {
         setError(getErrorMessage(res.data?.detail, t('common.something_went_wrong')))
         setShowMessage(true)
