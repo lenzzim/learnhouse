@@ -215,6 +215,8 @@ async def get_user_dossier(
         db_session, user_id, org_id, days,
         behavior_fetcher=fetcher,
         include_raw=_safe_bool(request, "include_raw"),
+        # Caderno privado: só entra no dossiê do próprio autor
+        include_private=(acting_user_id == user_id and not isinstance(current_user, APITokenUser)),
     )
     if not dossier:
         raise HTTPException(status_code=404, detail="User not found")
@@ -399,6 +401,7 @@ async def export_audit(
         d = await build_user_dossier(
             db_session, uid, org_id, days,
             behavior_fetcher=fetcher, include_raw=include_raw,
+            include_private=(acting_user_id == uid and not isinstance(current_user, APITokenUser)),
         )
         if d:
             dossiers.append(d)

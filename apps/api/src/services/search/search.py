@@ -11,6 +11,7 @@ from src.db.organizations import Organization
 from src.db.user_organizations import UserOrganization
 from src.db.communities.communities import Community, CommunityRead
 from src.db.communities.discussions import Discussion, DiscussionRead
+from src.services.communities.visibility import visible_discussions_clause
 from src.db.playgrounds import Playground, PlaygroundRead, PlaygroundAccessType
 from src.db.podcasts.podcasts import Podcast, PodcastRead
 from src.services.courses.courses import search_courses
@@ -257,6 +258,8 @@ async def search_across_org(
         .join(Community, Community.id == Discussion.community_id)
         .where(Discussion.org_id == org.id)
         .where(_ilike_any([Discussion.title, Discussion.content], pattern))
+        # Caderno privado: notas privadas só aparecem para o próprio autor
+        .where(visible_discussions_clause(current_user))
     )
     if only_public:
         discussions_q = discussions_q.where(Community.public == sa_true())

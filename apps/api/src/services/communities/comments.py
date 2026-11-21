@@ -15,6 +15,10 @@ from src.db.communities.discussion_comments import (
 )
 from src.services.communities.comment_votes import get_user_votes_for_comments
 from src.security.rbac import check_resource_access, AccessAction, authorization_verify_if_user_is_anon
+from src.services.communities.visibility import (
+    ensure_discussion_open_for_interaction,
+    ensure_discussion_visible,
+)
 from src.services.communities.moderation import validate_comment_content, enforce_auto_lock
 from src.services.webhooks.dispatch import dispatch_webhooks
 
@@ -42,6 +46,9 @@ async def create_comment(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: sem comentários/votos/reações (404 p/ outros, 403 p/ autor)
+    ensure_discussion_open_for_interaction(discussion, current_user)
 
     # Get the community and check read access
     community_statement = select(Community).where(
@@ -124,6 +131,9 @@ async def get_comments_by_discussion(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: só o autor lê (404 para os demais)
+    ensure_discussion_visible(discussion, current_user)
 
     # Get the community and check read access
     community_statement = select(Community).where(
@@ -214,6 +224,10 @@ async def update_comment(
     )
     discussion = (await db_session.execute(discussion_statement)).scalars().first()
 
+    # Caderno privado: fio oculto não aceita edição de quem não é o autor da nota
+    if discussion:
+        ensure_discussion_visible(discussion, current_user)
+
     # Check content moderation for updated content
     if comment_update.content is not None and discussion:
         await validate_comment_content(
@@ -278,6 +292,10 @@ async def delete_comment(
     is_author = comment.author_id == current_user.id
 
     if not is_author:
+        # Caderno privado: moderadores não agem sobre notas que não enxergam.
+        # (O autor do comentário sempre pode apagar o próprio comentário.)
+        if discussion:
+            ensure_discussion_visible(discussion, current_user)
         # Check if user is admin of the community
         if discussion:
             community_statement = select(Community).where(
@@ -332,6 +350,9 @@ async def get_comment_count(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: só o autor lê (404 para os demais)
+    ensure_discussion_visible(discussion, current_user)
 
     community = (await db_session.execute(
         select(Community).where(Community.id == discussion.community_id)

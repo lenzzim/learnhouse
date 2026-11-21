@@ -12,6 +12,9 @@ from src.db.communities.discussions import (
     DiscussionLockUpdate,
     DiscussionLabelInfo,
     DISCUSSION_LABELS,
+    DISCUSSION_VISIBILITY_PUBLIC,
+    DiscussionVisibilityUpdate,
+    NotebookDiscussionRead,
 )
 from src.db.communities.discussion_votes import DiscussionVoteRead
 from src.db.communities.discussion_comments import (
@@ -53,6 +56,10 @@ from src.services.communities.reactions import (
     get_reactions,
     toggle_reaction,
 )
+from src.services.communities.visibility import (
+    get_my_notebook,
+    set_discussion_visibility,
+)
 
 
 router = APIRouter()
@@ -63,6 +70,8 @@ class DiscussionCreateRequest(BaseModel):
     content: str | None = None
     label: str | None = "general"
     emoji: str | None = None
+    # 'public' (padrão) | 'private' (caderno: só o autor vê)
+    visibility: str | None = DISCUSSION_VISIBILITY_PUBLIC
 
 
 @router.get(
@@ -79,6 +88,28 @@ async def api_get_discussion_labels() -> List[DiscussionLabelInfo]:
     Get available discussion labels.
     """
     return [DiscussionLabelInfo(**label) for label in DISCUSSION_LABELS]
+
+
+# Registrado antes de /discussions/{discussion_uuid} para não ser capturado por ele.
+@router.get(
+    "/discussions/notebook",
+    response_model=List[NotebookDiscussionRead],
+    summary="List my private notebook",
+    description="Return the current user's private discussions (\"caderno\") across the communities of an organization, newest first. Only the author ever sees these.",
+    responses={
+        200: {"description": "The caller's private discussions.", "model": List[NotebookDiscussionRead]},
+        403: {"description": "Authentication required (anonymous users and API tokens are rejected)"},
+    },
+)
+async def api_get_my_notebook(
+    request: Request,
+    org_id: int = Query(...),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_db_session),
+) -> List[NotebookDiscussionRead]:
+    return await get_my_notebook(request, org_id, current_user, db_session, page, limit)
 
 
 @router.post(
@@ -114,6 +145,7 @@ async def api_create_discussion(
         current_user,
         db_session,
         emoji=discussion_data.emoji,
+        visibility=discussion_data.visibility or DISCUSSION_VISIBILITY_PUBLIC,
     )
 
 
@@ -205,6 +237,30 @@ async def api_update_discussion(
     """
     return await update_discussion(
         request, discussion_uuid, discussion_data, current_user, db_session
+    )
+
+
+@router.patch(
+    "/discussions/{discussion_uuid}/visibility",
+    response_model=DiscussionReadWithVoteStatus,
+    summary="Publish or unpublish a discussion",
+    description="Change a discussion's visibility. 'public' publishes a private note to the community; 'private' moves it back to the author's notebook (comments stay hidden while private). Author only.",
+    responses={
+        200: {"description": "Visibility updated.", "model": DiscussionReadWithVoteStatus},
+        403: {"description": "Caller is not the author (public discussion) or is not authenticated"},
+        404: {"description": "Discussion not found (or private and caller is not the author)"},
+        422: {"description": "Invalid visibility value"},
+    },
+)
+async def api_set_discussion_visibility(
+    request: Request,
+    discussion_uuid: str,
+    visibility_data: DiscussionVisibilityUpdate,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_db_session),
+) -> DiscussionReadWithVoteStatus:
+    return await set_discussion_visibility(
+        request, discussion_uuid, visibility_data.visibility, current_user, db_session
     )
 
 

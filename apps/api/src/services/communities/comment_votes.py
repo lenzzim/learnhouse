@@ -16,6 +16,10 @@ from src.db.communities.discussion_comment_votes import (
     DiscussionCommentVoteRead,
 )
 from src.security.rbac import check_resource_access, AccessAction, authorization_verify_if_user_is_anon
+from src.services.communities.visibility import (
+    ensure_discussion_open_for_interaction,
+    ensure_discussion_visible,
+)
 
 
 async def upvote_comment(
@@ -50,6 +54,9 @@ async def upvote_comment(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: sem comentários/votos/reações (404 p/ outros, 403 p/ autor)
+    ensure_discussion_open_for_interaction(discussion, current_user)
 
     # Get the community and check read access
     community_statement = select(Community).where(
@@ -132,6 +139,13 @@ async def remove_comment_upvote(
 
     if not comment:
         raise HTTPException(status_code=404, detail="Comment not found")
+
+    # Caderno privado: não revela a nota a quem não é o autor
+    discussion = (await db_session.execute(
+        select(Discussion).where(Discussion.id == comment.discussion_id)
+    )).scalars().first()
+    if discussion:
+        ensure_discussion_visible(discussion, current_user)
 
     # Find existing vote
     vote_statement = select(DiscussionCommentVote).where(

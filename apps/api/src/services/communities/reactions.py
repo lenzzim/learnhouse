@@ -14,6 +14,10 @@ from src.db.communities.discussion_reactions import (
     ReactionUser,
 )
 from src.security.rbac import check_resource_access, AccessAction, authorization_verify_if_user_is_anon
+from src.services.communities.visibility import (
+    ensure_discussion_open_for_interaction,
+    ensure_discussion_visible,
+)
 from src.services.communities.moderation import get_community_settings
 
 
@@ -36,6 +40,9 @@ async def get_reactions(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: só o autor lê (404 para os demais)
+    ensure_discussion_visible(discussion, current_user)
 
     # Get the community and check read access
     community_statement = select(Community).where(
@@ -130,6 +137,9 @@ async def toggle_reaction(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: sem comentários/votos/reações (404 p/ outros, 403 p/ autor)
+    ensure_discussion_open_for_interaction(discussion, current_user)
 
     # Get the community and check read access
     community_statement = select(Community).where(
