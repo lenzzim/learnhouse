@@ -32,7 +32,13 @@ export const SERIF: CSSProperties = {
 /** Tira o prefixo que a API põe nos uuids (`community_`, `discussion_`). */
 export const semPrefixo = (uuid: string, prefixo: string) => uuid.replace(prefixo, '')
 
-/** Caminho da discussão (ou nota) a partir dos uuids da API. */
+/** Caminho de uma nota do Caderno (/caderno/<id>; TCD abre pela data). */
+export function caminhoNota(n: { note_uuid: string; kind?: string; tcd_date?: string | null }): string {
+  if (n.kind === 'tcd' && n.tcd_date) return `/caderno/tcd/${n.tcd_date}`
+  return `/caderno/${n.note_uuid.replace(/^note_/, '')}`
+}
+
+/** Caminho da discussão a partir dos uuids da API. */
 export function caminhoDiscussao(communityUuid: string, discussionUuid: string): string {
   return `/community/${semPrefixo(communityUuid, 'community_')}/discussion/${semPrefixo(discussionUuid, 'discussion_')}`
 }

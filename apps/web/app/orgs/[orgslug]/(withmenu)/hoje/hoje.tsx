@@ -19,6 +19,7 @@ import {
   FOCO,
   SERIF,
   caminhoDiscussao,
+  caminhoNota,
 } from '@components/Discipulei/Navegacao/estilos'
 
 /** Quantas comunidades e itens entram em "Nas suas comunidades". */
@@ -204,17 +205,17 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
             {rascunho ? (
               <>
                 <p className="mt-2 line-clamp-2 text-base font-medium text-[var(--text)]" dir="auto">
-                  {rascunho.title}
+                  {rascunho.title || t('caderno.sem_titulo')}
                 </p>
                 <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-sm text-[var(--text-2)]">
                   <Lock size={12} aria-hidden="true" />
-                  <span>{t('communities.notebook.in_community', { community: rascunho.community_name })}</span>
+                  <span>{t('caderno.no_seu_caderno')}</span>
                   <span aria-hidden="true">·</span>
-                  <span>{parseApiDate(rascunho.update_date || rascunho.creation_date).fromNow()}</span>
+                  <span>{parseApiDate(rascunho.updated_at).fromNow()}</span>
                 </p>
                 <div className="mt-auto pt-4">
                   <Link
-                    href={getUriWithOrg(orgslug, caminhoDiscussao(rascunho.community_uuid, rascunho.discussion_uuid))}
+                    href={getUriWithOrg(orgslug, caminhoNota(rascunho))}
                     className={`${BOTAO_PRIMARIO} min-h-11 px-5 text-sm`}
                   >
                     {t('hoje.continuar')}

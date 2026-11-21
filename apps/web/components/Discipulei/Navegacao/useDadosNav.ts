@@ -5,7 +5,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { Community, getCommunities } from '@services/communities/communities'
-import { getMyNotebook, NotebookDiscussion } from '@services/communities/discussions'
+import { listarNotas, type NotaResumo } from '@services/caderno/notas'
 
 /** Chaves do React Query do shell (para invalidar depois de criar uma nota). */
 export const CHAVES_NAV = {
@@ -17,7 +17,7 @@ export const CHAVES_NAV = {
 /**
  * Dados que a navegação mostra: sessão, papel de admin, comunidades que a
  * pessoa pode acessar (a API já esconde as áreas restritas de quem não é
- * membro) e as 5 notas privadas mais recentes do caderno.
+ * membro) e as 5 notas mais recentes do Caderno.
  */
 export function useDadosNav() {
   const session = useLHSession() as any
@@ -42,11 +42,12 @@ export function useDadosNav() {
     staleTime: 60_000,
   })
 
-  const notasQuery = useQuery<NotebookDiscussion[]>({
+  // Notas recentes do Caderno (só as da própria pessoa; a API garante).
+  const notasQuery = useQuery<NotaResumo[]>({
     queryKey: CHAVES_NAV.notasRecentes(orgId),
     queryFn: async () => {
-      const lista = await getMyNotebook(orgId as number, 1, 5, token)
-      return Array.isArray(lista) ? lista : []
+      const r = await listarNotas(orgId as number, { limit: 5 }, token)
+      return Array.isArray(r?.items) ? r.items : []
     },
     enabled: autenticado && !!orgId && !!token,
     staleTime: 30_000,

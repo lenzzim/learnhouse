@@ -8,11 +8,10 @@ import { CalendarCheck, CaretRight, Hash, Lock, MagnifyingGlass, Plus } from '@p
 import { getUriWithOrg } from '@services/config/config'
 import { NAV_PRINCIPAL, abaAtiva, comunidadeDaRota, urlAgendar, type AbaId } from '@/lib/discipulei/nav'
 import { useDadosNav } from './useDadosNav'
-import { useEscrever } from './EscreverContexto'
 import { MenuAvatar } from './MenuAvatar'
 import { Logo } from './Logo'
 import { ICONE_ABA } from './icones'
-import { BOTAO_PRIMARIO, BOTAO_SECUNDARIO, FOCO, caminhoDiscussao, semPrefixo } from './estilos'
+import { BOTAO_PRIMARIO, BOTAO_SECUNDARIO, FOCO, caminhoNota, semPrefixo } from './estilos'
 import { rotuloAtalhoBusca } from './BuscaDialogo'
 
 const CHAVE_EXPANDIDOS = 'discipulei_nav_expandidos'
@@ -64,7 +63,6 @@ export function BarraLateral({
   const { t } = useTranslation()
   const pathname = usePathname()
   const { autenticado, status, comunidades, notasRecentes, carregandoNotas } = useDadosNav()
-  const { abrirEscrever } = useEscrever()
   const { expandidos, alternar } = useExpandidos()
   const [atalho, setAtalho] = useState('Ctrl K')
   useEffect(() => setAtalho(rotuloAtalhoBusca()), [])
@@ -105,10 +103,10 @@ export function BarraLateral({
           </kbd>
         </button>
         {autenticado && (
-          <button type="button" onClick={() => abrirEscrever('nota')} className={`${BOTAO_PRIMARIO} min-h-10 w-full text-sm`}>
+          <Link href={getUriWithOrg(orgslug, '/caderno/new')} className={`${BOTAO_PRIMARIO} min-h-10 w-full text-sm`}>
             <Plus size={16} weight="bold" aria-hidden="true" />
             {t('nav.nova_nota')}
-          </button>
+          </Link>
         )}
       </div>
 
@@ -152,16 +150,17 @@ export function BarraLateral({
                 {item.id === 'caderno' && aberto && (
                   <ul id={idLista} className="ms-5 mt-0.5 flex flex-col gap-px border-s border-[var(--line)] ps-2">
                     {notasRecentes.map((n) => {
-                      const href = getUriWithOrg(orgslug, caminhoDiscussao(n.community_uuid, n.discussion_uuid))
-                      const atual = pathname?.endsWith(semPrefixo(n.discussion_uuid, 'discussion_'))
+                      const caminho = caminhoNota(n)
+                      const href = getUriWithOrg(orgslug, caminho)
+                      const atual = !!pathname?.endsWith(caminho)
                       return (
-                        <li key={n.discussion_uuid}>
+                        <li key={n.note_uuid}>
                           <Link
                             href={href}
                             aria-current={atual ? 'page' : undefined}
                             className={`${SUBITEM} ${atual ? 'bg-[var(--surface)] text-[var(--text)]' : 'text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]'}`}
                           >
-                            <span className="min-w-0 flex-1 truncate" dir="auto">{n.title}</span>
+                            <span className="min-w-0 flex-1 truncate" dir="auto">{n.title || t('caderno.sem_titulo')}</span>
                           </Link>
                         </li>
                       )

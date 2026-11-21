@@ -113,7 +113,7 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
   const mostrarSelo = !MARCA_LEARNHOUSE_SO_ADMIN || !!rights?.dashboard?.action_access
 
   // Pages that use a full-bleed layout (no footer/watermark)
-  const noFooterPaths = ['copilot']
+  const noFooterPaths = ['copilot', 'caderno']
   const isFullBleedPage = noFooterPaths.some((p) => pathParts.includes(p))
 
   return (
