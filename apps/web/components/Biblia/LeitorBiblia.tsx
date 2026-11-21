@@ -20,6 +20,8 @@ import { SeletorVersao } from './SeletorVersao'
 import { OutrasTraducoes } from './OutrasTraducoes'
 import { OriginalVerso } from './OriginalVerso'
 import { PainelVerbete } from './PainelVerbete'
+import { ConviteEstudo } from '@components/Discipulei/ChamadaEstudo'
+import { CHAVE_ULTIMO_CAPITULO } from '@/lib/discipulei/nav'
 
 /**
  * Leitor da Bíblia. Esquema de URL único em todo o app:
@@ -31,7 +33,8 @@ import { PainelVerbete } from './PainelVerbete'
  * última versão escolhidos (localStorage) ou Gênesis 1 na BLIVRE.
  */
 
-const CHAVE_ULTIMO = 'discipulei_biblia_ultimo'
+// Também lida pela tela Hoje ("Continue lendo").
+const CHAVE_ULTIMO = CHAVE_ULTIMO_CAPITULO
 const CHAVE_VERSAO = 'discipulei_biblia_versao'
 const CHAVE_ORIGINAL = 'discipulei_biblia_original'
 const AT = LIVROS.filter((l) => l.testamento === 'AT')
@@ -81,7 +84,7 @@ const campoClasse =
 const botaoClasse =
   'inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--text-2)] transition-colors hover:border-[var(--line-strong)] hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]'
 const chipClasse =
-  'ms-1 inline-flex items-center rounded-md border border-[var(--line)] px-1.5 align-middle font-sans text-[0.68rem] text-[var(--text-2)] hover:border-[var(--line-strong)] hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]'
+  'ms-1 inline-flex items-center rounded-md border border-[var(--line)] px-1.5 align-middle font-sans text-xs text-[var(--text-2)] hover:border-[var(--line-strong)] hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]'
 const FONTE_TEXTO = "var(--font-serif), Georgia, 'Times New Roman', serif"
 
 function Credito({ versao }: { versao: VersaoInfo }) {
@@ -223,7 +226,7 @@ export default function LeitorBiblia() {
         replace
         scroll={false}
         aria-label={formatarReferencia({ livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: n })}
-        className="me-1 select-none align-super font-sans text-[0.68rem] font-medium text-[var(--text-3)] no-underline hover:text-[var(--text)]"
+        className="-my-2 me-0.5 inline-block select-none rounded px-1 py-2 align-super font-sans text-xs font-medium leading-none text-[var(--text-3)] no-underline hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
       >
         {n}
       </Link>
@@ -297,7 +300,7 @@ export default function LeitorBiblia() {
               )}
             </p>
             <p lang={versaoB?.idioma} className="text-[var(--text-2)] md:text-[var(--text)]">
-              <span className="me-1.5 font-sans text-[0.65rem] font-medium text-[var(--text-3)] md:hidden">{versaoB?.sigla}</span>
+              <span className="me-1.5 font-sans text-xs font-medium text-[var(--text-3)] md:hidden">{versaoB?.sigla}</span>
               {b || <span className="text-[var(--text-3)]">—</span>}
             </p>
           </div>
@@ -429,6 +432,9 @@ export default function LeitorBiblia() {
           <span />
         )}
       </nav>
+
+      {/* Discipulei: no fim do capítulo, convite para estudar com alguém. */}
+      {estadoTexto?.tipo === 'pronto' && <ConviteEstudo lugar="biblia" className="mt-10" />}
 
       <footer className="mt-12 border-t border-[var(--line)] pt-4 text-xs leading-relaxed text-[var(--text-3)]">
         <Credito versao={versaoA} />

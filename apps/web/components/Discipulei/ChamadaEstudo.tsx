@@ -9,8 +9,9 @@
    do site, que já tem o fluxo completo; aqui só apontamos para lá.
 
    Atribuição: todo link leva `?o=comunidade-<lugar>`, lido pelo main.js da
-   página (params.get('o')). Lugares em uso: lista, comunidade, discussao,
-   menu.
+   página (params.get('o')). Lugares em uso: menu (avatar), menu-lateral,
+   devocional (depois de publicar) e biblia (fim do capítulo). Ver
+   lib/discipulei/nav.ts.
 
    Nova aba (target _blank + rel noopener): o destino é outro site. Na
    comunidade instalada como app (PWA em modo standalone), abrir na mesma aba
@@ -25,16 +26,17 @@
 
 import React, { useId } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRight, BookOpen } from 'lucide-react'
+import { ArrowUpRight, BookOpen, X } from 'lucide-react'
 import { BookOpen as BookOpenMenu } from '@phosphor-icons/react'
+import { URL_DISCIPULADO, urlAgendar, type LugarAgendar } from '@/lib/discipulei/nav'
 
-export const URL_ESTUDO = 'https://www.discipulei.com.br/discipulado-biblico/'
+export const URL_ESTUDO = URL_DISCIPULADO
 
-export type LugarChamada = 'lista' | 'comunidade' | 'discussao' | 'menu'
+export type LugarChamada = LugarAgendar
 
 /** Link para a página do discipulado com a origem para atribuição. */
 export function urlEstudo(lugar: LugarChamada, ancora?: 'agendar' | 'como-funciona'): string {
-  return `${URL_ESTUDO}?o=comunidade-${lugar}${ancora ? `#${ancora}` : ''}`
+  return urlAgendar(lugar, ancora ?? 'agendar')
 }
 
 const SERIF: React.CSSProperties = {
@@ -157,4 +159,55 @@ export function itemMenuChamada(rotulo: string) {
     href: urlEstudo('menu', 'agendar'),
     external: true,
   }
+}
+
+/**
+ * Convite contextual, no momento em que faz sentido: logo depois de publicar
+ * um devocional e no fim de um capítulo da Bíblia. "Quer estudar isso com
+ * alguém?" + Agendar estudo (site, nova aba, com a origem na URL).
+ */
+export function ConviteEstudo({
+  lugar,
+  className = '',
+  aoFechar,
+}: {
+  lugar: Extract<LugarChamada, 'devocional' | 'biblia'>
+  className?: string
+  aoFechar?: () => void
+}) {
+  const { t } = useTranslation()
+  const id = useId()
+  return (
+    <section
+      aria-labelledby={id}
+      className={`relative flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--line)] bg-[var(--panel)] p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5 ${className}`}
+    >
+      <div className="min-w-0 pe-8 sm:pe-0">
+        <h2 id={id} className="text-lg leading-snug text-[var(--text)]" style={SERIF}>
+          {lugar === 'devocional' ? t('chamada_estudo.convite_publicado') : t('chamada_estudo.convite_titulo')}
+        </h2>
+        <p className="mt-1 text-sm leading-snug text-[var(--text-2)]">{t('chamada_estudo.convite_descricao')}</p>
+      </div>
+      <a
+        href={urlEstudo(lugar, 'agendar')}
+        target="_blank"
+        rel="noopener"
+        className={`${BOTAO_PRIMARIO} shrink-0 self-start sm:self-auto`}
+      >
+        {t('chamada_estudo.cta')}
+        <ArrowUpRight size={16} aria-hidden="true" className="rtl:-scale-x-100" />
+        <span className="sr-only"> ({t('chamada_estudo.nova_aba')})</span>
+      </a>
+      {aoFechar && (
+        <button
+          type="button"
+          onClick={aoFechar}
+          aria-label={t('chamada_estudo.dispensar')}
+          className={`absolute end-1 top-1 inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--text-3)] hover:bg-[var(--surface)] hover:text-[var(--text)] sm:static sm:-me-2 ${FOCO}`}
+        >
+          <X size={18} aria-hidden="true" />
+        </button>
+      )}
+    </section>
+  )
 }

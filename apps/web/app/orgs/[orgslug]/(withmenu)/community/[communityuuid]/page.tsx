@@ -9,7 +9,6 @@ import { getCanonicalUrl, getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
 import { JsonLd } from '@components/SEO/JsonLd'
 import CommunityClient from './community'
-import ChamadaEstudo from '@components/Discipulei/ChamadaEstudo'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; communityuuid: string }>
@@ -162,8 +161,9 @@ const CommunityPage = async (params: any) => {
     <>
       <JsonLd data={breadcrumbJsonLd} />
       <JsonLd data={communityJsonLd} />
-      {/* Discipulei: chamada para estudar com a equipe (foco da comunidade). */}
-      <ChamadaEstudo variante="faixa" lugar="comunidade" />
+      {/* Discipulei: a faixa "Agendar estudo" saiu daqui (21/11/2026); o convite
+          fica no menu e nos momentos certos (devocional publicado, fim do
+          capítulo). */}
       <CommunityClient
         community={community}
         initialDiscussions={discussions || []}

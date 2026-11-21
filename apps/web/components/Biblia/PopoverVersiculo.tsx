@@ -128,7 +128,7 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
             {visiveis.map((v) => (
               <span key={v.numero}>
                 {mostrarNumeros && (
-                  <sup className="me-0.5 font-sans text-[0.65rem] text-[var(--text-3)]">{v.numero}</sup>
+                  <sup className="me-0.5 font-sans text-xs text-[var(--text-3)]">{v.numero}</sup>
                 )}
                 {v.texto}{' '}
               </span>

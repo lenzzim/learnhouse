@@ -246,7 +246,11 @@
     "cta": "Agendar estudo",
     "como_funciona": "Como funciona",
     "menu": "Agendar estudo",
-    "nova_aba": "abre em nova aba"
+    "nova_aba": "abre em nova aba",
+    "convite_titulo": "Quer estudar isso com alguém?",
+    "convite_publicado": "Devocional publicado. Quer estudar isso com alguém?",
+    "convite_descricao": "Oito estudos bíblicos, de graça, em grupo de 2 ou 3 pessoas. Online ou presencial.",
+    "dispensar": "Dispensar convite"
   },
   "banner": {
     "viewing_as_guest": "Você está visualizando {{name}} como convidado.",
