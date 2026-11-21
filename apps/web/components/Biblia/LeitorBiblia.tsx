@@ -15,7 +15,9 @@ import {
 } from '@/lib/biblia/referencias'
 import { VERSAO_PADRAO, versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
 import { CREDITO_STEPBIBLE, URL_STEPBIBLE, type CapituloOriginal, type PalavraOriginal } from '@/lib/biblia/original'
-import { carregarLivro, carregarOriginal, type LivroDados } from '@/lib/biblia/dados'
+import { carregarOriginal } from '@/lib/biblia/dados'
+import { ErroFonte, getChapter, rotuloVerso, versoIncluidoEm, type Capitulo } from '@/lib/biblia/fontes'
+import { mensagemErroBiblia, useAcessoBiblia, useFums } from './useFonteBiblia'
 import { SeletorVersao } from './SeletorVersao'
 import { OutrasTraducoes } from './OutrasTraducoes'
 import { OriginalVerso } from './OriginalVerso'
@@ -55,7 +57,7 @@ function gravarArmazenado(chave: string, valor: string) {
   }
 }
 
-type Estado<T> = { tipo: 'carregando' } | { tipo: 'erro' } | { tipo: 'pronto'; dados: T }
+type Estado<T> = { tipo: 'carregando' } | { tipo: 'erro'; erro?: unknown } | { tipo: 'pronto'; dados: T }
 
 /** Carrega `carregar()` sempre que `chave` muda; `chave` null = nada a carregar. */
 function useCarregar<T>(chave: string | null, carregar: () => Promise<T>, tentativa: number): Estado<T> | null {
@@ -69,7 +71,7 @@ function useCarregar<T>(chave: string | null, carregar: () => Promise<T>, tentat
     setEstado({ tipo: 'carregando' })
     carregar()
       .then((dados) => vivo && setEstado({ tipo: 'pronto', dados }))
-      .catch(() => vivo && setEstado({ tipo: 'erro' }))
+      .catch((erro) => vivo && setEstado({ tipo: 'erro', erro }))
     return () => {
       vivo = false
     }
@@ -87,8 +89,17 @@ const chipClasse =
   'ms-1 inline-flex items-center rounded-md border border-[var(--line)] px-1.5 align-middle font-sans text-xs text-[var(--text-2)] hover:border-[var(--line-strong)] hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]'
 const FONTE_TEXTO = "var(--font-serif), Georgia, 'Times New Roman', serif"
 
-function Credito({ versao }: { versao: VersaoInfo }) {
+function Credito({ versao, copyright }: { versao: VersaoInfo; copyright?: string | null }) {
   const { t } = useTranslation()
+  if (versao.fonte === 'licenciada') {
+    // termos da API.Bible: copyright da versão junto do texto + sigla
+    return (
+      <p className="mt-1">
+        <span className="font-medium text-[var(--text-2)]">{versao.sigla}</span> — {copyright || versao.credito}{' '}
+        {t('biblia.fornecido_api_bible')}
+      </p>
+    )
+  }
   return (
     <p className="mt-1">
       {versao.credito}
@@ -151,14 +162,22 @@ export default function LeitorBiblia() {
   const irPara = (href: string) => router.push(href)
 
   const [tentativa, setTentativa] = useState(0)
-  const estadoA = useCarregar<LivroDados>(
-    `${versaoA.id}/${livroInfo.id}`,
-    () => carregarLivro(livroInfo.id, versaoA.id),
+  // licenciadas: espera a sessão (o proxy exige login) e recarrega ao entrar/sair
+  const acesso = useAcessoBiblia()
+  const chaveCapitulo = (v: VersaoInfo | null) => {
+    if (!v) return null
+    if (v.fonte !== 'licenciada') return `${v.id}/${livroInfo.id}/${atual.capitulo}`
+    if (acesso.carregandoSessao) return null
+    return `${v.id}/${livroInfo.id}/${atual.capitulo}/${acesso.logado ? 1 : 0}`
+  }
+  const estadoA = useCarregar<Capitulo>(
+    chaveCapitulo(versaoA),
+    () => getChapter(versaoA.id, livroInfo.id, atual.capitulo, acesso),
     tentativa
   )
-  const estadoB = useCarregar<LivroDados>(
-    versaoB ? `${versaoB.id}/${livroInfo.id}` : null,
-    () => carregarLivro(livroInfo.id, versaoB?.id),
+  const estadoB = useCarregar<Capitulo>(
+    chaveCapitulo(versaoB),
+    () => getChapter(versaoB?.id ?? '', livroInfo.id, atual.capitulo, acesso),
     tentativa
   )
 
@@ -189,8 +208,8 @@ export default function LeitorBiblia() {
 
   const prontoA = estadoA?.tipo === 'pronto' ? estadoA.dados : null
   const prontoB = estadoB?.tipo === 'pronto' ? estadoB.dados : null
-  const versosA = prontoA?.capitulos[atual.capitulo - 1] ?? []
-  const versosB = prontoB?.capitulos[atual.capitulo - 1] ?? []
+  const versosA = prontoA?.versos ?? []
+  const versosB = prontoB?.versos ?? []
   const total = Math.max(versosA.length, versosB.length)
   const original = estadoOriginal?.tipo === 'pronto' ? estadoOriginal.dados : null
   const ini = atual.versoIni
@@ -215,7 +234,7 @@ export default function LeitorBiblia() {
   const anterior = capituloVizinho(livroInfo.id, atual.capitulo, -1)
   const proximo = capituloVizinho(livroInfo.id, atual.capitulo, 1)
 
-  const numeroVerso = (n: number) => {
+  const numeroVerso = (n: number, cap: Capitulo | null = prontoA) => {
     const alvo: Referencia =
       destacado(n) && ini === fim
         ? { livroId: livroInfo.id, capitulo: atual.capitulo }
@@ -228,7 +247,7 @@ export default function LeitorBiblia() {
         aria-label={formatarReferencia({ livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: n })}
         className="-my-2 me-0.5 inline-block select-none rounded px-1 py-2 align-super font-sans text-xs font-medium leading-none text-[var(--text-3)] no-underline hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
       >
-        {n}
+        {rotuloVerso(cap, n)}
       </Link>
     )
   }
@@ -246,6 +265,16 @@ export default function LeitorBiblia() {
     )
   }
   const originalVisivel = (n: number) => mostrarOriginal || abertos.has(n)
+  // títulos de seção (ARA, NTLH...): pequenos, em sans, fora do texto do versículo
+  const classeTituloSecao = 'mb-1 mt-6 font-sans text-sm font-semibold leading-snug tracking-normal text-[var(--text-2)] first:mt-0'
+  const ausente = (cap: Capitulo | null, n: number) => {
+    const ini = versoIncluidoEm(cap, n)
+    return (
+      <span className="font-sans text-sm text-[var(--text-3)]" title={ini ? undefined : t('biblia.verso_ausente')}>
+        {ini ? t('biblia.verso_incluido', { n: rotuloVerso(cap, ini) }) : '—'}
+      </span>
+    )
+  }
   const classeDestaque = (n: number) =>
     destacado(n) ? 'rounded-[3px] bg-[var(--surface)] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]' : ''
 
@@ -260,6 +289,15 @@ export default function LeitorBiblia() {
     versosA.forEach((texto, i) => {
       const n = i + 1
       if (!texto) return // versículo ausente nesta versão (versificação)
+      const tituloSecao = prontoA?.titulos[n]
+      if (tituloSecao) {
+        fecharTrecho(`p-antes-t${n}`)
+        blocos.push(
+          <h2 key={`t${n}`} className={classeTituloSecao}>
+            {tituloSecao}
+          </h2>
+        )
+      }
       trecho.push(
         <span key={n} id={`v${n}`} className={`scroll-mt-28 ${classeDestaque(n)}`}>
           {numeroVerso(n)}
@@ -287,12 +325,25 @@ export default function LeitorBiblia() {
       const a = versosA[n - 1]
       const b = versosB[n - 1]
       if (!a && !b) continue
+      const tA = prontoA?.titulos[n]
+      const tB = prontoB?.titulos[n]
+      if (tA || tB) {
+        linhas.push(
+          <div key={`t${n}`} className="grid gap-x-8 pt-5 md:grid-cols-2">
+            <h2 lang={versaoA.idioma} className={`${classeTituloSecao} mt-0`}>{tA}</h2>
+            <h2 lang={versaoB?.idioma} className={`${classeTituloSecao} mt-0`}>
+              {tB && <span className="me-1.5 text-xs font-medium text-[var(--text-3)] md:hidden">{versaoB?.sigla}</span>}
+              {tB}
+            </h2>
+          </div>
+        )
+      }
       linhas.push(
         <div key={n} id={`v${n}`} className={`scroll-mt-28 border-b border-[var(--line-2)] py-2 ${destacado(n) ? 'bg-[var(--surface)]' : ''}`}>
           <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
             <p lang={versaoA.idioma}>
               {numeroVerso(n)}
-              {a || <span className="text-[var(--text-3)]">—</span>}
+              {a || ausente(prontoA, n)}
               {!mostrarOriginal && (
                 <button type="button" className={chipClasse} aria-expanded={abertos.has(n)} onClick={() => alternarVerso(n)}>
                   {t('biblia.original')}
@@ -301,7 +352,16 @@ export default function LeitorBiblia() {
             </p>
             <p lang={versaoB?.idioma} className="text-[var(--text-2)] md:text-[var(--text)]">
               <span className="me-1.5 font-sans text-xs font-medium text-[var(--text-3)] md:hidden">{versaoB?.sigla}</span>
-              {b || <span className="text-[var(--text-3)]">—</span>}
+              {b ? (
+                <>
+                  {prontoB?.combinados[n] && (
+                    <span className="me-1 font-sans text-xs text-[var(--text-3)]">{rotuloVerso(prontoB, n)}</span>
+                  )}
+                  {b}
+                </>
+              ) : (
+                ausente(prontoB, n)
+              )}
             </p>
           </div>
           {originalVisivel(n) && blocoOriginal(n)}
@@ -312,6 +372,10 @@ export default function LeitorBiblia() {
   }
 
   const estadoTexto = versaoB && estadoB?.tipo !== 'pronto' && estadoA?.tipo === 'pronto' ? estadoB : estadoA
+  const versaoComErro = estadoTexto === estadoB && versaoB ? versaoB : versaoA
+  // FUMS (API.Bible): reporta cada exibição de texto licenciado
+  useFums(estadoTexto?.tipo === 'pronto' ? [prontoA?.fums, versaoB ? prontoB?.fums : null] : [])
+  const temLicenciada = versaoA.fonte === 'licenciada' || versaoB?.fonte === 'licenciada'
   const refPassagem: Referencia = { livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: ini, versoFim: fim !== ini ? fim : undefined }
 
   return (
@@ -385,6 +449,7 @@ export default function LeitorBiblia() {
           </button>
           <OutrasTraducoes referencia={refPassagem} flutuante />
         </div>
+        {temLicenciada && <p className="-mt-1 text-xs text-[var(--text-3)]">{t('biblia.nota_licenciadas')}</p>}
       </header>
 
       {versaoB && (
@@ -405,10 +470,16 @@ export default function LeitorBiblia() {
         )}
         {estadoTexto?.tipo === 'erro' && (
           <div className="text-base text-[var(--text-2)]">
-            <p>{t('biblia.erro_carregar')}</p>
-            <button type="button" className={`${botaoClasse} mt-3`} onClick={() => setTentativa((n) => n + 1)}>
-              {t('biblia.tentar_novamente')}
-            </button>
+            <p>{mensagemErroBiblia(estadoTexto.erro, t, versaoComErro.sigla)}</p>
+            {estadoTexto.erro instanceof ErroFonte && estadoTexto.erro.codigo === 'nao_autenticado' ? (
+              <Link href={`/login?next=${encodeURIComponent(`/biblia${montarHref(atual)}`)}`} className={`${botaoClasse} mt-3`}>
+                {t('biblia.entrar')}
+              </Link>
+            ) : (
+              <button type="button" className={`${botaoClasse} mt-3`} onClick={() => setTentativa((n) => n + 1)}>
+                {t('biblia.tentar_novamente')}
+              </button>
+            )}
           </div>
         )}
         {estadoTexto?.tipo === 'pronto' && (versaoB ? textoComparado() : textoSimples())}
@@ -437,8 +508,8 @@ export default function LeitorBiblia() {
       {estadoTexto?.tipo === 'pronto' && <ConviteEstudo lugar="biblia" className="mt-10" />}
 
       <footer className="mt-12 border-t border-[var(--line)] pt-4 text-xs leading-relaxed text-[var(--text-3)]">
-        <Credito versao={versaoA} />
-        {versaoB && <Credito versao={versaoB} />}
+        <Credito versao={versaoA} copyright={prontoA?.copyright} />
+        {versaoB && <Credito versao={versaoB} copyright={prontoB?.copyright} />}
         {precisaOriginal && (
           <p className="mt-1">
             <a href={URL_STEPBIBLE} target="_blank" rel="noopener noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-[var(--text-2)]">

@@ -3,14 +3,22 @@ import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } f
 import type { Editor } from '@tiptap/react'
 import { useTranslation } from 'react-i18next'
 import { BookOpen } from 'lucide-react'
-import { formatarReferencia, interpretarReferencia, TRADUCAO } from '@/lib/biblia/referencias'
-import { versiculosDaReferencia, type Versiculo } from '@/lib/biblia/dados'
+import { formatarReferencia, interpretarReferencia } from '@/lib/biblia/referencias'
+import { type Versiculo } from '@/lib/biblia/dados'
+import { VERSAO_PADRAO, versaoPorId } from '@/lib/biblia/versoes'
+import { getVerses, rotuloVerso, type Capitulo } from '@/lib/biblia/fontes'
+import { SeletorVersao } from './SeletorVersao'
+import { mensagemErroBiblia, useAcessoBiblia, useFums } from './useFonteBiblia'
 
 /**
  * Botão da barra do editor de discussões: o usuário digita uma referência
- * ("Jo 3:16-18"), vê o texto e insere um <blockquote> com os versículos e,
- * na última linha, "— João 3:16-18 (BLIVRE)". O painel fica dentro da árvore
- * do editor (não em portal) para funcionar dentro do modal (foco preso).
+ * ("Jo 3:16-18"), escolhe a versão, vê o texto e insere um <blockquote>.
+ * - Versões abertas: os versículos e, na última linha, "— João 3:16-18 (BLIVRE)".
+ * - Versões licenciadas (API.Bible): SÓ a linha "— João 3:16-18 (ARA)". O
+ *   texto não é gravado no post (termos da licença); quem lê vê o texto ao
+ *   vivo pelo widget de citacaoViva.ts, com o copyright.
+ * O painel fica dentro da árvore do editor (não em portal) para funcionar
+ * dentro do modal (foco preso).
  */
 
 const MAX_VERSOS = 30
@@ -30,13 +38,27 @@ export function textoDoBloco(versos: Versiculo[]): string {
   return versos.map((v) => `${sobrescrito(v.numero)} ${v.texto}`).join(' ')
 }
 
-type Previa = { tipo: 'vazio' } | { tipo: 'carregando' } | { tipo: 'erro' } | { tipo: 'pronto'; versos: Versiculo[] }
+/** Prévia de licenciada: números com o rótulo do combinado ("25-26"). Só exibição, nunca gravado. */
+function textoComRotulos(versos: Versiculo[], capitulo: Capitulo): string {
+  if (versos.length === 1 && !capitulo.combinados[versos[0].numero]) return versos[0].texto
+  return versos.map((v) => `${rotuloVerso(capitulo, v.numero)} ${v.texto}`).join(' ')
+}
+
+type Previa =
+  | { tipo: 'vazio' }
+  | { tipo: 'carregando' }
+  | { tipo: 'erro'; erro?: unknown }
+  | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo }
 
 export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
   const { t } = useTranslation()
   const [aberto, setAberto] = useState(false)
   const [entrada, setEntrada] = useState('')
   const [previa, setPrevia] = useState<Previa>({ tipo: 'vazio' })
+  const [versao, setVersao] = useState(VERSAO_PADRAO)
+  const info = versaoPorId(versao) ?? versaoPorId(VERSAO_PADRAO)!
+  const licenciada = info.fonte === 'licenciada'
+  const acesso = useAcessoBiblia()
   const [deslocamento, setDeslocamento] = useState(0)
   const raizRef = useRef<HTMLDivElement | null>(null)
   const botaoRef = useRef<HTMLButtonElement | null>(null)
@@ -59,15 +81,16 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
     }
     let vivo = true
     setPrevia({ tipo: 'carregando' })
-    versiculosDaReferencia(ref)
-      .then((versos) => vivo && setPrevia({ tipo: 'pronto', versos }))
-      .catch(() => vivo && setPrevia({ tipo: 'erro' }))
+    getVerses(versao, ref, acesso)
+      .then(({ versos, capitulo }) => vivo && setPrevia({ tipo: 'pronto', versos, capitulo }))
+      .catch((erro) => vivo && setPrevia({ tipo: 'erro', erro }))
     return () => {
       vivo = false
     }
     // a referência é derivada de `entrada`
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entrada, valida])
+  }, [entrada, valida, versao, acesso.logado])
+  useFums(previa.tipo === 'pronto' ? [previa.capitulo.fums] : [])
 
   // mantém o painel dentro da viewport (a barra pode estar perto da borda)
   useLayoutEffect(() => {
@@ -95,16 +118,17 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
 
   const inserir = () => {
     if (!valida || !ref || previa.tipo !== 'pronto' || !previa.versos.length) return
+    const citacao = { type: 'paragraph', content: [{ type: 'text', text: `— ${formatarReferencia(ref)} (${info.sigla})` }] }
     editor
       .chain()
       .focus()
       .insertContent([
         {
           type: 'blockquote',
-          content: [
-            { type: 'paragraph', content: [{ type: 'text', text: textoDoBloco(previa.versos) }] },
-            { type: 'paragraph', content: [{ type: 'text', text: `— ${formatarReferencia(ref)} (${TRADUCAO})` }] },
-          ],
+          // licenciada: só a referência + versão; o texto aparece ao vivo para quem lê
+          content: licenciada
+            ? [citacao]
+            : [{ type: 'paragraph', content: [{ type: 'text', text: textoDoBloco(previa.versos) }] }, citacao],
         },
         { type: 'paragraph' },
       ])
@@ -146,9 +170,18 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
           style={{ left: deslocamento, width: `min(${LARGURA}px, calc(100vw - 32px))`, boxShadow: 'var(--sombra-md)' }}
           className="absolute top-full z-50 mt-2 rounded-xl border border-[var(--line-strong)] bg-[var(--panel)] p-3 text-[var(--text)]"
         >
-          <label htmlFor={idEntrada} className="mb-1 block text-xs font-medium text-[var(--text-2)]">
-            {t('biblia.referencia')}
-          </label>
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <label htmlFor={idEntrada} className="block text-xs font-medium text-[var(--text-2)]">
+              {t('biblia.referencia')}
+            </label>
+            <SeletorVersao
+              curto
+              rotulo={t('biblia.versao')}
+              valor={versao}
+              onChange={setVersao}
+              className="h-7 rounded-md border border-[var(--line)] bg-[var(--panel)] px-1.5 text-xs text-[var(--text-2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
+            />
+          </div>
           <input
             id={idEntrada}
             autoFocus
@@ -168,17 +201,25 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
           <div className="mt-2 min-h-[1.25rem] text-sm" aria-live="polite">
             {aviso && <p className="text-xs text-[var(--text-2)]">{aviso}</p>}
             {!aviso && previa.tipo === 'carregando' && <p className="text-xs text-[var(--text-3)]">{t('biblia.carregando')}</p>}
-            {!aviso && previa.tipo === 'erro' && <p className="text-xs text-[var(--text-2)]">{t('biblia.erro_carregar')}</p>}
+            {!aviso && previa.tipo === 'erro' && (
+              <p className="text-xs text-[var(--text-2)]">{mensagemErroBiblia(previa.erro, t, info.sigla)}</p>
+            )}
             {!aviso && previa.tipo === 'pronto' && ref && (
               <blockquote
                 className="max-h-40 overflow-y-auto border-s-2 border-[var(--line-strong)] ps-3 leading-relaxed"
                 style={{ fontFamily: "var(--font-serif), Georgia, 'Times New Roman', serif" }}
               >
-                <p>{textoDoBloco(previa.versos)}</p>
+                <p>{licenciada ? textoComRotulos(previa.versos, previa.capitulo) : textoDoBloco(previa.versos)}</p>
                 <p className="mt-1 font-sans text-xs text-[var(--text-3)]">
-                  — {formatarReferencia(ref)} ({TRADUCAO})
+                  — {formatarReferencia(ref)} ({info.sigla})
                 </p>
+                {licenciada && previa.capitulo.copyrightCurto && (
+                  <p className="mt-1 font-sans text-[0.7rem] text-[var(--text-3)]">{previa.capitulo.copyrightCurto}</p>
+                )}
               </blockquote>
+            )}
+            {!aviso && licenciada && previa.tipo === 'pronto' && (
+              <p className="mt-2 text-xs text-[var(--text-3)]">{t('biblia.nota_citacao_licenciada')}</p>
             )}
           </div>
           <div className="mt-3 flex justify-end gap-2">
