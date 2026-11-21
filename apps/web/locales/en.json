@@ -825,11 +825,51 @@
       "clear_filter": "Clear filter"
     },
     "labels": {
+      "devocional": "Devotional",
+      "testemunho": "Testimony",
+      "oracao": "Prayer request",
       "general": "General",
       "question": "Question",
       "idea": "Idea",
       "announcement": "Announcement",
       "showcase": "Showcase"
+    },
+    "devotional_template": {
+      "passage": "Passage",
+      "learned": "What I learned",
+      "apply": "How to apply it",
+      "prayer": "Prayer"
+    },
+    "visibility": {
+      "label": "Who can see this",
+      "private_option": "Only me (notebook)",
+      "private_hint": "Stays in your notebook. Nobody else can see it, not even moderators.",
+      "public_option": "Publish to the community",
+      "public_hint": "Every community member can read and comment.",
+      "private_badge": "Private",
+      "private_notice": "This note is private: only you can see it. Publish it whenever you want to share it with the community.",
+      "publish": "Publish",
+      "publish_title": "Publish to the community?",
+      "publish_confirm": "Community members will be able to read, react and comment.",
+      "publish_button": "Publish now",
+      "cancel": "Cancel",
+      "make_private": "Make private",
+      "published": "Published to the community",
+      "made_private": "Only you can see this discussion now",
+      "failed": "Could not change the visibility",
+      "submit_private": "Save to notebook",
+      "comments_private": "Replies become available once you publish."
+    },
+    "notebook": {
+      "title": "My notebook",
+      "open": "My notebook",
+      "description": "Your devotionals and study notes. Only you can see what is here.",
+      "empty_title": "Your notebook is empty",
+      "empty_description": "When creating a discussion, choose \"Only me (notebook)\" to keep it here.",
+      "load_more": "Load more",
+      "login_required": "Sign in to see your notebook.",
+      "in_community": "in {{community}}",
+      "error": "Could not load your notebook."
     },
     "create_discussion": {
       "title": "Start a Discussion",

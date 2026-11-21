@@ -1,39 +1,24 @@
 'use client'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDown, MessageSquare, HelpCircle, Lightbulb, Megaphone, Star, X } from 'lucide-react'
+import { ChevronDown, MessageSquare, X } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu"
-import { DISCUSSION_LABELS, DiscussionLabel } from '@services/communities/discussions'
+import { DISCUSSION_LABELS, getLabelInfo } from '@services/communities/discussions'
+import { getLabelIcon } from './labelIcons'
 
 interface LabelFilterProps {
   value: string | null
   onChange: (value: string | null) => void
 }
 
-// Get the icon component for a label
-function getLabelIcon(iconName: string, size: number = 12) {
-  switch (iconName) {
-    case 'HelpCircle':
-      return <HelpCircle size={size} />
-    case 'Lightbulb':
-      return <Lightbulb size={size} />
-    case 'Megaphone':
-      return <Megaphone size={size} />
-    case 'Star':
-      return <Star size={size} />
-    default:
-      return <MessageSquare size={size} />
-  }
-}
-
 export function LabelFilter({ value, onChange }: LabelFilterProps) {
   const { t } = useTranslation()
-  const currentLabel = value ? DISCUSSION_LABELS.find(l => l.id === value) : null
+  const currentLabel = value ? getLabelInfo(value) : null
 
   return (
     <div className="flex items-center gap-1">

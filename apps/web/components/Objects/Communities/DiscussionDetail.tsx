@@ -5,12 +5,13 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.extend(relativeTime)
-import { Edit, Trash2, MoreVertical } from 'lucide-react'
+import { Edit, Trash2, MoreVertical, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { useRouter } from 'next/navigation'
 import { getUriWithOrg } from '@services/config/config'
-import { DiscussionWithAuthor, DiscussionAuthor, deleteDiscussion, getLabelInfo } from '@services/communities/discussions'
+import { DiscussionWithAuthor, DiscussionAuthor, deleteDiscussion, getLabelInfo, isPrivateDiscussion } from '@services/communities/discussions'
+import { PrivateBadge, PublishDiscussionButton, useChangeVisibility } from './DiscussionVisibilityControls'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { CommentSection } from './CommentSection'
 import { DiscussionContent } from './DiscussionContent'
@@ -28,6 +29,7 @@ interface DiscussionDetailProps {
   communityUuid: string
   orgslug: string
   onEdit?: () => void
+  onDiscussionUpdated?: (updated: DiscussionWithAuthor) => void
 }
 
 /**
@@ -71,6 +73,7 @@ export function DiscussionDetail({
   communityUuid,
   orgslug,
   onEdit,
+  onDiscussionUpdated,
 }: DiscussionDetailProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
@@ -82,6 +85,13 @@ export function DiscussionDetail({
   const timeAgo = dayjs(discussion.creation_date).fromNow()
   const isAuthor = currentUserId === discussion.author_id
   const labelInfo = getLabelInfo(discussion.label || 'general')
+  const isPrivate = isPrivateDiscussion(discussion)
+  const { changeVisibility } = useChangeVisibility()
+
+  const handleMakePrivate = async () => {
+    const updated = await changeVisibility(discussion, 'private')
+    if (updated) onDiscussionUpdated?.(updated)
+  }
 
   const authorName = discussion.author
     ? `${discussion.author.first_name} ${discussion.author.last_name}`.trim() || discussion.author.username
@@ -115,6 +125,7 @@ export function DiscussionDetail({
               )}
               <span dir="auto">{discussion.title}</span>
             </h1>
+            {isPrivate && <PrivateBadge className="mt-2" />}
           </div>
 
           {isAuthor && (
@@ -129,6 +140,12 @@ export function DiscussionDetail({
                   <DropdownMenuItem onClick={onEdit}>
                     <Edit className="me-2 h-4 w-4" />
                     {t('communities.discussion_detail.edit')}
+                  </DropdownMenuItem>
+                )}
+                {!isPrivate && (
+                  <DropdownMenuItem onClick={handleMakePrivate}>
+                    <Lock className="me-2 h-4 w-4" />
+                    {t('communities.visibility.make_private')}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
@@ -149,6 +166,17 @@ export function DiscussionDetail({
             </DropdownMenu>
           )}
         </div>
+
+        {/* Nota privada: aviso + publicar (só o autor chega até aqui) */}
+        {isPrivate && isAuthor && (
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <Lock size={16} className="flex-shrink-0 text-gray-500" />
+            <p className="flex-1 text-sm text-gray-600">
+              {t('communities.visibility.private_notice')}
+            </p>
+            <PublishDiscussionButton discussion={discussion} onUpdated={onDiscussionUpdated} />
+          </div>
+        )}
 
         {/* Author info - Mobile only */}
         <div className="mt-4 flex items-center gap-3 md:hidden">
@@ -185,6 +213,7 @@ export function DiscussionDetail({
           discussionUuid={discussion.discussion_uuid}
           communityUuid={communityUuid}
           isLocked={discussion.is_locked}
+          isPrivate={isPrivate}
         />
       </div>
     </div>

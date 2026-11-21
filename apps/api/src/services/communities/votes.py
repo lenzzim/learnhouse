@@ -12,6 +12,11 @@ from src.db.communities.communities import Community
 from src.db.communities.discussions import Discussion
 from src.db.communities.discussion_votes import DiscussionVote, DiscussionVoteRead
 from src.security.rbac import check_resource_access, AccessAction, authorization_verify_if_user_is_anon
+from src.services.communities.visibility import (
+    ensure_discussion_open_for_interaction,
+    ensure_discussion_visible,
+    visible_discussions_clause,
+)
 from src.services.webhooks.dispatch import dispatch_webhooks
 
 
@@ -38,6 +43,9 @@ async def upvote_discussion(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: sem comentários/votos/reações (404 p/ outros, 403 p/ autor)
+    ensure_discussion_open_for_interaction(discussion, current_user)
 
     # Get the community and check read access
     community_statement = select(Community).where(
@@ -124,6 +132,9 @@ async def remove_upvote(
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
 
+    # Caderno privado: só o autor lê (404 para os demais)
+    ensure_discussion_visible(discussion, current_user)
+
     # Find existing vote
     vote_statement = select(DiscussionVote).where(
         DiscussionVote.discussion_id == discussion.id,
@@ -172,7 +183,8 @@ async def get_user_votes_for_discussions(
 
     # Get discussion IDs from UUIDs
     discussions_statement = select(Discussion).where(
-        Discussion.discussion_uuid.in_(discussion_uuids)  # type: ignore
+        Discussion.discussion_uuid.in_(discussion_uuids),  # type: ignore
+        visible_discussions_clause(current_user),
     )
     discussions = (await db_session.execute(discussions_statement)).scalars().all()
     discussion_id_to_uuid = {d.id: d.discussion_uuid for d in discussions}

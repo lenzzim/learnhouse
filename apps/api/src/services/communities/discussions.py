@@ -17,6 +17,8 @@ from src.db.communities.discussions import (
     DiscussionReadWithVoteStatus,
     DiscussionUpdate,
     DISCUSSION_LABELS,
+    LEGACY_DISCUSSION_LABELS,
+    DISCUSSION_VISIBILITY_PUBLIC,
 )
 from src.db.communities.discussion_votes import DiscussionVote
 from src.security.rbac import (
@@ -28,6 +30,15 @@ from src.security.rbac import (
 from src.services.communities.moderation import (
     validate_discussion_content,
     enforce_posting_limits,
+)
+from src.services.communities.visibility import (
+    apply_visibility,
+    announce_publication,
+    ensure_discussion_visible,
+    is_private,
+    privacy_viewer_id,
+    validate_visibility,
+    visible_discussions_clause,
 )
 
 
@@ -66,7 +77,9 @@ def calculate_hot_score(upvotes: int, creation_date: str) -> float:
 
 def validate_label(label: str) -> str:
     """Validate that the label is a valid discussion label."""
-    valid_labels = {label_def["id"] for label_def in DISCUSSION_LABELS}
+    valid_labels = {
+        label_def["id"] for label_def in (*DISCUSSION_LABELS, *LEGACY_DISCUSSION_LABELS)
+    }
     if label not in valid_labels:
         return "general"
     return label
@@ -81,15 +94,19 @@ async def create_discussion(
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: AsyncSession,
     emoji: Optional[str] = None,
+    visibility: str = DISCUSSION_VISIBILITY_PUBLIC,
 ) -> DiscussionReadWithVoteStatus:
     """
     Create a new discussion in a community.
 
     Requires authenticated user who can read the community.
     Author automatically upvotes their own discussion.
+    ``visibility='private'`` keeps it in the author's notebook (only they see it).
     """
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
+
+    visibility = validate_visibility(visibility or DISCUSSION_VISIBILITY_PUBLIC)
 
     # Check if user can read the community
     await check_resource_access(
@@ -127,6 +144,7 @@ async def create_discussion(
         upvote_count=1,  # Author's auto-upvote
         is_pinned=False,
         is_locked=False,
+        visibility=visibility,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
     )
@@ -152,6 +170,23 @@ async def create_discussion(
     await db_session.commit()
     await db_session.refresh(discussion)
 
+    # Caderno privado: nada sai para analytics/webhooks (o título iria para
+    # integrações externas). O anúncio acontece se/quando for publicada.
+    if not is_private(discussion):
+        await _announce_new_discussion(discussion, community, community_uuid, validated_label, current_user)
+
+    # Get author info
+    author_statement = select(User).where(User.id == discussion.author_id)
+    author = (await db_session.execute(author_statement)).scalars().first()
+
+    return DiscussionReadWithVoteStatus(
+        **discussion.model_dump(),
+        author=UserReadAuthor.model_validate(author.model_dump()) if author else None,
+        has_voted=True,
+    )
+
+
+async def _announce_new_discussion(discussion, community, community_uuid, validated_label, current_user) -> None:
     # Track discussion posted event
     await track(
         event_name=analytics_events.DISCUSSION_POSTED,
@@ -173,16 +208,6 @@ async def create_discussion(
         },
     )
 
-    # Get author info
-    author_statement = select(User).where(User.id == discussion.author_id)
-    author = (await db_session.execute(author_statement)).scalars().first()
-
-    return DiscussionReadWithVoteStatus(
-        **discussion.model_dump(),
-        author=UserReadAuthor.model_validate(author.model_dump()) if author else None,
-        has_voted=True,
-    )
-
 
 async def get_discussion(
     request: Request,
@@ -199,6 +224,9 @@ async def get_discussion(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: só o autor lê (404 para os demais, inclusive admins)
+    ensure_discussion_visible(discussion, current_user)
 
     # Get community and check access
     community_statement = select(Community).where(Community.id == discussion.community_id)
@@ -267,12 +295,16 @@ async def get_discussions_by_community(
     if label:
         query = query.where(Discussion.label == label)
 
+    # Caderno privado: públicas + as privadas do próprio usuário
+    visible = visible_discussions_clause(current_user)
+
     # For first page, get pinned discussions first
     pinned_discussions = []
     if page == 1:
         pinned_query = select(Discussion).where(
             Discussion.community_id == community.id,
             Discussion.is_pinned == True,
+            visible,
         )
         if label:
             pinned_query = pinned_query.where(Discussion.label == label)
@@ -282,6 +314,7 @@ async def get_discussions_by_community(
     non_pinned_query = select(Discussion).where(
         Discussion.community_id == community.id,
         Discussion.is_pinned == False,
+        visible,
     )
     if label:
         non_pinned_query = non_pinned_query.where(Discussion.label == label)
@@ -382,6 +415,9 @@ async def update_discussion(
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
 
+    # Caderno privado: admins não editam (nem enxergam) notas de outros
+    ensure_discussion_visible(discussion, current_user)
+
     # Get community
     community_statement = select(Community).where(Community.id == discussion.community_id)
     community = (await db_session.execute(community_statement)).scalars().first()
@@ -398,11 +434,30 @@ async def update_discussion(
     if not is_author and not is_admin:
         raise HTTPException(status_code=403, detail="You don't have permission to update this discussion")
 
+    # Visibilidade: só o próprio autor publica/despublica
+    new_visibility = None
+    if discussion_object.visibility is not None:
+        new_visibility = validate_visibility(discussion_object.visibility)
+        if new_visibility != discussion.visibility and discussion.author_id != privacy_viewer_id(current_user):
+            raise HTTPException(
+                status_code=403,
+                detail="Only the author can change the visibility of this discussion",
+            )
+
     # Check edit limit for authors (admins can edit unlimited)
     is_author = discussion.author_id == acting_user_id
     max_edits = 2
+    # Notas privadas não têm público, então editar o caderno não consome edições;
+    # mudar só a visibilidade também não conta como edição.
+    was_private = is_private(discussion)
+    content_changed = any(
+        value is not None
+        for value in (discussion_object.title, discussion_object.content,
+                      discussion_object.label, discussion_object.emoji)
+    )
+    counts_as_edit = is_author and content_changed and not was_private
 
-    if is_author and discussion.edit_count >= max_edits:
+    if counts_as_edit and discussion.edit_count >= max_edits:
         raise HTTPException(
             status_code=403,
             detail={
@@ -430,14 +485,21 @@ async def update_discussion(
         discussion.emoji = discussion_object.emoji if discussion_object.emoji else None
 
     # Increment edit count for authors
-    if is_author:
+    if counts_as_edit:
         discussion.edit_count += 1
 
     discussion.update_date = str(datetime.now())
 
+    just_published = False
+    if new_visibility is not None and new_visibility != discussion.visibility:
+        just_published = apply_visibility(discussion, new_visibility)
+
     db_session.add(discussion)
     await db_session.commit()
     await db_session.refresh(discussion)
+
+    if just_published:
+        await announce_publication(discussion, community, current_user)
 
     # Get author info
     author_statement = select(User).where(User.id == discussion.author_id)
@@ -476,6 +538,11 @@ async def pin_discussion(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: invisível para moderadores; fixar/bloquear não se aplica
+    ensure_discussion_visible(discussion, current_user)
+    if is_private(discussion):
+        raise HTTPException(status_code=403, detail="Private discussions cannot be pinned or locked")
 
     community_statement = select(Community).where(Community.id == discussion.community_id)
     community = (await db_session.execute(community_statement)).scalars().first()
@@ -545,6 +612,11 @@ async def lock_discussion(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: invisível para moderadores; fixar/bloquear não se aplica
+    ensure_discussion_visible(discussion, current_user)
+    if is_private(discussion):
+        raise HTTPException(status_code=403, detail="Private discussions cannot be pinned or locked")
 
     community_statement = select(Community).where(Community.id == discussion.community_id)
     community = (await db_session.execute(community_statement)).scalars().first()
@@ -616,6 +688,9 @@ async def delete_discussion(
 
     if not discussion:
         raise HTTPException(status_code=404, detail="Discussion not found")
+
+    # Caderno privado: só o autor apaga (admins nem sabem que existe)
+    ensure_discussion_visible(discussion, current_user)
 
     # Get community
     community_statement = select(Community).where(Community.id == discussion.community_id)

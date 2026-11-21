@@ -40,7 +40,7 @@ from src.db.courses.assignments import (
 from src.db.code_submissions import CodeSubmission
 from src.db.courses.certifications import CertificateUser, Certifications
 from src.db.communities.communities import Community
-from src.db.communities.discussions import Discussion
+from src.db.communities.discussions import Discussion, DISCUSSION_VISIBILITY_PRIVATE
 from src.db.communities.discussion_comments import DiscussionComment
 from src.services.analytics.enrichment import enrich_with_metadata
 from src.services.audit.answers import (
@@ -523,12 +523,26 @@ async def _code_submissions(db_session: AsyncSession, user_id: int, org_id: int)
     return await enrich_with_metadata(result, db_session)
 
 
-async def _community(db_session: AsyncSession, user_id: int, org_id: int) -> dict:
-    discussions = (await db_session.execute(
+async def _community(
+    db_session: AsyncSession, user_id: int, org_id: int, include_private: bool = False
+) -> dict:
+    """Participação na comunidade.
+
+    Caderno privado (LGPD art. 11): notas privadas são do autor e o dossiê é uma
+    superfície de admin, então ficam de fora — inclusive o título de uma nota
+    privada que apareceria como contexto de um comentário de outra pessoa.
+    ``include_private`` só é ligado quando quem pede o dossiê é o próprio autor.
+    """
+    def _hidden(d: Discussion) -> bool:
+        if d.visibility != DISCUSSION_VISIBILITY_PRIVATE:
+            return False
+        return not (include_private and d.author_id == user_id)
+
+    discussions = [d for d in (await db_session.execute(
         select(Discussion).where(
             Discussion.author_id == user_id, Discussion.org_id == org_id
         ).order_by(Discussion.creation_date.desc())  # type: ignore[union-attr]
-    )).scalars().all()
+    )).scalars().all() if not _hidden(d)]
 
     # Comments have no org column — scope via the parent discussion's org.
     org_discussions = {
@@ -557,7 +571,7 @@ async def _community(db_session: AsyncSession, user_id: int, org_id: int) -> dic
     comments = []
     for c in comment_rows:
         parent = org_discussions.get(c.discussion_id)
-        if parent is None:
+        if parent is None or _hidden(parent):
             continue
         comments.append({
             "comment_uuid": c.comment_uuid,
@@ -656,6 +670,7 @@ async def build_user_dossier(
     days: int = 365,
     behavior_fetcher: Optional[BehaviorFetcher] = None,
     include_raw: bool = False,
+    include_private: bool = False,
 ) -> dict:
     """Assemble the full per-student dossier. ``behavior_fetcher`` is optional so
     the durable Postgres dossier still renders when analytics is unconfigured.
@@ -673,7 +688,7 @@ async def build_user_dossier(
     courses = await _course_progress(db_session, user_id, org_id)
     assignments = await _assignments(db_session, user_id, org_id, include_raw=include_raw)
     code_submissions = await _code_submissions(db_session, user_id, org_id)
-    community = await _community(db_session, user_id, org_id)
+    community = await _community(db_session, user_id, org_id, include_private=include_private)
     certificates = await _certificates(db_session, user_id, org_id)
 
     behavior: dict = {}

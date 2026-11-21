@@ -5,13 +5,28 @@ from src.db.users import UserReadAuthor
 
 
 # Available discussion labels
+# Discipulei: categorias do fórum devocional (espelha DISCUSSION_LABELS em
+# apps/web/services/communities/discussions.ts). Só estas são oferecidas.
 DISCUSSION_LABELS = [
-    {"id": "general", "name": "General", "color": "#6B7280", "icon": "MessageSquare"},
-    {"id": "question", "name": "Q&A", "color": "#EAB308", "icon": "HelpCircle"},
-    {"id": "idea", "name": "Ideas", "color": "#8B5CF6", "icon": "Lightbulb"},
-    {"id": "announcement", "name": "Announcements", "color": "#3B82F6", "icon": "Megaphone"},
-    {"id": "showcase", "name": "Show and Tell", "color": "#10B981", "icon": "Star"},
+    {"id": "devocional", "name": "Devocional", "color": "#8fb8ea", "icon": "BookOpen"},
+    {"id": "testemunho", "name": "Testemunho", "color": "#b9a6ec", "icon": "Sparkles"},
+    {"id": "oracao", "name": "Pedido de oração", "color": "#e5978f", "icon": "HandHeart"},
+    {"id": "question", "name": "Pergunta", "color": "#a3a19c", "icon": "HelpCircle"},
+    {"id": "announcement", "name": "Aviso", "color": "#8a877f", "icon": "Megaphone"},
+    {"id": "general", "name": "Geral", "color": "#7d7b75", "icon": "MessageSquare"},
 ]
+
+# Rótulos do upstream que não são mais oferecidos, mas continuam válidos para
+# que posts antigos (e edições deles) não sejam reclassificados como "general".
+LEGACY_DISCUSSION_LABELS = [
+    {"id": "idea", "name": "Ideas", "color": "#a3a19c", "icon": "Lightbulb"},
+    {"id": "showcase", "name": "Show and Tell", "color": "#a3a19c", "icon": "Star"},
+]
+
+# Caderno privado (decisão N30): 'private' = só o autor vê.
+DISCUSSION_VISIBILITY_PUBLIC = "public"
+DISCUSSION_VISIBILITY_PRIVATE = "private"
+DISCUSSION_VISIBILITIES = (DISCUSSION_VISIBILITY_PUBLIC, DISCUSSION_VISIBILITY_PRIVATE)
 
 
 class DiscussionBase(SQLModel):
@@ -24,6 +39,8 @@ class DiscussionBase(SQLModel):
 class Discussion(DiscussionBase, table=True):
     __table_args__ = (
         Index("ix_discussion_community_id", "community_id"),
+        # "Meu caderno" lista por autor + visibilidade.
+        Index("ix_discussion_author_visibility", "author_id", "visibility"),
     )
     id: Optional[int] = Field(default=None, primary_key=True)
     community_id: int = Field(
@@ -40,6 +57,16 @@ class Discussion(DiscussionBase, table=True):
     edit_count: int = 0
     is_pinned: bool = Field(default=False, sa_column=Column(Boolean, default=False))
     is_locked: bool = Field(default=False, sa_column=Column(Boolean, default=False))
+    # 'public' | 'private'. server_default mantém linhas antigas públicas.
+    visibility: str = Field(
+        default=DISCUSSION_VISIBILITY_PUBLIC,
+        sa_column=Column(
+            String(20),
+            nullable=False,
+            default=DISCUSSION_VISIBILITY_PUBLIC,
+            server_default=DISCUSSION_VISIBILITY_PUBLIC,
+        ),
+    )
     creation_date: str = ""
     update_date: str = ""
 
@@ -49,6 +76,7 @@ class DiscussionCreate(SQLModel):
     content: Optional[str] = None
     label: Optional[str] = "general"
     emoji: Optional[str] = None
+    visibility: Optional[str] = DISCUSSION_VISIBILITY_PUBLIC
     community_id: int = Field(default=None, foreign_key="community.id")
     org_id: int = Field(default=None, foreign_key="organization.id")
     author_id: int = Field(default=None, foreign_key="user.id")
@@ -59,6 +87,12 @@ class DiscussionUpdate(SQLModel):
     content: Optional[str] = None
     label: Optional[str] = None
     emoji: Optional[str] = None
+    # Só o autor pode trocar; validado no service.
+    visibility: Optional[str] = None
+
+
+class DiscussionVisibilityUpdate(SQLModel):
+    visibility: str
 
 
 class DiscussionPinUpdate(SQLModel):
@@ -83,6 +117,7 @@ class DiscussionRead(SQLModel):
     edit_count: int = 0
     is_pinned: bool = False
     is_locked: bool = False
+    visibility: str = DISCUSSION_VISIBILITY_PUBLIC
     creation_date: str
     update_date: str
 
@@ -93,6 +128,12 @@ class DiscussionReadWithAuthor(DiscussionRead):
 
 class DiscussionReadWithVoteStatus(DiscussionReadWithAuthor):
     has_voted: bool = False
+
+
+class NotebookDiscussionRead(DiscussionReadWithVoteStatus):
+    """Item do "Meu caderno": carrega a comunidade para o link na UI."""
+    community_uuid: str = ""
+    community_name: str = ""
 
 
 class DiscussionLabelInfo(SQLModel):

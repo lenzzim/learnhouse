@@ -1,7 +1,9 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, Plus, Loader2, Search, X, Trash2, CheckSquare, Square } from 'lucide-react'
+import { MessageCircle, Plus, Loader2, Search, X, Trash2, CheckSquare, Square, NotebookPen } from 'lucide-react'
+import Link from 'next/link'
+import { getUriWithOrg } from '@services/config/config'
 import { DiscussionCard } from './DiscussionCard'
 import { SortDropdown } from './SortDropdown'
 import { LabelFilter } from './LabelFilter'
@@ -242,6 +244,17 @@ export function DiscussionList({
                 <CheckSquare size={14} />
                 {isSelectMode ? t('communities.discussion_list.cancel') : t('communities.discussion_list.select')}
               </button>
+            )}
+
+            {/* Meu caderno: notas privadas do usuário (entrada para /caderno) */}
+            {session?.status === 'authenticated' && isUserPartOfTheOrg && !isSelectMode && (
+              <Link
+                href={getUriWithOrg(orgslug, '/caderno')}
+                className="flex items-center gap-1.5 px-3 py-2 h-8 text-xs font-medium rounded-md transition-colors bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100"
+              >
+                <NotebookPen size={14} />
+                {t('communities.notebook.open')}
+              </Link>
             )}
 
             {/* Desktop create button */}

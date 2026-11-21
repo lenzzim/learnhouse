@@ -4,12 +4,18 @@ import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { createDiscussion, DISCUSSION_LABELS } from '@services/communities/discussions'
+import {
+  buildDevotionalTemplate,
+  createDiscussion,
+  DISCUSSION_LABELS,
+  DiscussionVisibility,
+} from '@services/communities/discussions'
 import { useMutateDiscussions } from '@components/Hooks/useDiscussions'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { DiscussionEditor } from '@components/Objects/Communities/DiscussionEditor'
 import { EmojiPicker } from '@components/Objects/Communities/EmojiPicker'
-import { Loader2, AlertCircle, MessageSquare, HelpCircle, Lightbulb, Megaphone, Star, Check } from 'lucide-react'
+import { Loader2, AlertCircle, Check, Lock, Globe } from 'lucide-react'
+import { getLabelIcon } from '@components/Objects/Communities/labelIcons'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CreateDiscussionModalProps {
@@ -19,20 +25,20 @@ interface CreateDiscussionModalProps {
   orgSlug: string
 }
 
-// Get the icon component for a label
-function getLabelIcon(iconName: string, size: number = 16) {
-  switch (iconName) {
-    case 'HelpCircle':
-      return <HelpCircle size={size} />
-    case 'Lightbulb':
-      return <Lightbulb size={size} />
-    case 'Megaphone':
-      return <Megaphone size={size} />
-    case 'Star':
-      return <Star size={size} />
-    default:
-      return <MessageSquare size={size} />
-  }
+// Rótulo cuja nota nasce no caderno (privada) e ganha o template devocional.
+const DEVOTIONAL_LABEL = 'devocional'
+
+function defaultVisibilityFor(label: string): DiscussionVisibility {
+  return label === DEVOTIONAL_LABEL ? 'private' : 'public'
+}
+
+// O editor está "vazio" quando não há nenhum texto digitado (parágrafos vazios
+// não contam). Assim o template nunca sobrescreve o que a pessoa escreveu.
+function editorHasText(node: any): boolean {
+  if (!node) return false
+  if (node.type === 'text') return !!(node.text && node.text.trim())
+  if (Array.isArray(node.content)) return node.content.some(editorHasText)
+  return false
 }
 
 export function CreateDiscussionModal({
@@ -53,6 +59,11 @@ export function CreateDiscussionModal({
   const [titleError, setTitleError] = useState<string | null>(null)
   const [selectedLabel, setSelectedLabel] = useState<string>('general')
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
+  const [visibility, setVisibility] = useState<DiscussionVisibility>(defaultVisibilityFor('general'))
+  // Depois que a pessoa escolhe a visibilidade, trocar a categoria não a altera mais.
+  const [visibilityTouched, setVisibilityTouched] = useState(false)
+  // O DiscussionEditor só lê `content` ao montar; trocar a key remonta com o template.
+  const [editorKey, setEditorKey] = useState(0)
 
   const accessToken = session?.data?.tokens?.access_token
 
@@ -67,6 +78,39 @@ export function CreateDiscussionModal({
       return t('communities.create_discussion.title_max_length')
     }
     return null
+  }
+
+  const handleLabelSelect = (labelId: string) => {
+    setSelectedLabel(labelId)
+    if (!visibilityTouched) {
+      setVisibility(defaultVisibilityFor(labelId))
+    }
+    if (labelId === DEVOTIONAL_LABEL && !editorHasText(content)) {
+      setContent(
+        buildDevotionalTemplate({
+          passage: t('communities.devotional_template.passage'),
+          learned: t('communities.devotional_template.learned'),
+          apply: t('communities.devotional_template.apply'),
+          prayer: t('communities.devotional_template.prayer'),
+        })
+      )
+      setEditorKey((k) => k + 1)
+    }
+  }
+
+  const handleVisibilitySelect = (value: DiscussionVisibility) => {
+    setVisibility(value)
+    setVisibilityTouched(true)
+  }
+
+  const resetForm = () => {
+    setTitle('')
+    setContent(null)
+    setSelectedLabel('general')
+    setSelectedEmoji(null)
+    setVisibility(defaultVisibilityFor('general'))
+    setVisibilityTouched(false)
+    setEditorKey((k) => k + 1)
   }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,6 +138,7 @@ export function CreateDiscussionModal({
           content: content ? JSON.stringify(content) : null,
           label: selectedLabel,
           emoji: selectedEmoji,
+          visibility,
         },
         accessToken
       )
@@ -106,11 +151,7 @@ export function CreateDiscussionModal({
         })
         // Revalidate SWR cache to show new discussion immediately
         mutateDiscussions(communityUuid)
-        // Reset form
-        setTitle('')
-        setContent(null)
-        setSelectedLabel('general')
-        setSelectedEmoji(null)
+        resetForm()
         onClose()
       }
     } catch (err: any) {
@@ -134,12 +175,9 @@ export function CreateDiscussionModal({
       isDialogOpen={isOpen}
       onOpenChange={(open) => {
         if (!open) {
-          setTitle('')
-          setContent(null)
+          resetForm()
           setError(null)
           setTitleError(null)
-          setSelectedLabel('general')
-          setSelectedEmoji(null)
           onClose()
         }
       }}
@@ -158,7 +196,7 @@ export function CreateDiscussionModal({
                 <button
                   key={label.id}
                   type="button"
-                  onClick={() => setSelectedLabel(label.id)}
+                  onClick={() => handleLabelSelect(label.id)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
                     selectedLabel === label.id
                       ? 'border-gray-900 bg-gray-50'
@@ -224,6 +262,7 @@ export function CreateDiscussionModal({
               {t('communities.create_discussion.details_label')}
             </label>
             <DiscussionEditor
+              key={editorKey}
               content={content}
               onChange={setContent}
               placeholder={t('communities.create_discussion.details_placeholder')}
@@ -233,6 +272,44 @@ export function CreateDiscussionModal({
               {t('communities.create_discussion.editor_hint')}
             </p>
           </div>
+
+          {/* Visibilidade: caderno (só eu) ou comunidade */}
+          <fieldset>
+            <legend className="block text-sm font-medium text-gray-700 mb-2">
+              {t('communities.visibility.label')}
+            </legend>
+            <div role="radiogroup" aria-label={t('communities.visibility.label')} className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {([
+                { value: 'private', icon: <Lock size={16} />, title: t('communities.visibility.private_option'), hint: t('communities.visibility.private_hint') },
+                { value: 'public', icon: <Globe size={16} />, title: t('communities.visibility.public_option'), hint: t('communities.visibility.public_hint') },
+              ] as const).map((option) => {
+                const selected = visibility === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => handleVisibilitySelect(option.value)}
+                    className={`flex items-start gap-2 p-3 rounded-lg border text-start transition-all ${
+                      selected
+                        ? 'border-gray-900 bg-gray-50'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                    }`}
+                  >
+                    <span className={`mt-0.5 ${selected ? 'text-gray-900' : 'text-gray-500'}`}>{option.icon}</span>
+                    <span className="flex-1 min-w-0">
+                      <span className={`block text-sm ${selected ? 'font-medium text-gray-900' : 'text-gray-700'}`}>
+                        {option.title}
+                      </span>
+                      <span className="block text-xs text-gray-500 mt-0.5">{option.hint}</span>
+                    </span>
+                    {selected && <Check size={14} className="mt-0.5 text-gray-900" />}
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
 
           {/* Error message */}
           {error && (
@@ -257,7 +334,9 @@ export function CreateDiscussionModal({
               className="px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-              {t('communities.create_discussion.submit')}
+              {visibility === 'private'
+                ? t('communities.visibility.submit_private')
+                : t('communities.create_discussion.submit')}
             </button>
           </div>
         </form>

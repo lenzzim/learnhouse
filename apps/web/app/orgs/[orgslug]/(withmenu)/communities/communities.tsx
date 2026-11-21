@@ -9,7 +9,8 @@ import CommunityCard from '@components/Objects/Communities/CommunityCard'
 import { CreateCommunityModal } from '@components/Objects/Modals/Communities/CreateCommunityModal'
 import { EditCommunityModal } from '@components/Objects/Modals/Communities/EditCommunityModal'
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder'
-import { Users, Plus, Search, LayoutGrid, List, Globe, Lock, ChevronRight } from 'lucide-react'
+import { Users, Plus, Search, LayoutGrid, List, Globe, Lock, ChevronRight, NotebookPen } from 'lucide-react'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import { Community } from '@services/communities/communities'
 import { getUriWithOrg } from '@services/config/config'
@@ -31,6 +32,7 @@ const semPrefixo = (uuid: string) => uuid.replace('community_', '')
 
 const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientProps) => {
   const { t } = useTranslation()
+  const session = useLHSession() as any
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(null)
   const [busca, setBusca] = useState('')
@@ -91,7 +93,18 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
       <div className="flex flex-col space-y-2 mb-6">
         <div className="flex items-center justify-between">
           <TypeOfContentTitle title={t('communities.title')} type="col" />
-          {botaoNova}
+          <div className="flex items-center gap-2">
+            {session?.status === 'authenticated' && (
+              <Link
+                href={getUriWithOrg(orgslug, '/caderno')}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors text-sm font-medium"
+              >
+                <NotebookPen size={16} />
+                {t('communities.notebook.open')}
+              </Link>
+            )}
+            {botaoNova}
+          </div>
         </div>
 
         {/* Busca, ordenação e alternância de visualização.

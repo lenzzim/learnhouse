@@ -5,16 +5,58 @@ import {
   getResponseMetadata,
 } from '@services/utils/ts/requests'
 
-// Discussion labels - must match backend
+// Discussion labels - must match backend (apps/api/src/db/communities/discussions.py)
+// Discipulei: categorias de fórum devocional. Cores neutras/suaves que funcionam
+// no tema escuro (#121211) e no claro (#fbfaf7) — sem dourado/âmbar (decisão N19).
+// Só estas são oferecidas para posts novos.
 export const DISCUSSION_LABELS = [
-  { id: 'general', name: 'General', color: '#6B7280', icon: 'MessageSquare' },
-  { id: 'question', name: 'Q&A', color: '#EAB308', icon: 'HelpCircle' },
-  { id: 'idea', name: 'Ideas', color: '#8B5CF6', icon: 'Lightbulb' },
-  { id: 'announcement', name: 'Announcements', color: '#3B82F6', icon: 'Megaphone' },
-  { id: 'showcase', name: 'Show and Tell', color: '#10B981', icon: 'Star' },
+  { id: 'devocional', name: 'Devocional', color: '#8fb8ea', icon: 'BookOpen' },
+  { id: 'testemunho', name: 'Testemunho', color: '#b9a6ec', icon: 'Sparkles' },
+  { id: 'oracao', name: 'Pedido de oração', color: '#e5978f', icon: 'HandHeart' },
+  { id: 'question', name: 'Pergunta', color: '#a3a19c', icon: 'HelpCircle' },
+  { id: 'announcement', name: 'Aviso', color: '#8a877f', icon: 'Megaphone' },
+  { id: 'general', name: 'Geral', color: '#7d7b75', icon: 'MessageSquare' },
 ] as const
 
-export type DiscussionLabelId = typeof DISCUSSION_LABELS[number]['id']
+// Rótulos antigos do upstream: não são mais oferecidos, mas posts antigos
+// continuam renderizando com eles.
+const LEGACY_DISCUSSION_LABELS = [
+  { id: 'idea', name: 'Ideas', color: '#a3a19c', icon: 'Lightbulb' },
+  { id: 'showcase', name: 'Show and Tell', color: '#a3a19c', icon: 'Star' },
+] as const
+
+export type DiscussionLabelId =
+  | typeof DISCUSSION_LABELS[number]['id']
+  | typeof LEGACY_DISCUSSION_LABELS[number]['id']
+
+// Template leve para devocionais (TipTap JSON — o editor salva JSON, não HTML).
+// Os títulos chegam já traduzidos de quem chama.
+export function buildDevotionalTemplate(headings: {
+  passage: string
+  learned: string
+  apply: string
+  prayer: string
+}) {
+  const section = (text: string) => [
+    { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text }] },
+    { type: 'paragraph' },
+  ]
+  return {
+    type: 'doc',
+    content: [
+      ...section(headings.passage),
+      ...section(headings.learned),
+      ...section(headings.apply),
+      ...section(headings.prayer),
+    ],
+  }
+}
+
+// ============================================================================
+// Visibilidade (caderno privado)
+// ============================================================================
+
+export type DiscussionVisibility = 'public' | 'private'
 
 export interface DiscussionLabel {
   id: string
@@ -37,6 +79,8 @@ export interface Discussion {
   edit_count: number
   is_pinned: boolean
   is_locked: boolean
+  // Opcional para tolerar respostas de uma API antiga (ausente = pública).
+  visibility?: DiscussionVisibility
   creation_date: string
   update_date: string
 }
@@ -60,6 +104,7 @@ export interface DiscussionCreate {
   content?: string | null
   label?: string
   emoji?: string | null
+  visibility?: DiscussionVisibility
 }
 
 export interface DiscussionUpdate {
@@ -67,6 +112,17 @@ export interface DiscussionUpdate {
   content?: string | null
   label?: string
   emoji?: string | null
+  visibility?: DiscussionVisibility
+}
+
+export function isPrivateDiscussion(discussion: Pick<Discussion, 'visibility'>): boolean {
+  return discussion.visibility === 'private'
+}
+
+// Item do "Meu caderno": inclui a comunidade para montar o link.
+export interface NotebookDiscussion extends DiscussionWithAuthor {
+  community_uuid: string
+  community_name: string
 }
 
 export type DiscussionSortBy = 'recent' | 'upvotes' | 'hot'
@@ -80,7 +136,43 @@ export interface DiscussionVote {
 }
 
 export function getLabelInfo(labelId: string): DiscussionLabel {
-  return DISCUSSION_LABELS.find(l => l.id === labelId) || DISCUSSION_LABELS[0]
+  const all: readonly DiscussionLabel[] = [...DISCUSSION_LABELS, ...LEGACY_DISCUSSION_LABELS]
+  return (
+    all.find(l => l.id === labelId) ||
+    all.find(l => l.id === 'general') ||
+    DISCUSSION_LABELS[0]
+  )
+}
+
+export async function setDiscussionVisibility(
+  discussion_uuid: string,
+  visibility: DiscussionVisibility,
+  access_token: string
+): Promise<DiscussionWithAuthor> {
+  const result: any = await fetch(
+    `${getAPIUrl()}discussions/${discussion_uuid}/visibility`,
+    {
+      ...RequestBodyWithAuthHeader('PATCH', null, null, access_token),
+      // RequestBodyWithAuthHeader só serializa corpo em POST/PUT/DELETE.
+      body: JSON.stringify({ visibility }),
+    }
+  )
+  const res = await errorHandling(result)
+  return res
+}
+
+export async function getMyNotebook(
+  org_id: number,
+  page: number = 1,
+  limit: number = 20,
+  access_token?: string
+): Promise<NotebookDiscussion[]> {
+  const result: any = await fetch(
+    `${getAPIUrl()}discussions/notebook?org_id=${org_id}&page=${page}&limit=${limit}`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
+  )
+  const res = await errorHandling(result)
+  return res
 }
 
 export async function getDiscussionLabels(): Promise<DiscussionLabel[]> {

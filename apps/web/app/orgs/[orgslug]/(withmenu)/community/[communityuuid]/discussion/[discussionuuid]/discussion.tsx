@@ -76,6 +76,7 @@ const DiscussionPageClient = ({
             communityUuid={community.community_uuid}
             orgslug={orgslug}
             onEdit={() => setIsEditModalOpen(true)}
+            onDiscussionUpdated={handleDiscussionUpdated}
           />
           {/* Discipulei: no celular não há coluna lateral; a chamada vem no fim da discussão. */}
           <ChamadaEstudo variante="lateral" className="md:hidden mt-6" />
