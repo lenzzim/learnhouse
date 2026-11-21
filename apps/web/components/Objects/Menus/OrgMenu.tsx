@@ -363,8 +363,10 @@ export const OrgMenu = (props: any) => {
               <HeaderProfileBox primaryColor={primaryColor} />
             </div>
             <button
-              className={`md:hidden focus:outline-hidden ${colors.text}`}
+              className={`md:hidden inline-flex h-11 w-11 items-center justify-center rounded-lg focus:outline-hidden focus-visible:ring-2 focus-visible:ring-current ${colors.text}`}
               onClick={toggleMenu}
+              aria-label={isMenuOpen ? t('nav.fechar') : t('common.menu', { defaultValue: 'Menu' })}
+              aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
