@@ -4,8 +4,9 @@ import type { Metadata, Viewport } from 'next'
 import Providers from '@components/Providers'
 import { Inter, Newsreader, Tajawal } from 'next/font/google'
 
-// Sem manifesto de propósito (21/11/2026): o dono não quer o aviso de
-// "Instalar app" do navegador; o app de verdade vai para as lojas.
+// Sem manifesto global de propósito (21/11/2026): visitante anônimo não
+// recebe oferta de instalação. Para quem está logado na comunidade, o
+// componente ConviteInstalar injeta /app.webmanifest e mostra o convite.
 // `viewportFit: 'cover'` + barra 'black-translucent' fazem a página ocupar a
 // tela toda no iOS; os recuos de área segura estão em discipulei-dark.css.
 // O favicon por organização (app/orgs/[orgslug]/layout.tsx) continua
