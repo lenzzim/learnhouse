@@ -6432,5 +6432,35 @@
       "pergunta_modal_descricao": "Sua pergunta fica visível para quem participa da comunidade.",
       "pergunta_comunidade_dica": "A pergunta aparece nesta comunidade."
     }
+  },
+  "hoje": {
+    "ola": "Olá, {{nome}}",
+    "ola_sem_nome": "Olá",
+    "bom_dia": "Bom dia, {{nome}}",
+    "bom_dia_sem_nome": "Bom dia",
+    "boa_tarde": "Boa tarde, {{nome}}",
+    "boa_tarde_sem_nome": "Boa tarde",
+    "boa_noite": "Boa noite, {{nome}}",
+    "boa_noite_sem_nome": "Boa noite",
+    "continue_lendo": "Continue lendo",
+    "continue_lendo_descricao": "Do ponto em que você parou.",
+    "continuar_leitura": "Continuar leitura",
+    "sem_leitura": "Você ainda não abriu nenhum capítulo.",
+    "abrir_biblia": "Abrir a Bíblia",
+    "ultimo_rascunho": "Seu último rascunho",
+    "continuar": "Continuar",
+    "sem_rascunho": "Nenhuma nota ainda. Comece com uma linha.",
+    "nas_comunidades": "Nas suas comunidades",
+    "ver_comunidades": "Ver todas",
+    "sem_comunidades": "Você ainda não participa de nenhuma comunidade.",
+    "comunidades_quietas": "Nada novo por enquanto. Que tal puxar a conversa?",
+    "comecar_titulo": "Por onde começar",
+    "comecar_descricao": "Leia um capítulo ou escreva o que Deus está falando com você. O resto vem com o tempo.",
+    "comece_biblia": "Comece pela Bíblia",
+    "comece_biblia_descricao": "Sugestão: o Evangelho de João, capítulo 1.",
+    "primeira_nota": "Escreva sua primeira nota",
+    "primeira_nota_descricao": "Fica no seu caderno. Só você vê.",
+    "anonimo_titulo": "Seu dia com a Palavra",
+    "anonimo_descricao": "Entre para continuar a leitura, ver seus rascunhos e o que há de novo nas suas comunidades."
   }
 }

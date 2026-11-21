@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
-import { apiDateToIso } from './datas-utc'
+import { apiDateToIso, formatarDataCurta } from './datas-utc'
 
-export { apiDateToIso }
+export { apiDateToIso, formatarDataCurta }
 
 /**
  * Converte uma data vinda da API em dayjs, tratando como UTC as strings sem fuso.

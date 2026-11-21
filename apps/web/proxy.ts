@@ -2,6 +2,7 @@ import { getAPIUrl } from './services/config/config'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isLocalhost as isLocalhostCheck } from './services/utils/ts/hostUtils'
+import { ROTA_INICIAL } from './lib/discipulei/nav'
 
 // =============================================================================
 // Tenancy
@@ -315,11 +316,11 @@ export default async function proxy(req: NextRequest) {
   //    hub's client components can read tenancy/mode/top-domain.
   // -------------------------------------------------------------------------
   // Discipulei: com uma organização só, `/home` é um seletor de um item, e a
-  // pessoa cai numa tela que não entrega nada. As comunidades são o destino.
+  // pessoa cai numa tela que não entrega nada. A tela "Hoje" é o destino.
   // Vale para quem digita /home, para os bookmarks antigos e para todo
   // redirecionamento interno que ainda aponte para lá.
   if (instance.tenancy === 'single' && (pathname === '/home' || pathname.startsWith('/home/'))) {
-    return NextResponse.redirect(new URL(`/communities${search}`, req.url))
+    return NextResponse.redirect(new URL(`${ROTA_INICIAL}${search}`, req.url))
   }
 
   const HUB_ROOT_PATHS = ['/home', '/organizations', '/account', '/billing', '/subscriptions', '/new']
@@ -354,7 +355,7 @@ export default async function proxy(req: NextRequest) {
     // A logged-in user has no business on /login — bounce them to the hub (the
     // page itself re-verifies, so this is a best-effort UX shortcut).
     if (pathname === '/login' && hasSession) {
-      const destino = instance.tenancy === 'single' ? '/communities' : '/home'
+      const destino = instance.tenancy === 'single' ? ROTA_INICIAL : '/home'
       return NextResponse.redirect(new URL(destino, req.url))
     }
 
@@ -532,8 +533,8 @@ export default async function proxy(req: NextRequest) {
   // 9b. Raiz para quem já entrou (Discipulei, tenancy single)
   //
   //     A raiz é a página de apresentação: ela existe para convencer quem
-  //     ainda não tem conta. Quem já está logado quer a comunidade, não o
-  //     convite de novo. O cookie LH_session é só um marcador (a página
+  //     ainda não tem conta. Quem já está logado vai para a tela "Hoje",
+  //     não para o convite de novo. O cookie LH_session é só um marcador (a página
   //     confere de verdade), então errar aqui não abre acesso a nada: no
   //     máximo mostra a apresentação a quem já entrou.
   //
@@ -544,7 +545,7 @@ export default async function proxy(req: NextRequest) {
     && pathname === '/'
     && !!req.cookies.get('LH_session')?.value
   ) {
-    return NextResponse.redirect(new URL(`/communities${search}`, req.url))
+    return NextResponse.redirect(new URL(`${ROTA_INICIAL}${search}`, req.url))
   }
 
   // -------------------------------------------------------------------------

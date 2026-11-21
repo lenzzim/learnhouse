@@ -6355,5 +6355,35 @@
       "pergunta_modal_descricao": "Your question is visible to everyone in the community.",
       "pergunta_comunidade_dica": "The question shows up in this community."
     }
+  },
+  "hoje": {
+    "ola": "Hello, {{nome}}",
+    "ola_sem_nome": "Hello",
+    "bom_dia": "Good morning, {{nome}}",
+    "bom_dia_sem_nome": "Good morning",
+    "boa_tarde": "Good afternoon, {{nome}}",
+    "boa_tarde_sem_nome": "Good afternoon",
+    "boa_noite": "Good evening, {{nome}}",
+    "boa_noite_sem_nome": "Good evening",
+    "continue_lendo": "Keep reading",
+    "continue_lendo_descricao": "Right where you left off.",
+    "continuar_leitura": "Continue reading",
+    "sem_leitura": "You haven't opened a chapter yet.",
+    "abrir_biblia": "Open the Bible",
+    "ultimo_rascunho": "Your latest draft",
+    "continuar": "Continue",
+    "sem_rascunho": "No notes yet. Start with one line.",
+    "nas_comunidades": "In your communities",
+    "ver_comunidades": "See all",
+    "sem_comunidades": "You're not part of any community yet.",
+    "comunidades_quietas": "Nothing new for now. Why not start the conversation?",
+    "comecar_titulo": "Where to start",
+    "comecar_descricao": "Read a chapter or write down what God is saying to you. The rest comes with time.",
+    "comece_biblia": "Start with the Bible",
+    "comece_biblia_descricao": "Suggestion: the Gospel of John, chapter 1.",
+    "primeira_nota": "Write your first note",
+    "primeira_nota_descricao": "It stays in your notebook. Only you can see it.",
+    "anonimo_titulo": "Your day with the Word",
+    "anonimo_descricao": "Sign in to keep reading, see your drafts and what's new in your communities."
   }
 }

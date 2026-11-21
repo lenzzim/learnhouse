@@ -19,3 +19,22 @@ export function apiDateToIso<T>(value: T): T | string {
   if (!DATA_HORA.test(s)) return value
   return `${s.replace(' ', 'T')}Z`
 }
+
+/**
+ * Data curta no formato da língua da pessoa: "21 de nov. de 2026" em pt-BR,
+ * "Nov 21, 2026" em inglês. Usa Intl, então não depende do locale do dayjs.
+ */
+export function formatarDataCurta(
+  value: string | number | Date | null | undefined,
+  idioma: string = 'pt-BR'
+): string {
+  if (value === null || value === undefined || value === '') return ''
+  const data = value instanceof Date ? value : new Date(typeof value === 'string' ? apiDateToIso(value) : value)
+  if (Number.isNaN(data.getTime())) return ''
+  const locale = idioma === 'pt' ? 'pt-BR' : idioma
+  try {
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(data)
+  } catch {
+    return new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).format(data)
+  }
+}

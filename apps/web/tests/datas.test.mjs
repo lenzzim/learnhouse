@@ -35,3 +35,11 @@ test('datas sem hora e valores que não são string passam sem mudança', () => 
   const d = new Date()
   assert.equal(apiDateToIso(d), d)
 })
+
+test('data curta em pt-BR no formato "21 de nov. de 2026"', async () => {
+  const { formatarDataCurta } = await import('../lib/datas-utc.ts')
+  assert.equal(formatarDataCurta('2026-11-21 12:00:00', 'pt-BR'), '21 de nov. de 2026')
+  assert.equal(formatarDataCurta('2026-11-21 12:00:00', 'pt'), '21 de nov. de 2026')
+  assert.equal(formatarDataCurta(null), '')
+  assert.equal(formatarDataCurta('lixo'), '')
+})

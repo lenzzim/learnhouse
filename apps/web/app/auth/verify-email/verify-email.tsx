@@ -7,6 +7,7 @@ import { verifyEmail } from '@services/auth/auth'
 import { useTranslation } from 'react-i18next'
 import AuthLayout from '@components/Auth/AuthLayout'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
+import { ROTA_INICIAL } from '@/lib/discipulei/nav'
 
 interface VerifyEmailClientProps {
     org: any
@@ -65,7 +66,7 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
                     // fresh, now-verified user lands somewhere useful. A full
                     // navigation lets auth bootstrap from the new cookies.
                     setTimeout(() => {
-                        window.location.assign('/communities')
+                        window.location.assign(ROTA_INICIAL)
                     }, 1200)
                 } else {
                     track(AnalyticsEvent.EmailVerificationCompleted, { result: 'fail' })

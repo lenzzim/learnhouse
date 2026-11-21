@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Loader2, AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@components/Contexts/AuthContext'
+import { ROTA_INICIAL } from '@/lib/discipulei/nav'
 
 /**
  * Consumes a passwordless login link: reads ?token from the URL and hands it to
@@ -31,7 +32,7 @@ export default function MagicLinkConsumePage() {
   const buildCallbackUrl = () => {
     const params = new URLSearchParams(window.location.search)
     const raw = params.get('next') ?? params.get('redirect') ?? params.get('redirect_to')
-    const dest = raw && /^\/(?!\/)/.test(raw) ? raw : '/communities'
+    const dest = raw && /^\/(?!\/)/.test(raw) ? raw : ROTA_INICIAL
     return `${window.location.origin}/redirect_from_auth?next=${encodeURIComponent(dest)}`
   }
 

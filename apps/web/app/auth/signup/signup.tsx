@@ -17,6 +17,7 @@ import FormLayout, {
   FormField,
 } from '@components/Objects/StyledElements/Form/Form'
 import * as Form from '@radix-ui/react-form'
+import { ROTA_INICIAL } from '@/lib/discipulei/nav'
 
 interface SignUpClientProps {
   org: any
@@ -56,12 +57,12 @@ function SignUpClient(props: SignUpClientProps) {
 
   useEffect(() => {
     if (isAuthenticated && !hasOrgToJoin) {
-      router.replace('/communities')
+      router.replace(ROTA_INICIAL)
     }
   }, [isAuthenticated, hasOrgToJoin, router])
 
   useEffect(() => {
-    if (membro) router.replace(destino || '/communities')
+    if (membro) router.replace(destino || ROTA_INICIAL)
   }, [membro, destino, router])
 
   useEffect(() => {
@@ -173,7 +174,7 @@ const LoggedInJoinScreen = ({ inviteCode, org, destino }: JoinScreenProps) => {
       } else if (String(res.data?.detail || '').includes('already part of that organization')) {
         // Já é membro (sessão desatualizada): não é erro, é só seguir em frente.
         await session.update?.(true)
-        router.replace(destino || '/communities')
+        router.replace(destino || ROTA_INICIAL)
       } else {
         setError(getErrorMessage(res.data?.detail, t('common.something_went_wrong')))
         setShowMessage(true)

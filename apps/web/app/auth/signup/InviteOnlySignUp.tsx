@@ -22,6 +22,7 @@ import CustomSignupFields, {
   validateCustomFields,
 } from '@components/Auth/CustomSignupFields'
 import { readSignupFields, type SignupFieldItem } from '@services/settings/org'
+import { ROTA_INICIAL } from '@/lib/discipulei/nav'
 
 const validate = (values: any, t: any, customFields: SignupFieldItem[]) => {
   const errors: any = {}
@@ -135,7 +136,7 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
   const buildCallbackUrl = () => {
     const params = new URLSearchParams(window.location.search)
     const raw = params.get('next') ?? params.get('redirect')
-    const dest = raw && /^\/(?!\/)/.test(raw) ? raw : '/communities'
+    const dest = raw && /^\/(?!\/)/.test(raw) ? raw : ROTA_INICIAL
     return `${window.location.origin}/redirect_from_auth?next=${encodeURIComponent(dest)}`
   }
 
