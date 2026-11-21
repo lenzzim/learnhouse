@@ -31,7 +31,9 @@ REGRAS (documentadas também no README gerado):
   Variantes do grego: entra toda palavra cujo tipo, fora dos parênteses, tenha
     N (Nestle-Aland) ou K (TR/KJV), maiúsculo ou minúsculo — ou seja, o texto
     "amalgamado" NA + TR. Palavras só de outras edições ("O", "o", "(k)O") ficam
-    de fora. Palavras de um só lado recebem a marca "N" ou "K".
+    de fora. Palavras de um só lado recebem a marca "N" ou "K" (uma letra
+    minúscula entre parênteses, ex. "N(k)O", conta como presente nos dois lados:
+    é a mesma palavra com diferença mínima).
 
 Uso:
   python -I stepbible_para_json.py <pasta_stepbible> <pasta_biblia_dados>
@@ -122,7 +124,10 @@ def analisar_linha_grc(linha):
     tem_n, tem_k = "n" in fora, "k" in fora
     if not (tem_n or tem_k):
         return None  # só em outras edições
-    marca = "N" if tem_n and not tem_k else ("K" if tem_k and not tem_n else "")
+    # minúscula entre parênteses = mesma palavra com diferença mínima no outro texto
+    dentro = "".join(re.findall(r"\(([^)]*)\)", tipo))
+    no_n, no_k = tem_n or "n" in dentro, tem_k or "k" in dentro
+    marca = "N" if no_n and not no_k else ("K" if no_k and not no_n else "")
     m = re.match(r"^(.*?)\s*\(([^)]*)\)\s*$", cols[1])
     original, translit = (m.group(1), m.group(2)) if m else (cols[1], "")
     original = original.replace("¶", "").strip()
