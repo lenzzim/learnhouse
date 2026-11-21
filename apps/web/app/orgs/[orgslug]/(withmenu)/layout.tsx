@@ -16,6 +16,7 @@ import { PageViewTracker } from '@components/Analytics/PageViewTracker'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { usePlan } from '@components/Hooks/usePlan'
 import { getGoogleFontUrl, DEFAULT_FONT } from '@/lib/fonts'
+import ConviteInstalar from '@components/Discipulei/ConviteInstalar'
 
 // Helper to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number): string => {
@@ -137,6 +138,8 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
       </div>
       {!isFullBleedPage && !chromeless && <OrgFooter />}
       {!isFullBleedPage && !chromeless && <Watermark />}
+      {/* Discipulei: convite para instalar o app, só para quem está logado. */}
+      {!chromeless && <ConviteInstalar />}
     </div>
   )
 }
