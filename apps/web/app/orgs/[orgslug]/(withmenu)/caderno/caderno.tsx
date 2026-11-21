@@ -205,7 +205,7 @@ export default function NotebookClient({ orgslug }: NotebookClientProps) {
                 href={href}
                 className={`flex items-center gap-4 px-4 py-3 border-b border-gray-100 last:border-b-0 transition-colors ${
                   // Translúcido + contorno: legível no tema claro e no escuro.
-                  isNew ? 'bg-amber-400/10 ring-2 ring-inset ring-amber-400/70' : 'hover:bg-gray-50'
+                  isNew ? 'bg-white/5 ring-1 ring-inset ring-white/30' : 'hover:bg-gray-50'
                 }`}
               >
                 <span
