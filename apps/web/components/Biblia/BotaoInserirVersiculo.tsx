@@ -15,7 +15,7 @@ import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
  * Botão da barra do editor de discussões: o usuário digita uma referência
  * ("Jo 3:16-18"), escolhe a versão, vê o texto e insere um <blockquote>.
  * - Versões abertas: os versículos e, na última linha, "— João 3:16-18 (BLIVRE)".
- * - Versões licenciadas (API.Bible): SÓ a linha "— João 3:16-18 (ARA)". O
+ * - Versões licenciadas (API.Bible, YouVersion): SÓ a linha "— João 3:16-18 (ARA)". O
  *   texto não é gravado no post (termos da licença); quem lê vê o texto ao
  *   vivo pelo widget de citacaoViva.ts, com o copyright.
  * O painel fica dentro da árvore do editor (não em portal) para funcionar

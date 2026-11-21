@@ -94,11 +94,11 @@ const FONTE_TEXTO = "var(--font-serif), Georgia, 'Times New Roman', serif"
 function Credito({ versao, copyright }: { versao: VersaoInfo; copyright?: string | null }) {
   const { t } = useTranslation()
   if (versao.fonte === 'licenciada') {
-    // termos da API.Bible: copyright da versão junto do texto + sigla
+    // termos da API.Bible e da YouVersion: crédito oficial da versão junto do texto + sigla
     return (
       <p className="mt-1">
         <span className="font-medium text-[var(--text-2)]">{versao.sigla}</span> — {copyright || versao.credito}{' '}
-        {t('biblia.fornecido_api_bible')}
+        {t(versao.provedor === 'youversion' ? 'biblia.fornecido_youversion' : 'biblia.fornecido_api_bible')}
       </p>
     )
   }
@@ -381,7 +381,7 @@ export default function LeitorBiblia() {
 
   const estadoTexto = versaoB && estadoB?.tipo !== 'pronto' && estadoA?.tipo === 'pronto' ? estadoB : estadoA
   const versaoComErro = estadoTexto === estadoB && versaoB ? versaoB : versaoA
-  // FUMS (API.Bible): reporta cada exibição de texto licenciado
+  // FUMS (só API.Bible; na YouVersion o token vem null): reporta cada exibição de texto licenciado
   useFums(estadoTexto?.tipo === 'pronto' ? [prontoA?.fums, versaoB ? prontoB?.fums : null] : [])
   const temLicenciada = versaoA.fonte === 'licenciada' || versaoB?.fonte === 'licenciada'
   const refPassagem: Referencia = { livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: ini, versoFim: fim !== ini ? fim : undefined }

@@ -1,8 +1,8 @@
 /**
  * Citação "viva" de versão licenciada em posts.
  *
- * Os termos da API.Bible não permitem guardar o texto licenciado de forma
- * permanente. Por isso o post guarda só a citação — um blockquote cujo texto é
+ * Os termos da API.Bible e da YouVersion não permitem guardar o texto
+ * licenciado de forma permanente. Por isso o post guarda só a citação — um blockquote cujo texto é
  * "— João 3:16-18 (ARA)" — e, ao exibir, este widget (decoração do
  * ProseMirror, fora do documento salvo) busca o texto pelo proxy e o mostra
  * com o copyright, reportando o FUMS. Sem sessão, mostra o convite para entrar.

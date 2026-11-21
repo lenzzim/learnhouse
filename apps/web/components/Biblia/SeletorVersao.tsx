@@ -8,7 +8,7 @@ import { useVersoesLicenciadas } from './useFonteBiblia'
 const IDIOMAS: Idioma[] = ['pt', 'en', 'es']
 
 /**
- * <select> de versões agrupado por idioma. As licenciadas (API.Bible) liberadas
+ * <select> de versões agrupado por idioma. As licenciadas (API.Bible e YouVersion) liberadas
  * pelo servidor entram num grupo próprio logo depois do idioma delas:
  * "Licenciadas" (português) e "Licenciadas · Inglês". `opcaoVazia` acrescenta
  * uma opção "" no topo.

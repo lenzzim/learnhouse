@@ -3,17 +3,22 @@
  *
  * VERSOES (abertas) espelha public/biblia-dados/catalogo.json (o teste
  * versoes.test.mjs garante que os dois batem) para ficar disponível de forma
- * síncrona. VERSOES_LICENCIADAS são as protegidas servidas pelo proxy da
- * API.Bible (apps/api/src/routers/biblia.py): o texto NUNCA fica em arquivo
- * estático; quem diz se cada uma está ativa é o endpoint /biblia/versoes.
+ * síncrona. VERSOES_LICENCIADAS são as protegidas servidas pelo proxy do
+ * servidor (apps/api/src/routers/biblia.py), que fala com a API.Bible (ARA,
+ * ARC, NTLH, RC69, NIV, NKJV) ou com a YouVersion Platform (NVI): o texto
+ * NUNCA fica em arquivo estático; quem diz se cada uma está ativa é o
+ * endpoint /biblia/versoes.
  * Sem imports de valor: roda direto no Node (`node --test`).
  */
 import type { Referencia } from './referencias'
 
 export type Idioma = 'pt' | 'en' | 'es'
 
-/** 'aberta': JSON estático em /biblia-dados; 'licenciada': proxy da API.Bible (só com sessão). */
+/** 'aberta': JSON estático em /biblia-dados; 'licenciada': proxy do servidor (só com sessão). */
 export type FonteVersao = 'aberta' | 'licenciada'
+
+/** Quem fornece o texto de uma licenciada (créditos e regras mudam por provedor). */
+export type ProvedorLicenciada = 'apibible' | 'youversion'
 
 export interface VersaoInfo {
   id: string
@@ -25,6 +30,8 @@ export interface VersaoInfo {
   credito: string
   /** ausente = 'aberta' */
   fonte?: FonteVersao
+  /** só licenciadas */
+  provedor?: ProvedorLicenciada
 }
 
 const CC_BY = 'https://creativecommons.org/licenses/by/4.0/deed.pt-br'
@@ -101,21 +108,41 @@ export const VERSOES: VersaoInfo[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Versões licenciadas (API.Bible). Mesmos ids de apps/api/src/services/biblia/versoes.py.
+// Versões licenciadas. Mesmos ids de apps/api/src/services/biblia/versoes.py.
 // `credito` é só o texto de reserva: o copyright exibido vem de cada resposta
-// da API (campo `copyright`), como pedem os termos.
+// do proxy (campo `copyright`, vindo da API.Bible ou da YouVersion), como
+// pedem os termos. A ordem aqui é a ordem no seletor ("Licenciadas":
+// NVI, ARA, ARC, NTLH, RC69).
 // ---------------------------------------------------------------------------
-const LICENCA_API_BIBLE = 'Licenciada (API.Bible)'
-
-function licenciada(id: string, sigla: string, nome: string, idioma: Idioma, credito: string): VersaoInfo {
-  return { id, sigla, nome, idioma, licenca: LICENCA_API_BIBLE, licencaUrl: null, credito, fonte: 'licenciada' }
+const LICENCA_POR_PROVEDOR: Record<ProvedorLicenciada, string> = {
+  apibible: 'Licenciada (API.Bible)',
+  youversion: 'Licenciada (YouVersion)',
 }
 
+function licenciada(
+  id: string,
+  sigla: string,
+  nome: string,
+  idioma: Idioma,
+  credito: string,
+  provedor: ProvedorLicenciada = 'apibible'
+): VersaoInfo {
+  return { id, sigla, nome, idioma, licenca: LICENCA_POR_PROVEDOR[provedor], licencaUrl: null, credito, fonte: 'licenciada', provedor }
+}
+
+const CREDITO_NVI =
+  'Bíblia Sagrada, Nova Versão Internacional®, NVI® © 1993, 2000, 2011, 2023 por Biblica, Inc. Usado com permissão. Todos os direitos reservados mundialmente.'
+
 export const VERSOES_LICENCIADAS: VersaoInfo[] = [
+  licenciada('nvi', 'NVI', 'Nova Versão Internacional', 'pt', CREDITO_NVI, 'youversion'),
   licenciada('ara', 'ARA', 'Almeida Revista e Atualizada', 'pt', 'ARA © 1993 Sociedade Bíblica do Brasil.'),
   licenciada('arc', 'ARC', 'Almeida Revista e Corrigida', 'pt', 'ARC © 2009 Sociedade Bíblica do Brasil. Todos os direitos reservados.'),
-  licenciada('rc69', 'RC69', 'Almeida Revista e Corrigida 1969', 'pt', 'RC69 © 1969 Sociedade Bíblica do Brasil. Todos os direitos reservados.'),
   licenciada('ntlh', 'NTLH', 'Nova Tradução na Linguagem de Hoje', 'pt', 'Nova Tradução na Linguagem de Hoje © Copyright © 2000 Sociedade Bíblica do Brasil. Todos os direitos reservados.'),
+  licenciada('rc69', 'RC69', 'Almeida Revista e Corrigida 1969', 'pt', 'RC69 © 1969 Sociedade Bíblica do Brasil. Todos os direitos reservados.'),
+  // YouVersion opcionais: só aparecem se o servidor as ligar (YOUVERSION_BIBLES)
+  licenciada('nvi2011', 'NVI2011', 'Nova Versão Internacional (2011)', 'pt', 'Nova Versão Internacional © Biblica, Inc.', 'youversion'),
+  licenciada('nbvp', 'NBVP', 'Nova Bíblia Viva (Portugal)', 'pt', 'Nova Bíblia Viva © Biblica, Inc.', 'youversion'),
+  licenciada('olivro', 'OL', 'O Livro', 'pt', 'O Livro © Biblica, Inc.', 'youversion'),
   licenciada('niv', 'NIV', 'New International Version', 'en', 'Holy Bible, New International Version® NIV® © Biblica, Inc.®'),
   licenciada('nkjv', 'NKJV', 'New King James Version', 'en', 'New King James Version® © 1982 Thomas Nelson.'),
 ]
@@ -161,7 +188,7 @@ export function versaoValida(id: string | null | undefined): string {
 
 // ---------------------------------------------------------------------------
 // Versões protegidas SEM licença aqui: NUNCA embutidas — só link para a mesma
-// passagem na YouVersion (bible.com). ARA, ARC e NTLH saíram desta lista
+// passagem na YouVersion (bible.com). ARA, ARC, NTLH e NVI saíram desta lista
 // porque agora são lidas no próprio app (VERSOES_LICENCIADAS).
 // Ids conferidos em bible.com/pt/bible/<id>/JHN.3.16.<SIGLA>.
 // ---------------------------------------------------------------------------
@@ -172,7 +199,6 @@ export interface VersaoExterna {
 }
 
 export const VERSOES_EXTERNAS: VersaoExterna[] = [
-  { sigla: 'NVI', nome: 'Nova Versão Internacional', idYouVersion: 129 },
   { sigla: 'NAA', nome: 'Nova Almeida Atualizada', idYouVersion: 1840 },
 ]
 
@@ -187,4 +213,43 @@ export function urlYouVersion(ref: Referencia, versao: VersaoExterna): string {
     if (ref.versoFim !== undefined && ref.versoFim !== ref.versoIni) passagem += `-${ref.versoFim}`
   }
   return `https://www.bible.com/pt/bible/${versao.idYouVersion}/${passagem}.${versao.sigla}`
+}
+
+// ---------------------------------------------------------------------------
+// Política de cópia/compartilhamento por versão (P0 do leitor; ainda NÃO usada
+// pela interface além do que já existe: inserir versículo licenciado já grava
+// só a referência). Valores conservadores até a leitura completa dos termos:
+//  - abertas (CC BY, CC BY-SA, domínio público): cópia livre, imagem permitida;
+//  - API.Bible: no máximo 25 versículos por cópia (placeholder), sem imagem;
+//  - YouVersion (NVI): no máximo 25 versículos por cópia, sem imagem.
+// `siglaObrigatoria`: toda cópia leva a sigla da versão (e, nas licenciadas,
+// o copyright).
+// ---------------------------------------------------------------------------
+export interface PoliticaCopia {
+  permiteCopiar: boolean
+  /** null = sem limite */
+  maxVersiculosCopia: number | null
+  /** gerar imagem de versículo para compartilhar */
+  permiteImagem: boolean
+  siglaObrigatoria: true
+}
+
+export const POLITICA_ABERTA: Readonly<PoliticaCopia> = Object.freeze({
+  permiteCopiar: true,
+  maxVersiculosCopia: null,
+  permiteImagem: true,
+  siglaObrigatoria: true as const,
+})
+
+export const POLITICA_POR_PROVEDOR: Readonly<Record<ProvedorLicenciada, Readonly<PoliticaCopia>>> = Object.freeze({
+  apibible: Object.freeze({ permiteCopiar: true, maxVersiculosCopia: 25, permiteImagem: false, siglaObrigatoria: true as const }),
+  youversion: Object.freeze({ permiteCopiar: true, maxVersiculosCopia: 25, permiteImagem: false, siglaObrigatoria: true as const }),
+})
+
+/** Política de cópia da versão; id desconhecido cai na regra mais restrita (licenciada). */
+export function politicaCopia(id: string | null | undefined): Readonly<PoliticaCopia> {
+  const v = versaoPorId(id)
+  if (!v) return POLITICA_POR_PROVEDOR.apibible
+  if (v.fonte !== 'licenciada') return POLITICA_ABERTA
+  return POLITICA_POR_PROVEDOR[v.provedor ?? 'apibible']
 }

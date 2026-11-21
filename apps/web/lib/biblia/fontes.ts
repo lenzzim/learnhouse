@@ -1,7 +1,8 @@
 /**
  * Provedor único de texto bíblico: decide se o capítulo vem do JSON estático
- * (versões abertas, /biblia-dados) ou do proxy da API.Bible (versões
- * licenciadas, /api/v1/biblia — só com sessão). Quem exibe texto (leitor,
+ * (versões abertas, /biblia-dados) ou do proxy do servidor (versões
+ * licenciadas, /api/v1/biblia — só com sessão; o servidor fala com a
+ * API.Bible ou com a YouVersion Platform, conforme a versão). Quem exibe texto (leitor,
  * popover, inserir versículo, Caderno) deve passar por aqui:
  *
  *   const cap = await getChapter('ara', 'JHN', 3, { token })
@@ -9,9 +10,11 @@
  *   cap.titulos[16]         // "A missão do Filho" (título de seção, NÃO é texto do versículo)
  *   cap.copyright, cap.fums // exibir o copyright; reportar o fums ao mostrar (ver fums.ts)
  *
- * Regras das licenciadas (termos da API.Bible): não guardar o texto em notas
- * ou posts (guarde só a referência + versão), não enviar para IA/LLM, não
- * gerar áudio/TTS, sempre mostrar o copyright e reportar o FUMS.
+ * Regras das licenciadas (termos da API.Bible e da YouVersion): não guardar o
+ * texto em notas ou posts (guarde só a referência + versão), não enviar para
+ * IA/LLM, não gerar áudio/TTS, sempre mostrar o copyright (crédito oficial que
+ * vem do servidor) e reportar o FUMS (só API.Bible; YouVersion manda null).
+ * Limites de cópia por versão: politicaCopia() em versoes.ts.
  */
 import { getAPIUrl } from '@services/config/config'
 import { carregarLivro, type Versiculo } from './dados'
@@ -226,7 +229,7 @@ export function versoIncluidoEm(capitulo: Pick<Capitulo, 'combinados'> | null | 
 // Catálogo das licenciadas (o que a chave do servidor libera)
 // ---------------------------------------------------------------------------
 export interface EstadoLicenciadas {
-  /** servidor com BIBLE_API_KEY configurada */
+  /** servidor com alguma chave configurada (BIBLE_API_KEY e/ou YOUVERSION_API_KEY) */
   ativo: boolean
   /** ids liberados para leitura */
   disponiveis: string[]
