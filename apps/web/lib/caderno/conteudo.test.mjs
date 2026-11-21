@@ -111,3 +111,26 @@ test('árvore de coleções: ordem, órfãos e ciclos', () => {
   assert.ok(ehDescendente(lista, 'b', 'b'))
   assert.ok(!ehDescendente(lista, 'c', 'b'))
 })
+
+import { docDoModelo, pareceMarkdown, MODELOS_PRONTOS } from './conteudo.ts'
+
+test('modelos: h3 + parágrafo por seção; gratidão vira lista de 3', () => {
+  const d = docDoModelo(['Escritura', 'Observação', 'Aplicação', 'Oração'])
+  assert.equal(d.content.length, 8)
+  assert.equal(d.content[0].attrs.level, 3)
+  const g = docDoModelo(['Três motivos de gratidão'], 'ordenada')
+  assert.equal(g.content[1].type, 'orderedList')
+  assert.equal(g.content[1].content.length, 3)
+  assert.ok(MODELOS_PRONTOS.some((m) => m.id === 'soap'))
+  assert.equal(docDoModelo([]).content.length, 1)
+})
+
+test('colar: detecta markdown, ignora texto comum', () => {
+  assert.ok(pareceMarkdown('# Título\n\ntexto'))
+  assert.ok(pareceMarkdown('- um\n- dois'))
+  assert.ok(pareceMarkdown('isso é **forte**'))
+  assert.ok(pareceMarkdown('veja [site](https://x.com)'))
+  assert.ok(!pareceMarkdown('Jo 3:16 diz que Deus amou o mundo.'))
+  assert.ok(!pareceMarkdown('linha um\nlinha dois'))
+  assert.ok(!pareceMarkdown('#oração de hoje'))
+})

@@ -272,3 +272,29 @@ export async function lerCompartilhada(tokenLink: string, tokenSessao?: string):
   })
   return errorHandling(res)
 }
+
+/* ------------------------------------------------------- modelos do usuário */
+
+export interface ModeloUsuario {
+  template_uuid: string
+  name: string
+  kind: TipoNota | null
+  content_json: string
+  created_at: string
+  updated_at: string
+}
+
+export function listarModelos(orgId: number, token?: string) {
+  return chamar<ModeloUsuario[]>(`${base()}/templates?org_id=${orgId}`, 'GET', null, token)
+}
+
+export function criarModelo(
+  dados: { org_id: number; name: string; content_json: string; kind?: TipoNota | null },
+  token?: string
+) {
+  return chamar<ModeloUsuario>(`${base()}/templates`, 'POST', dados, token)
+}
+
+export function apagarModelo(uuid: string, token?: string) {
+  return chamar<{ ok: boolean }>(`${base()}/templates/${encodeURIComponent(uuid)}`, 'DELETE', null, token)
+}

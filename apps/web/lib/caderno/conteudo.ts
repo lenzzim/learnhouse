@@ -176,7 +176,7 @@ export function titulosDoDoc(doc: NoTiptap | null | undefined): Titulo[] {
 export function modeloTcd(secoes: string[]): NoTiptap {
   const content: NoTiptap[] = []
   for (const s of secoes) {
-    content.push({ type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: s }] })
+    content.push({ type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: s }] })
     content.push({ type: 'paragraph' })
   }
   return { type: 'doc', content }
@@ -258,4 +258,64 @@ export function ehDescendente(lista: ColecaoBasica[], uuid: string, alvo: string
     atual = pai.get(atual)
   }
   return false
+}
+
+/* ------------------------------------------------------------ modelos */
+
+export interface ModeloPronto {
+  id: string
+  /** sugere o tipo, mas o tipo da nota não muda por causa do modelo */
+  paraTcd?: boolean
+  /** chaves i18n das seções (caderno.modelos.<id>.secoes) — resolvidas na tela */
+  lista?: 'ordenada'
+}
+
+/** Modelos prontos. Nome e seções vêm do i18n: caderno.modelos.<id>.{nome,descricao,secoes}. */
+export const MODELOS_PRONTOS: ModeloPronto[] = [
+  { id: 'tcd', paraTcd: true },
+  { id: 'soap', paraTcd: true },
+  { id: 'tres_perguntas', paraTcd: true },
+  { id: 'culto' },
+  { id: 'estudo' },
+  { id: 'tematico' },
+  { id: 'oracao', paraTcd: true },
+  { id: 'resumo' },
+  { id: 'gratidao', lista: 'ordenada' },
+]
+
+/** Seções → documento: título h3 + parágrafo vazio por seção. Gratidão: h3 + lista de 3 itens. */
+export function docDoModelo(secoes: string[], lista?: 'ordenada'): NoTiptap {
+  if (lista === 'ordenada') {
+    const [titulo = '', ...itens] = secoes
+    const n = Math.max(itens.length, 3)
+    return {
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 3 }, content: titulo ? [{ type: 'text', text: titulo }] : [] },
+        {
+          type: 'orderedList',
+          attrs: { start: 1 },
+          content: Array.from({ length: n }, () => ({ type: 'listItem', content: [{ type: 'paragraph' }] })),
+        },
+      ],
+    }
+  }
+  const content: NoTiptap[] = []
+  for (const s of secoes) {
+    content.push({ type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: s }] })
+    content.push({ type: 'paragraph' })
+  }
+  return { type: 'doc', content: content.length ? content : [{ type: 'paragraph' }] }
+}
+
+/** Texto colado parece markdown? (títulos, listas, citações, negrito, links, código) */
+export function pareceMarkdown(texto: string): boolean {
+  if (!texto || texto.length > 500_000) return false
+  const linhas = texto.split(/\r?\n/)
+  let sinais = 0
+  for (const l of linhas) {
+    if (/^\s{0,3}(#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s?|```|---\s*$)/.test(l)) sinais++
+  }
+  if (/\*\*[^*\n]+\*\*|__[^_\n]+__|\[[^\]\n]+\]\([^)\s]+\)/.test(texto)) sinais++
+  return sinais >= 1
 }
