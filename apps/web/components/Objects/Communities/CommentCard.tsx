@@ -21,6 +21,7 @@ import {
 } from "@components/ui/dropdown-menu"
 import UserAvatar from '@components/Objects/UserAvatar'
 import { CommentUpvoteButton } from './CommentUpvoteButton'
+import { ReferenciasNoTexto, TextoComReferencias } from '@components/Biblia/ReferenciasNoTexto'
 
 dayjs.extend(relativeTime)
 
@@ -203,9 +204,11 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
                   <span className="font-medium text-gray-900 text-sm">{authorName}</span>
                   <span className="text-gray-400 text-xs">{timeAgo}</span>
                 </div>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap" dir="auto">
-                  {comment.content}
-                </p>
+                <ReferenciasNoTexto>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap" dir="auto">
+                    <TextoComReferencias texto={comment.content} />
+                  </p>
+                </ReferenciasNoTexto>
               </>
             )}
           </div>

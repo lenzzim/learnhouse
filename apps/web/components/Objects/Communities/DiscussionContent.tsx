@@ -3,6 +3,8 @@ import React from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
+import { ReferenciasBiblicas } from '@components/Biblia/extensaoReferencias'
+import { ReferenciasNoTexto, TextoComReferencias } from '@components/Biblia/ReferenciasNoTexto'
 
 interface DiscussionContentProps {
   content: any
@@ -16,9 +18,11 @@ export function DiscussionContent({ content }: DiscussionContentProps) {
   // Handle plain text content (legacy)
   if (typeof content === 'string') {
     return (
-      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-        {content}
-      </p>
+      <ReferenciasNoTexto>
+        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+          <TextoComReferencias texto={content} />
+        </p>
+      </ReferenciasNoTexto>
     )
   }
 
@@ -68,6 +72,8 @@ function DiscussionContentEditor({ content }: { content: any }) {
           rel: 'noopener noreferrer',
         },
       }),
+      // Discipulei: referências bíblicas viram links (decoração, não altera o conteúdo)
+      ReferenciasBiblicas,
     ],
     content,
     editable: false,
@@ -80,7 +86,9 @@ function DiscussionContentEditor({ content }: { content: any }) {
 
   return (
     <>
-      <EditorContent editor={editor} className="discussion-content-readonly" />
+      <ReferenciasNoTexto>
+        <EditorContent editor={editor} className="discussion-content-readonly" />
+      </ReferenciasNoTexto>
       <style jsx global>{`
         .discussion-content-readonly .ProseMirror {
           outline: none;
