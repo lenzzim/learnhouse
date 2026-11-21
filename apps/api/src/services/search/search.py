@@ -22,6 +22,7 @@ from src.services.search.normalization import (
 )
 from src.security.auth import resolve_acting_user_id
 from src.security.org_auth import is_org_member
+from src.security.rbac.resource_access import readable_communities_clause
 
 
 class SearchDiscussionRead(DiscussionRead):
@@ -143,6 +144,10 @@ async def search_across_org(
     - Org members additionally see org-scoped non-public content where the
       resource itself doesn't restrict it further (e.g. unpublished items and
       usergroup-restricted playgrounds are always excluded from search).
+    - Communities and their discussions follow the community READ rule of
+      ``ResourceAccessChecker`` (public; usergroup-linked → group members only;
+      no group → org members; admins/superadmins see all), via
+      ``readable_communities_clause``.
     - User hits are serialized as ``UserReadPublic``, never ``UserRead``: search
       is open to every member, so it must not expose the PII the dedicated
       member directory restricts to admins.
@@ -241,13 +246,19 @@ async def search_across_org(
         users, total_users = await _paginate_and_count(db_session, users_q, page, limit)
 
     # ── Communities ──────────────────────────────────────────────────────────
+    # SECURITY: same READ rule as ``check_resource_access`` on a community,
+    # expressed in SQL so pagination totals stay exact. A plain "public or org
+    # member" filter leaked usergroup-restricted communities (e.g. the gender-
+    # exclusive ones) and their discussions to every member of the org.
+    community_access = await readable_communities_clause(
+        request, db_session, current_user, org, is_member=user_is_member
+    )
     communities_q = (
         select(Community)
         .where(Community.org_id == org.id)
         .where(_ilike_any([Community.name, Community.description], pattern))
+        .where(community_access)
     )
-    if only_public:
-        communities_q = communities_q.where(Community.public == sa_true())
     communities, total_communities = await _paginate_and_count(
         db_session, communities_q, page, limit
     )
@@ -260,9 +271,9 @@ async def search_across_org(
         .where(_ilike_any([Discussion.title, Discussion.content], pattern))
         # Caderno privado: notas privadas só aparecem para o próprio autor
         .where(visible_discussions_clause(current_user))
+        # Comunidades restritas por grupo: só quem pode ler a comunidade
+        .where(community_access)
     )
-    if only_public:
-        discussions_q = discussions_q.where(Community.public == sa_true())
     discussions, total_discussions = await _paginate_and_count_rows(
         db_session, discussions_q, page, limit
     )
