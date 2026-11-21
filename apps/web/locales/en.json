@@ -245,6 +245,14 @@
     "free_plan_upgrade": "You're on the Free plan. Upgrade to unlock the complete experience.",
     "free_plan_upgrade_button": "Upgrade"
   },
+  "instalar": {
+    "rotulo": "Install the app",
+    "titulo": "Install the Discipulei app",
+    "descricao": "Open the community straight from your home screen.",
+    "ios_instrucoes": "Tap Share, then Add to Home Screen.",
+    "botao_instalar": "Install",
+    "agora_nao": "Not now"
+  },
   "auth": {
     "login": "Login",
     "sign_in": "Sign in",

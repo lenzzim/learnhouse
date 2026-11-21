@@ -245,6 +245,14 @@
     "free_plan_upgrade": "Você está no plano gratuito. Atualize para desbloquear a experiência completa.",
     "free_plan_upgrade_button": "Atualizar"
   },
+  "instalar": {
+    "rotulo": "Instalar o app",
+    "titulo": "Instale o app do Discipulei",
+    "descricao": "Abra a comunidade direto da tela inicial.",
+    "ios_instrucoes": "Toque em Compartilhar e depois em Adicionar à Tela de Início.",
+    "botao_instalar": "Instalar",
+    "agora_nao": "Agora não"
+  },
   "auth": {
     "login": "Entrar",
     "email": "E-mail",
