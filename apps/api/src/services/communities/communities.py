@@ -1,7 +1,7 @@
 from typing import List, Union
 from uuid import uuid4
 from datetime import datetime
-from sqlmodel import select, and_, or_
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import HTTPException, Request
 
@@ -24,7 +24,9 @@ from src.security.rbac import (
     authorization_verify_if_user_is_anon,
     authorization_verify_based_on_org_admin_status,
     authorization_verify_based_on_roles,
+    community_read_clause_for_user,
 )
+from src.security.org_auth import is_org_member
 
 
 async def create_community(
@@ -169,28 +171,16 @@ async def get_communities_by_org(
         communities = (await db_session.execute(query)).scalars().all()
         return [CommunityRead.model_validate(c.model_dump()) for c in communities]
 
-    # For regular users, use a subquery approach to avoid DISTINCT with JSON columns
-    # Get IDs of communities the user has access to
-    accessible_community_ids_query = (
-        select(Community.id)
-        .where(Community.org_id == org_id)
-        .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Community.community_uuid)
-        .outerjoin(UserGroupUser, and_(
-            UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-            UserGroupUser.user_id == acting_user_id
-        ))
-        .where(or_(
-            Community.public == True,
-            UserGroupResource.resource_uuid.is_(None),  # Not in any UserGroup
-            UserGroupUser.user_id == acting_user_id,  # User in linked UserGroup
-        ))
-        .distinct()
-    )
-
-    # Now select full communities using the IDs
+    # Regular users: the same READ rule ``check_resource_access`` applies to a
+    # single community (public; usergroup-linked → group members only; no
+    # linked group → members of THIS org). The previous inline query granted
+    # "no linked group" communities to any signed-in account, so a member of
+    # another tenant could list this org's members-only communities.
+    is_member = await is_org_member(acting_user_id, org_id, db_session)
     query = (
         select(Community)
-        .where(Community.id.in_(accessible_community_ids_query))
+        .where(Community.org_id == org_id)
+        .where(community_read_clause_for_user(acting_user_id, org_id, is_member))
         .order_by(Community.creation_date.desc())
         .offset(offset)
         .limit(limit)

@@ -51,6 +51,8 @@ from src.security.rbac.config import (
 from src.security.rbac.resource_access import (
     ResourceAccessChecker,
     check_resource_access,
+    community_read_clause_for_user,
+    readable_communities_clause,
 )
 
 # New unified RBAC system - FastAPI Dependencies
@@ -107,6 +109,8 @@ __all__ = [
     # Checker
     "ResourceAccessChecker",
     "check_resource_access",
+    "community_read_clause_for_user",
+    "readable_communities_clause",
     # FastAPI Dependencies
     "require_resource_access",
     "require_read_access",

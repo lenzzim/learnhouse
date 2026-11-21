@@ -604,13 +604,9 @@ class ResourceAccessChecker:
                 action=action.value,
             )
 
-        rights = api_token_user.rights
-        if isinstance(rights, dict):
-            resource_rights = rights.get(config.resource_type, {})
-            has_permission = resource_rights.get(f"action_{action.value}", False)
-        else:
-            resource_rights = getattr(rights, config.resource_type, None)
-            has_permission = getattr(resource_rights, f"action_{action.value}", False) if resource_rights else False
+        has_permission = api_token_has_right(
+            api_token_user, config.resource_type, action.value
+        )
 
         if has_permission:
             return AccessDecision(
@@ -972,6 +968,131 @@ class ResourceAccessChecker:
 
         self._resource_cache[resource_uuid] = resource
         return resource
+
+
+def api_token_has_right(
+    token: APITokenUser, resource_type: str, action: str
+) -> bool:
+    """Whether an API token's ``rights`` grant ``action_<action>`` on a type.
+
+    ``rights`` arrives either as a plain dict or as a pydantic object.
+    """
+    rights = token.rights
+    if not rights:
+        return False
+    if isinstance(rights, dict):
+        resource_rights = rights.get(resource_type) or {}
+        return bool(resource_rights.get(f"action_{action}", False))
+    resource_rights = getattr(rights, resource_type, None)
+    if not resource_rights:
+        return False
+    return bool(getattr(resource_rights, f"action_{action}", False))
+
+
+# ---------------------------------------------------------------------------
+# Bulk (SQL) twin of the community READ rules
+# ---------------------------------------------------------------------------
+#
+# ``ResourceAccessChecker`` decides one resource at a time. Listings that span
+# several communities (org search, community listing…) cannot afford one
+# ``check_access`` per row, and filtering after LIMIT/OFFSET would also break
+# pagination totals. These helpers express the very same READ/PUBLIC_VIEW rule
+# chain for communities (and, through ``Discussion.community_id``, for their
+# discussions) as a SQL predicate over ``Community``. Keep them in lockstep with
+# ``check_access`` → ``_check_public_view_read_access``:
+#
+#   superadmin                         → everything
+#   API token                          → org boundary + ``communities.action_read``
+#   anonymous                          → public only
+#   org admin/maintainer (Rule 3)      → everything in the org
+#   otherwise                          → public (Rule 1)
+#                                        OR member of a linked UserGroup (Rule 5)
+#                                        OR no linked UserGroup AND member of the
+#                                           community's org (UsersOnly fallback)
+#
+# Communities have no authorship (Rule 2) and Rule 4 (role permission) only ever
+# applies to public resources, which Rule 1 already admits.
+
+
+def community_read_clause_for_user(user_id: int, org_id: int, is_org_member: bool):
+    """SQL predicate over ``Community`` for a signed-in, non-admin user.
+
+    ``is_org_member`` must be the caller's membership in ``org_id``; the
+    "no linked group" fallback is only granted for communities of that org.
+    """
+    from sqlalchemy import and_, or_, true as sa_true
+    from src.db.communities.communities import Community
+
+    is_public = Community.public == sa_true()
+    if not user_id:
+        return is_public
+
+    in_linked_group = (
+        select(UserGroupResource.id)
+        .join(UserGroupUser, UserGroupUser.usergroup_id == UserGroupResource.usergroup_id)
+        .where(
+            UserGroupResource.resource_uuid == Community.community_uuid,
+            UserGroupUser.user_id == user_id,
+        )
+        .exists()
+    )
+    clauses = [is_public, in_linked_group]
+
+    if is_org_member:
+        has_linked_group = (
+            select(UserGroupResource.id)
+            .where(UserGroupResource.resource_uuid == Community.community_uuid)
+            .exists()
+        )
+        clauses.append(and_(Community.org_id == org_id, ~has_linked_group))
+
+    return or_(*clauses)
+
+
+async def readable_communities_clause(
+    request: Request,
+    db_session: AsyncSession,
+    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
+    org,
+    *,
+    is_member: Optional[bool] = None,
+):
+    """SQL predicate over ``Community``: the communities of ``org`` that
+    ``current_user`` may READ, per the same rules as ``check_access``.
+
+    Use it in any query that lists communities or community content
+    (join ``Community`` on ``Discussion.community_id``) across communities.
+    ``is_member`` may be passed when the caller already resolved the user's
+    membership in ``org``, to save a query.
+    """
+    from sqlalchemy import false as sa_false, true as sa_true
+    from src.db.communities.communities import Community
+
+    if isinstance(current_user, PublicUser) and current_user.is_superadmin:
+        return sa_true()
+
+    if isinstance(current_user, APITokenUser):
+        if current_user.org_id != org.id:
+            return sa_false()
+        if api_token_has_right(current_user, "communities", "read"):
+            return sa_true()
+        return sa_false()
+
+    user_id = getattr(current_user, "id", 0) or 0
+    if not user_id:
+        return Community.public == sa_true()
+
+    if await authorization_verify_based_on_org_admin_status(
+        request, user_id, "read", org.org_uuid, db_session
+    ):
+        return sa_true()
+
+    if is_member is None:
+        from src.security.org_auth import is_org_member
+
+        is_member = await is_org_member(user_id, org.id, db_session)
+
+    return community_read_clause_for_user(user_id, org.id, bool(is_member))
 
 
 # Convenience functions for quick access checks
