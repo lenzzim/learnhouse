@@ -3,33 +3,18 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { updateDiscussion, DISCUSSION_LABELS, DiscussionWithAuthor } from '@services/communities/discussions'
+import { updateDiscussion, DISCUSSION_LABELS, DiscussionWithAuthor, isPrivateDiscussion } from '@services/communities/discussions'
+import { getLabelIcon } from '@components/Objects/Communities/labelIcons'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { DiscussionEditor } from '@components/Objects/Communities/DiscussionEditor'
 import { EmojiPicker } from '@components/Objects/Communities/EmojiPicker'
-import { Loader2, AlertCircle, MessageSquare, HelpCircle, Lightbulb, Megaphone, Star, Check, Info } from 'lucide-react'
+import { Loader2, AlertCircle, Check, Info } from 'lucide-react'
 
 interface EditDiscussionModalProps {
   isOpen: boolean
   onClose: () => void
   discussion: DiscussionWithAuthor
   onUpdated: (updated: DiscussionWithAuthor) => void
-}
-
-// Get the icon component for a label
-function getLabelIcon(iconName: string, size: number = 16) {
-  switch (iconName) {
-    case 'HelpCircle':
-      return <HelpCircle size={size} />
-    case 'Lightbulb':
-      return <Lightbulb size={size} />
-    case 'Megaphone':
-      return <Megaphone size={size} />
-    case 'Star':
-      return <Star size={size} />
-    default:
-      return <MessageSquare size={size} />
-  }
 }
 
 // Parse content - handles both JSON (tiptap) and plain text
@@ -67,7 +52,9 @@ export function EditDiscussionModal({
 
   const accessToken = session?.data?.tokens?.access_token
   const remainingEdits = MAX_EDITS - (discussion.edit_count || 0)
-  const canEdit = remainingEdits > 0
+  // Notas privadas (caderno) não têm limite de edições — o backend não as conta.
+  const isPrivate = isPrivateDiscussion(discussion)
+  const canEdit = isPrivate || remainingEdits > 0
 
   // Initialize form with discussion data
   useEffect(() => {
@@ -161,7 +148,7 @@ export function EditDiscussionModal({
       dialogContent={
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Edit count warning */}
-          {canEdit ? (
+          {isPrivate ? null : canEdit ? (
             <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg text-blue-700 text-sm">
               <Info size={16} className="flex-shrink-0" />
               <span>

@@ -807,11 +807,51 @@
       "clear_filter": "Limpar filtro"
     },
     "labels": {
+      "devocional": "Devocional",
+      "testemunho": "Testemunho",
+      "oracao": "Pedido de oração",
       "general": "Geral",
       "question": "Pergunta",
       "idea": "Ideia",
-      "announcement": "Anúncio",
+      "announcement": "Aviso",
       "showcase": "Vitrine"
+    },
+    "devotional_template": {
+      "passage": "Passagem",
+      "learned": "O que aprendi",
+      "apply": "Como aplicar",
+      "prayer": "Oração"
+    },
+    "visibility": {
+      "label": "Quem pode ver",
+      "private_option": "Só eu (caderno)",
+      "private_hint": "Fica no seu caderno. Ninguém mais vê, nem os moderadores.",
+      "public_option": "Publicar na comunidade",
+      "public_hint": "Todos os membros da comunidade podem ler e comentar.",
+      "private_badge": "Privado",
+      "private_notice": "Esta nota é privada: só você pode vê-la. Publique quando quiser compartilhar com a comunidade.",
+      "publish": "Publicar",
+      "publish_title": "Publicar na comunidade?",
+      "publish_confirm": "Os membros da comunidade poderão ler, reagir e comentar.",
+      "publish_button": "Publicar agora",
+      "cancel": "Cancelar",
+      "make_private": "Tornar privado",
+      "published": "Publicado na comunidade",
+      "made_private": "Agora só você vê esta discussão",
+      "failed": "Não foi possível mudar a visibilidade",
+      "submit_private": "Salvar no caderno",
+      "comments_private": "As respostas ficam disponíveis depois que você publicar."
+    },
+    "notebook": {
+      "title": "Meu caderno",
+      "open": "Meu caderno",
+      "description": "Seus devocionais e anotações de estudo. Só você vê o que está aqui.",
+      "empty_title": "Seu caderno está vazio",
+      "empty_description": "Ao criar uma discussão, escolha \"Só eu (caderno)\" para guardar aqui.",
+      "load_more": "Carregar mais",
+      "login_required": "Entre na sua conta para ver o seu caderno.",
+      "in_community": "em {{community}}",
+      "error": "Não foi possível carregar o seu caderno."
     },
     "create_discussion": {
       "title": "Iniciar uma discussão",
