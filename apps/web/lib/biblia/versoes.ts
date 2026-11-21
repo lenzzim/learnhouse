@@ -94,6 +94,22 @@ export const VERSOES: VersaoInfo[] = [
 
 export const VERSAO_PADRAO = 'blivre'
 
+/**
+ * Versão padrão de cada idioma da interface, usada quando o usuário ainda
+ * não escolheu uma (dono, 21/11/2026): pt -> BLIVRE, en -> WEB, es -> RV1909.
+ */
+export const VERSAO_PADRAO_POR_IDIOMA: Record<Idioma, string> = {
+  pt: 'blivre',
+  en: 'web',
+  es: 'rv1909',
+}
+
+/** "en-US" -> "web"; idiomas fora de pt/en/es caem na BLIVRE. */
+export function versaoPadraoDoIdioma(lng: string | null | undefined): string {
+  const base = String(lng || '').split('-')[0].toLowerCase()
+  return VERSAO_PADRAO_POR_IDIOMA[base as Idioma] ?? VERSAO_PADRAO
+}
+
 export function versaoPorId(id: string | null | undefined): VersaoInfo | undefined {
   return id ? VERSOES.find((v) => v.id === id) : undefined
 }

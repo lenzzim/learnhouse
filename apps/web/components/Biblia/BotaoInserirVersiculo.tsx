@@ -3,7 +3,9 @@ import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } f
 import type { Editor } from '@tiptap/react'
 import { useTranslation } from 'react-i18next'
 import { BookOpen } from 'lucide-react'
-import { formatarReferencia, interpretarReferencia, TRADUCAO } from '@/lib/biblia/referencias'
+import { formatarReferencia, interpretarReferencia } from '@/lib/biblia/referencias'
+import { versaoPorId } from '@/lib/biblia/versoes'
+import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
 import { versiculosDaReferencia, type Versiculo } from '@/lib/biblia/dados'
 
 /**
@@ -34,6 +36,10 @@ type Previa = { tipo: 'vazio' } | { tipo: 'carregando' } | { tipo: 'erro' } | { 
 
 export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
   const { t } = useTranslation()
+  // texto e nomes na versão do idioma da interface (BLIVRE, WEB ou RV1909)
+  const { idioma, versaoPadrao: versao } = useBibliaIdioma()
+  const sigla = versaoPorId(versao)?.sigla ?? ''
+  const nomes = useNomesLivros(versao)
   const [aberto, setAberto] = useState(false)
   const [entrada, setEntrada] = useState('')
   const [previa, setPrevia] = useState<Previa>({ tipo: 'vazio' })
@@ -43,7 +49,7 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
   const idPainel = useId()
   const idEntrada = useId()
 
-  const ref = useMemo(() => interpretarReferencia(entrada), [entrada])
+  const ref = useMemo(() => interpretarReferencia(entrada, idioma), [entrada, idioma])
   const quantidade = ref && ref.versoIni !== undefined ? (ref.versoFim ?? ref.versoIni) - ref.versoIni + 1 : 0
   let aviso: string | null = null
   if (entrada.trim() && !ref) aviso = t('biblia.referencia_invalida')
@@ -59,7 +65,7 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
     }
     let vivo = true
     setPrevia({ tipo: 'carregando' })
-    versiculosDaReferencia(ref)
+    versiculosDaReferencia(ref, versao)
       .then((versos) => vivo && setPrevia({ tipo: 'pronto', versos }))
       .catch(() => vivo && setPrevia({ tipo: 'erro' }))
     return () => {
@@ -67,7 +73,7 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
     }
     // a referência é derivada de `entrada`
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entrada, valida])
+  }, [entrada, valida, versao])
 
   // mantém o painel dentro da viewport (a barra pode estar perto da borda)
   useLayoutEffect(() => {
@@ -103,7 +109,7 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
           type: 'blockquote',
           content: [
             { type: 'paragraph', content: [{ type: 'text', text: textoDoBloco(previa.versos) }] },
-            { type: 'paragraph', content: [{ type: 'text', text: `— ${formatarReferencia(ref)} (${TRADUCAO})` }] },
+            { type: 'paragraph', content: [{ type: 'text', text: `— ${formatarReferencia(ref, false, nomes)} (${sigla})` }] },
           ],
         },
         { type: 'paragraph' },
@@ -176,7 +182,7 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
               >
                 <p>{textoDoBloco(previa.versos)}</p>
                 <p className="mt-1 font-sans text-xs text-[var(--text-3)]">
-                  — {formatarReferencia(ref)} ({TRADUCAO})
+                  — {formatarReferencia(ref, false, nomes)} ({sigla})
                 </p>
               </blockquote>
             )}

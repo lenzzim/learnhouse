@@ -4,7 +4,9 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { formatarReferencia, lerCodigoReferencia } from '@/lib/biblia/referencias'
 import { hrefLeitor, versiculosDaReferencia, type Versiculo } from '@/lib/biblia/dados'
-import { VERSAO_PADRAO, versaoPorId } from '@/lib/biblia/versoes'
+import { versaoPadraoDoIdioma, versaoPorId } from '@/lib/biblia/versoes'
+import { idiomaDiscipulei } from '@/lib/discipulei/nav'
+import { useNomesLivros } from './useBibliaIdioma'
 import { Z_INDEX } from '@/lib/z-index'
 import { SeletorVersao } from './SeletorVersao'
 import { OutrasTraducoes } from './OutrasTraducoes'
@@ -33,11 +35,17 @@ type Estado = { tipo: 'carregando' } | { tipo: 'erro' } | { tipo: 'pronto'; vers
  * fecha e trata Escape é o host (ReferenciasNoTexto).
  */
 export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter, onMouseLeave, onNavegar }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const ref = lerCodigoReferencia(codigo)
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
-  // começa sempre na BLIVRE; o seletor troca só neste popover
-  const [versao, setVersao] = useState(VERSAO_PADRAO)
+  // começa na versão do idioma da interface (pt BLIVRE, en WEB, es RV1909);
+  // o seletor troca só neste popover. O popover só existe no cliente, depois
+  // de uma interação, então ler o idioma direto do i18next não quebra a
+  // hidratação.
+  const padrao = versaoPadraoDoIdioma(idiomaDiscipulei(i18n.language))
+  const [escolhida, setVersao] = useState<string | null>(null)
+  const versao = escolhida ?? padrao
+  const nomes = useNomesLivros(versao)
   const [pos, setPos] = useState<{ top: number; left: number; largura: number } | null>(null)
   const localRef = useRef<HTMLDivElement | null>(null)
 
@@ -77,8 +85,8 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
   }, [ancora, estado.tipo])
 
   if (!ref || typeof document === 'undefined') return null
-  const titulo = formatarReferencia(ref)
-  const href = hrefLeitor(codigo, versao)
+  const titulo = formatarReferencia(ref, false, nomes)
+  const href = hrefLeitor(codigo, versao, padrao)
   const info = versaoPorId(versao)
   const versos = estado.tipo === 'pronto' ? estado.versos : []
   const visiveis = versos.slice(0, MAX_VERSOS)

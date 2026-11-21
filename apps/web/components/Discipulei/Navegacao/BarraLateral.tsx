@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { CalendarCheck, CaretRight, Hash, Lock, MagnifyingGlass, Plus } from '@phosphor-icons/react'
 import { getUriWithOrg } from '@services/config/config'
+import { useIdiomaDiscipulei } from '../useIdioma'
 import { NAV_PRINCIPAL, abaAtiva, comunidadeDaRota, urlAgendar, type AbaId } from '@/lib/discipulei/nav'
 import { useDadosNav } from './useDadosNav'
 import { useEscrever } from './EscreverContexto'
@@ -62,6 +63,7 @@ export function BarraLateral({
   aoBuscar: () => void
 }) {
   const { t } = useTranslation()
+  const idioma = useIdiomaDiscipulei()
   const pathname = usePathname()
   const { autenticado, status, comunidades, notasRecentes, carregandoNotas } = useDadosNav()
   const { abrirEscrever } = useEscrever()
@@ -204,7 +206,7 @@ export function BarraLateral({
         <div className="my-3 h-px bg-[var(--line)]" role="separator" />
 
         <a
-          href={urlAgendar('menu-lateral')}
+          href={urlAgendar('menu-lateral', 'agendar', idioma)}
           target="_blank"
           rel="noopener"
           className={`${ITEM_BASE} font-medium text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]`}

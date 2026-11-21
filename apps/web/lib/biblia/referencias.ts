@@ -1,8 +1,9 @@
 /**
- * Referências bíblicas em português.
+ * Referências bíblicas em português, inglês e espanhol.
  *
- * Encontra referências como "Jo 3:16", "João 3.16-18", "1 Co 13", "Sl 23" ou
- * "I Coríntios 13:4" em texto livre e as normaliza para
+ * Encontra referências como "Jo 3:16", "João 3.16-18", "1 Co 13", "Sl 23",
+ * "I Coríntios 13:4", "John 3:16", "Psalm 23", "Juan 3:16" ou
+ * "1 Corintios 13:4-7" em texto livre e as normaliza para
  * { livroId (USFM), capitulo, versoIni?, versoFim? }, com os offsets do trecho
  * no texto original (para envolver num link sem alterar o conteúdo salvo).
  *
@@ -15,8 +16,13 @@
  *  - valida capítulo e versículos contra a contagem real da BLIVRE;
  *  - abreviações que também são palavras comuns ("Os", "Na", "Ap", "Ag", ...)
  *    só casam com inicial maiúscula E versículo ("Os 6:6", não "os 3 meninos");
- *  - nomes que também são substantivos comuns ("Números", "Atos", "Reis", ...)
- *    só casam com inicial maiúscula ("os números 3 e 4" não vira Nm 3).
+ *  - nomes que também são substantivos comuns ("Números", "Atos", "Reis",
+ *    "Acts", "Kings", "Hechos", "Is", "Sal", ...) só casam com inicial
+ *    maiúscula ("os números 3 e 4" não vira Nm 3; "this is 3" não vira Is 3).
+ * Quando a mesma abreviação é de livros diferentes em idiomas diferentes
+ * ("Jn" é Jonas em português e João em inglês/espanhol), vale primeiro a do
+ * idioma pedido em `{ idioma }` (padrão: pt) e, se o capítulo/versículo não
+ * existir nesse livro, a do outro idioma ("Jn 3:16" só pode ser João).
  * O modo `{ estrito: false }` (usado no seletor do editor, onde o usuário
  * digita só a referência) desliga essas duas últimas exigências.
  */
@@ -211,8 +217,163 @@ const NOMES: Record<string, string[]> = {
   REV: ['Apocalipse', 'Ap', 'Apoc'],
 }
 
+/** Inglês: nomes da WEB/KJV e abreviações usuais (SBL e comuns). */
+const NOMES_EN: Record<string, string[]> = {
+  GEN: ['Genesis', 'Gen', 'Gn'],
+  EXO: ['Exodus', 'Exod', 'Ex'],
+  LEV: ['Leviticus', 'Lev', 'Lv'],
+  NUM: ['Numbers', 'Num', 'Nm'],
+  DEU: ['Deuteronomy', 'Deut', 'Dt'],
+  JOS: ['Joshua', 'Josh'],
+  JDG: ['Judges', 'Judg', 'Jdg'],
+  RUT: ['Ruth'],
+  '1SA': ['Samuel', 'Sam', 'Sa'],
+  '2SA': ['Samuel', 'Sam', 'Sa'],
+  '1KI': ['Kings', 'Kgs', 'Ki'],
+  '2KI': ['Kings', 'Kgs', 'Ki'],
+  '1CH': ['Chronicles', 'Chron', 'Chr'],
+  '2CH': ['Chronicles', 'Chron', 'Chr'],
+  EZR: ['Ezra', 'Ezr'],
+  NEH: ['Nehemiah', 'Neh'],
+  EST: ['Esther', 'Esth', 'Est'],
+  JOB: ['Job'],
+  PSA: ['Psalms', 'Psalm', 'Pss', 'Psa', 'Ps'],
+  PRO: ['Proverbs', 'Prov', 'Prv'],
+  ECC: ['Ecclesiastes', 'Eccles', 'Eccl', 'Ecc'],
+  SNG: ['Song of Songs', 'Song of Solomon', 'Song of Sol'],
+  ISA: ['Isaiah', 'Isa'],
+  JER: ['Jeremiah', 'Jer'],
+  LAM: ['Lamentations', 'Lam'],
+  EZK: ['Ezekiel', 'Ezek', 'Ezk'],
+  DAN: ['Daniel', 'Dan'],
+  HOS: ['Hosea', 'Hos'],
+  JOL: ['Joel'],
+  AMO: ['Amos'],
+  OBA: ['Obadiah', 'Obad'],
+  JON: ['Jonah', 'Jon'],
+  MIC: ['Micah', 'Mic'],
+  NAM: ['Nahum', 'Nah'],
+  HAB: ['Habakkuk', 'Hab'],
+  ZEP: ['Zephaniah', 'Zeph'],
+  HAG: ['Haggai', 'Hag'],
+  ZEC: ['Zechariah', 'Zech'],
+  MAL: ['Malachi', 'Mal'],
+  MAT: ['Matthew', 'Matt', 'Mt'],
+  MRK: ['Mark', 'Mk', 'Mrk'],
+  LUK: ['Luke', 'Lk'],
+  JHN: ['John', 'Jn', 'Jhn'],
+  ACT: ['Acts'],
+  ROM: ['Romans', 'Rom'],
+  '1CO': ['Corinthians', 'Cor'],
+  '2CO': ['Corinthians', 'Cor'],
+  GAL: ['Galatians', 'Gal'],
+  EPH: ['Ephesians', 'Eph'],
+  PHP: ['Philippians', 'Phil', 'Php'],
+  COL: ['Colossians', 'Col'],
+  '1TH': ['Thessalonians', 'Thess', 'Th'],
+  '2TH': ['Thessalonians', 'Thess', 'Th'],
+  '1TI': ['Timothy', 'Tim'],
+  '2TI': ['Timothy', 'Tim'],
+  TIT: ['Titus', 'Tit'],
+  PHM: ['Philemon', 'Philem', 'Phlm', 'Phm'],
+  HEB: ['Hebrews', 'Heb'],
+  JAS: ['James', 'Jas'],
+  '1PE': ['Peter', 'Pet', 'Pt'],
+  '2PE': ['Peter', 'Pet', 'Pt'],
+  '1JN': ['John', 'Jn', 'Jhn'],
+  '2JN': ['John', 'Jn', 'Jhn'],
+  '3JN': ['John', 'Jn', 'Jhn'],
+  JUD: ['Jude'],
+  REV: ['Revelation', 'Revelations', 'Rev'],
+}
+
+/** Espanhol: nomes da RV1909 e abreviações usuais. */
+const NOMES_ES: Record<string, string[]> = {
+  GEN: ['Génesis', 'Gén', 'Gn'],
+  EXO: ['Éxodo', 'Éx'],
+  LEV: ['Levítico', 'Lv'],
+  NUM: ['Números', 'Nm'],
+  DEU: ['Deuteronomio', 'Dt'],
+  JOS: ['Josué', 'Jos'],
+  JDG: ['Jueces', 'Jue'],
+  RUT: ['Rut'],
+  '1SA': ['Samuel', 'Sam', 'Sm'],
+  '2SA': ['Samuel', 'Sam', 'Sm'],
+  '1KI': ['Reyes', 'Re', 'Rey'],
+  '2KI': ['Reyes', 'Re', 'Rey'],
+  '1CH': ['Crónicas', 'Cr', 'Cró'],
+  '2CH': ['Crónicas', 'Cr', 'Cró'],
+  EZR: ['Esdras', 'Esd'],
+  NEH: ['Nehemías', 'Neh'],
+  EST: ['Ester', 'Est'],
+  JOB: ['Job', 'Jb'],
+  PSA: ['Salmos', 'Salmo', 'Sal'],
+  PRO: ['Proverbios', 'Prov', 'Pr'],
+  ECC: ['Eclesiastés', 'Ecl', 'Ec'],
+  SNG: ['Cantar de los Cantares', 'Cantares', 'Cnt'],
+  ISA: ['Isaías', 'Is'],
+  JER: ['Jeremías', 'Jer'],
+  LAM: ['Lamentaciones', 'Lm', 'Lam'],
+  EZK: ['Ezequiel', 'Ez'],
+  DAN: ['Daniel', 'Dn'],
+  HOS: ['Oseas', 'Os'],
+  JOL: ['Joel', 'Jl'],
+  AMO: ['Amós', 'Am'],
+  OBA: ['Abdías', 'Abd'],
+  JON: ['Jonás', 'Jon'],
+  MIC: ['Miqueas', 'Mi', 'Miq'],
+  NAM: ['Nahúm', 'Nah'],
+  HAB: ['Habacuc', 'Hab'],
+  ZEP: ['Sofonías', 'Sof'],
+  HAG: ['Hageo', 'Ageo', 'Hag'],
+  ZEC: ['Zacarías', 'Zac'],
+  MAL: ['Malaquías', 'Mal'],
+  MAT: ['Mateo', 'San Mateo', 'Mt'],
+  MRK: ['Marcos', 'San Marcos', 'Mc'],
+  LUK: ['Lucas', 'San Lucas', 'Lc'],
+  JHN: ['Juan', 'San Juan', 'Jn'],
+  ACT: ['Hechos', 'Hch'],
+  ROM: ['Romanos', 'Rom', 'Ro'],
+  '1CO': ['Corintios', 'Cor', 'Co'],
+  '2CO': ['Corintios', 'Cor', 'Co'],
+  GAL: ['Gálatas', 'Gál', 'Gá'],
+  EPH: ['Efesios', 'Ef'],
+  PHP: ['Filipenses', 'Flp', 'Fil'],
+  COL: ['Colosenses', 'Col'],
+  '1TH': ['Tesalonicenses', 'Ts', 'Tes'],
+  '2TH': ['Tesalonicenses', 'Ts', 'Tes'],
+  '1TI': ['Timoteo', 'Tim', 'Ti'],
+  '2TI': ['Timoteo', 'Tim', 'Ti'],
+  TIT: ['Tito', 'Tit'],
+  PHM: ['Filemón', 'Flm'],
+  HEB: ['Hebreos', 'Heb'],
+  JAS: ['Santiago', 'Stg'],
+  '1PE': ['Pedro', 'Pe'],
+  '2PE': ['Pedro', 'Pe'],
+  '1JN': ['Juan', 'Jn'],
+  '2JN': ['Juan', 'Jn'],
+  '3JN': ['Juan', 'Jn'],
+  JUD: ['Judas', 'Jud'],
+  REV: ['Apocalipsis', 'Ap', 'Apoc'],
+}
+
+export type IdiomaReferencia = 'pt' | 'en' | 'es'
+
+/** Ordem de desempate quando o idioma pedido não decide. */
+const NOMES_POR_IDIOMA: [IdiomaReferencia, Record<string, string[]>][] = [
+  ['pt', NOMES],
+  ['en', NOMES_EN],
+  ['es', NOMES_ES],
+]
+
 /** Abreviações que também são palavras comuns: exigem maiúscula + versículo. */
-const ABREV_AMBIGUAS = new Set(['os', 'na', 'ap', 'ag', 'am', 'at', 'ed', 'et'])
+const ABREV_AMBIGUAS = new Set([
+  'os', 'na', 'ap', 'ag', 'am', 'at', 'ed', 'et',
+  // inglês / espanhol
+  'num', // "num 3 dias" (pt)
+  'mi', // "mi 3 hijos" (es)
+  'santiago', // cidade e nome próprio
+])
 
 /** Nomes que também são substantivos comuns: exigem inicial maiúscula. */
 const NOMES_COMUNS = new Set([
@@ -225,6 +386,27 @@ const NOMES_COMUNS = new Set([
   'proverbios',
   'cantares',
   'canticos',
+  // inglês
+  'numbers',
+  'judges',
+  'kings',
+  'chronicles',
+  'lamentations',
+  'proverbs',
+  'acts',
+  'mark',
+  'revelation',
+  'revelations',
+  'job',
+  'is', // "this is 3 times"
+  // espanhol
+  'jueces',
+  'reyes',
+  'lamentaciones',
+  'hechos',
+  'sal', // "sal 3 colheres" (pt)
+  'mal', // "mal 3 vezes" (pt/es)
+  'dan', // "dan 3 vueltas" (es)
 ])
 
 function semAcento(s: string): string {
@@ -235,24 +417,55 @@ function chaveNome(s: string): string {
   return s.toLowerCase().replace(/\s+/g, ' ').trim()
 }
 
-/** chave = "<n>|<nome>" para livros numerados, "<nome>" para os demais */
-const ALIAS_PARA_LIVRO = new Map<string, string>()
+interface Candidato {
+  id: string
+  idiomas: IdiomaReferencia[]
+}
+
+/**
+ * chave = "<n>|<nome>" para livros numerados, "<nome>" para os demais.
+ * Uma chave pode apontar para mais de um livro ("jn": Jonas em pt, João em
+ * en/es); a ordem de inserção (pt, en, es) é o desempate.
+ */
+const ALIAS_PARA_LIVRO = new Map<string, Candidato[]>()
 const TODOS_NOMES = new Set<string>()
 
 ;(function montarMapa() {
-  const pares: [string, string][] = []
-  for (const id of Object.keys(NOMES)) {
-    const num = /^[1-3]/.test(id) ? id[0] + '|' : ''
-    for (const nome of NOMES[id]) pares.push([num + chaveNome(nome), id])
+  const pares: [string, string, IdiomaReferencia][] = []
+  for (const [idioma, tabela] of NOMES_POR_IDIOMA) {
+    for (const id of Object.keys(tabela)) {
+      const num = /^[1-3]/.test(id) ? id[0] + '|' : ''
+      for (const nome of tabela[id]) pares.push([num + chaveNome(nome), id, idioma])
+    }
   }
-  // explícitos primeiro; variantes sem acento só onde não colidem
-  for (const [k, id] of pares) if (!ALIAS_PARA_LIVRO.has(k)) ALIAS_PARA_LIVRO.set(k, id)
-  for (const [k, id] of pares) {
+  const adicionar = (k: string, id: string, idioma: IdiomaReferencia) => {
+    let lista = ALIAS_PARA_LIVRO.get(k)
+    if (!lista) ALIAS_PARA_LIVRO.set(k, (lista = []))
+    let c = lista.find((x) => x.id === id)
+    if (!c) lista.push((c = { id, idiomas: [] }))
+    if (!c.idiomas.includes(idioma)) c.idiomas.push(idioma)
+  }
+  // explícitos primeiro; variantes sem acento só onde não colidem com um
+  // explícito ("Jó" sem acento seria "jo", que é João)
+  const explicitos = new Set(pares.map(([k]) => k))
+  for (const [k, id, idioma] of pares) adicionar(k, id, idioma)
+  for (const [k, id, idioma] of pares) {
     const s = semAcento(k)
-    if (!ALIAS_PARA_LIVRO.has(s)) ALIAS_PARA_LIVRO.set(s, id)
+    if (s !== k && !explicitos.has(s)) adicionar(s, id, idioma)
   }
   for (const k of ALIAS_PARA_LIVRO.keys()) TODOS_NOMES.add(k.replace(/^[1-3]\|/, ''))
 })()
+
+/** Livros possíveis para a chave, os do idioma pedido primeiro. */
+function candidatos(chave: string, idioma: IdiomaReferencia): LivroInfo[] {
+  const lista = ALIAS_PARA_LIVRO.get(chave)
+  if (!lista) return []
+  const ordenada = [
+    ...lista.filter((c) => c.idiomas.includes(idioma)),
+    ...lista.filter((c) => !c.idiomas.includes(idioma)),
+  ]
+  return ordenada.map((c) => POR_ID.get(c.id)).filter((l): l is LivroInfo => !!l)
+}
 
 function escaparRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+')
@@ -260,16 +473,18 @@ function escaparRegex(s: string): string {
 
 // Grupos: 1 = fronteira à esquerda, 2 = prefixo numérico, 3 = nome do livro,
 // 4 = separador, 5 = capítulo. Sem lookbehind (Safari < 16.4 não suporta).
+// "1", "1ª", "1º", "1.", "1st", "I", "Primeira", "Primera", "First"...
 const PREFIXO =
-  '((?:[123]\\s*(?:[ªº°]\\.?|[ao](?=\\s)|\\.)?|(?:iii|ii|i)(?=\\s)|primeir[ao]|segund[ao]|terceir[ao])\\s*)?'
+  '((?:[123]\\s*(?:[ªº°]\\.?|(?:st|nd|rd)(?=\\s)|[ao](?=\\s)|\\.)?|(?:iii|ii|i)(?=\\s)|' +
+  'primeir[ao]|segund[ao]|terceir[ao]|primer[ao]?|tercer[ao]?|first|second|third)\\s*)?'
 const NOMES_REGEX = [...TODOS_NOMES].sort((a, b) => b.length - a.length).map(escaparRegex).join('|')
 const PADRAO = `(^|[^\\p{L}\\p{N}])${PREFIXO}(${NOMES_REGEX})(\\.?\\s*)(\\d{1,3})(?!\\d)`
 
 function numeroDoPrefixo(p: string): number {
   const s = p.trim().toLowerCase()
   if (/^[123]/.test(s)) return Number(s[0])
-  if (s.startsWith('iii') || s.startsWith('terceir')) return 3
-  if (s.startsWith('ii') || s.startsWith('segund')) return 2
+  if (s.startsWith('iii') || s.startsWith('tercer') || s.startsWith('terceir') || s.startsWith('third')) return 3
+  if (s.startsWith('ii') || s.startsWith('segund') || s.startsWith('second')) return 2
   return 1
 }
 
@@ -292,10 +507,16 @@ function lerNumero(texto: string, i: number): [number, number] | null {
 export interface OpcoesBusca {
   /** false: aceita abreviações ambíguas e nomes comuns em minúscula (padrão: true) */
   estrito?: boolean
+  /**
+   * Idioma de desempate quando a mesma abreviação é de livros diferentes
+   * ("Jn": Jonas em pt, João em en/es). Padrão: 'pt'.
+   */
+  idioma?: IdiomaReferencia
 }
 
 export function encontrarReferencias(texto: string, opcoes: OpcoesBusca = {}): ReferenciaEncontrada[] {
   const estrito = opcoes.estrito !== false
+  const idioma: IdiomaReferencia = opcoes.idioma ?? 'pt'
   const re = new RegExp(PADRAO, 'giu')
   const achados: ReferenciaEncontrada[] = []
   let m: RegExpExecArray | null
@@ -310,16 +531,15 @@ export function encontrarReferencias(texto: string, opcoes: OpcoesBusca = {}): R
     const fimCap = m.index + m[0].length
 
     const chave = chaveNome(nome)
-    let livroId: string | undefined
+    let possiveis: LivroInfo[] = []
     let inicio = inicioPrefixo
-    if (prefixo) livroId = ALIAS_PARA_LIVRO.get(numeroDoPrefixo(prefixo) + '|' + chave)
-    if (!livroId) {
+    if (prefixo) possiveis = candidatos(numeroDoPrefixo(prefixo) + '|' + chave, idioma)
+    if (!possiveis.length) {
       // "2 Gn 1:1": o "2" não faz parte de um livro numerado; tenta sem ele
-      livroId = ALIAS_PARA_LIVRO.get(chave)
+      possiveis = candidatos(chave, idioma)
       inicio = inicioNome
     }
-    const livro = livroId ? POR_ID.get(livroId) : undefined
-    if (!livro) {
+    if (!possiveis.length) {
       re.lastIndex = m.index + 1
       continue
     }
@@ -368,12 +588,17 @@ export function encontrarReferencias(texto: string, opcoes: OpcoesBusca = {}): R
       if (nome[0] === nome[0].toLowerCase()) rejeitar = true
     }
 
-    // validação contra a contagem real
-    if (!rejeitar && (capitulo < 1 || capitulo > livro.versos.length)) rejeitar = true
+    // validação contra a contagem real; com mais de um livro possível ("Jn"),
+    // fica o primeiro (idioma pedido antes) em que capítulo e versículo existem
+    const cabe = (l: LivroInfo) =>
+      capitulo >= 1 &&
+      capitulo <= l.versos.length &&
+      (versoIni === undefined || (versoIni >= 1 && versoIni <= l.versos[capitulo - 1]))
+    const livro = possiveis.find(cabe) ?? possiveis[0]
+    if (!rejeitar && !cabe(livro)) rejeitar = true
     if (!rejeitar && versoIni !== undefined) {
       const total = livro.versos[capitulo - 1]
-      if (versoIni < 1 || versoIni > total) rejeitar = true
-      else if (versoFim !== undefined && (versoFim <= versoIni || versoFim > total)) {
+      if (versoFim !== undefined && (versoFim <= versoIni || versoFim > total)) {
         // intervalo inválido: mantém só o primeiro versículo
         versoFim = undefined
         fim = fimCap + 1 + String(versoIni).length
@@ -398,12 +623,12 @@ export function encontrarReferencias(texto: string, opcoes: OpcoesBusca = {}): R
  * Interpreta um texto que deve ser SÓ uma referência ("Jo 3:16-18",
  * "joao 3.16", ou o código "JHN.3.16-18"). Usado no seletor do editor.
  */
-export function interpretarReferencia(texto: string): Referencia | null {
+export function interpretarReferencia(texto: string, idioma?: IdiomaReferencia): Referencia | null {
   const t = texto.trim()
   if (!t) return null
   const porCodigo = lerCodigoReferencia(t)
   if (porCodigo) return porCodigo
-  const achados = encontrarReferencias(t, { estrito: false })
+  const achados = encontrarReferencias(t, { estrito: false, idioma })
   if (achados.length !== 1) return null
   const a = achados[0]
   if (a.inicio !== 0 || a.fim !== t.length) return null
@@ -449,9 +674,15 @@ export function lerCodigoReferencia(codigo: string | null | undefined): Referenc
   return ref
 }
 
-/** "João 3:16-18" (ou "Jo 3:16-18" com `abreviado`). */
-export function formatarReferencia(ref: Referencia, abreviado = false): string {
-  const livro = POR_ID.get(ref.livroId)
+/** Nome e abreviação de cada livro numa versão (vindos do index.json dela). */
+export type NomesLivros = Record<string, { nome: string; abrev: string }>
+
+/**
+ * "João 3:16-18" (ou "Jo 3:16-18" com `abreviado`). Com `nomes` (o index.json
+ * de uma versão), usa os nomes daquela versão: "John 3:16-18", "Juan 3:16-18".
+ */
+export function formatarReferencia(ref: Referencia, abreviado = false, nomes?: NomesLivros | null): string {
+  const livro = nomes?.[ref.livroId] ?? POR_ID.get(ref.livroId)
   const nome = livro ? (abreviado ? livro.abrev : livro.nome) : ref.livroId
   let s = `${nome} ${ref.capitulo}`
   if (ref.versoIni !== undefined) {

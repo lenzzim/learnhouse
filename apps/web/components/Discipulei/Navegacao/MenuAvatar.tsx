@@ -3,19 +3,23 @@
 import React from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRight, CalendarCheck, CaretUpDown, SignOut, SquaresFour, UserCircle } from '@phosphor-icons/react'
+import { ArrowUpRight, CalendarCheck, CaretUpDown, Globe, SignOut, SquaresFour, UserCircle } from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { signOut } from '@components/Contexts/AuthContext'
 import { urlAgendar } from '@/lib/discipulei/nav'
+import { IDIOMAS_SELETOR, escolherIdioma } from '@components/Utils/LanguageSwitcher'
 import { useDadosNav } from './useDadosNav'
+import { useIdiomaDiscipulei } from '../useIdioma'
 import { FOCO } from './estilos'
 
 const ITEM =
@@ -24,11 +28,12 @@ const ITEM =
 
 /**
  * Menu do avatar: Perfil/Conta, Agendar estudo (site), Painel admin (só
- * admin) e Sair. `variante="completa"` é a linha do rodapé da barra lateral;
+ * admin), Idioma (PT/EN/ES) e Sair. `variante="completa"` é a linha do rodapé da barra lateral;
  * `compacta` é só o avatar, na barra superior do celular.
  */
 export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) {
   const { t } = useTranslation()
+  const idioma = useIdiomaDiscipulei()
   const { usuario, ehAdmin } = useDadosNav()
 
   const nome =
@@ -83,7 +88,7 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className={ITEM}>
-          <a href={urlAgendar('menu')} target="_blank" rel="noopener">
+          <a href={urlAgendar('menu', 'agendar', idioma)} target="_blank" rel="noopener">
             <CalendarCheck size={18} aria-hidden="true" />
             <span className="flex-1">{t('nav.agendar_estudo')}</span>
             <ArrowUpRight size={14} aria-hidden="true" className="text-[var(--text-3)] rtl:-scale-x-100" />
@@ -98,6 +103,37 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuSeparator className="my-1 bg-[var(--line)]" />
+        <DropdownMenuLabel className="flex items-center gap-2 px-3 pb-1 pt-1.5 text-xs font-medium text-[var(--text-3)]">
+          <Globe size={14} aria-hidden="true" />
+          {t('nav.idioma')}
+        </DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={idioma}
+          onValueChange={(code) => {
+            escolherIdioma(code)
+          }}
+          className="flex gap-1 px-1.5 pb-1"
+        >
+          {IDIOMAS_SELETOR.map((l) => (
+            <DropdownMenuRadioItem
+              key={l.code}
+              value={l.code}
+              lang={l.code === 'pt' ? 'pt-BR' : l.code}
+              // não fecha o menu: a troca aparece na hora, ainda com o menu aberto
+              onSelect={(e) => e.preventDefault()}
+              className={
+                'min-h-11 flex-1 cursor-pointer justify-center rounded-md border border-[var(--line)] px-1 ps-1 text-sm ' +
+                'text-[var(--text-2)] outline-none [&>span:first-child]:hidden ' +
+                'focus:bg-[var(--surface)] data-[highlighted]:bg-[var(--surface)] ' +
+                'data-[state=checked]:border-[var(--line-strong)] data-[state=checked]:bg-[var(--surface)] ' +
+                'data-[state=checked]:font-semibold data-[state=checked]:text-[var(--text)]'
+              }
+            >
+              {l.nativeName}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
         <DropdownMenuSeparator className="my-1 bg-[var(--line)]" />
         <DropdownMenuItem
           className={ITEM}

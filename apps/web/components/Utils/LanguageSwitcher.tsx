@@ -3,7 +3,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Languages, ChevronDown, Check } from 'lucide-react'
-import { AVAILABLE_LANGUAGES } from '@/lib/languages'
+import { getLanguageByCode, type Language } from '@/lib/languages'
+import { IDIOMAS_DISCIPULEI } from '@/lib/discipulei/nav'
 import { changeLanguage, LANGUAGE_USER_PICKED_KEY } from '@/lib/i18n'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import {
@@ -14,8 +15,27 @@ import {
 } from "@components/ui/dropdown-menu"
 import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
+/**
+ * Discipulei: só os idiomas de IDIOMAS_DISCIPULEI (pt, en, es) aparecem no
+ * seletor. Os outros locales continuam no repositório (lib/languages.ts).
+ */
+export const IDIOMAS_SELETOR: Language[] = IDIOMAS_DISCIPULEI.map((c) => getLanguageByCode(c)).filter(
+  (l): l is Language => !!l
+)
+
+/**
+ * Troca o idioma pela escolha do usuário: marca a escolha, carrega o pacote e
+ * troca (o detector grava em 'discipulei_lng'; bindI18nStore re-renderiza).
+ */
+export function escolherIdioma(code: string) {
+  try {
+    localStorage.setItem(LANGUAGE_USER_PICKED_KEY, '1')
+  } catch { /* ignore */ }
+  return changeLanguage(code)
+}
+
 const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { track } = useLHAnalytics()
   const colors = getMenuColorClasses(primaryColor)
   const [mounted, setMounted] = React.useState(false)
@@ -26,7 +46,7 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className={`flex items-center space-x-1.5 px-2.5 py-2 rounded-lg transition-colors text-sm font-bold outline-none ${colors.iconBtn}`}>
+        <button aria-label={mounted ? `${t('nav.idioma')}: ${currentLangCode}` : undefined} className={`flex items-center space-x-1.5 px-2.5 py-2 rounded-lg transition-colors text-sm font-bold outline-none ${colors.iconBtn}`}>
           <Languages size={16} strokeWidth={2.5} />
           <span suppressHydrationWarning>{currentLangCode}</span>
           <ChevronDown size={12} className="opacity-50" />
@@ -37,19 +57,16 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
         className="min-w-[180px] z-dropdown"
         align="end"
       >
-        {AVAILABLE_LANGUAGES.map((language) => (
+        {IDIOMAS_SELETOR.map((language) => (
           <DropdownMenuItem
             key={language.code}
             className="flex items-center justify-between cursor-pointer"
             onClick={() => {
-              try {
-                localStorage.setItem(LANGUAGE_USER_PICKED_KEY, '1')
-              } catch { /* ignore */ }
               track(AnalyticsEvent.LanguageChanged, {
                 language_code: language.code,
                 source: 'language_switcher',
               })
-              changeLanguage(language.code)
+              escolherIdioma(language.code)
             }}
           >
             <span className="flex items-center space-x-2">

@@ -13,10 +13,11 @@ import {
   livroPorId,
   type Referencia,
 } from '@/lib/biblia/referencias'
-import { VERSAO_PADRAO, versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
+import { versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
 import { CREDITO_STEPBIBLE, URL_STEPBIBLE, type CapituloOriginal, type PalavraOriginal } from '@/lib/biblia/original'
 import { carregarLivro, carregarOriginal, type LivroDados } from '@/lib/biblia/dados'
 import { SeletorVersao } from './SeletorVersao'
+import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
 import { OutrasTraducoes } from './OutrasTraducoes'
 import { OriginalVerso } from './OriginalVerso'
 import { PainelVerbete } from './PainelVerbete'
@@ -27,10 +28,11 @@ import { CHAVE_ULTIMO_CAPITULO } from '@/lib/discipulei/nav'
  * Leitor da Bíblia. Esquema de URL único em todo o app:
  *   /biblia?ref=JHN.3              capítulo
  *   /biblia?ref=JHN.3.16-18        capítulo com o intervalo destacado
- *   &v=kjv                         versão (padrão: blivre; omitida na URL)
+ *   &v=kjv                         versão (padrão: a do idioma da interface —
+ *                                  blivre/web/rv1909 —, omitida na URL)
  *   &c=web                         modo comparar com uma segunda versão
  * Cada versículo tem âncora #v<n>. Sem `ref`/`v`, usa o último capítulo e a
- * última versão escolhidos (localStorage) ou Gênesis 1 na BLIVRE.
+ * última versão escolhidos (localStorage) ou Gênesis 1 na versão do idioma.
  */
 
 // Também lida pela tela Hoje ("Continue lendo").
@@ -91,7 +93,7 @@ function Credito({ versao }: { versao: VersaoInfo }) {
   const { t } = useTranslation()
   return (
     <p className="mt-1">
-      {versao.credito}
+      {t(`biblia.creditos.${versao.id}`, { defaultValue: versao.credito })}
       {versao.licencaUrl && (
         <>
           {' '}
@@ -117,6 +119,7 @@ export default function LeitorBiblia() {
   const vParam = params.get('v')
   const cParam = params.get('c')
   const ref = useMemo(() => lerCodigoReferencia(refParam), [refParam])
+  const { versaoPadrao, montado } = useBibliaIdioma()
 
   // preferências guardadas (lidas depois de montar, para não quebrar a hidratação)
   const [padrao, setPadrao] = useState<Referencia>({ livroId: 'GEN', capitulo: 1 })
@@ -131,7 +134,10 @@ export default function LeitorBiblia() {
 
   const atual: Referencia = ref ?? padrao
   const livroInfo = livroPorId(atual.livroId) ?? LIVROS[0]
-  const versaoA = versaoPorId(vParam) ?? versaoPorId(versaoSalva) ?? (versaoPorId(VERSAO_PADRAO) as VersaoInfo)
+  const versaoA = versaoPorId(vParam) ?? versaoPorId(versaoSalva) ?? (versaoPorId(versaoPadrao) as VersaoInfo)
+  // nomes dos livros na versão escolhida (WEB/KJV em inglês, RV1909/VBL em espanhol)
+  const nomes = useNomesLivros(montado ? versaoA.id : null)
+  const nomeLivro = (l: { id: string; nome: string }) => nomes?.[l.id]?.nome ?? l.nome
   const versaoB = cParam && cParam !== versaoA.id ? versaoPorId(cParam) ?? null : null
 
   useEffect(() => {
@@ -142,17 +148,19 @@ export default function LeitorBiblia() {
     (r: Referencia, versao: string = versaoA.id, comparar: string = versaoB?.id ?? '') => {
       const q = new URLSearchParams()
       q.set('ref', codigoReferencia(r))
-      if (versao !== VERSAO_PADRAO) q.set('v', versao)
+      if (versao !== versaoPadrao) q.set('v', versao)
       if (comparar && comparar !== versao) q.set('c', comparar)
       return `?${q.toString()}`
     },
-    [versaoA.id, versaoB]
+    [versaoA.id, versaoB, versaoPadrao]
   )
   const irPara = (href: string) => router.push(href)
 
   const [tentativa, setTentativa] = useState(0)
+  // só depois de montar: antes disso o idioma e a versão salva ainda não são
+  // conhecidos, e carregaria a BLIVRE à toa para quem lê em inglês/espanhol
   const estadoA = useCarregar<LivroDados>(
-    `${versaoA.id}/${livroInfo.id}`,
+    montado ? `${versaoA.id}/${livroInfo.id}` : null,
     () => carregarLivro(livroInfo.id, versaoA.id),
     tentativa
   )
@@ -225,7 +233,7 @@ export default function LeitorBiblia() {
         href={montarHref(alvo)}
         replace
         scroll={false}
-        aria-label={formatarReferencia({ livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: n })}
+        aria-label={formatarReferencia({ livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: n }, false, nomes)}
         className="-my-2 me-0.5 inline-block select-none rounded px-1 py-2 align-super font-sans text-xs font-medium leading-none text-[var(--text-3)] no-underline hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
       >
         {n}
@@ -318,7 +326,7 @@ export default function LeitorBiblia() {
     <div className={`mx-auto w-full px-4 pb-16 pt-6 text-[var(--text)] sm:pt-10 ${versaoB ? 'max-w-[1040px]' : 'max-w-[680px]'}`}>
       <header className="mb-6 flex flex-col gap-4">
         <h1 className="text-3xl">
-          {livroInfo.nome} {atual.capitulo}
+          {nomeLivro(livroInfo)} {atual.capitulo}
         </h1>
         <div className="flex flex-wrap gap-2">
           <select
@@ -330,14 +338,14 @@ export default function LeitorBiblia() {
             <optgroup label={t('biblia.antigo_testamento')}>
               {AT.map((l) => (
                 <option key={l.id} value={l.id}>
-                  {l.nome}
+                  {nomeLivro(l)}
                 </option>
               ))}
             </optgroup>
             <optgroup label={t('biblia.novo_testamento')}>
               {NT.map((l) => (
                 <option key={l.id} value={l.id}>
-                  {l.nome}
+                  {nomeLivro(l)}
                 </option>
               ))}
             </optgroup>
@@ -416,16 +424,16 @@ export default function LeitorBiblia() {
 
       <nav className="mt-10 flex items-center justify-between gap-3" aria-label={t('biblia.titulo')}>
         {anterior ? (
-          <Link href={montarHref(anterior)} className={botaoClasse} aria-label={`${t('biblia.anterior')}: ${formatarReferencia(anterior)}`}>
+          <Link href={montarHref(anterior)} className={botaoClasse} aria-label={`${t('biblia.anterior')}: ${formatarReferencia(anterior, false, nomes)}`}>
             <ChevronLeft size={16} aria-hidden="true" />
-            <span>{formatarReferencia(anterior, true)}</span>
+            <span>{formatarReferencia(anterior, true, nomes)}</span>
           </Link>
         ) : (
           <span />
         )}
         {proximo ? (
-          <Link href={montarHref(proximo)} className={botaoClasse} aria-label={`${t('biblia.proximo')}: ${formatarReferencia(proximo)}`}>
-            <span>{formatarReferencia(proximo, true)}</span>
+          <Link href={montarHref(proximo)} className={botaoClasse} aria-label={`${t('biblia.proximo')}: ${formatarReferencia(proximo, false, nomes)}`}>
+            <span>{formatarReferencia(proximo, true, nomes)}</span>
             <ChevronRight size={16} aria-hidden="true" />
           </Link>
         ) : (

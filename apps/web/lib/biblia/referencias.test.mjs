@@ -216,3 +216,130 @@ test('intervaloVersos', () => {
   assert.deepEqual(intervaloVersos({ livroId: 'JHN', capitulo: 3, versoIni: 16 }), [16, 16])
   assert.deepEqual(intervaloVersos({ livroId: 'JHN', capitulo: 3, versoIni: 16, versoFim: 18 }), [16, 18])
 })
+
+// ---------------------------------------------------------------------------
+// Inglês e espanhol
+// ---------------------------------------------------------------------------
+
+test('inglês: nomes e abreviações comuns', () => {
+  assert.deepEqual(um('John 3:16'), { livroId: 'JHN', capitulo: 3, versoIni: 16 })
+  assert.deepEqual(um('Psalm 23'), { livroId: 'PSA', capitulo: 23 })
+  assert.deepEqual(um('Psalms 119:105'), { livroId: 'PSA', capitulo: 119, versoIni: 105 })
+  assert.deepEqual(um('Ps 23'), { livroId: 'PSA', capitulo: 23 })
+  assert.equal(um('Genesis 1:1').livroId, 'GEN')
+  assert.equal(um('Gen. 1:1').livroId, 'GEN')
+  assert.equal(um('Exodus 20').livroId, 'EXO')
+  assert.equal(um('Deuteronomy 6:4').livroId, 'DEU')
+  assert.equal(um('Proverbs 3:5-6').livroId, 'PRO')
+  assert.equal(um('Isaiah 53').livroId, 'ISA')
+  assert.equal(um('Song of Songs 2:1').livroId, 'SNG')
+  assert.equal(um('Matthew 5:3').livroId, 'MAT')
+  assert.equal(um('Matt 5:3').livroId, 'MAT')
+  assert.equal(um('Mark 4:3').livroId, 'MRK')
+  assert.equal(um('Luke 15:11').livroId, 'LUK')
+  assert.equal(um('Acts 2:38').livroId, 'ACT')
+  assert.equal(um('Romans 8:28').livroId, 'ROM')
+  assert.equal(um('Phil 4:13').livroId, 'PHP')
+  assert.equal(um('James 1:5').livroId, 'JAS')
+  assert.equal(um('Revelation 21:4').livroId, 'REV')
+  assert.equal(um('Job 1:21').livroId, 'JOB')
+})
+
+test('inglês: livros numerados', () => {
+  assert.deepEqual(um('1 Corinthians 13:4-7'), { livroId: '1CO', capitulo: 13, versoIni: 4, versoFim: 7 })
+  assert.equal(um('1 Cor 13').livroId, '1CO')
+  assert.equal(um('2 Kings 2:11').livroId, '2KI')
+  assert.equal(um('1 John 4:8').livroId, '1JN')
+  assert.equal(um('1 Jn 4:8').livroId, '1JN')
+  assert.equal(um('1st John 4:8').livroId, '1JN')
+  assert.equal(um('First Peter 5:7').livroId, '1PE')
+  assert.equal(um('2 Tim 3:16').livroId, '2TI')
+  assert.equal(um('1 Thess 5:17').livroId, '1TH')
+})
+
+test('espanhol: nomes e abreviações comuns', () => {
+  assert.deepEqual(um('Juan 3:16'), { livroId: 'JHN', capitulo: 3, versoIni: 16 })
+  assert.deepEqual(um('Gén 1:1'), { livroId: 'GEN', capitulo: 1, versoIni: 1 })
+  assert.equal(um('Génesis 1:1').livroId, 'GEN')
+  assert.equal(um('Éxodo 20').livroId, 'EXO')
+  assert.deepEqual(um('Salmos 23'), { livroId: 'PSA', capitulo: 23 })
+  assert.deepEqual(um('Sal 23:1'), { livroId: 'PSA', capitulo: 23, versoIni: 1 })
+  assert.equal(um('Proverbios 3:5').livroId, 'PRO')
+  assert.equal(um('Eclesiastés 3:1').livroId, 'ECC')
+  assert.equal(um('Jeremías 29:11').livroId, 'JER')
+  assert.equal(um('Oseas 6:6').livroId, 'HOS')
+  assert.equal(um('Miqueas 6:8').livroId, 'MIC')
+  assert.equal(um('Mateo 5:3').livroId, 'MAT')
+  assert.equal(um('Hechos 2:38').livroId, 'ACT')
+  assert.equal(um('Hch 2:38').livroId, 'ACT')
+  assert.equal(um('Efesios 2:8').livroId, 'EPH')
+  assert.equal(um('Hebreos 11:1').livroId, 'HEB')
+  assert.equal(um('Santiago 1:5').livroId, 'JAS')
+  assert.equal(um('Apocalipsis 21:4').livroId, 'REV')
+})
+
+test('espanhol: livros numerados', () => {
+  assert.deepEqual(um('1 Corintios 13:4-7'), { livroId: '1CO', capitulo: 13, versoIni: 4, versoFim: 7 })
+  assert.equal(um('2 Reyes 2:11').livroId, '2KI')
+  assert.equal(um('1 Juan 4:8').livroId, '1JN')
+  assert.equal(um('2 Timoteo 3:16').livroId, '2TI')
+  assert.equal(um('Primera Corintios 13:4').livroId, '1CO')
+  assert.equal(um('1 Pedro 5:7').livroId, '1PE')
+})
+
+test('"Jn": Jonas em português, João em inglês/espanhol; capítulo inválido decide', () => {
+  assert.equal(um('Jn 1:1').livroId, 'JON') // padrão pt
+  assert.equal(um('Jn 1:1', { idioma: 'en' }).livroId, 'JHN')
+  assert.equal(um('Jn 1:1', { idioma: 'es' }).livroId, 'JHN')
+  // Jonas 3 tem 10 versículos: "Jn 3:16" só pode ser João, em qualquer idioma
+  assert.equal(um('Jn 3:16').livroId, 'JHN')
+  assert.equal(um('Jn 3:16', { idioma: 'pt' }).livroId, 'JHN')
+  assert.deepEqual(refs('Jn 22:1'), [])
+  assert.equal(interpretarReferencia('Jn 3:16', 'en').livroId, 'JHN')
+})
+
+test('inglês/espanhol não trazem falsos positivos novos', () => {
+  assert.deepEqual(refs('this is 3 times better'), [])
+  assert.deepEqual(refs('a job 2 days ago'), [])
+  assert.deepEqual(refs('the acts 2 and 3'), [])
+  assert.deepEqual(refs('mark 4 boxes'), [])
+  assert.deepEqual(refs('two kings 3 queens'), [])
+  assert.deepEqual(refs('mi 3 hijos'), [])
+  assert.deepEqual(refs('Mi 3 hijos'), []) // ambígua: precisa de versículo
+  assert.deepEqual(refs('los hechos 2 y 3'), [])
+  assert.deepEqual(refs('le dan 3 vueltas'), [])
+  assert.deepEqual(refs('uma pitada de sal 2 vezes'), [])
+  assert.deepEqual(refs('foi mal 3 vezes'), [])
+  assert.deepEqual(refs('num 3 dias'), [])
+  assert.deepEqual(refs('Santiago 3 graus'), [])
+  assert.deepEqual(refs('page 2 p 3'), [])
+  assert.equal(um('Mi 6:8').livroId, 'MIC')
+  assert.equal(um('Is 53').livroId, 'ISA') // "Is" com maiúscula continua valendo
+  assert.equal(um('Mal 3:10').livroId, 'MAL')
+})
+
+test('formatarReferencia com os nomes de uma versão', async () => {
+  const { readFileSync } = await import('node:fs')
+  const nomesDe = (v) => {
+    const indice = JSON.parse(readFileSync(new URL(`../../public/biblia-dados/${v}/index.json`, import.meta.url), 'utf8'))
+    return Object.fromEntries(indice.livros.map((l) => [l.id, { nome: l.nome, abrev: l.abrev }]))
+  }
+  const r = { livroId: 'JHN', capitulo: 3, versoIni: 16, versoFim: 18 }
+  assert.equal(formatarReferencia(r, false, nomesDe('web')), 'John 3:16-18')
+  assert.equal(formatarReferencia(r, false, nomesDe('rv1909')), 'Juan 3:16-18')
+  assert.equal(formatarReferencia(r, false, null), 'João 3:16-18')
+  // o que o formatador produz, o parser reconhece de volta
+  for (const v of ['blivre', 'web', 'kjv', 'rv1909', 'vbl']) {
+    const nomes = nomesDe(v)
+    for (const id of Object.keys(nomes)) {
+      const texto = formatarReferencia({ livroId: id, capitulo: 1, versoIni: 1 }, false, nomes)
+      assert.equal(interpretarReferencia(texto, 'pt')?.livroId, id, `${v}: ${texto}`)
+    }
+  }
+})
+
+test('espanhol: "San Mateo", "San Juan" (títulos da RV1909)', () => {
+  assert.equal(um('San Mateo 5:3').livroId, 'MAT')
+  assert.equal(um('San Juan 3:16').livroId, 'JHN')
+  assert.equal(um('San Lucas 15').livroId, 'LUK')
+})

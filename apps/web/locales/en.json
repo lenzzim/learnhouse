@@ -243,9 +243,9 @@
     "titulo_inicio": "Live your faith",
     "titulo_destaque": "in practice",
     "descricao": "Look at your life in the light of the Bible, with someone by your side, in a small group of 2 or 3 people. Eight studies, free, online or in person.",
-    "cta": "Schedule a study",
+    "cta": "Book a study",
     "como_funciona": "How it works",
-    "menu": "Schedule a study",
+    "menu": "Book a study",
     "nova_aba": "opens in a new tab",
     "convite_titulo": "Want to study this with someone?",
     "convite_publicado": "Devotional published. Want to study this with someone?",
@@ -855,7 +855,7 @@
       "prayer": "Prayer"
     },
     "visibility": {
-      "label": "Who can see this",
+      "label": "Who can see it",
       "private_option": "Only me (notebook)",
       "private_hint": "Stays in your notebook. Nobody else can see it, not even moderators.",
       "public_option": "Publish to the community",
@@ -3028,7 +3028,7 @@
         "footer_text_desc": "Custom text displayed at the bottom of your organization pages",
         "email_sender_name": "Email Sender Name",
         "email_sender_name_placeholder": "Your organization's name",
-        "email_sender_name_desc": "The name recipients see on emails sent for this organization. Only the name changes \u2014 the sending address stays the platform's, which is what keeps these emails passing SPF and DKIM checks. Leave empty to use the platform default.",
+        "email_sender_name_desc": "The name recipients see on emails sent for this organization. Only the name changes — the sending address stays the platform's, which is what keeps these emails passing SPF and DKIM checks. Leave empty to use the platform default.",
         "default_language": "Default Language",
         "default_language_desc": "The language new visitors see by default and the language used for emails sent on behalf of this organization. Members can still switch their own UI language.",
         "watermark_label": "\"Made with LearnHouse\" watermark",
@@ -6381,9 +6381,9 @@
     "abrir_na_biblia": "Open in the Bible",
     "inserir_versiculo": "Insert verse",
     "referencia": "Reference",
-    "referencia_placeholder": "e.g. Jo 3:16-18",
+    "referencia_placeholder": "e.g. John 3:16-18",
     "referencia_invalida": "Reference not recognized.",
-    "informe_versiculo": "Also enter the verse (e.g. Sl 23:1-6).",
+    "informe_versiculo": "Also enter the verse (e.g. Ps 23:1-6).",
     "limite_versiculos": "Choose at most {{max}} verses.",
     "inserir": "Insert",
     "cancelar": "Cancel",
@@ -6403,13 +6403,22 @@
     "strong": "Strong",
     "no_texto": "In the text",
     "morfologia": "Morphology",
-    "glosa": "Gloss",
+    "glosa": "Gloss (English)",
     "glosa_espanhol": "Spanish gloss",
     "texto_base": "Base text",
     "so_na": "Only in the critical text (Nestle-Aland)",
     "so_tr": "Only in the Textus Receptus (KJV base)",
-    "definicao_ingles": "Definition",
+    "definicao_ingles": "Definition (English)",
     "credito_stepbible": "Data from STEPBible.org (Tyndale House, Cambridge), CC BY 4.0",
+    "creditos": {
+      "blivre": "Bíblia Livre (BLIVRE), Copyright © Diego Santos, Mario Sérgio and Marco Teles, http://sites.google.com/site/biblialivre/ — Creative Commons Attribution 4.0 Brazil license.",
+      "onbv": "Biblica® Open Nova Bíblia Viva 2007, Copyright © 2007, 2010 Biblica, Inc. Creative Commons Attribution-ShareAlike 4.0 license.",
+      "bpm": "Bíblia Portuguesa Mundial. Public domain (translation still under review by its authors).",
+      "kjv": "King James Version (Authorized Version), standardized 1769 text. Public domain outside the United Kingdom.",
+      "web": "World English Bible. Public domain; \"World English Bible\" is a trademark of eBible.org.",
+      "rv1909": "Santa Biblia, Reina-Valera 1909. Public domain.",
+      "vbl": "Versión Biblia Libre, Copyright © 2018-2020 Jonathan Gallagher and Shelly Barrios de Avila. Creative Commons Attribution-ShareAlike 4.0 license."
+    },
     "fechar": "Close"
   },
   "nav": {
@@ -6434,11 +6443,12 @@
     "restrita": "restricted area",
     "expandir": "Show {{item}} items",
     "recolher": "Hide {{item}} items",
-    "agendar_estudo": "Schedule a study",
+    "agendar_estudo": "Book a study",
     "menu_conta": "Account menu",
     "perfil_conta": "Profile and account",
     "painel_admin": "Admin dashboard",
     "sair": "Sign out",
+    "idioma": "Language",
     "escrever": {
       "rotulo": "Write",
       "titulo": "Write",
@@ -6486,91 +6496,91 @@
   "erros": {
     "version_mismatch": {
       "titulo": "The app just updated",
-      "descricao": "A new version was released while this page was open, so it briefly fell out of sync. Reloading will pick up the latest version."
+      "descricao": "A new version was released while this page was open. Reload to use the latest version."
     },
     "chunk_load": {
       "titulo": "Part of the page didn't load",
-      "descricao": "Your browser was holding onto an older copy of the app and couldn't load a piece of it. A quick reload usually clears it right up."
+      "descricao": "Your browser kept an old copy of the app and couldn't load part of it. Reloading usually fixes it."
     },
     "auth_session": {
       "titulo": "Your session expired",
-      "descricao": "You've been signed out or your sign-in needs refreshing. Logging back in will restore your access."
+      "descricao": "You were signed out or your access needs to be renewed. Sign in again to continue."
     },
     "plan_limit": {
-      "titulo": "This needs a plan upgrade",
-      "descricao": "The feature you tried to use isn't included on your current plan, or it's turned off for your organization. Upgrading or enabling it unlocks access."
+      "titulo": "This feature isn't available",
+      "descricao": "This feature isn't turned on for the community. Talk to the team if you think it should be."
     },
     "permission": {
       "titulo": "You don't have access to this",
-      "descricao": "Your account doesn't have permission for this page or action. If you think it should, an admin for your organization can grant access."
+      "descricao": "Your account doesn't have permission for this page or action. If you think it should, talk to the community team."
     },
     "rate_limit": {
       "titulo": "Let's slow down for a moment",
-      "descricao": "You've made a lot of requests in a short time, so we've paused things briefly to keep your account safe. It'll free up shortly."
+      "descricao": "There were a lot of actions in a short time, so we paused briefly to protect your account. It'll free up shortly."
     },
     "not_found": {
       "titulo": "We couldn't find that",
-      "descricao": "The item you're looking for may have been moved, deleted, or isn't available to your organization. It's not something you did wrong."
+      "descricao": "What you're looking for may have been moved, deleted, or isn't available to you. It's not something you did wrong."
     },
     "conflict": {
       "titulo": "That already exists",
-      "descricao": "This conflicts with something that's already there — for example an account or item with the same name or email already exists."
+      "descricao": "Something identical already exists, for example an account with the same email or an item with the same name."
     },
     "validation": {
-      "titulo": "Something needs a quick fix",
-      "descricao": "A field is missing, out of range, or in the wrong format. Adjust the highlighted input and try again."
+      "titulo": "A field needs a fix",
+      "descricao": "A field is empty, out of range, or in the wrong format. Fix the highlighted field and try again."
     },
     "org_config": {
-      "titulo": "This workspace needs setup",
-      "descricao": "This organization isn't fully configured yet. An administrator may need to finish setting it up before it can be used."
+      "titulo": "The community is still being set up",
+      "descricao": "The organization isn't ready yet. The team needs to finish setting it up."
     },
     "payment": {
-      "titulo": "We couldn't complete that billing step",
-      "descricao": "Something interrupted checkout, the billing portal, or a subscription change. No charge is lost; you can safely try again."
+      "titulo": "We couldn't complete the payment",
+      "descricao": "Something interrupted the payment or subscription. Nothing extra was charged; you can safely try again."
     },
     "upload": {
       "titulo": "That upload didn't go through",
-      "descricao": "Your file may be too large or in an unsupported format, or the connection dropped mid-upload. Check the file and give it another try."
+      "descricao": "The file may be too large or in an unsupported format, or the connection dropped midway. Check the file and try again."
     },
     "ai": {
-      "titulo": "The AI assistant ran into trouble",
-      "descricao": "An AI or generation request was interrupted or returned an incomplete response. These can be temporary, so trying again often works."
+      "titulo": "The assistant ran into a problem",
+      "descricao": "The response was interrupted or came back incomplete. It's usually temporary; try again."
     },
     "offline": {
       "titulo": "You appear to be offline",
-      "descricao": "We couldn't reach our servers, which usually means a network hiccup on the way. Check your connection and try again."
+      "descricao": "We couldn't reach the server. Check your connection and try again."
     },
     "service_unavailable": {
-      "titulo": "A service is temporarily down",
-      "descricao": "A feature we rely on isn't responding or hasn't been set up for your deployment yet. It's on our side and usually clears on its own."
+      "titulo": "A service is down",
+      "descricao": "Something we depend on isn't responding right now. It's on our side and usually comes back on its own."
     },
     "timeout": {
       "titulo": "That took too long",
-      "descricao": "The request timed out before it finished. The server may be busy — trying again usually works."
+      "descricao": "The request took too long to finish. The server may be busy; trying again usually works."
     },
     "server": {
       "titulo": "We hit a snag on our end",
-      "descricao": "Our servers returned an unexpected error while handling your request. This is on us, not you; trying again in a moment usually helps."
+      "descricao": "The server returned an unexpected error. It's our fault, not yours; try again in a moment."
     },
     "unknown": {
       "titulo": "Something didn't go as planned",
-      "descricao": "We ran into an unexpected problem completing your request. It's been logged automatically and is likely temporary — trying again often clears it. If it keeps happening, tell us exactly what you were doing below."
+      "descricao": "We ran into an unexpected problem. It has been logged and is usually temporary; trying again normally fixes it. If it keeps happening, tell us what you were doing."
     },
     "aquecimento": {
       "titulo": "Waking up the server",
-      "descricao": "The community was idle and the server takes a few seconds to come back. We will try again on our own.",
+      "descricao": "The community was idle and the server takes a few seconds to come back. We'll try again on our own.",
       "tentando": "Trying again in 3 seconds…"
     },
     "mostrar_detalhes": "Show technical details",
     "esconder_detalhes": "Hide technical details",
     "acoes": {
-      "tentar": "Retry",
+      "tentar": "Try again",
       "recarregar": "Reload",
-      "entrar": "Log back in",
+      "entrar": "Sign in again",
       "inicio": "Home",
       "sair": "Sign out",
       "saindo": "Signing out…",
-      "reportar": "Report this problem",
+      "reportar": "Report the problem",
       "suporte": "Contact support"
     }
   }

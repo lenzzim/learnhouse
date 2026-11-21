@@ -118,20 +118,20 @@
           "title": "Función Estándar"
         },
         "boards": {
-          "title": "Standard Feature",
-          "description": "Boards is a premium feature available only to organizations on our Standard plan or higher. Upgrade to unlock collaborative boards for real-time brainstorming and planning."
+          "title": "Función Standard",
+          "description": "Las pizarras son una función premium disponible solo para organizaciones en nuestro plan Standard o superior. Actualiza para desbloquear pizarras colaborativas para lluvias de ideas y planificación en tiempo real."
         },
         "playgrounds": {
-          "title": "Standard Feature",
-          "description": "Playgrounds is a premium feature available only to organizations on our Standard plan or higher. Upgrade to create interactive AI-generated experiences for your learners."
+          "title": "Función Standard",
+          "description": "Playgrounds es una función premium disponible solo para organizaciones en nuestro plan Standard o superior. Actualiza para crear experiencias interactivas generadas por IA para tus estudiantes."
         },
         "scorm": {
-          "title": "Enterprise Feature",
-          "description": "SCORM support is a premium feature available only to organizations on our Enterprise plan. Upgrade to import and deliver SCORM packages alongside your courses."
+          "title": "Función Enterprise",
+          "description": "La compatibilidad con SCORM es una función premium disponible solo para organizaciones en nuestro plan Enterprise. Actualiza para importar y distribuir paquetes SCORM junto con tus cursos."
         },
         "webhooks": {
-          "title": "Pro Feature",
-          "description": "Automations is a premium feature available only to organizations on our Pro plan or higher. Upgrade to wire your courses up to webhooks and external integrations."
+          "title": "Función Pro",
+          "description": "Las automatizaciones son una función premium disponible solo para organizaciones en nuestro plan Pro o superior. Actualiza para conectar tus cursos con webhooks e integraciones externas."
         },
         "api_access": {
           "title": "Función Pro",
@@ -209,9 +209,9 @@
     "powered_by": "Desarrollado con",
     "results": "resultado",
     "no_content_yet": "Aún no hay contenido",
-    "other": "Other",
-    "disabled": "Disabled",
-    "store": "Store",
+    "other": "Otro",
+    "disabled": "Deshabilitado",
+    "store": "Tienda",
     "organizations": "Organizaciones",
     "billing": "Facturación",
     "create_organization": "Crear organización",
@@ -228,7 +228,29 @@
     "leave_organization_title": "¿Salir de la organización?",
     "leave_organization_desc": "Perderás el acceso a {{org}} y se te eliminará de sus miembros. Podrás volver a unirte más adelante si recibes una invitación.",
     "leave_organization_error": "No se pudo salir de esta organización. Inténtalo de nuevo.",
-    "leaving": "Saliendo…"
+    "leaving": "Saliendo…",
+    "select": "Seleccionar…",
+    "continue": "Continuar",
+    "dismiss": "Descartar",
+    "sign_out": "Cerrar sesión",
+    "move_up": "Mover hacia arriba",
+    "move_down": "Mover hacia abajo",
+    "less": "Menos",
+    "more": "Más"
+  },
+  "chamada_estudo": {
+    "rotulo": "Camino del Discipulado",
+    "titulo_inicio": "Vive tu fe",
+    "titulo_destaque": "en la práctica",
+    "descricao": "Mira tu vida a la luz de la Biblia, con alguien a tu lado, en un grupo pequeño de 2 o 3 personas. Ocho estudios, gratis, en línea o en persona.",
+    "cta": "Agendar un estudio",
+    "como_funciona": "Cómo funciona",
+    "menu": "Agendar un estudio",
+    "nova_aba": "se abre en una pestaña nueva",
+    "convite_titulo": "¿Quieres estudiar esto con alguien?",
+    "convite_publicado": "Devocional publicado. ¿Quieres estudiar esto con alguien?",
+    "convite_descricao": "Ocho estudios bíblicos, gratis, en grupos de 2 o 3 personas. En línea o en persona.",
+    "dispensar": "Descartar invitación"
   },
   "banner": {
     "viewing_as_guest": "Estás viendo {{name}} como invitado.",
@@ -236,6 +258,14 @@
     "to_access_features": "para acceder a todas las funciones.",
     "free_plan_upgrade": "Estás en el plan gratuito. Actualiza para desbloquear la experiencia completa.",
     "free_plan_upgrade_button": "Actualizar"
+  },
+  "instalar": {
+    "rotulo": "Instalar la app",
+    "titulo": "Instala la app de Discipulei",
+    "descricao": "Abre la comunidad directo desde tu pantalla de inicio.",
+    "ios_instrucoes": "Toca Compartir y luego Agregar a la pantalla de inicio.",
+    "botao_instalar": "Instalar",
+    "agora_nao": "Ahora no"
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -356,6 +386,7 @@
     "terms_of_service": "Términos del servicio",
     "and": "y la",
     "privacy_policy": "Política de privacidad",
+    "source_code": "Código fuente",
     "image_title_forgot": "Restablece tu contraseña.",
     "image_subtitle_forgot": "Te ayudaremos a recuperar el acceso a tu cuenta en un instante.",
     "image_title_login": "Bienvenido de nuevo a LearnHouse.",
@@ -367,7 +398,38 @@
     "image_title_verify": "Verifica tu correo electrónico.",
     "image_subtitle_verify": "Un paso rápido para proteger tu cuenta y empezar.",
     "turnstile_failed": "Verificación fallida. Por favor, intenta de nuevo.",
-    "resend_verification": "¿No lo recibiste? Reenviar correo"
+    "resend_verification": "¿No lo recibiste? Reenviar correo",
+    "no_sign_up_method_available": "Esta organización restringió la forma en que los miembros inician sesión, así que aquí no se pueden crear cuentas. Contacta a un administrador.",
+    "continue_to_dashboard": "Continuar a tu panel de control",
+    "mfa_invalid_code": "Ese código no es correcto. Verifica que el reloj de tu dispositivo esté configurado automáticamente y luego prueba con el siguiente código.",
+    "mfa_title": "Verificación en dos pasos",
+    "mfa_subtitle_backup": "Ingresa uno de los códigos de respaldo que guardaste.",
+    "mfa_subtitle": "Ingresa el código de 6 dígitos de tu app de autenticación.",
+    "mfa_backup_code": "Código de respaldo",
+    "mfa_code": "Código de verificación",
+    "mfa_verify": "Verificar",
+    "mfa_use_authenticator": "Usar tu app de autenticación",
+    "mfa_use_backup": "Usar un código de respaldo",
+    "mfa_back_to_login": "Volver a iniciar sesión",
+    "magic_title": "Inicia sesión con un enlace",
+    "magic_sent_title": "Revisa tu correo",
+    "magic_sent_body": "Si existe una cuenta para {{email}}, acabamos de enviarle un enlace seguro para iniciar sesión. Vence pronto, así que úsalo cuanto antes.",
+    "magic_back_to_login": "Volver a iniciar sesión",
+    "magic_subtitle": "Ingresa tu correo y te enviaremos un enlace para iniciar sesión, sin necesidad de contraseña.",
+    "magic_send": "Envíame un enlace de inicio de sesión",
+    "magic_use_password": "Iniciar sesión con contraseña",
+    "magic_missing_token": "A este enlace le falta el código de acceso. Pide uno nuevo para entrar.",
+    "magic_expired": "Este enlace expiró o ya se usó. Pide uno nuevo para entrar.",
+    "magic_invalid_title": "Este enlace ya no es válido",
+    "magic_request_new": "Pedir un enlace nuevo",
+    "magic_signing_in": "Entrando...",
+    "magic_please_wait": "Espera mientras verificamos tu enlace.",
+    "choose_sign_in_method": "Elige cómo quieres iniciar sesión.",
+    "no_sign_in_method_available": "Esta organización restringió la forma en que los miembros inician sesión y ninguno de los métodos permitidos está disponible aquí. Contacta a un administrador.",
+    "complete_profile": {
+      "title": "Completa tu perfil",
+      "subtitle": "{{org}} necesita un poco más de información antes de que continúes."
+    }
   },
   "validation": {
     "required": "Obligatorio",
@@ -375,7 +437,12 @@
     "password_min_length": "La contraseña debe tener al menos 8 caracteres",
     "username_min_length": "El nombre de usuario debe tener al menos 4 caracteres",
     "title_required": "El título es obligatorio",
-    "content_required": "El contenido es obligatorio"
+    "content_required": "El contenido es obligatorio",
+    "invalid_number": "Debe ser un número",
+    "invalid_option": "Elige una de las opciones disponibles",
+    "min_value": "Debe ser como mínimo {{value}}",
+    "max_value": "Debe ser como máximo {{value}}",
+    "too_long": "Debe tener como máximo {{max}} caracteres"
   },
   "courses": {
     "my_courses": "Mis cursos",
@@ -482,6 +549,7 @@
     "successfully_completed": "Has completado con éxito",
     "keep_going": "¡Sigue así! 💪",
     "keep_going_description": "¡Buen trabajo! Completa el resto de actividades para desbloquear tu certificado de finalización.",
+    "keep_going_description_no_certificate": "¡Vas muy bien! Completa las actividades restantes para terminar el curso.",
     "making_great_progress": "Llevas un gran progreso en",
     "continue_learning": "Continuar aprendiendo",
     "back_to_course": "Volver al curso",
@@ -714,7 +782,11 @@
       "no_discussions": "Aún no hay discusiones",
       "no_discussions_description": "¡Sé el primero en iniciar una discusión en esta comunidad!",
       "start_discussion": "Iniciar discusión",
-      "delete_failed": "Error al eliminar la discusión"
+      "delete_failed": "Error al eliminar la discusión",
+      "filter": "Filtrar",
+      "clear_filters": "Limpiar",
+      "show_results_one": "Ver {{count}} resultado",
+      "show_results_other": "Ver {{count}} resultados"
     },
     "discussion_detail": {
       "edit": "Editar",
@@ -736,7 +808,12 @@
       "votes": "votos",
       "delete_failed": "Error al eliminar la discusión",
       "lock_failed": "Error al actualizar el estado de bloqueo",
-      "pin_failed": "Error al actualizar el estado de fijado"
+      "pin_failed": "Error al actualizar el estado de fijado",
+      "actions": "Acciones de la discusión",
+      "comment_count_one": "{{count}} comentario",
+      "comment_count_other": "{{count}} comentarios",
+      "pinned": "Fijada",
+      "locked": "Cerrada a comentarios"
     },
     "comments": {
       "no_replies": "Aún no hay respuestas",
@@ -762,11 +839,59 @@
       "clear_filter": "Borrar filtro"
     },
     "labels": {
+      "devocional": "Devocional",
+      "testemunho": "Testimonio",
+      "oracao": "Petición de oración",
       "general": "General",
       "question": "Pregunta",
       "idea": "Idea",
       "announcement": "Anuncio",
       "showcase": "Muestra"
+    },
+    "devotional_template": {
+      "passage": "Pasaje",
+      "learned": "Lo que aprendí",
+      "apply": "Cómo aplicarlo",
+      "prayer": "Oración"
+    },
+    "visibility": {
+      "label": "Quién puede verlo",
+      "private_option": "Solo yo (cuaderno)",
+      "private_hint": "Se queda en tu cuaderno. Nadie más lo ve, ni siquiera los moderadores.",
+      "public_option": "Publicar en la comunidad",
+      "public_hint": "Todos los miembros de la comunidad pueden leer y comentar.",
+      "private_badge": "Privado",
+      "private_notice": "Esta nota es privada: solo tú puedes verla. Publícala cuando quieras compartirla con la comunidad.",
+      "publish": "Publicar",
+      "publish_title": "¿Publicar en la comunidad?",
+      "publish_confirm": "Los miembros de la comunidad podrán leer, reaccionar y comentar.",
+      "publish_button": "Publicar ahora",
+      "cancel": "Cancelar",
+      "make_private": "Hacer privado",
+      "published": "Publicado en la comunidad",
+      "made_private": "Ahora solo tú ves esta discusión",
+      "failed": "No se pudo cambiar la visibilidad",
+      "submit_private": "Guardar en el cuaderno",
+      "comments_private": "Las respuestas estarán disponibles cuando publiques."
+    },
+    "notebook": {
+      "title": "Mi cuaderno",
+      "open": "Mi cuaderno",
+      "description": "Tus devocionales y notas de estudio. Solo tú ves lo que hay aquí.",
+      "empty_title": "Tu cuaderno está vacío",
+      "empty_description": "Escribe tu devocional o una nota de estudio. Solo tú lo ves.",
+      "load_more": "Cargar más",
+      "login_required": "Inicia sesión para ver tu cuaderno.",
+      "in_community": "en {{community}}",
+      "error": "No se pudo cargar tu cuaderno.",
+      "new_note": "Nueva nota",
+      "new_note_description": "Se queda en tu cuaderno. Escribe con calma.",
+      "community_label": "Comunidad",
+      "community_hint": "La nota se guarda en esta comunidad. Si la publicas después, aparecerá aquí.",
+      "no_community": "Todavía no participas en ninguna comunidad.",
+      "private_lock_note": "Solo tú lo ves. Puedes publicarla después.",
+      "created": "Nota guardada en tu cuaderno",
+      "public_lock_note": "Todos en la comunidad la ven y pueden responder."
     },
     "create_discussion": {
       "title": "Iniciar una discusión",
@@ -804,6 +929,13 @@
       "view_all": "Ver todo",
       "no_discussions": "Aún no hay discusiones",
       "start_first": "Inicia la primera discusión"
+    },
+    "manage_community": "Administrar comunidad",
+    "mobile_actions": "Acciones de la comunidad",
+    "upvote": {
+      "add": "Votar",
+      "remove": "Quitar voto",
+      "join": "Únete a la organización para votar"
     }
   },
   "podcasts": {
@@ -983,6 +1115,12 @@
     "autosaved": "Guardado",
     "autosaving": "Guardando…",
     "save_answers": "Guardar respuestas",
+    "grid_columns_2": "2 columnas",
+    "grid_columns_3": "3 columnas",
+    "grid_columns_4": "4 columnas",
+    "add_card": "Añadir tarjeta",
+    "ungroup_cards": "Desagrupar tarjetas",
+    "group_into_grid": "Agrupar en cuadrícula",
     "markdown": "Markdown",
     "custom": "Personalizado",
     "scorm": "SCORM"
@@ -1016,7 +1154,18 @@
     },
     "quiz": {
       "correct_answer": "Correcta",
-      "incorrect_answer": "Incorrecta"
+      "incorrect_answer": "Incorrecta",
+      "select_one": "Selecciona una respuesta",
+      "select_all_that_apply": "Selecciona todas las que correspondan",
+      "response_type_single": "Respuesta única",
+      "response_type_multiple": "Respuestas múltiples",
+      "no_correct_option_warning": "No hay opción correcta: esta pregunta se omite al calificar",
+      "question_fallback_label": "Pregunta",
+      "grading_mode_label": "Calificación",
+      "grading_all_or_nothing": "Todo o nada",
+      "grading_partial_credit": "Puntaje parcial",
+      "grading_all_or_nothing_hint": "Una pregunta suma puntos solo cuando las respuestas seleccionadas coinciden exactamente con la clave.",
+      "grading_partial_credit_hint": "Las preguntas de \"selecciona todas las que correspondan\" otorgan parte de los puntos; cada selección incorrecta anula una correcta."
     },
     "quick_grade": {
       "full": "Total",
@@ -1038,7 +1187,18 @@
     "no_task_submission_to_grade": "Este estudiante aún no ha enviado un archivo para esta tarea.",
     "past_due": "Fecha límite vencida",
     "past_due_description": "La fecha límite de esta tarea fue el {{date}}. Ya no se pueden guardar respuestas ni enviarlas para calificación.",
-    "past_due_title": "Fecha límite vencida"
+    "past_due_title": "Fecha límite vencida",
+    "ungraded_badge": "Sin calificación",
+    "hand_in": "Entregar mi trabajo",
+    "hand_in_title": "Entrega tu trabajo",
+    "hand_in_confirm": "Tu trabajo se entregará a tu profesor. No se califica.",
+    "handed_in": "Entregado",
+    "solution_title": "Respuesta modelo",
+    "solution_download": "Descargar la respuesta modelo",
+    "solution_locked_title": "Respuesta modelo bloqueada",
+    "solution_locked_on_submission": "Entrega tu trabajo y la respuesta modelo se desbloqueará de inmediato.",
+    "solution_locked_after_grading": "La respuesta modelo se desbloquea cuando tu trabajo haya sido calificado.",
+    "retry_assignment_confirm_ungraded": "Tu entrega actual se restablecerá para que puedas empezar de nuevo, y la respuesta modelo se volverá a bloquear hasta que entregues el siguiente intento."
   },
   "certificate": {
     "certificate": "Certificado",
@@ -1229,7 +1389,8 @@
           "industry": "Industria",
           "expertise": "Experiencia",
           "community": "Comunidad"
-        }
+        },
+        "signin_again": "Por favor, inicia sesión de nuevo"
       },
       "password": {
         "title": "Cambiar contraseña",
@@ -1240,7 +1401,8 @@
         "updating": "Actualizando...",
         "password_updated": "Contraseña actualizada con éxito",
         "relogin_message": "Por favor, inicia sesión nuevamente con tu nueva contraseña",
-        "logout_warning": "Serás desconectado después de cambiar tu contraseña"
+        "logout_warning": "Serás desconectado después de cambiar tu contraseña",
+        "update_failed": "No se pudo actualizar la contraseña. Por favor, inicia sesión de nuevo."
       },
       "profile_builder": {
         "title": "Constructor de perfil",
@@ -1380,7 +1542,61 @@
         "current_session_title": "Sesión actual",
         "current_session_subtitle": "El dispositivo desde el que has iniciado sesión ahora mismo.",
         "this_device": "Este dispositivo",
-        "sign_out": "Cerrar sesión"
+        "sign_out": "Cerrar sesión",
+        "mfa": {
+          "rate_limited": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+          "status_error": "No se pudo cargar tu configuración de verificación en dos pasos.",
+          "copy_failed": "No se pudo copiar. Selecciona el texto y cópialo manualmente.",
+          "codes_file_header": "Códigos de respaldo de verificación en dos pasos de LearnHouse. Cada código se puede usar una sola vez.",
+          "already_enabled": "La verificación en dos pasos ya está activada en esta cuenta.",
+          "setup_failed": "No se pudo iniciar la configuración de la verificación en dos pasos. Inténtalo de nuevo.",
+          "enabled_toast": "La verificación en dos pasos ya está activada.",
+          "invalid_code": "Ese código no es válido. Inténtalo de nuevo.",
+          "regenerate_failed": "No se pudieron regenerar tus códigos de respaldo. Inténtalo de nuevo.",
+          "disabled_toast": "Se desactivó la verificación en dos pasos.",
+          "disable_failed": "No se pudo desactivar la verificación en dos pasos. Inténtalo de nuevo.",
+          "retry_in": "Puedes volver a intentarlo en {{seconds}} s.",
+          "code_label": "Código de autenticación",
+          "code_hint": "Ingresa el código de 6 dígitos que se muestra ahora en tu app de autenticación.",
+          "title": "Verificación en dos pasos",
+          "subtitle": "Pide un código de un solo uso de tu app de autenticación cada vez que inicies sesión.",
+          "retry": "Reintentar",
+          "codes_once_title": "Esta es la única vez que se mostrarán estos códigos.",
+          "codes_once_body": "Guárdalos ahora en un lugar seguro. Cada código se puede usar una vez para iniciar sesión si pierdes el acceso a tu app de autenticación. Cuando salgas de esta pantalla no se podrán recuperar: tendrías que generar códigos nuevos.",
+          "copied": "Copiado",
+          "copy_all": "Copiar todo",
+          "download": "Descargar .txt",
+          "codes_ack": "Guardé estos códigos en un lugar seguro.",
+          "done": "Listo",
+          "step_password_title": "Confirma tu contraseña",
+          "step_password_body": "Por tu seguridad, ingresa tu contraseña actual para continuar.",
+          "continue": "Continuar",
+          "step_scan_title": "Escanea esto con tu app de autenticación",
+          "step_scan_body": "Abre una app de autenticación (1Password, Google Authenticator, Authy, …) y escanea el código de abajo.",
+          "qr_alt": "Código QR de configuración de la verificación en dos pasos",
+          "qr_failed": "No se pudo generar el código QR. Usa la clave de configuración en su lugar.",
+          "secret_label": "O ingresa esta clave de configuración manualmente",
+          "copy_secret": "Copiar clave de configuración",
+          "secret_hint": "Útil para apps de autenticación de escritorio que no pueden escanear un código QR.",
+          "step_verify_title": "Confirma el código de tu app",
+          "back": "Atrás",
+          "wait_seconds": "Espera {{seconds}} s",
+          "verify_and_enable": "Verificar y activar",
+          "enabled": "Activada",
+          "enabled_since": "Desde el {{date}}",
+          "enabled_hint": "Se requiere un código de tu app de autenticación para iniciar sesión.",
+          "regenerate": "Regenerar códigos de respaldo",
+          "disable": "Desactivar",
+          "codes_remaining": "Quedan {{remaining}} códigos de respaldo",
+          "codes_low": "genera un nuevo conjunto para no quedarte sin acceso.",
+          "regenerate_body": "Generar un nuevo conjunto invalida de inmediato todos tus códigos de respaldo actuales.",
+          "regenerate_confirm": "Generar códigos nuevos",
+          "disable_warning": "Al desactivarla se elimina el segundo paso del inicio de sesión y se borran tus códigos de respaldo.",
+          "disable_confirm": "Desactivar verificación en dos pasos",
+          "not_enabled": "No activada",
+          "not_enabled_hint": "Protege tu cuenta pidiendo también un código de un solo uso de tu app de autenticación al iniciar sesión.",
+          "enable": "Activar"
+        }
       }
     },
     "sign_out": "Cerrar sesión",
@@ -1415,6 +1631,22 @@
     "minutes_ago": "hace {{count}} minutos"
   },
   "dashboard": {
+    "nav": {
+      "sidebar_navigation": "Navegación lateral del panel de control",
+      "mobile_navigation": "Navegación móvil del panel de control",
+      "top_navigation": "Navegación superior",
+      "collapse_sidebar": "Contraer barra lateral",
+      "expand_sidebar": "Expandir barra lateral",
+      "open_courses_menu": "Abrir menú de cursos",
+      "open_assignments_menu": "Abrir menú de tareas",
+      "open_users_menu": "Abrir menú de usuarios",
+      "open_organization_menu": "Abrir menú de la organización",
+      "open_organizations_menu": "Abrir menú de organizaciones",
+      "open_developers_menu": "Abrir menú de desarrolladores",
+      "open_language_menu": "Abrir menú de idioma",
+      "open_help_menu": "Abrir menú de ayuda",
+      "other": "Otros"
+    },
     "home": {
       "cards": {
         "courses": {
@@ -1735,7 +1967,7 @@
             "description": "Ornado con motivos de corona"
           },
           "tech": {
-            "name": "Tech",
+            "name": "Tecnología",
             "description": "Patrones inspirados en circuitos"
           },
           "nature": {
@@ -2081,7 +2313,10 @@
           "publish_all_success": "Todas las actividades se publicaron correctamente",
           "unpublish_all": "Despublicar todo",
           "unpublish_all_success": "Todas las actividades se despublicaron correctamente",
-          "publish_all_error": "No se pudieron actualizar algunas actividades"
+          "publish_all_error": "No se pudieron actualizar algunas actividades",
+          "back": "Volver",
+          "save_name": "Guardar nombre",
+          "rename_chapter": "Renombrar capítulo"
         },
         "bulk_actions": {
           "selected": "{{count}} seleccionada(s)",
@@ -2096,7 +2331,9 @@
           "publish_error": "No se pudieron publicar algunas actividades",
           "unpublish_success": "{{count}} actividades despublicadas correctamente",
           "unpublish_error": "No se pudieron despublicar algunas actividades",
-          "partial_error": "{{failed}} de {{total}} actividades no se pudieron actualizar"
+          "partial_error": "{{failed}} de {{total}} actividades no se pudieron actualizar",
+          "publish_tooltip": "Publicar seleccionadas",
+          "unpublish_tooltip": "Despublicar seleccionadas"
         },
         "chapter_element": {
           "chapter_name_placeholder": "Nombre del capítulo"
@@ -2116,7 +2353,7 @@
             "dynamic_page": "Página dinámica",
             "scorm": "Scorm",
             "markdown": "Markdown",
-            "embed": "Embed",
+            "embed": "Incrustar",
             "resource": "Recurso",
             "custom": "Personalizado"
           },
@@ -2269,8 +2506,8 @@
           "domains": "Dominios",
           "seo": "SEO",
           "automations": "Automatizaciones",
-          "api": "API Access",
-          "menu": "Menu",
+          "api": "Acceso API",
+          "menu": "Menú",
           "danger": "Zona de Peligro"
         },
         "pages": {
@@ -2311,16 +2548,19 @@
             "title": "Dominios personalizados"
           },
           "api": {
-            "title": "API Access",
-            "subtitle": "Manage API tokens and programmatic access"
+            "title": "Acceso API",
+            "subtitle": "Gestiona los tokens de API y el acceso programático"
           },
           "menu": {
-            "title": "Public menu",
-            "subtitle": "Choose and order the links shown in your public navigation"
+            "title": "Menú público",
+            "subtitle": "Elige y ordena los enlaces que se muestran en tu navegación pública"
           },
           "danger": {
             "title": "Zona de Peligro",
             "subtitle": "Acciones irreversibles y destructivas para esta organización"
+          },
+          "seo": {
+            "subtitle": "Gestiona la configuración de optimización para motores de búsqueda"
           }
         },
         "name": "Nombre de la organización",
@@ -2339,6 +2579,9 @@
         "footer_text": "Texto del pie de página",
         "footer_text_placeholder": "Introduce el texto del pie de página...",
         "footer_text_desc": "Texto personalizado que se muestra en la parte inferior de las páginas de tu organización",
+        "email_sender_name": "Nombre del remitente de correo",
+        "email_sender_name_placeholder": "El nombre de tu organización",
+        "email_sender_name_desc": "El nombre que ven los destinatarios en los correos enviados para esta organización. Solo cambia el nombre: la dirección de envío sigue siendo la de la plataforma, que es lo que permite que estos correos pasen las verificaciones SPF y DKIM. Déjalo vacío para usar el valor predeterminado de la plataforma.",
         "default_language": "Idioma predeterminado",
         "default_language_desc": "El idioma que ven los nuevos visitantes por defecto y el que se utiliza para los correos enviados en nombre de esta organización. Los miembros pueden cambiar su propio idioma de la interfaz.",
         "watermark_desc": "Mostrar la marca de agua de LearnHouse en las páginas de tu organización",
@@ -2405,7 +2648,7 @@
           "images": "Imágenes y vistas previas",
           "social": "Enlaces sociales",
           "theme": "Tema",
-          "auth": "Auth"
+          "auth": "Autenticación"
         }
       },
       "auth_branding": {
@@ -2475,6 +2718,7 @@
         "enable_ai": "Activar funciones de IA",
         "enable_ai_description": "Permite funciones impulsadas por IA en el contenido y las experiencias de aprendizaje de tu organización",
         "admin_only": "Solo los administradores pueden modificar la configuración de IA.",
+        "currently_disabled": "Las funciones de IA están desactivadas actualmente para esta organización. Activa el interruptor de abajo para restablecerlas.",
         "features_enabled": "Funciones de IA disponibles",
         "feature_editor": "Asistencia de IA para el editor de contenido",
         "feature_activity": "Interacciones de IA en actividades de aprendizaje",
@@ -2483,11 +2727,11 @@
           "save_success": "Configuración de IA actualizada con éxito",
           "save_error": "Error al actualizar la configuración de IA"
         },
-        "ai_copilot": "AI Copilot",
-        "ai_copilot_description": "Let learners ask questions about course content. Uses indexed material to provide grounded answers with source citations.",
-        "feature_editor_description": "AI-powered content editing assistance for course creators.",
-        "feature_activity_description": "AI assistant available within activities to help learners.",
-        "always_on": "Always on"
+        "ai_copilot": "Copiloto de IA",
+        "ai_copilot_description": "Permite que los estudiantes hagan preguntas sobre el contenido del curso. Usa el material indexado para dar respuestas fundamentadas con citas de las fuentes.",
+        "feature_editor_description": "Asistencia de edición de contenido con IA para creadores de cursos.",
+        "feature_activity_description": "Asistente de IA disponible dentro de las actividades para ayudar a los estudiantes.",
+        "always_on": "Siempre activo"
       },
       "features": {
         "title": "Configuración de funcionalidades",
@@ -2736,7 +2980,7 @@
           "select": "Seleccionar"
         },
         "org_id_not_found": "ID de organización no encontrado",
-        "unknown_section_type": "Unknown section type"
+        "unknown_section_type": "Tipo de sección desconocido"
       },
       "theme": {
         "primary_color": "Color primario",
@@ -2791,7 +3035,7 @@
         "org_seo": {
           "quick_links": "Enlaces rapidos",
           "important_seo_urls": "URLs SEO importantes para tu organizacion",
-          "sitemap": "Sitemap:",
+          "sitemap": "Mapa del sitio:",
           "robots_txt": "Robots.txt:",
           "default_meta_tags": "Meta tags predeterminados",
           "set_default_metadata": "Establecer metadatos predeterminados",
@@ -2799,7 +3043,7 @@
           "title_suffix_hint": "Se anade a todos los titulos, ej. \" | Mi Academia\"",
           "default_description": "Descripcion predeterminada",
           "default_description_hint": "Descripcion de respaldo cuando una pagina no tiene una",
-          "social_open_graph": "Social & Open Graph",
+          "social_open_graph": "Redes sociales y Open Graph",
           "social_open_graph_hint": "Controla como aparecen tus paginas al compartir en redes sociales",
           "default_og_image": "Imagen OG predeterminada",
           "default_og_image_hint": "Imagen predeterminada para redes sociales (1200x630 recomendado)",
@@ -2894,60 +3138,137 @@
         "base_credits": "Creditos base",
         "purchased": "Comprados",
         "used": "Usados",
-        "remaining": "Restantes"
+        "remaining": "Restantes",
+        "upsell": {
+          "title": "Haz más con un plan superior",
+          "subtitle": "Actualiza para ampliar tus límites y desbloquear más funciones.",
+          "popular": "Popular",
+          "compare": "Comparar todos los planes",
+          "upgrade_to": "Actualizar a {{plan}}"
+        }
       },
       "api_access": {
-        "title": "API Access",
-        "api_tokens": "API Tokens",
-        "docs_playground": "Documentation & Playground",
-        "something_not_working": "Something not working as expected?",
-        "tokens_description": "API tokens allow external applications to access your organization's data securely.",
-        "create_token": "Create Token",
-        "no_tokens_yet": "No API tokens yet",
-        "create_first_token": "Create your first token to get started",
-        "create_api_token": "Create API Token",
-        "token_name": "Token Name *",
-        "expires": "Expires",
-        "never": "Never",
-        "revoked": "Revoked",
-        "revoke": "Revoke",
-        "api_docs_title": "API Documentation & Playground",
-        "create_token_desc": "Create a new API token for programmatic access. The token will only be shown once.",
-        "token_name_label": "Token Name *",
-        "description_label": "Description",
-        "expiration_label": "Expiration Date (optional)",
-        "expiration_hint": "Leave empty for a token that never expires",
-        "permissions_label": "Permissions",
-        "read_only": "Read Only",
-        "full_access": "Full Access",
-        "custom": "Custom",
-        "cancel": "Cancel",
-        "save_token_warning": "Save your token now!",
-        "save_token_hint": "This is the only time you'll see this token. Copy it and store it securely.",
-        "your_api_token": "Your API Token",
-        "done": "Done"
+        "title": "Acceso API",
+        "api_tokens": "Tokens de API",
+        "docs_playground": "Documentación y Playground",
+        "something_not_working": "¿Algo no funciona como esperabas?",
+        "tokens_description": "Los tokens de API permiten que aplicaciones externas accedan a los datos de tu organización de forma segura.",
+        "create_token": "Crear token",
+        "no_tokens_yet": "Aún no hay tokens de API",
+        "create_first_token": "Crea tu primer token para comenzar",
+        "create_api_token": "Crear token de API",
+        "token_name": "Nombre del token *",
+        "expires": "Vence",
+        "never": "Nunca",
+        "revoked": "Revocado",
+        "revoke": "Revocar",
+        "api_docs_title": "Documentación de la API y Playground",
+        "create_token_desc": "Crea un nuevo token de API para el acceso programático. El token solo se mostrará una vez.",
+        "token_name_label": "Nombre del token *",
+        "description_label": "Descripción",
+        "expiration_label": "Fecha de vencimiento (opcional)",
+        "expiration_hint": "Déjalo vacío para un token que nunca vence",
+        "permissions_label": "Permisos",
+        "read_only": "Solo lectura",
+        "full_access": "Acceso completo",
+        "custom": "Personalizado",
+        "cancel": "Cancelar",
+        "save_token_warning": "¡Guarda tu token ahora!",
+        "save_token_hint": "Esta es la única vez que verás este token. Cópialo y guárdalo en un lugar seguro.",
+        "your_api_token": "Tu token de API",
+        "done": "Listo"
       },
       "general": {
         "validation": {
-          "short_description_required": "Short description is required",
-          "short_description_max": "Short description must be 100 characters or less",
-          "about_max": "About text must be 400 characters or less",
-          "label_required": "Organization label is required"
+          "short_description_required": "La descripción corta es obligatoria",
+          "short_description_max": "La descripción corta debe tener 100 caracteres o menos",
+          "about_max": "El texto de \"Acerca de\" debe tener 400 caracteres o menos",
+          "label_required": "La etiqueta de la organización es obligatoria"
         }
       },
       "menu": {
-        "title": "Public navigation",
-        "subtitle": "Toggle, reorder, rename links and add your own. Links only appear if the related feature is on your plan and enabled.",
-        "save": "Save changes",
-        "saving": "Saving menu…",
-        "saved": "Menu updated",
-        "error": "Couldn't update the menu",
-        "add_custom": "Add a custom link",
-        "add": "Add",
-        "label_placeholder": "Label",
-        "custom_required": "A label and a URL are required",
-        "plan_locked": "Requires {{plan}} plan",
-        "feature_off": "Feature is off"
+        "title": "Navegación pública",
+        "subtitle": "Activa, reordena y renombra enlaces, y añade los tuyos. Los enlaces solo aparecen si la función correspondiente está incluida en tu plan y habilitada.",
+        "save": "Guardar cambios",
+        "saving": "Guardando menú…",
+        "saved": "Menú actualizado",
+        "error": "No se pudo actualizar el menú",
+        "add_custom": "Añadir un enlace personalizado",
+        "add": "Añadir",
+        "label_placeholder": "Etiqueta",
+        "custom_required": "Se requieren una etiqueta y una URL",
+        "plan_locked": "Requiere el plan {{plan}}",
+        "feature_off": "La función está desactivada"
+      },
+      "danger_zone": {
+        "delete_org_tooltip": "Eliminar la organización de forma permanente"
+      },
+      "security": {
+        "saving": "Guardando política de seguridad…",
+        "save_error": "No se pudo guardar la política de seguridad.",
+        "save_success": "Política de seguridad actualizada",
+        "admin_mfa_first": "Activa la verificación en dos pasos en tu propia cuenta antes de exigirla a la organización.",
+        "admin_mfa_first_why": "De lo contrario, la política te dejaría sin acceso a tu propia organización en cuanto se guarde, y no quedaría ningún administrador para desactivarla.",
+        "admin_mfa_first_cta": "Configurar la verificación en dos pasos en tu cuenta",
+        "not_admin_title": "No tienes acceso a esta configuración",
+        "not_admin_body": "Solo los administradores de la organización pueden ver o cambiar el requisito de verificación en dos pasos.",
+        "read_only": "Puedes revisar esta página, pero solo un administrador de la organización puede cambiar la política.",
+        "methods_title": "Métodos de inicio de sesión permitidos",
+        "methods_description": "Elige cómo pueden iniciar sesión los miembros en esta organización. Deja todos los métodos marcados para no restringir el inicio de sesión.",
+        "methods_empty_warning": "Sin ningún método seleccionado, nadie podría iniciar sesión en esta organización. Elige al menos uno.",
+        "methods_effect": "Los métodos desmarcados desaparecen de la página de inicio de sesión de esta organización, y a los miembros que ya iniciaron sesión con uno de ellos se les pedirá que vuelvan a iniciar sesión con un método permitido.",
+        "session_sharing_label": "Permitir compartir sesiones con learnhouse.io",
+        "session_sharing_hint": "Si está desactivado, iniciar sesión en learnhouse.io no dará acceso a los miembros a esta organización: deberán volver a iniciar sesión desde la página de inicio de sesión de esta organización con un método permitido.",
+        "saving_short": "Guardando…",
+        "save": "Guardar cambios",
+        "cancel": "Cancelar",
+        "load_error": "No se pudo cargar el estado de verificación en dos pasos de tu organización.",
+        "reset_error": "No se pudo restablecer la verificación en dos pasos de este miembro.",
+        "load_error_title": "Algo salió mal",
+        "retry": "Reintentar",
+        "subtitle": "Exige la verificación en dos pasos a todos en esta organización.",
+        "compliance_title": "Cobertura de verificación en dos pasos",
+        "compliance_count": "{{enabled}} de {{total}} miembros tienen activada la verificación en dos pasos",
+        "refresh": "Actualizar",
+        "stat_enrolled": "Inscritos",
+        "stat_exempt": "Exentos (inicio de sesión externo)",
+        "stat_blocked": "Quedarían bloqueados",
+        "blocked_hint_active": "Estos miembros perderán el acceso a esta organización cuando termine su período de gracia, a menos que se inscriban.",
+        "members_title": "Miembros",
+        "members_sorted": "primero los no inscritos",
+        "members_empty": "Todavía no hay miembros en esta organización.",
+        "you": "tú",
+        "badge_enrolled": "Inscrito",
+        "badge_exempt": "Exento: {{method}}",
+        "badge_not_enrolled": "No inscrito",
+        "reset_hint": "Borra la verificación en dos pasos de este miembro para que pueda configurarla de nuevo",
+        "resetting": "Restableciendo…",
+        "reset_confirm": "¿Confirmar restablecimiento?",
+        "reset_2fa": "Restablecer 2FA",
+        "show_less": "Mostrar menos",
+        "show_all": "Mostrar los {{count}} miembros",
+        "policy_title": "Exigir verificación en dos pasos",
+        "policy_description": "Los miembros sin un segundo factor quedan bloqueados en esta organización cuando termina su período de gracia. Conservan su cuenta y cualquier otra organización a la que pertenezcan, y recuperan el acceso en cuanto se inscriben.",
+        "active_since": "Política activa desde el {{date}}",
+        "active_no_date": "La política está activa",
+        "no_restart_note": "Guardar cambios en una política ya activa no reinicia la cuenta regresiva de nadie: los plazos existentes siguen anclados a la fecha de arriba. La cuenta regresiva solo se reinicia si desactivas el requisito y lo vuelves a activar.",
+        "grace_label": "Período de gracia",
+        "grace_immediately": "De inmediato",
+        "grace_days": "{{count}} días",
+        "grace_hint_immediate": "Los miembros sin verificación en dos pasos quedan bloqueados en cuanto se guarda la política.",
+        "grace_hint_days": "Los miembros tienen {{count}} días para inscribirse antes de quedar bloqueados. Los miembros nuevos tienen el mismo plazo desde el día en que se unen.",
+        "exempt_label": "Eximir a los usuarios que inician sesión con Google o SSO",
+        "exempt_hint": "Su proveedor de identidad ya gestiona la autenticación multifactor, así que pedirles un segundo factor aquí no aporta nada.",
+        "self_blocking": "Tu propio plazo ya venció. Inscríbete ahora para mantener el acceso a esta organización.",
+        "self_days_left": "Te quedan {{count}} días para inscribirte tú en la verificación en dos pasos.",
+        "confirm_title": "¿Exigir la verificación en dos pasos a todos?",
+        "confirm_none": "Todos en esta organización tienen activada la verificación en dos pasos o están exentos. Nadie pierde el acceso.",
+        "confirm_immediate": "{{count}} de {{total}} miembros perderán el acceso a esta organización de inmediato, en cuanto guardes.",
+        "confirm_deadline": "{{count}} de {{total}} miembros perderán el acceso a esta organización el {{date}}, a menos que activen la verificación en dos pasos antes de esa fecha.",
+        "confirm_list_title": "A quiénes afecta",
+        "confirm_exempt_note": "{{count}} miembros están exentos porque inician sesión a través de un proveedor de identidad externo.",
+        "confirm_reversible": "Esto es reversible: al desactivar el requisito, el acceso se restablece de inmediato.",
+        "confirm_button": "Sí, exigir verificación en dos pasos"
       }
     },
     "users": {
@@ -2958,12 +3279,19 @@
           "roles": "Roles",
           "signups": "Inscripciones y códigos de invitación",
           "add": "Invitar miembros",
-          "audit_logs": "Registros de auditoría"
+          "audit_logs": "Registros de auditoría",
+          "analytics": "Analíticas",
+          "sign_in": "Inicio de sesión",
+          "two_factor": "Dos pasos"
         },
         "pages": {
           "users": {
             "title": "Usuarios",
             "subtitle": "Gestiona los usuarios de tu organización, asigna roles y permisos"
+          },
+          "analytics": {
+            "title": "Analíticas de estudiantes",
+            "subtitle": "Un registro completo y exportable de la actividad de aprendizaje de cada estudiante"
           },
           "signups": {
             "title": "Inscripciones y códigos de invitación",
@@ -2984,6 +3312,14 @@
           "audit_logs": {
             "title": "Registros de auditoría",
             "subtitle": "Rastrea y supervisa todas las actividades dentro de tu organización"
+          },
+          "two_factor": {
+            "title": "Verificación en dos pasos",
+            "subtitle": "Exige la verificación en dos pasos a los miembros de esta organización"
+          },
+          "sign_in": {
+            "title": "Inicio de sesión",
+            "subtitle": "Elige cómo pueden iniciar sesión los miembros en esta organización"
           }
         },
         "mobile": {
@@ -3004,19 +3340,143 @@
         "failed_load": "No se pudo cargar el expediente del estudiante.",
         "back_to_students": "Volver a estudiantes",
         "no_behavioral": "Sin datos de comportamiento (las analíticas pueden no estar configuradas para este periodo).",
-        "ranges": { "d30": "30 días", "d90": "90 días", "y1": "1 año" },
-        "kpi": { "courses": "Cursos", "completed": "{{count}} completados", "avg_progress": "Progreso medio", "time_spent": "Tiempo dedicado", "assignments": "Tareas", "avg_grade": "media {{grade}}", "certificates": "Certificados", "connections": "Conexiones", "last": "última {{date}}" },
-        "tabs": { "connections": "Conexiones", "courses": "Cursos", "assignments": "Tareas", "code": "Código", "community": "Comunidad", "certificates": "Certificados", "behavior": "Comportamiento" },
-        "identity": { "verified": "Verificado", "unverified": "Sin verificar", "via": "vía {{method}}" },
-        "connections": { "title": "Conexiones", "empty": "Aún no hay conexiones registradas." },
-        "courses": { "title": "Progreso del curso", "empty": "No inscrito en ningún curso.", "activities": "{{done}}/{{total}} actividades", "enrolled": "Inscrito {{date}}" },
-        "assignments": { "title": "Tareas", "empty": "Sin entregas de tareas.", "attempt": "intento {{number}}", "feedback": "Comentarios:" },
-        "code": { "title": "Ejercicios de código", "empty": "Sin envíos de código.", "activity": "Actividad", "result": "Resultado", "tests": "Pruebas", "time": "Tiempo", "when": "Cuándo", "passed": "Superado", "failed": "Fallido" },
-        "community": { "title": "Participación en la comunidad", "empty": "Sin actividad en la comunidad.", "discussions": "Debates", "comments": "Comentarios" },
-        "certificates": { "title": "Certificados obtenidos", "empty": "Sin certificados obtenidos." },
-        "behavior": { "title": "Analíticas de comportamiento", "time_by_course": "Tiempo dedicado por curso", "searches": "Búsquedas" },
-        "status": { "completed": "completado", "in_progress": "en curso", "paused": "en pausa", "cancelled": "cancelado", "graded": "calificado", "submitted": "entregado", "pending": "pendiente", "late": "atrasado", "not_submitted": "sin entregar" },
-        "comparison": { "student": "Estudiante", "enrolled": "Inscrito", "completed": "Completado", "certificates": "Certificados", "last_connection": "Última conexión", "view": "Ver" }
+        "ranges": {
+          "d30": "30 días",
+          "d90": "90 días",
+          "y1": "1 año"
+        },
+        "kpi": {
+          "courses": "Cursos",
+          "completed": "{{count}} completados",
+          "avg_progress": "Progreso medio",
+          "time_spent": "Tiempo dedicado",
+          "assignments": "Tareas",
+          "avg_grade": "media {{grade}}",
+          "certificates": "Certificados",
+          "connections": "Conexiones",
+          "last": "última {{date}}"
+        },
+        "tabs": {
+          "connections": "Conexiones",
+          "courses": "Cursos",
+          "assignments": "Tareas",
+          "code": "Código",
+          "community": "Comunidad",
+          "certificates": "Certificados",
+          "behavior": "Comportamiento"
+        },
+        "identity": {
+          "verified": "Verificado",
+          "unverified": "Sin verificar",
+          "via": "vía {{method}}"
+        },
+        "connections": {
+          "title": "Conexiones",
+          "empty": "Aún no hay conexiones registradas.",
+          "device": "Dispositivo",
+          "raw_agent": "User agent sin procesar",
+          "unknown_device": "Dispositivo desconocido"
+        },
+        "courses": {
+          "title": "Progreso del curso",
+          "empty": "No inscrito en ningún curso.",
+          "activities": "{{done}}/{{total}} actividades",
+          "enrolled": "Inscrito {{date}}"
+        },
+        "assignments": {
+          "title": "Tareas",
+          "empty": "Sin entregas de tareas.",
+          "attempt": "intento {{number}}",
+          "feedback": "Comentarios:",
+          "tasks": "{{done}}/{{total}} ejercicios enviados",
+          "no_tasks": "Esta tarea no tiene ejercicios."
+        },
+        "code": {
+          "title": "Ejercicios de código",
+          "empty": "Sin envíos de código.",
+          "activity": "Actividad",
+          "result": "Resultado",
+          "tests": "Pruebas",
+          "time": "Tiempo",
+          "when": "Cuándo",
+          "passed": "Superado",
+          "failed": "Fallido",
+          "language": "Lenguaje",
+          "course": "Curso",
+          "untitled_activity": "Actividad sin título"
+        },
+        "community": {
+          "title": "Participación en la comunidad",
+          "empty": "Sin actividad en la comunidad.",
+          "discussions": "Debates",
+          "comments": "Comentarios",
+          "in_discussion": "En \"{{title}}\"",
+          "community": "Comunidad"
+        },
+        "certificates": {
+          "title": "Certificados obtenidos",
+          "empty": "Sin certificados obtenidos.",
+          "credential_id": "ID de credencial"
+        },
+        "behavior": {
+          "title": "Analíticas de comportamiento",
+          "time_by_course": "Tiempo dedicado por curso",
+          "searches": "Búsquedas",
+          "views": "Vistas de páginas y contenido",
+          "untitled_course": "Curso sin título"
+        },
+        "status": {
+          "completed": "completado",
+          "in_progress": "en curso",
+          "paused": "en pausa",
+          "cancelled": "cancelado",
+          "graded": "calificado",
+          "submitted": "entregado",
+          "pending": "pendiente",
+          "late": "atrasado",
+          "not_submitted": "sin entregar"
+        },
+        "comparison": {
+          "student": "Estudiante",
+          "enrolled": "Inscrito",
+          "completed": "Completado",
+          "certificates": "Certificados",
+          "last_connection": "Última conexión",
+          "view": "Ver"
+        },
+        "export_include_raw": "Incluir datos de entrega sin procesar",
+        "answer": {
+          "question": "Pregunta",
+          "answered": "Respuesta",
+          "expected": "Respuesta esperada",
+          "no_answer": "Sin respuesta",
+          "correct": "Correcta",
+          "incorrect": "Incorrecta",
+          "correct_answer": "Respuesta correcta",
+          "not_graded": "Sin calificación automática",
+          "score": "{{correct}}/{{total}} correctas",
+          "explanation": "Explicación",
+          "raw_note": "Ejercicio personalizado: se muestra como campos sin procesar",
+          "not_submitted": "No enviado",
+          "manual": "calificado manualmente",
+          "source_code": "Código enviado",
+          "test_cases": "Casos de prueba",
+          "hidden_test": "Prueba oculta {{number}}",
+          "test_passed": "Aprobada",
+          "test_failed": "Fallida",
+          "actual": "Salida",
+          "download_file": "Descargar archivo"
+        },
+        "task_types": {
+          "QUIZ": "Cuestionario",
+          "FORM": "Completar los espacios",
+          "SHORT_ANSWER": "Respuesta corta",
+          "NUMBER_ANSWER": "Respuesta numérica",
+          "FILE_SUBMISSION": "Subida de archivo",
+          "CODE": "Ejercicio de código",
+          "CUSTOM": "Ejercicio personalizado",
+          "OTHER": "Otro"
+        }
       },
       "active_users": {
         "title": "Usuarios activos",
@@ -3035,7 +3495,8 @@
           "remove_error": "Error al eliminar al usuario",
           "updating_role": "Actualizando rol...",
           "role_update_success": "Rol actualizado con éxito",
-          "role_update_error": "Error al actualizar el rol"
+          "role_update_error": "Error al actualizar el rol",
+          "export_csv": "Exportar usuarios (CSV)"
         },
         "modals": {
           "update_role": {
@@ -3048,12 +3509,16 @@
             "button": "Eliminar usuario"
           }
         },
+        "beyond_included": "{{count}} por encima de tu plan",
+        "beyond_included_tooltip": "Estos miembros superan la cantidad que incluye tu plan. Solo se cuentan los que estuvieron activos este mes. Consulta la facturación para más detalles.",
         "search_placeholder": "Buscar usuarios...",
         "no_results": "No se encontraron usuarios que coincidan con tu búsqueda",
         "no_users": "Aún no hay usuarios en esta organización",
         "pagination": {
           "showing": "Mostrando {{start}}-{{end}} de {{total}}",
-          "page": "Página {{current}} de {{total}}"
+          "page": "Página {{current}} de {{total}}",
+          "previous": "Página anterior",
+          "next": "Página siguiente"
         }
       },
       "signups": {
@@ -3384,7 +3849,9 @@
                 "coursechapters": "Capítulos de cursos",
                 "activities": "Actividades",
                 "roles": "Roles",
-                "dashboard": "Panel de control"
+                "dashboard": "Panel de control",
+                "folders": "Carpetas",
+                "media": "Multimedia"
               },
               "actions": {
                 "create": "crear",
@@ -3444,6 +3911,8 @@
                 "coursechapters": "Capítulos del curso",
                 "courses": "Cursos",
                 "dashboard": "Panel",
+                "folders": "Carpetas",
+                "media": "Multimedia",
                 "organizations": "Organizaciones",
                 "roles": "Roles",
                 "usergroups": "Grupos de usuarios",
@@ -3475,12 +3944,46 @@
             "coursechapters": "Capítulos del curso",
             "courses": "Cursos",
             "dashboard": "Panel de control",
+            "folders": "Carpetas",
+            "media": "Multimedia",
             "organizations": "Organizaciones",
             "roles": "Roles",
             "usergroups": "Grupos de usuarios",
             "users": "Usuarios"
           }
         }
+      },
+      "security": {
+        "two_factor_title": "Verificación en dos pasos"
+      },
+      "signup_fields": {
+        "no_rights": "No tienes permiso para cambiar los campos de registro.",
+        "label_required": "Cada campo necesita una etiqueta.",
+        "duplicate_key": "Dos campos comparten la misma clave. Dales etiquetas diferentes.",
+        "options_required": "Los campos desplegables necesitan al menos una opción.",
+        "saving": "Guardando campos de registro…",
+        "saved": "Campos de registro actualizados.",
+        "save_error": "No se pudieron guardar los campos de registro. Inténtalo de nuevo.",
+        "title": "Campos de registro personalizados",
+        "subtitle": "Preguntas adicionales que se hacen cuando alguien se une. Las respuestas se guardan en cada miembro.",
+        "public_notice": "Las etiquetas, los textos de ayuda y las opciones aparecen en tu página pública de registro: cualquiera puede leerlos. No pongas nada confidencial aquí.",
+        "empty": "No hay campos personalizados. Tu formulario de registro solo hace las preguntas estándar.",
+        "label_placeholder": "Etiqueta de la pregunta",
+        "badge_saved": "en uso",
+        "badge_new": "nuevo",
+        "type": "Tipo de campo",
+        "required": "Obligatorio",
+        "delete_confirm": "Eliminar este campo abandona las respuestas ya recopiladas con su clave. Haz clic de nuevo en la papelera para confirmar.",
+        "key": "Clave",
+        "key_locked": "Bloqueada: cambiarla dejaría huérfanas las respuestas ya recopiladas.",
+        "key_hint": "Se genera automáticamente a partir de la etiqueta.",
+        "help_text": "Texto de ayuda",
+        "max_length": "Longitud máxima",
+        "min_value": "Mín.",
+        "max_value": "Máx.",
+        "add": "Añadir campo",
+        "options": "Opciones (una por línea)",
+        "options_placeholder": "Primera opción\\nSegunda opción"
       }
     },
     "assignments": {
@@ -3742,7 +4245,11 @@
           "placeholder": "Escribe un comentario sobre la entrega. El estudiante lo verá junto a su nota.",
           "hint": "Déjalo vacío para mantener cualquier comentario anterior sin cambios."
         },
-        "truncated_warning": "Solo se muestran las primeras {{max}} entregas. Algunas entregas no aparecen aquí."
+        "truncated_warning": "Solo se muestran las primeras {{max}} entregas. Algunas entregas no aparecen aquí.",
+        "ungraded_title": "Formativa: sin calificación",
+        "ungraded_description": "Esta tarea se entrega solo para revisión. No se registra ninguna nota.",
+        "download_to_grade": "Descarga el archivo y califícalo manualmente; luego ingresa la nota arriba",
+        "download_to_review": "Descarga el archivo para revisar lo que entregó el estudiante."
       },
       "analytics": {
         "loading": "Cargando analíticas...",
@@ -3807,6 +4314,8 @@
             "description_required": "Por favor, proporciona una descripción para la tarea",
             "due_date_label": "Fecha límite",
             "due_date_required": "Por favor, proporciona una fecha límite",
+            "due_date_hint": "Opcional: déjalo vacío para un curso a tu propio ritmo sin fecha límite.",
+            "due_date_clear": "Sin fecha límite",
             "grading_type_label": "Tipo de calificación",
             "grading_type_required": "Por favor, proporciona un tipo de calificación",
             "grading_types": {
@@ -3819,6 +4328,25 @@
             "cancel": "Cancelar",
             "save": "Guardar cambios",
             "saving": "Guardando...",
+            "pass_threshold_label": "Umbral de aprobación",
+            "pass_threshold_description": "Nota mínima para aprobar. Déjalo en blanco para usar el valor predeterminado (50 %, o 60 % para calificaciones con letras).",
+            "pass_threshold_placeholder": "Automático",
+            "ungraded_label": "Formativa: sin calificación",
+            "ungraded_description": "Los estudiantes entregan su trabajo y nunca se califica. Sin nota, sin aprobado ni reprobado: combínala con una respuesta modelo abajo para la autoevaluación.",
+            "solution_label": "Respuesta modelo",
+            "solution_hint": "Se muestra a los estudiantes solo una vez desbloqueada",
+            "solution_placeholder": "Escribe la solución desarrollada con la que los estudiantes deben comparar su trabajo…",
+            "solution_no_file": "Ningún documento adjunto",
+            "solution_remove_file": "Quitar",
+            "solution_upload_file": "Adjuntar",
+            "solution_reveal_label": "Desbloquear la respuesta modelo",
+            "solution_reveal_never": "Nunca",
+            "solution_reveal_never_hint": "Solo visible para ti",
+            "solution_reveal_on_submission": "Al entregar",
+            "solution_reveal_on_submission_hint": "Se desbloquea en cuanto la entregan",
+            "solution_reveal_after_grading": "Después de calificar",
+            "solution_reveal_after_grading_hint": "Se desbloquea una vez calificada",
+            "allow_retries_description_ungraded": "Permite que los estudiantes restablezcan y vuelvan a entregar la tarea. Cada reintento borra su trabajo anterior y vuelve a bloquear la respuesta modelo.",
             "grading_type_descriptions": {
               "alphabet": "Calificaciones con letras A, B, C, D, F",
               "numeric": "Puntuación de 0 a 100",
@@ -3846,7 +4374,8 @@
             "updating": "Actualizando tarea...",
             "success": "Tarea actualizada con éxito",
             "error": "Error al actualizar la tarea",
-            "error_detail": "Ocurrió un error al actualizar la tarea"
+            "error_detail": "Ocurrió un error al actualizar la tarea",
+            "solution_file_error": "No se pudo subir el documento de la respuesta modelo."
           }
         },
         "create": {
@@ -3857,6 +4386,8 @@
             "description_required": "Por favor, proporciona una descripción para la tarea",
             "due_date_label": "Fecha límite",
             "due_date_required": "Por favor, proporciona una fecha límite",
+            "due_date_hint": "Opcional: déjalo vacío para un curso a tu propio ritmo sin fecha límite.",
+            "due_date_clear": "Sin fecha límite",
             "grading_type_label": "Tipo de calificación",
             "grading_type_required": "Por favor, proporciona un tipo de calificación",
             "grading_types": {
@@ -3867,6 +4398,7 @@
               "gpa_scale": "Escala GPA"
             },
             "submit": "Crear actividad",
+            "ungraded_description": "Los estudiantes entregan su trabajo y nunca se califica. Añade una respuesta modelo en el editor de la tarea para que se desbloquee al entregar.",
             "grading_type_descriptions": {
               "alphabet": "Calificaciones con letras A, B, C, D, F",
               "numeric": "Puntuación de 0 a 100",
@@ -3998,6 +4530,10 @@
         "users_audit_logs": {
           "description": "Registro de actividad de la organización",
           "keywords": "auditoría, registros, historial, seguridad, actividad"
+        },
+        "users_analytics": {
+          "description": "Actividad de aprendizaje y auditoría por estudiante",
+          "keywords": "analíticas, auditoría, estudiante, progreso, actividad, exportar, legal, cumplimiento"
         },
         "org_branding": {
           "description": "Logo, colores e identidad visual",
@@ -4173,6 +4709,7 @@
       "image": "Imagen",
       "video": "Vídeo",
       "pdf": "Documento PDF",
+      "h5p": "Contenido interactivo H5P",
       "youtube": "Video de YouTube",
       "quiz": "Quiz interactivo",
       "math": "Ecuación matemática (LaTeX)",
@@ -4216,6 +4753,9 @@
         "suggestion_timeline": "Línea de tiempo",
         "suggestion_timeline_prompt": "Crear una línea de tiempo interactiva que muestre eventos históricos importantes con detalles expandibles"
       },
+      "library": "Biblioteca",
+      "flipcard_grid": "Cuadrícula de tarjetas giratorias",
+      "divider": "Separador",
       "magic_block_disabled": "Bloque mágico requiere plan Standard",
       "common": {
         "uploading": "Cargando...",
@@ -4262,6 +4802,40 @@
         "expand_pdf": "Expandir PDF",
         "download_pdf": "Descargar PDF"
       },
+      "h5p_block": {
+        "default_title": "Contenido interactivo H5P",
+        "description": "Pega la URL de inserción de una actividad H5P para mostrarla aquí.",
+        "hosted_hint": "El contenido permanece en tu propio servidor H5P (H5P.com, Lumi o un sitio Drupal, Moodle o WordPress autoalojado). Puedes pegar la URL de inserción o el fragmento iframe completo que te da el servidor.",
+        "url_label": "URL de inserción de H5P",
+        "url_placeholder": "https://your-team.h5p.com/content/123456/embed",
+        "title_label": "Título",
+        "title_placeholder": "Título (se usa para accesibilidad y búsqueda)",
+        "edit_content": "Editar contenido H5P",
+        "remove_content": "Eliminar contenido H5P",
+        "errors": {
+          "empty": "Ingresa una URL de inserción de H5P.",
+          "unparseable": "Eso no parece una URL válida. Pega la URL de inserción o el fragmento iframe de tu servidor H5P.",
+          "unsupported_protocol": "Solo se pueden insertar URLs http y https."
+        },
+        "size_label": "Tamaño",
+        "sizes": {
+          "auto": "Automático",
+          "auto_hint": "Deja que la actividad indique su propia altura.",
+          "widescreen": "16:9",
+          "widescreen_hint": "Panorámico: ideal para video interactivo.",
+          "classic": "4:3",
+          "classic_hint": "Clásico: ideal para presentaciones con diapositivas.",
+          "short": "Bajo",
+          "short_hint": "Un marco fijo de 320 píxeles.",
+          "medium": "Mediano",
+          "medium_hint": "Un marco fijo de 520 píxeles.",
+          "tall": "Alto",
+          "tall_hint": "Un marco fijo de 760 píxeles.",
+          "custom": "Personalizado ({{height}}px)",
+          "custom_hint": "Ajustado arrastrando a la altura que elegiste."
+        },
+        "resize_handle": "Cambiar el tamaño del marco H5P"
+      },
       "quiz_block": {
         "all_correct": "¡Todas las respuestas son correctas!",
         "some_incorrect": "¡Algunas respuestas son incorrectas!",
@@ -4273,7 +4847,17 @@
         "reset_answers": "Restablecer respuestas",
         "mark_correct": "Marcar como correcta",
         "mark_incorrect": "Marcar como incorrecta",
-        "delete_answer": "Eliminar respuesta"
+        "delete_answer": "Eliminar respuesta",
+        "question_label": "Pregunta",
+        "delete_question": "Eliminar pregunta",
+        "empty_editable": "Todavía no hay preguntas. Añade la primera para comenzar.",
+        "empty_readonly": "Este cuestionario todavía no tiene preguntas.",
+        "select_one": "Selecciona una respuesta",
+        "select_all_that_apply": "Selecciona todas las que correspondan",
+        "response_type_single": "Respuesta única",
+        "response_type_multiple": "Respuestas múltiples",
+        "no_correct_answer_warning": "No hay respuesta correcta: esta pregunta se omite",
+        "generate_with_ai": "Generar con IA"
       },
       "math_block": {
         "templates": "Plantillas",
@@ -4300,7 +4884,8 @@
         "paste_directly": "Pega directamente cualquier URL de inserción",
         "how_to_embed": "Cómo insertar {{name}}",
         "paste_code": "Pega código de inserción (iframe, script de inserción, etc.)",
-        "paste_iframe": "Pega iframe o código de inserción de cualquier plataforma"
+        "paste_iframe": "Pega iframe o código de inserción de cualquier plataforma",
+        "remove_embed": "Eliminar inserción"
       },
       "web_preview_block": {
         "website_preview": "Vista previa del sitio web",
@@ -4867,7 +5452,7 @@
       "note": "Nota",
       "sticker": "Sticker",
       "youtube": "YouTube",
-      "ai_playground": "AI Playground",
+      "ai_playground": "Playground de IA",
       "activity": "Actividad",
       "embed": "Insertar",
       "webpage": "Página web",
@@ -4897,7 +5482,7 @@
       "aurora": "Aurora",
       "lightning": "Relámpago",
       "glitch": "Glitch",
-      "nuke": "Nuke"
+      "nuke": "Nuclear"
     },
     "timer": {
       "set_timer": "Establecer temporizador",
@@ -4947,7 +5532,7 @@
       "open_in_new_tab": "Abrir en nueva pestaña"
     },
     "playground_block": {
-      "title": "AI Playground",
+      "title": "Playground de IA",
       "description": "Genera elementos interactivos impulsados por IA",
       "generate": "Generar",
       "edit": "Editar",
@@ -4955,7 +5540,7 @@
       "generating": "Generando contenido interactivo...",
       "streaming": "Generando...",
       "empty_state": "Describe lo que quieres crear y observa cómo cobra vida",
-      "chat_header": "AI Playground",
+      "chat_header": "Playground de IA",
       "prompt_text": "Describe un elemento interactivo para generar",
       "ai_content": "Contenido generado por IA",
       "check_preview": "Revisa la vista previa a la izquierda",
@@ -5263,15 +5848,15 @@
   "playgrounds": {
     "no_playgrounds_yet": "Aún no hay playgrounds",
     "playgrounds_description": "Crea experiencias interactivas generadas por IA para tus estudiantes.",
-    "new_playground": "New Playground",
-    "search_placeholder": "Search playgrounds...",
-    "no_results_for": "No results for",
-    "try_different_search": "Try a different search term",
-    "new_playground_modal_title": "New Playground",
-    "new_playground_modal_desc": "Give your playground a name to get started.",
-    "creating": "Creating...",
-    "create": "Create",
-    "failed_create": "Failed to create playground",
+    "new_playground": "Nuevo Playground",
+    "search_placeholder": "Buscar playgrounds...",
+    "no_results_for": "Sin resultados para",
+    "try_different_search": "Prueba con otro término de búsqueda",
+    "new_playground_modal_title": "Nuevo Playground",
+    "new_playground_modal_desc": "Ponle un nombre a tu playground para comenzar.",
+    "creating": "Creando...",
+    "create": "Crear",
+    "failed_create": "No se pudo crear el playground",
     "view": {
       "open_editor_to_generate": "Abre el editor para generar contenido.",
       "check_back_later": "Vuelve más tarde.",
@@ -5292,85 +5877,86 @@
     }
   },
   "library": {
-    "library": "Library",
-    "my_library": "My Library",
-    "new_folder": "New Folder",
+    "library": "Biblioteca",
+    "my_library": "Mi biblioteca",
+    "new_folder": "Nueva carpeta",
     "tabs": {
-      "courses": "Courses",
+      "courses": "Cursos",
       "podcasts": "Podcasts",
-      "communities": "Communities",
-      "boards": "Boards",
+      "communities": "Comunidades",
+      "boards": "Pizarras",
       "playgrounds": "Playgrounds",
-      "media": "Media"
+      "media": "Multimedia"
     },
-    "add_content": "Add content",
-    "upload_media": "Upload media",
-    "empty_folder": "This folder is empty",
-    "error_loading": "Couldn't load the library. Please refresh to try again.",
-    "folder": "Folder",
-    "folders": "Folders",
-    "items": "items",
-    "move": "Move",
-    "rename": "Rename",
-    "manage_access": "Manage access",
-    "delete_folder": "Delete folder",
-    "delete_folder_confirm": "Are you sure you want to delete this folder and everything inside it?",
-    "folder_name": "Folder name",
-    "enter_folder_name": "Enter folder name",
-    "create_folder": "Create folder",
-    "description": "Description",
-    "add": "Add",
-    "added": "Added",
-    "content_add_error": "Failed to add content",
-    "content_added": "Content added",
-    "content_remove_error": "Failed to remove content",
-    "content_removed": "Content removed",
-    "creating_folder": "Creating folder…",
-    "deleting_folder": "Deleting folder…",
-    "empty_folder_description": "Add sub-folders or content to get started.",
-    "folder_created_error": "Failed to create folder",
-    "folder_created_success": "Folder created",
-    "folder_deleted_error": "Failed to delete folder",
-    "folder_deleted_success": "Folder deleted",
-    "folder_name_required": "Folder name is required",
-    "folder_not_found": "Folder not found",
-    "folder_updated_error": "Failed to update folder",
-    "folder_updated_success": "Folder updated",
-    "no_items": "Your library is empty",
-    "no_items_description": "Create a folder or upload media to organize your content.",
-    "no_resources": "No resources available",
-    "open": "Open",
-    "private": "Private",
-    "public": "Public",
-    "remove_from_folder": "Remove from folder",
-    "remove_from_folder_confirm": "Remove this item from the folder? The item itself won't be deleted.",
-    "removing_content": "Removing…",
-    "rename_folder": "Rename folder",
-    "save": "Save",
-    "saving_folder": "Saving…",
-    "search": "Search",
-    "untitled": "Untitled",
-    "visibility": "Visibility",
-    "resources_label": "Resources",
-    "no_results": "No results",
+    "add_content": "Añadir contenido",
+    "upload_media": "Subir multimedia",
+    "empty_folder": "Esta carpeta está vacía",
+    "error_loading": "No se pudo cargar la biblioteca. Actualiza la página para intentarlo de nuevo.",
+    "folder": "Carpeta",
+    "folders": "Carpetas",
+    "items": "elementos",
+    "move": "Mover",
+    "rename": "Renombrar",
+    "manage_access": "Gestionar acceso",
+    "delete_folder": "Eliminar carpeta",
+    "delete_folder_confirm": "¿Seguro que quieres eliminar esta carpeta y todo su contenido?",
+    "delete_folder_title": "¿Eliminar \"{{name}}\"?",
+    "folder_name": "Nombre de la carpeta",
+    "enter_folder_name": "Escribe el nombre de la carpeta",
+    "create_folder": "Crear carpeta",
+    "description": "Descripción",
+    "add": "Añadir",
+    "added": "Añadido",
+    "content_add_error": "No se pudo añadir el contenido",
+    "content_added": "Contenido añadido",
+    "content_remove_error": "No se pudo quitar el contenido",
+    "content_removed": "Contenido quitado",
+    "creating_folder": "Creando carpeta…",
+    "deleting_folder": "Eliminando carpeta…",
+    "empty_folder_description": "Añade subcarpetas o contenido para comenzar.",
+    "folder_created_error": "No se pudo crear la carpeta",
+    "folder_created_success": "Carpeta creada",
+    "folder_deleted_error": "No se pudo eliminar la carpeta",
+    "folder_deleted_success": "Carpeta eliminada",
+    "folder_name_required": "El nombre de la carpeta es obligatorio",
+    "folder_not_found": "Carpeta no encontrada",
+    "folder_updated_error": "No se pudo actualizar la carpeta",
+    "folder_updated_success": "Carpeta actualizada",
+    "no_items": "Tu biblioteca está vacía",
+    "no_items_description": "Crea una carpeta o sube multimedia para organizar tu contenido.",
+    "no_resources": "No hay recursos disponibles",
+    "open": "Abrir",
+    "private": "Privado",
+    "public": "Público",
+    "remove_from_folder": "Quitar de la carpeta",
+    "remove_from_folder_confirm": "¿Quitar este elemento de la carpeta? El elemento en sí no se eliminará.",
+    "removing_content": "Quitando…",
+    "rename_folder": "Renombrar carpeta",
+    "save": "Guardar",
+    "saving_folder": "Guardando…",
+    "search": "Buscar",
+    "untitled": "Sin título",
+    "visibility": "Visibilidad",
+    "resources_label": "Recursos",
+    "no_results": "Sin resultados",
     "color": "Color",
-    "thumbnail": "Cover image",
-    "remove_thumbnail": "Remove cover",
+    "thumbnail": "Imagen de portada",
+    "remove_thumbnail": "Quitar portada",
     "filters": {
-      "all": "All",
-      "folders": "Folders",
-      "courses": "Courses",
-      "media": "Media"
+      "all": "Todo",
+      "folders": "Carpetas",
+      "courses": "Cursos",
+      "media": "Multimedia"
     },
-    "edit": "Edit",
-    "edit_folder": "Edit folder",
-    "share": "Share",
-    "copy_link": "Copy link",
-    "link_copied": "Link copied to clipboard",
-    "link_copy_error": "Couldn't copy the link",
-    "thumbnail_error": "Couldn't upload the cover image",
-    "open_resource": "Open",
-    "replace_cover": "Replace",
+    "edit": "Editar",
+    "edit_folder": "Editar carpeta",
+    "share": "Compartir",
+    "copy_link": "Copiar enlace",
+    "link_copied": "Enlace copiado al portapapeles",
+    "link_copy_error": "No se pudo copiar el enlace",
+    "thumbnail_error": "No se pudo subir la imagen de portada",
+    "open_resource": "Abrir",
+    "replace_cover": "Reemplazar",
     "cover_hint": "PNG, JPG, WEBP",
     "sort": {
       "sort_by": "Ordenar por",
@@ -5382,77 +5968,89 @@
       "drag_to_reorder": "Arrastra para reordenar",
       "sort_error": "No se pudo actualizar el orden",
       "reorder_error": "No se pudo guardar el nuevo orden"
-    }
+    },
+    "preview": "Vista previa",
+    "no_access": "No tienes acceso a este archivo.",
+    "choose_from_library": "Elegir de la biblioteca",
+    "upload_to_library": "Subir",
+    "upload_to_library_hint": "Los archivos subidos se añaden a tu biblioteca para que puedas reutilizarlos en otros lugares.",
+    "no_resource_selected": "No hay ningún elemento de la biblioteca seleccionado.",
+    "private_media_warning": "Privado: los estudiantes sin acceso no verán esto.",
+    "replace_resource": "Reemplazar",
+    "remove_resource": "Quitar",
+    "show_as_card": "Mostrar como tarjeta",
+    "show_inline": "Mostrar integrado"
   },
   "media": {
-    "media": "Media",
-    "file": "File",
-    "embed": "Embed",
-    "download": "Download",
-    "add_media": "Add media",
-    "upload": "Upload",
-    "media_name": "Media name",
+    "media": "Multimedia",
+    "file": "Archivo",
+    "embed": "Incrustar",
+    "download": "Descargar",
+    "add_media": "Añadir multimedia",
+    "upload": "Subir",
+    "media_name": "Nombre del archivo multimedia",
     "media_url": "URL",
-    "delete_media": "Delete media",
-    "delete_media_confirm": "Are you sure you want to delete this media?",
-    "choose_file": "Choose a file",
-    "deleting_media": "Deleting…",
-    "description": "Description",
-    "file_required": "A file is required",
-    "media_deleted_error": "Failed to delete media",
-    "media_deleted_success": "Media deleted",
-    "media_uploaded_error": "Failed to add media",
-    "media_uploaded_success": "Media added",
-    "name": "Name",
-    "name_required": "Name is required",
-    "public": "Public",
-    "upload_file": "Upload file",
-    "upload_media": "Upload media",
-    "uploading_media": "Uploading…",
+    "delete_media": "Eliminar multimedia",
+    "delete_media_confirm": "¿Seguro que quieres eliminar este archivo multimedia?",
+    "delete_media_title": "¿Eliminar \"{{name}}\"?",
+    "choose_file": "Elige un archivo",
+    "deleting_media": "Eliminando…",
+    "description": "Descripción",
+    "file_required": "Se requiere un archivo",
+    "media_deleted_error": "No se pudo eliminar el archivo multimedia",
+    "media_deleted_success": "Archivo multimedia eliminado",
+    "media_uploaded_error": "No se pudo añadir el archivo multimedia",
+    "media_uploaded_success": "Archivo multimedia añadido",
+    "name": "Nombre",
+    "name_required": "El nombre es obligatorio",
+    "public": "Público",
+    "upload_file": "Subir archivo",
+    "upload_media": "Subir multimedia",
+    "uploading_media": "Subiendo…",
     "url": "URL",
-    "url_required": "A URL is required",
-    "upload_hint": "Images, video, audio, PDF, Office docs & ZIP",
-    "remove": "Remove",
-    "open_pdf": "Open PDF"
+    "url_required": "Se requiere una URL",
+    "upload_hint": "Imágenes, video, audio, PDF, documentos de Office y ZIP",
+    "remove": "Quitar",
+    "open_pdf": "Abrir PDF"
   },
   "access": {
     "public": {
-      "title": "Public",
-      "description": "Anyone can view this.",
-      "confirmation_title": "Make public?",
-      "confirmation_message": "This will be visible to everyone.",
-      "confirmation_button": "Make public"
+      "title": "Público",
+      "description": "Cualquiera puede verlo.",
+      "confirmation_title": "¿Hacer público?",
+      "confirmation_message": "Esto será visible para todos.",
+      "confirmation_button": "Hacer público"
     },
     "users_only": {
-      "title": "Users only",
-      "description": "Only signed-in members (and selected groups) can view this.",
-      "confirmation_title": "Restrict access?",
-      "confirmation_message": "Only authenticated users and linked groups will be able to view this.",
-      "confirmation_button": "Restrict access"
+      "title": "Solo usuarios",
+      "description": "Solo los miembros que hayan iniciado sesión (y los grupos seleccionados) pueden verlo.",
+      "confirmation_title": "¿Restringir el acceso?",
+      "confirmation_message": "Solo los usuarios autenticados y los grupos vinculados podrán verlo.",
+      "confirmation_button": "Restringir acceso"
     },
-    "active": "Active",
-    "visibility_update_error": "Failed to update visibility",
-    "visibility_updated": "Visibility updated",
+    "active": "Activo",
+    "visibility_update_error": "No se pudo actualizar la visibilidad",
+    "visibility_updated": "Visibilidad actualizada",
     "usergroups": {
-      "title": "User groups",
-      "subtitle": "Restrict access to specific user groups.",
-      "link_to_usergroup": "Link a user group",
-      "table_name": "Name",
-      "table_actions": "Actions",
-      "usergroup_name": "Group",
-      "delete_link": "Unlink",
-      "warning": "Members of linked groups will be able to access this resource.",
-      "no_usergroups": "No user groups linked yet.",
-      "create_usergroup": "Create a user group",
-      "link_button": "Link",
-      "link_title": "Link a user group",
-      "link_success": "User group linked",
-      "link_error": "Failed to link user group",
-      "unlink_button": "Unlink",
-      "unlink_title": "Unlink user group",
-      "unlink_message": "Remove this group's access?",
-      "unlink_success": "User group unlinked",
-      "unlink_error": "Failed to unlink user group"
+      "title": "Grupos de usuarios",
+      "subtitle": "Restringe el acceso a grupos de usuarios específicos.",
+      "link_to_usergroup": "Vincular un grupo de usuarios",
+      "table_name": "Nombre",
+      "table_actions": "Acciones",
+      "usergroup_name": "Grupo",
+      "delete_link": "Desvincular",
+      "warning": "Los miembros de los grupos vinculados podrán acceder a este recurso.",
+      "no_usergroups": "Aún no hay grupos de usuarios vinculados.",
+      "create_usergroup": "Crear un grupo de usuarios",
+      "link_button": "Vincular",
+      "link_title": "Vincular un grupo de usuarios",
+      "link_success": "Grupo de usuarios vinculado",
+      "link_error": "No se pudo vincular el grupo de usuarios",
+      "unlink_button": "Desvincular",
+      "unlink_title": "Desvincular grupo de usuarios",
+      "unlink_message": "¿Quitar el acceso de este grupo?",
+      "unlink_success": "Grupo de usuarios desvinculado",
+      "unlink_error": "No se pudo desvincular el grupo de usuarios"
     }
   },
   "plan": {
@@ -5494,6 +6092,7 @@
     "admin_seats": "Puestos de administrador",
     "ai_credits": "Créditos de IA",
     "addons": "Complementos",
+    "addons_subtitle": "Compra créditos de IA adicionales como suscripciones mensuales.",
     "active_subscriptions": "Suscripciones activas",
     "credits": "créditos",
     "seats": "puestos",
@@ -5566,7 +6165,34 @@
     "scheduled_desc": "Tu plan cambiará a {{plan}} al final de tu ciclo de facturación actual. Tendrás acceso completo a tu plan actual hasta entonces.",
     "plan_plus_purchased": "Plan: {{plan}} + Comprado: {{purchased}}",
     "base_plus_purchased": "Base: {{base}} + Comprado: {{purchased}}",
-    "pack_ai_desc": "{{quantity}} créditos de AI adicionales agregados a tu organización"
+    "pack_ai_desc": "{{quantity}} créditos de AI adicionales agregados a tu organización",
+    "unlimited_lower": "ilimitado",
+    "limit_reached_upgrade": "Límite alcanzado: actualiza tu plan para continuar",
+    "remaining": "Quedan {{n}}",
+    "remaining_nearing": "Quedan {{n}}: cerca del límite",
+    "usage_subtitle_free": "Los planes gratuitos tienen límites. Actualiza tu plan para superarlos.",
+    "usage_subtitle_paid": "Tu plan incluye estas cantidades. Superar el límite de miembros está permitido y se factura; no se bloquea nada.",
+    "members_hint": "Todas las personas que se unieron a tu organización.",
+    "members_beyond_plan": "{{included}} incluidos · {{beyond}} por encima de tu plan",
+    "members_within_plan": "{{included}} incluidos en tu plan",
+    "active_members": "Miembros activos",
+    "active_members_short": "Miembros activos",
+    "active_members_hint": "Se cuenta cuando un miembro está activo 2 días o más en el mes. Las {{included}} plazas que incluye tu plan son gratuitas; se te cobra $1/mes por cada miembro activo adicional.",
+    "overage_this_month": "${{amount}} en lo que va del mes",
+    "no_extra_charges": "Sin cargos adicionales este mes",
+    "admin_seats_hint": "Miembros que pueden acceder al panel de control. Un subconjunto de tus miembros.",
+    "credits_reset_on": "Se restablece el {{date}}",
+    "next_invoice": "Próxima factura",
+    "due_on": "vence el {{date}}",
+    "line_subscription": "Suscripción",
+    "accruing_this_month": "Miembros activos este mes (se facturan en tu próxima renovación)",
+    "packs_billed_separately": "Los complementos son suscripciones independientes y se facturan según su propio calendario.",
+    "invoice_history": "Historial de facturas",
+    "view": "Ver",
+    "checkout_settling": "Pago recibido: tu nuevo plan se está aplicando y aparecerá en breve.",
+    "checkout_settling_delayed": "Pago recibido, pero tu plan aún no se actualizó. Actualiza la página en un momento y, si el problema persiste, contacta a soporte.",
+    "cancels_on": "Tu suscripción se cancelará el {{periodEnd}}. Mantienes el acceso hasta entonces.",
+    "add_pack": "Agregar {{pack}}"
   },
   "hub_new": {
     "useType": {
@@ -5721,6 +6347,21 @@
     "opening": "Abriendo…",
     "manage_billing": "Gestionar facturación"
   },
+  "mfa": {
+    "policy": {
+      "banner_message_overdue": "{{org}} exige la verificación en dos pasos y el plazo ya venció. Actívala abajo para recuperar el acceso.",
+      "banner_message_today": "{{org}} exige la verificación en dos pasos. Debes configurarla hoy.",
+      "banner_message_one_day": "{{org}} exige la verificación en dos pasos. Te queda 1 día para configurarla.",
+      "banner_message": "{{org}} exige la verificación en dos pasos. Te quedan {{days}} días para configurarla.",
+      "set_up_now": "Configurar ahora",
+      "blocked_title": "Se requiere la verificación en dos pasos",
+      "blocked_description": "El plazo fijado por {{org}} para activar la verificación en dos pasos ya venció. Para seguir usando {{org}}, añade un segundo factor a tu cuenta; solo toma un minuto.",
+      "blocked_scope_note": "Esto solo afecta a {{org}}. Tus otras organizaciones no se ven afectadas.",
+      "set_up_2fa": "Configurar la verificación en dos pasos",
+      "signed_in_as": "Sesión iniciada como {{email}}",
+      "sign_in_to_org": "Iniciar sesión en esta organización"
+    }
+  },
   "folders": {
     "folder": "Carpeta",
     "folders": "Carpetas",
@@ -5728,5 +6369,224 @@
     "folder_count_one": "{{count}} carpeta",
     "item_count": "{{count}} elementos",
     "item_count_one": "{{count}} elemento"
+  },
+  "biblia": {
+    "titulo": "Biblia",
+    "livro": "Libro",
+    "capitulo": "Capítulo",
+    "capitulo_n": "Capítulo {{n}}",
+    "antigo_testamento": "Antiguo Testamento",
+    "novo_testamento": "Nuevo Testamento",
+    "anterior": "Capítulo anterior",
+    "proximo": "Capítulo siguiente",
+    "carregando": "Cargando…",
+    "erro_carregar": "No se pudo cargar el texto.",
+    "tentar_novamente": "Intentar de nuevo",
+    "licenca_n": "Licencia {{licenca}}",
+    "abrir_na_biblia": "Abrir en la Biblia",
+    "inserir_versiculo": "Insertar versículo",
+    "referencia": "Referencia",
+    "referencia_placeholder": "Ej.: Juan 3:16-18",
+    "referencia_invalida": "Referencia no reconocida.",
+    "informe_versiculo": "Indica también el versículo (ej.: Sal 23:1-6).",
+    "limite_versiculos": "Elige como máximo {{max}} versículos.",
+    "inserir": "Insertar",
+    "cancelar": "Cancelar",
+    "versao": "Versión",
+    "comparar_com": "Comparar con",
+    "idioma_pt": "Portugués",
+    "idioma_en": "Inglés",
+    "idioma_es": "Español",
+    "outras_traducoes": "Leer en otra traducción",
+    "abre_youversion": "Se abre en YouVersion (bible.com), en una pestaña nueva",
+    "original": "Original",
+    "mostrar_original": "Mostrar original",
+    "original_indisponivel": "Texto original no disponible para este versículo.",
+    "hebraico": "Hebreo",
+    "grego": "Griego",
+    "titulo_salmo": "Título del salmo",
+    "strong": "Strong",
+    "no_texto": "En el texto",
+    "morfologia": "Morfología",
+    "glosa": "Glosa (inglés)",
+    "glosa_espanhol": "Glosa en español",
+    "texto_base": "Texto base",
+    "so_na": "Solo en el texto crítico (Nestle-Aland)",
+    "so_tr": "Solo en el Textus Receptus (base de la KJV)",
+    "definicao_ingles": "Definición (en inglés)",
+    "credito_stepbible": "Datos de STEPBible.org (Tyndale House, Cambridge), CC BY 4.0",
+    "creditos": {
+      "blivre": "Bíblia Livre (BLIVRE), Copyright © Diego Santos, Mario Sérgio y Marco Teles, http://sites.google.com/site/biblialivre/ — Licencia Creative Commons Atribución 4.0 Brasil.",
+      "onbv": "Biblica® Open Nova Bíblia Viva 2007, Copyright © 2007, 2010 Biblica, Inc. Licencia Creative Commons Atribución-CompartirIgual 4.0.",
+      "bpm": "Bíblia Portuguesa Mundial. Dominio público (traducción todavía en revisión por sus autores).",
+      "kjv": "King James Version (Authorized Version), texto estandarizado de 1769. Dominio público fuera del Reino Unido.",
+      "web": "World English Bible. Dominio público; \"World English Bible\" es marca registrada de eBible.org.",
+      "rv1909": "Santa Biblia, Reina-Valera 1909. Dominio público.",
+      "vbl": "Versión Biblia Libre, Copyright © 2018-2020 Jonathan Gallagher y Shelly Barrios de Avila. Licencia Creative Commons Atribución-CompartirIgual 4.0."
+    },
+    "fechar": "Cerrar"
+  },
+  "nav": {
+    "inicio": "Inicio",
+    "biblia": "Biblia",
+    "caderno": "Cuaderno",
+    "comunidades": "Comunidades",
+    "navegacao_principal": "Navegación principal",
+    "ir_inicio": "{{nome}}: ir al inicio",
+    "fechar": "Cerrar",
+    "buscar": "Buscar",
+    "busca": {
+      "descricao": "Busca comunidades, notas, discusiones y personas.",
+      "placeholder": "Buscar comunidades, notas, discusiones…",
+      "buscar_por": "Buscar “{{termo}}” en todo",
+      "nada_rapido": "Nada en tus comunidades ni en tus notas recientes. Presiona Enter para buscar en todo.",
+      "dica": "Enter busca en todas las discusiones y personas."
+    },
+    "nova_nota": "Nueva nota",
+    "notas_recentes": "Notas recientes",
+    "caderno_vazio": "Tus notas recientes aparecen aquí.",
+    "restrita": "área restringida",
+    "expandir": "Mostrar elementos de {{item}}",
+    "recolher": "Ocultar elementos de {{item}}",
+    "agendar_estudo": "Agendar un estudio",
+    "menu_conta": "Menú de la cuenta",
+    "perfil_conta": "Perfil y cuenta",
+    "painel_admin": "Panel de administración",
+    "sair": "Cerrar sesión",
+    "idioma": "Idioma",
+    "escrever": {
+      "rotulo": "Escribir",
+      "titulo": "Escribir",
+      "descricao": "¿Qué quieres escribir ahora?",
+      "nota": "Nota privada",
+      "nota_descricao": "Una nota de estudio. Solo tú la ves.",
+      "devocional": "Devocional",
+      "devocional_descricao": "Pasaje, lo que aprendí, cómo aplicarlo y una oración. Se queda en tu cuaderno.",
+      "pergunta": "Pregunta en la comunidad",
+      "pergunta_descricao": "Elige una comunidad y pregunta. Todos allí lo ven.",
+      "pergunta_modal_descricao": "Tu pregunta será visible para quienes participan en la comunidad.",
+      "pergunta_comunidade_dica": "La pregunta aparece en esta comunidad."
+    }
+  },
+  "hoje": {
+    "ola": "Hola, {{nome}}",
+    "ola_sem_nome": "Hola",
+    "bom_dia": "Buenos días, {{nome}}",
+    "bom_dia_sem_nome": "Buenos días",
+    "boa_tarde": "Buenas tardes, {{nome}}",
+    "boa_tarde_sem_nome": "Buenas tardes",
+    "boa_noite": "Buenas noches, {{nome}}",
+    "boa_noite_sem_nome": "Buenas noches",
+    "continue_lendo": "Sigue leyendo",
+    "continue_lendo_descricao": "Desde donde lo dejaste.",
+    "continuar_leitura": "Continuar lectura",
+    "sem_leitura": "Todavía no has abierto ningún capítulo.",
+    "abrir_biblia": "Abrir la Biblia",
+    "ultimo_rascunho": "Tu último borrador",
+    "continuar": "Continuar",
+    "sem_rascunho": "Todavía no hay notas. Empieza con una línea.",
+    "nas_comunidades": "En tus comunidades",
+    "ver_comunidades": "Ver todas",
+    "sem_comunidades": "Todavía no participas en ninguna comunidad.",
+    "comunidades_quietas": "Nada nuevo por ahora. ¿Por qué no inicias la conversación?",
+    "comecar_titulo": "Por dónde empezar",
+    "comecar_descricao": "Lee un capítulo o escribe lo que Dios te está diciendo. Lo demás llega con el tiempo.",
+    "comece_biblia": "Empieza por la Biblia",
+    "comece_biblia_descricao": "Sugerencia: el Evangelio de Juan, capítulo 1.",
+    "primeira_nota": "Escribe tu primera nota",
+    "primeira_nota_descricao": "Se queda en tu cuaderno. Solo tú lo ves.",
+    "anonimo_titulo": "Tu día con la Palabra",
+    "anonimo_descricao": "Inicia sesión para seguir leyendo, ver tus borradores y lo nuevo en tus comunidades."
+  },
+  "erros": {
+    "version_mismatch": {
+      "titulo": "La app se acaba de actualizar",
+      "descricao": "Se publicó una versión nueva mientras esta página estaba abierta. Recarga para usar la versión más reciente."
+    },
+    "chunk_load": {
+      "titulo": "Parte de la página no cargó",
+      "descricao": "Tu navegador guardó una copia antigua de la app y no pudo cargar una parte. Recargar suele resolverlo."
+    },
+    "auth_session": {
+      "titulo": "Tu sesión expiró",
+      "descricao": "Cerraste sesión o el acceso necesita renovarse. Inicia sesión de nuevo para continuar."
+    },
+    "plan_limit": {
+      "titulo": "Esta función no está disponible",
+      "descricao": "Esta función no está activa en la comunidad. Habla con el equipo si crees que debería estarlo."
+    },
+    "permission": {
+      "titulo": "No tienes acceso a esto",
+      "descricao": "Tu cuenta no tiene permiso para esta página o acción. Si crees que deberías tenerlo, habla con el equipo de la comunidad."
+    },
+    "rate_limit": {
+      "titulo": "Vamos con calma un momento",
+      "descricao": "Hiciste muchas acciones en poco tiempo, así que hicimos una pausa breve para proteger tu cuenta. Se libera enseguida."
+    },
+    "not_found": {
+      "titulo": "No encontramos eso",
+      "descricao": "Lo que buscas pudo haberse movido, borrado o no estar disponible para ti. No es nada que hayas hecho mal."
+    },
+    "conflict": {
+      "titulo": "Eso ya existe",
+      "descricao": "Ya existe algo igual, por ejemplo una cuenta con el mismo correo o un elemento con el mismo nombre."
+    },
+    "validation": {
+      "titulo": "Falta ajustar un campo",
+      "descricao": "Un campo está vacío, fuera del límite o en el formato incorrecto. Corrige el campo resaltado e inténtalo de nuevo."
+    },
+    "org_config": {
+      "titulo": "La comunidad todavía se está configurando",
+      "descricao": "La organización todavía no está lista. El equipo necesita terminar la configuración."
+    },
+    "payment": {
+      "titulo": "No pudimos completar el pago",
+      "descricao": "Algo interrumpió el pago o la suscripción. No se cobró nada de más; puedes intentarlo de nuevo con seguridad."
+    },
+    "upload": {
+      "titulo": "La subida no funcionó",
+      "descricao": "El archivo puede ser demasiado grande, estar en un formato no aceptado, o la conexión se cayó a mitad de camino. Revisa el archivo e inténtalo de nuevo."
+    },
+    "ai": {
+      "titulo": "El asistente tuvo un problema",
+      "descricao": "La respuesta se interrumpió o llegó incompleta. Suele ser pasajero; inténtalo de nuevo."
+    },
+    "offline": {
+      "titulo": "Parece que no tienes conexión a internet",
+      "descricao": "No pudimos comunicarnos con el servidor. Revisa tu conexión e inténtalo de nuevo."
+    },
+    "service_unavailable": {
+      "titulo": "Un servicio no está disponible",
+      "descricao": "Algo de lo que dependemos no responde en este momento. Es de nuestro lado y suele volver solo."
+    },
+    "timeout": {
+      "titulo": "Tardó demasiado",
+      "descricao": "La solicitud tardó demasiado en terminar. El servidor puede estar ocupado; intentarlo de nuevo suele funcionar."
+    },
+    "server": {
+      "titulo": "Tuvimos un problema de nuestro lado",
+      "descricao": "El servidor devolvió un error inesperado. La culpa es nuestra, no tuya; inténtalo de nuevo en un momento."
+    },
+    "unknown": {
+      "titulo": "Algo no salió como esperábamos",
+      "descricao": "Tuvimos un problema inesperado. Ya quedó registrado y suele ser pasajero; intentarlo de nuevo normalmente lo resuelve. Si sigue pasando, cuéntanos qué estabas haciendo."
+    },
+    "aquecimento": {
+      "titulo": "Estamos despertando el servidor",
+      "descricao": "La comunidad estaba inactiva y el servidor tarda unos segundos en volver. Lo intentaremos de nuevo por nuestra cuenta.",
+      "tentando": "Intentando de nuevo en 3 segundos…"
+    },
+    "mostrar_detalhes": "Mostrar detalles técnicos",
+    "esconder_detalhes": "Ocultar detalles técnicos",
+    "acoes": {
+      "tentar": "Intentar de nuevo",
+      "recarregar": "Recargar",
+      "entrar": "Iniciar sesión de nuevo",
+      "inicio": "Inicio",
+      "sair": "Cerrar sesión",
+      "saindo": "Cerrando sesión…",
+      "reportar": "Avisar del problema",
+      "suporte": "Hablar con soporte"
+    }
   }
 }
