@@ -21,8 +21,8 @@ test('switching to Arabic flips direction without a reload', async ({ page }) =>
     ;(window as unknown as { __rtlNoReload?: boolean }).__rtlNoReload = true
   })
 
-  // The switcher trigger shows the active language code (EN, AR, ...).
-  const trigger = page.getByRole('button', { name: /^(EN|AR|FR|DE|ES)$/i }).first()
+  // The switcher trigger shows the active language code (PT, EN, AR, ...).
+  const trigger = page.getByRole('button', { name: /^(PT|EN|AR|FR|DE|ES)$/i }).first()
   if (!(await trigger.count())) {
     test.skip(true, 'no language switcher on this page')
   }
@@ -42,7 +42,7 @@ test('switching to Arabic flips direction without a reload', async ({ page }) =>
 
 test('the choice survives a reload', async ({ page }) => {
   await page.addInitScript(() => {
-    window.localStorage.setItem('i18nextLng', 'ar')
+    window.localStorage.setItem('discipulei_lng', 'ar')
   })
   await page.goto('/', { waitUntil: 'domcontentloaded' })
   await page.reload({ waitUntil: 'domcontentloaded' })

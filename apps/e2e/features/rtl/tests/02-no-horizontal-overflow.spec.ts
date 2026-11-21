@@ -37,7 +37,7 @@ for (const viewport of VIEWPORTS) {
         test(`${route.name} in ${lng}`, async ({ page }) => {
           await page.setViewportSize({ width: viewport.width, height: viewport.height })
           await page.addInitScript((code) => {
-            window.localStorage.setItem('i18nextLng', code as string)
+            window.localStorage.setItem('discipulei_lng', code as string)
           }, lng)
 
           await page.goto(route.path, { waitUntil: 'networkidle' })

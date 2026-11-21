@@ -17,7 +17,7 @@ test.describe('dir on first paint', () => {
     test(`localStorage locale applies before paint on ${route}`, async ({ page }) => {
       // Seed the same key i18next reads, before any page script runs.
       await page.addInitScript(() => {
-        window.localStorage.setItem('i18nextLng', 'ar')
+        window.localStorage.setItem('discipulei_lng', 'ar')
       })
 
       // Deliberately NOT networkidle: waiting for idle would step past the
@@ -41,7 +41,7 @@ test.describe('dir on first paint', () => {
 
   test('English stays left-to-right', async ({ page }) => {
     await page.addInitScript(() => {
-      window.localStorage.setItem('i18nextLng', 'en')
+      window.localStorage.setItem('discipulei_lng', 'en')
     })
     await page.goto('/', { waitUntil: 'domcontentloaded' })
     const dir = await page.evaluate(() => document.documentElement.getAttribute('dir'))
