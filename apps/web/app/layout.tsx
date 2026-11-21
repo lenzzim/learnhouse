@@ -82,12 +82,14 @@ export default function RootLayout({
 }) {
   // `dir` is deliberately absent from the <html> below. React only reconciles
   // attributes present in its virtual tree, so leaving it out means React never
-  // clobbers what dir-init.js wrote before paint. `lang="en"` stays as the
-  // no-JS baseline for crawlers; the script overwrites it for everyone else.
+  // clobbers what dir-init.js wrote before paint. `lang="pt-BR"` stays as the
+  // no-JS baseline for crawlers (Discipulei defaults to Portuguese, N04); the
+  // script overwrites it for everyone else (also `pt-BR` unless the viewer
+  // picked another language).
   return (
     <html
       className={`${inter.variable} ${newsreader.variable} ${tajawal.variable} dark`}
-      lang="en"
+      lang="pt-BR"
       suppressHydrationWarning
     >
       <head>

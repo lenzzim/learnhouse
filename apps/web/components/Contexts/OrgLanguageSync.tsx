@@ -2,9 +2,9 @@
 
 import { useEffect } from 'react'
 import { useOrg } from './OrgContext'
-import i18n, { changeLanguage } from '@/lib/i18n'
+import i18n, { changeLanguage, LANGUAGE_USER_PICKED_KEY } from '@/lib/i18n'
 
-const USER_PICKED_KEY = 'i18nextLng_userPicked'
+const USER_PICKED_KEY = LANGUAGE_USER_PICKED_KEY
 
 export default function OrgLanguageSync() {
   const org = useOrg() as any
@@ -14,7 +14,10 @@ export default function OrgLanguageSync() {
     org?.config?.config?.general?.default_language
 
   useEffect(() => {
-    if (!orgDefault) return
+    // Discipulei (N04): the API stores `en` as the implicit default for every
+    // org (GeneralCustomization.default_language), so `en` cannot be told apart
+    // from "never configured" — treat it as unset and keep Portuguese.
+    if (!orgDefault || orgDefault === 'en') return
 
     let userPicked: string | null = null
     try {

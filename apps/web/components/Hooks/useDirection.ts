@@ -11,7 +11,7 @@ import { directionForLanguage, dirMultiplier, type Direction } from '@/lib/direc
  * to that same event.
  *
  * ⚠ THE ONE RULE
- * On the server `i18n.language` is always `en`, so the first render is always
+ * On the server `i18n.language` is always `pt` (fallbackLng), so the first render is always
  * `ltr`. Therefore this hook must NEVER choose between two different DOM
  * structures — that's a guaranteed hydration mismatch.
  *

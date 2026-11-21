@@ -4,7 +4,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Languages, ChevronDown, Check } from 'lucide-react'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
-import { changeLanguage } from '@/lib/i18n'
+import { changeLanguage, LANGUAGE_USER_PICKED_KEY } from '@/lib/i18n'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 import {
   DropdownMenu,
@@ -43,7 +43,7 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
             className="flex items-center justify-between cursor-pointer"
             onClick={() => {
               try {
-                localStorage.setItem('i18nextLng_userPicked', '1')
+                localStorage.setItem(LANGUAGE_USER_PICKED_KEY, '1')
               } catch { /* ignore */ }
               track(AnalyticsEvent.LanguageChanged, {
                 language_code: language.code,

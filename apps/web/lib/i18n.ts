@@ -4,6 +4,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import en from '../locales/en.json';
+import pt from '../locales/pt.json';
 import { loadDateLocale } from './format';
 
 const LOCALE_LOADERS: Record<string, () => Promise<{ default: any }>> = {
@@ -30,10 +31,23 @@ const LOCALE_LOADERS: Record<string, () => Promise<{ default: any }>> = {
   sk: () => import('../locales/sk.json'),
 };
 
-// Only bundle English; lazy-load all other locales on demand
+// Discipulei (N04, Brazil-only): Portuguese is the default language, so it is
+// bundled alongside English (the last-resort fallback). Every other locale is
+// lazy-loaded on demand. `pt` stays in LOCALE_LOADERS so the registry test
+// keeps passing; loadLocale() skips it because the bundle is already present.
 const resources = {
   en: { common: en },
+  pt: { common: pt },
 };
+
+/**
+ * Detection cache keys. Renamed from upstream's `i18nextLng` / `i18next` so
+ * values cached before Portuguese became the default (usually `en-US`, taken
+ * from the browser) are ignored. MIRRORED in public/dir-init.js and
+ * lib/direction.ts — update all three together.
+ */
+export const LANGUAGE_STORAGE_KEY = 'discipulei_lng'
+export const LANGUAGE_USER_PICKED_KEY = 'discipulei_lng_userPicked'
 
 async function loadLocale(lng: string) {
   const code = lng.split('-')[0]
@@ -53,20 +67,29 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
+    // No explicit choice (nothing cached, no ?lng=) resolves to Portuguese.
+    fallbackLng: ['pt', 'en'],
     ns: ['common'],
     defaultNS: 'common',
     interpolation: {
       escapeValue: false, // react already safes from xss
     },
     detection: {
-      order: ['localStorage', 'cookie', 'querystring', 'navigator', 'path', 'subdomain'],
+      // No 'navigator': a browser set to English must still get Portuguese.
+      // No 'path'/'subdomain': without supportedLngs they would turn the first
+      // URL segment (e.g. "signup", "orgs") into a "language".
+      order: ['localStorage', 'cookie', 'querystring'],
       caches: ['localStorage', 'cookie'],
-      lookupLocalStorage: 'i18nextLng',
-      lookupCookie: 'i18next',
+      lookupLocalStorage: LANGUAGE_STORAGE_KEY,
+      lookupCookie: LANGUAGE_STORAGE_KEY,
     },
     react: {
       useSuspense: false,
+      // Re-render when a lazily loaded bundle lands. Without this, a language
+      // detected at startup (e.g. "pt-BR") set i18n.language — so the switcher
+      // showed "PT" — while the tree kept rendering the English fallback,
+      // because addResourceBundle() fires no languageChanged event.
+      bindI18nStore: 'added',
     }
   });
 

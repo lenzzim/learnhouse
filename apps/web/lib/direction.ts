@@ -32,7 +32,7 @@ export const RTL_LANGUAGES = new Set([
 
 /** `en-GB` -> `en`. Mirrors the `.split('-')[0]` used throughout lib/i18n.ts. */
 export function baseCode(lng?: string | null): string {
-  return String(lng || 'en').split('-')[0].toLowerCase()
+  return String(lng || 'pt').split('-')[0].toLowerCase()
 }
 
 export function directionForLanguage(lng?: string | null): Direction {
@@ -46,22 +46,22 @@ export function dirMultiplier(dir: Direction): 1 | -1 {
 
 /**
  * Detect the language the same way i18next's LanguageDetector does, in the same
- * order (see `detection.order` in lib/i18n.ts). Client-only — returns 'en' on
- * the server.
+ * order (see `detection.order` in lib/i18n.ts), defaulting to Portuguese like
+ * its fallbackLng. Client-only — returns 'pt' on the server.
  *
  * Kept byte-for-byte equivalent to the detector in public/dir-init.js.
  */
 export function detectClientLanguage(): string {
-  if (typeof window === 'undefined') return 'en'
+  if (typeof window === 'undefined') return 'pt'
 
   try {
-    const stored = window.localStorage.getItem('i18nextLng')
+    const stored = window.localStorage.getItem('discipulei_lng')
     if (stored) return stored
   } catch {
     /* localStorage can throw in private mode / sandboxed iframes */
   }
 
-  const cookie = document.cookie.match(/(?:^|;\s*)i18next=([^;]*)/)
+  const cookie = document.cookie.match(/(?:^|;\s*)discipulei_lng=([^;]*)/)
   if (cookie) {
     try {
       return decodeURIComponent(cookie[1])
@@ -77,7 +77,7 @@ export function detectClientLanguage(): string {
     /* malformed query string */
   }
 
-  return navigator.languages?.[0] || navigator.language || 'en'
+  return 'pt'
 }
 
 /**
@@ -93,7 +93,7 @@ export function applyDocumentDirection(lng: string): Direction {
   if (typeof document === 'undefined') return dir
 
   const el = document.documentElement
-  el.setAttribute('lang', code)
+  el.setAttribute('lang', code === 'pt' ? 'pt-BR' : code)
   el.setAttribute('dir', dir)
   el.style.setProperty('--dir', dir === 'rtl' ? '-1' : '1')
 
