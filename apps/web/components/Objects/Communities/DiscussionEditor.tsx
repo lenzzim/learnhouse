@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Bold, Italic, Strikethrough, Code, Link as LinkIcon, List, ListOrdered, Heading2, Quote } from 'lucide-react'
+import { BotaoInserirVersiculo } from '@components/Biblia/BotaoInserirVersiculo'
 
 interface DiscussionEditorProps {
   content: any
@@ -182,6 +183,7 @@ export function DiscussionEditor({
             >
               <Quote size={16} />
             </ToolbarButton>
+            <BotaoInserirVersiculo editor={editor} />
 
             <div className="w-px h-5 bg-gray-300 mx-1" />
 
