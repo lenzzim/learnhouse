@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Loader2, AlertTriangle, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { useAuth, validateOAuthState } from '@components/Contexts/AuthContext'
 import { getLEARNHOUSE_DOMAIN_VAL, getLEARNHOUSE_TOP_DOMAIN_VAL, getAPIUrl } from '@services/config/config'
 import { getErrorMessage } from '@services/utils/ts/errorMessage'
@@ -12,6 +13,7 @@ export default function GoogleCallbackPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { signIn } = useAuth()
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'csrf_error'>('loading')
 
@@ -275,9 +277,9 @@ export default function GoogleCallbackPage() {
             <Loader2 className="w-12 h-12 text-gray-600 animate-spin" />
           </div>
           <h1 className="text-xl font-semibold text-gray-800 mb-2">
-            Completing sign in...
+            {t('auth.sso_callback.authenticating')}
           </h1>
-          <p className="text-gray-500">Please wait while we authenticate you.</p>
+          <p className="text-gray-500">{t('auth.sso_callback.please_wait')}</p>
         </div>
       </div>
     )
@@ -305,13 +307,13 @@ export default function GoogleCallbackPage() {
               href="/login"
               className="block w-full py-2 px-4 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
             >
-              Go to Login
+              {t('auth.back_to_login')}
             </Link>
             <Link
               href="/"
               className="block w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
             >
-              Go Home
+              {t('auth.sso_callback.go_home')}
             </Link>
           </div>
         </div>
@@ -329,7 +331,7 @@ export default function GoogleCallbackPage() {
             </div>
           </div>
           <h1 className="text-xl font-semibold text-gray-800 mb-2">
-            Authentication Failed
+            {t('auth.sso_callback.auth_failed')}
           </h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <div className="space-y-3">
@@ -337,13 +339,13 @@ export default function GoogleCallbackPage() {
               href="/login"
               className="block w-full py-2 px-4 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
             >
-              Try Again
+              {t('auth.sso_callback.try_again')}
             </Link>
             <Link
               href="/"
               className="block w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
             >
-              Go Home
+              {t('auth.sso_callback.go_home')}
             </Link>
           </div>
         </div>
@@ -359,9 +361,9 @@ export default function GoogleCallbackPage() {
           <Loader2 className="w-12 h-12 text-green-600 animate-spin" />
         </div>
         <h1 className="text-xl font-semibold text-gray-800 mb-2">
-          Success!
+          {t('auth.sso_callback.success')}
         </h1>
-        <p className="text-gray-500">Redirecting you now...</p>
+        <p className="text-gray-500">{t('auth.sso_callback.redirecting')}</p>
       </div>
     </div>
   )

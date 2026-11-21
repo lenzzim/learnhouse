@@ -395,10 +395,17 @@
     "magic_subtitle": "Enter your email and we’ll send you a link that signs you in — no password needed.",
     "magic_send": "Email me a login link",
     "magic_use_password": "Sign in with a password instead",
+    "magic_missing_token": "This link is missing its token. Request a new one to sign in.",
+    "magic_expired": "This link has expired or was already used. Request a new one to sign in.",
+    "magic_invalid_title": "This link isn’t valid anymore",
+    "magic_request_new": "Request a new link",
+    "magic_signing_in": "Signing you in...",
+    "magic_please_wait": "Please wait while we verify your link.",
     "choose_sign_in_method": "Choose how you’d like to sign in.",
     "no_sign_in_method_available": "This organization has restricted how members sign in, and none of the allowed methods are available here. Contact an administrator.",
     "complete_profile": {
-      "title": "Complete your profile"
+      "title": "Complete your profile",
+      "subtitle": "{{org}} needs a little more information before you continue."
     }
   },
   "validation": {
@@ -409,7 +416,10 @@
     "title_required": "Title is required",
     "content_required": "Content is required",
     "invalid_number": "Must be a number",
-    "invalid_option": "Choose one of the available options"
+    "invalid_option": "Choose one of the available options",
+    "min_value": "Must be at least {{value}}",
+    "max_value": "Must be at most {{value}}",
+    "too_long": "Must be {{max}} characters or fewer"
   },
   "courses": {
     "my_courses": "My Courses",
@@ -1240,6 +1250,7 @@
     "manage_access": "Manage access",
     "delete_folder": "Delete folder",
     "delete_folder_confirm": "Are you sure you want to delete this folder and everything inside it?",
+    "delete_folder_title": "Delete \"{{name}}\"?",
     "folder_name": "Folder name",
     "enter_folder_name": "Enter folder name",
     "create_folder": "Create folder",
@@ -1331,6 +1342,7 @@
     "media_url": "URL",
     "delete_media": "Delete media",
     "delete_media_confirm": "Are you sure you want to delete this media?",
+    "delete_media_title": "Delete \"{{name}}\"?",
     "choose_file": "Choose a file",
     "deleting_media": "Deleting…",
     "description": "Description",
@@ -3522,7 +3534,8 @@
           "title": "Do more with a higher plan",
           "subtitle": "Upgrade to raise your limits and unlock more features.",
           "popular": "Popular",
-          "compare": "Compare all plans"
+          "compare": "Compare all plans",
+          "upgrade_to": "Upgrade to {{plan}}"
         }
       },
       "general": {
@@ -5188,7 +5201,8 @@
         "select_all_that_apply": "Select all that apply",
         "response_type_single": "Single answer",
         "response_type_multiple": "Multiple answers",
-        "no_correct_answer_warning": "No correct answer — this question is skipped"
+        "no_correct_answer_warning": "No correct answer — this question is skipped",
+        "generate_with_ai": "Generate with AI"
       },
       "math_block": {
         "templates": "Templates",
@@ -6092,7 +6106,9 @@
     "invoice_history": "Invoice history",
     "view": "View",
     "checkout_settling": "Payment received — your new plan is being applied and will appear shortly.",
-    "checkout_settling_delayed": "Payment received, but your plan has not updated yet. Refresh in a moment — contact support if it persists."
+    "checkout_settling_delayed": "Payment received, but your plan has not updated yet. Refresh in a moment — contact support if it persists.",
+    "cancels_on": "Your subscription will cancel on {{periodEnd}}. Access continues until then.",
+    "add_pack": "Add {{pack}}"
   },
   "hub_new": {
     "useType": {

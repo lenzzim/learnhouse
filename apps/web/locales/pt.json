@@ -387,18 +387,25 @@
     "mfa_verify": "Verificar",
     "mfa_use_authenticator": "Usar o aplicativo autenticador",
     "mfa_use_backup": "Usar um código de backup",
-    "mfa_back_to_login": "Voltar para a entrada",
+    "mfa_back_to_login": "Voltar ao login",
     "magic_title": "Entrar com um link",
     "magic_sent_title": "Confira seu e-mail",
     "magic_sent_body": "Se existir uma conta para {{email}}, acabamos de enviar um link seguro para entrar. Ele expira em pouco tempo, então use-o logo.",
-    "magic_back_to_login": "Voltar para a entrada",
+    "magic_back_to_login": "Voltar ao login",
     "magic_subtitle": "Digite seu e-mail e enviaremos um link para você entrar — sem precisar de senha.",
     "magic_send": "Enviar link de acesso por e-mail",
     "magic_use_password": "Entrar com senha",
+    "magic_missing_token": "Este link está sem o código de acesso. Peça um novo para entrar.",
+    "magic_expired": "Este link expirou ou já foi usado. Peça um novo para entrar.",
+    "magic_invalid_title": "Este link não é mais válido",
+    "magic_request_new": "Pedir um novo link",
+    "magic_signing_in": "Entrando...",
+    "magic_please_wait": "Aguarde enquanto verificamos seu link.",
     "choose_sign_in_method": "Escolha como você quer entrar.",
     "no_sign_in_method_available": "Esta organização restringiu as formas de entrada dos membros, e nenhum dos métodos permitidos está disponível aqui. Fale com um administrador.",
     "complete_profile": {
-      "title": "Complete seu perfil"
+      "title": "Complete seu perfil",
+      "subtitle": "{{org}} precisa de mais algumas informações antes de você continuar."
     }
   },
   "validation": {
@@ -409,7 +416,10 @@
     "title_required": "O título é obrigatório",
     "content_required": "O conteúdo é obrigatório",
     "invalid_number": "Precisa ser um número",
-    "invalid_option": "Escolha uma das opções disponíveis"
+    "invalid_option": "Escolha uma das opções disponíveis",
+    "min_value": "Deve ser no mínimo {{value}}",
+    "max_value": "Deve ser no máximo {{value}}",
+    "too_long": "Deve ter no máximo {{max}} caracteres"
   },
   "courses": {
     "my_courses": "Meus Cursos",
@@ -3046,7 +3056,8 @@
           "title": "Faça mais com um plano superior",
           "subtitle": "Faça upgrade para aumentar seus limites e liberar mais recursos.",
           "popular": "Popular",
-          "compare": "Comparar todos os planos"
+          "compare": "Comparar todos os planos",
+          "upgrade_to": "Fazer upgrade para o {{plan}}"
         }
       },
       "api_access": {
@@ -4723,7 +4734,8 @@
         "select_all_that_apply": "Selecione todas as que se aplicam",
         "response_type_single": "Resposta única",
         "response_type_multiple": "Múltiplas respostas",
-        "no_correct_answer_warning": "Nenhuma resposta correta — esta pergunta é ignorada"
+        "no_correct_answer_warning": "Nenhuma resposta correta — esta pergunta é ignorada",
+        "generate_with_ai": "Gerar com IA"
       },
       "math_block": {
         "templates": "Modelos",
@@ -5796,6 +5808,7 @@
     "manage_access": "Gerenciar acesso",
     "delete_folder": "Excluir pasta",
     "delete_folder_confirm": "Tem certeza de que deseja excluir esta pasta e tudo o que há nela?",
+    "delete_folder_title": "Excluir \"{{name}}\"?",
     "folder_name": "Nome da pasta",
     "enter_folder_name": "Digite o nome da pasta",
     "create_folder": "Criar pasta",
@@ -5887,6 +5900,7 @@
     "media_url": "URL",
     "delete_media": "Excluir mídia",
     "delete_media_confirm": "Tem certeza de que deseja excluir esta mídia?",
+    "delete_media_title": "Excluir \"{{name}}\"?",
     "choose_file": "Escolha um arquivo",
     "deleting_media": "Excluindo…",
     "description": "Descrição",
@@ -6084,7 +6098,9 @@
     "invoice_history": "Histórico de faturas",
     "view": "Ver",
     "checkout_settling": "Pagamento recebido — seu novo plano está sendo aplicado e aparecerá em instantes.",
-    "checkout_settling_delayed": "Pagamento recebido, mas seu plano ainda não foi atualizado. Atualize a página em instantes — fale com o suporte se o problema continuar."
+    "checkout_settling_delayed": "Pagamento recebido, mas seu plano ainda não foi atualizado. Atualize a página em instantes — fale com o suporte se o problema continuar.",
+    "cancels_on": "Sua assinatura será cancelada em {{periodEnd}}. O acesso continua até lá.",
+    "add_pack": "Adicionar {{pack}}"
   },
   "hub_new": {
     "useType": {

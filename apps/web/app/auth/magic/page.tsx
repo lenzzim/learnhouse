@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Loader2, AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@components/Contexts/AuthContext'
 
 /**
@@ -20,6 +21,7 @@ import { useAuth } from '@components/Contexts/AuthContext'
  */
 export default function MagicLinkConsumePage() {
   const { completeMagicLink } = useAuth()
+  const { t } = useTranslation()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [error, setError] = useState<string | null>(null)
   const ranRef = useRef(false)
@@ -43,7 +45,7 @@ export default function MagicLinkConsumePage() {
       const token = params.get('token')
 
       if (!token) {
-        setError('This link is missing its token. Request a new one to sign in.')
+        setError(t('auth.magic_missing_token'))
         setStatus('error')
         return
       }
@@ -68,7 +70,7 @@ export default function MagicLinkConsumePage() {
         return
       }
 
-      let message = 'This link has expired or was already used. Request a new one to sign in.'
+      let message = t('auth.magic_expired')
       try {
         const parsed = JSON.parse(res.error || '{}')
         if (parsed.message) message = parsed.message
@@ -80,7 +82,7 @@ export default function MagicLinkConsumePage() {
     }
 
     run()
-  }, [completeMagicLink])
+  }, [completeMagicLink, t])
 
   if (status === 'error') {
     return (
@@ -92,7 +94,7 @@ export default function MagicLinkConsumePage() {
             </div>
           </div>
           <h1 className="text-xl font-semibold text-gray-800 mb-2">
-            This link isn’t valid anymore
+            {t('auth.magic_invalid_title')}
           </h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <div className="space-y-3">
@@ -100,13 +102,13 @@ export default function MagicLinkConsumePage() {
               href="/login"
               className="block w-full py-2 px-4 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
             >
-              Request a new link
+              {t('auth.magic_request_new')}
             </Link>
             <Link
               href="/"
               className="block w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
             >
-              Go Home
+              {t('auth.sso_callback.go_home')}
             </Link>
           </div>
         </div>
@@ -121,8 +123,8 @@ export default function MagicLinkConsumePage() {
           <div className="flex justify-center mb-4">
             <Loader2 className="w-12 h-12 text-green-600 animate-spin" />
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 mb-2">Success!</h1>
-          <p className="text-gray-500">Redirecting you now...</p>
+          <h1 className="text-xl font-semibold text-gray-800 mb-2">{t('auth.sso_callback.success')}</h1>
+          <p className="text-gray-500">{t('auth.sso_callback.redirecting')}</p>
         </div>
       </div>
     )
@@ -134,8 +136,8 @@ export default function MagicLinkConsumePage() {
         <div className="flex justify-center mb-4">
           <Loader2 className="w-12 h-12 text-gray-600 animate-spin" />
         </div>
-        <h1 className="text-xl font-semibold text-gray-800 mb-2">Signing you in...</h1>
-        <p className="text-gray-500">Please wait while we verify your link.</p>
+        <h1 className="text-xl font-semibold text-gray-800 mb-2">{t('auth.magic_signing_in')}</h1>
+        <p className="text-gray-500">{t('auth.magic_please_wait')}</p>
       </div>
     </div>
   )
