@@ -1,6 +1,6 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
-import { Books, FolderSimple, ChatsCircle, Headphones, Cube, ShoppingBag } from '@phosphor-icons/react'
+import { Books, FolderSimple, ChatsCircle, Headphones, Cube, ShoppingBag, BookOpen } from '@phosphor-icons/react'
 import { menuIcon } from '@components/Objects/Menus/menuIcons'
 import Link from 'next/link'
 import React from 'react'
@@ -14,12 +14,14 @@ const BUILTIN: Record<string, Builtin> = {
   library: { feature: 'folders', link: '/library', labelKey: 'library.library', Icon: FolderSimple },
   podcasts: { feature: 'podcasts', link: '/podcasts', labelKey: 'podcasts.podcasts', Icon: Headphones },
   communities: { feature: 'communities', link: '/communities', labelKey: 'communities.title', Icon: ChatsCircle },
+  // Discipulei: a Bíblia não depende de feature/plano do backend (feature vazia)
+  biblia: { feature: '', link: '/biblia', labelKey: 'biblia.titulo', Icon: BookOpen },
   playgrounds: { feature: 'playgrounds', link: '/playgrounds', labelKey: 'common.playgrounds', Icon: Cube },
   store: { feature: 'payments', link: '/store', labelKey: 'common.store', Icon: ShoppingBag },
 }
 
 // Default order when an org has no custom menu config.
-const DEFAULT_ORDER = ['courses', 'library', 'podcasts', 'communities', 'playgrounds', 'store']
+const DEFAULT_ORDER = ['courses', 'library', 'podcasts', 'communities', 'biblia', 'playgrounds', 'store']
 
 function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
   const { t } = useTranslation()
@@ -38,6 +40,13 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
       ? [...configItems].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       : DEFAULT_ORDER.map((type, i) => ({ type, enabled: true, order: i, label: '', url: '' }))
 
+  // Discipulei: menus configurados no painel ainda não conhecem a Bíblia;
+  // quando ela não está listada, entra logo depois de Comunidades.
+  if (!source.some((item: any) => item.type === 'biblia')) {
+    const i = source.findIndex((item: any) => item.type === 'communities')
+    source.splice(i < 0 ? source.length : i + 1, 0, { type: 'biblia', enabled: true, order: 0, label: '', url: '' })
+  }
+
   const rendered = source
     .map((item: any) => {
       if (item.type === 'custom') {
@@ -54,7 +63,7 @@ function MenuLinks(props: { orgslug: string; primaryColor?: string }) {
       const meta = BUILTIN[item.type]
       if (!meta) return null
       if (!item.enabled) return null
-      if (!isEnabled(meta.feature)) return null // plan/feature gating
+      if (meta.feature && !isEnabled(meta.feature)) return null // plan/feature gating
       return {
         key: item.type,
         label: item.label || t(meta.labelKey),

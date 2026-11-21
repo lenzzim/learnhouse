@@ -6277,5 +6277,29 @@
     "folder_count_one": "{{count}} pasta",
     "item_count": "{{count}} itens",
     "item_count_one": "{{count}} item"
+  },
+  "biblia": {
+    "titulo": "Bíblia",
+    "livro": "Livro",
+    "capitulo": "Capítulo",
+    "capitulo_n": "Capítulo {{n}}",
+    "antigo_testamento": "Antigo Testamento",
+    "novo_testamento": "Novo Testamento",
+    "anterior": "Capítulo anterior",
+    "proximo": "Próximo capítulo",
+    "carregando": "Carregando…",
+    "erro_carregar": "Não foi possível carregar o texto.",
+    "tentar_novamente": "Tentar novamente",
+    "licenca": "Licença CC BY 4.0",
+    "abrir_na_biblia": "Abrir na Bíblia",
+    "fechar": "Fechar",
+    "inserir_versiculo": "Inserir versículo",
+    "referencia": "Referência",
+    "referencia_placeholder": "Ex.: Jo 3:16-18",
+    "referencia_invalida": "Referência não reconhecida.",
+    "informe_versiculo": "Informe também o versículo (ex.: Sl 23:1-6).",
+    "limite_versiculos": "Escolha no máximo {{max}} versículos.",
+    "inserir": "Inserir",
+    "cancelar": "Cancelar"
   }
 }

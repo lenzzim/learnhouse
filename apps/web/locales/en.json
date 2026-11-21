@@ -6277,5 +6277,29 @@
       "signed_in_as": "Signed in as {{email}}",
       "sign_in_to_org": "Sign in to this organization"
     }
+  },
+  "biblia": {
+    "titulo": "Bible",
+    "livro": "Book",
+    "capitulo": "Chapter",
+    "capitulo_n": "Chapter {{n}}",
+    "antigo_testamento": "Old Testament",
+    "novo_testamento": "New Testament",
+    "anterior": "Previous chapter",
+    "proximo": "Next chapter",
+    "carregando": "Loading…",
+    "erro_carregar": "Could not load the text.",
+    "tentar_novamente": "Try again",
+    "licenca": "CC BY 4.0 license",
+    "abrir_na_biblia": "Open in the Bible",
+    "fechar": "Close",
+    "inserir_versiculo": "Insert verse",
+    "referencia": "Reference",
+    "referencia_placeholder": "e.g. Jo 3:16-18",
+    "referencia_invalida": "Reference not recognized.",
+    "informe_versiculo": "Also enter the verse (e.g. Sl 23:1-6).",
+    "limite_versiculos": "Choose at most {{max}} verses.",
+    "inserir": "Insert",
+    "cancelar": "Cancel"
   }
 }
