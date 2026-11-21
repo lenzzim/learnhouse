@@ -11,6 +11,7 @@ import { getLabelIcon } from '@components/Objects/Communities/labelIcons'
 import { parseApiDate } from '@/lib/datas'
 import { formatarReferencia, lerCodigoReferencia, codigoReferencia, type Referencia } from '@/lib/biblia/referencias'
 import { CHAVE_ULTIMO_CAPITULO } from '@/lib/discipulei/nav'
+import { useBibliaIdioma, useNomesLivros } from '@components/Biblia/useBibliaIdioma'
 import { primeiroNome, useDadosNav } from '@components/Discipulei/Navegacao/useDadosNav'
 import { useEscrever } from '@components/Discipulei/Navegacao/EscreverContexto'
 import {
@@ -63,6 +64,9 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
     useDadosNav()
   const { abrirEscrever } = useEscrever()
   const ultimo = useUltimoCapitulo()
+  // nome do livro no idioma da interface (index.json da versão padrão dele)
+  const { versaoPadrao, montado } = useBibliaIdioma()
+  const nomesLivros = useNomesLivros(montado ? versaoPadrao : null)
 
   const [agora, setAgora] = useState<Date | null>(null)
   useEffect(() => setAgora(new Date()), [])
@@ -173,7 +177,7 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
             <TituloSecao id="hoje-lendo">{t('hoje.continue_lendo')}</TituloSecao>
             {ultimo ? (
               <>
-                <p className="mt-2 text-base font-medium text-[var(--text)]">{formatarReferencia(ultimo)}</p>
+                <p className="mt-2 text-base font-medium text-[var(--text)]">{formatarReferencia(ultimo, false, nomesLivros)}</p>
                 <p className="mt-0.5 text-sm text-[var(--text-2)]">{t('hoje.continue_lendo_descricao')}</p>
                 <div className="mt-auto pt-4">
                   <Link

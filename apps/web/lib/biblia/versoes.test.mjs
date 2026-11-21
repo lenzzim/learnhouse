@@ -50,3 +50,16 @@ test('YouVersion: ids conferidos das cinco versões', () => {
   const ara = VERSOES_EXTERNAS.find((v) => v.sigla === 'ARA')
   assert.equal(urlYouVersion({ livroId: 'GEN', capitulo: 1, versoIni: 1 }, ara), 'https://www.bible.com/pt/bible/1608/GEN.1.1.ARA')
 })
+
+test('versão padrão segue o idioma da interface', async () => {
+  const { versaoPadraoDoIdioma, VERSAO_PADRAO_POR_IDIOMA } = await import('./versoes.ts')
+  assert.equal(versaoPadraoDoIdioma('pt'), 'blivre')
+  assert.equal(versaoPadraoDoIdioma('pt-BR'), 'blivre')
+  assert.equal(versaoPadraoDoIdioma('en-US'), 'web')
+  assert.equal(versaoPadraoDoIdioma('es'), 'rv1909')
+  assert.equal(versaoPadraoDoIdioma('fr'), 'blivre')
+  assert.equal(versaoPadraoDoIdioma(undefined), 'blivre')
+  for (const [idioma, id] of Object.entries(VERSAO_PADRAO_POR_IDIOMA)) {
+    assert.equal(versaoPorId(id).idioma, idioma, id)
+  }
+})

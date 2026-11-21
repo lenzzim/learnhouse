@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { codigoReferencia, encontrarReferencias } from '@/lib/biblia/referencias'
 import { hrefLeitor } from '@/lib/biblia/dados'
 import { PopoverVersiculo } from './PopoverVersiculo'
+import { useIdiomaDiscipulei } from '@components/Discipulei/useIdioma'
 import { CLASSE_REF } from './extensaoReferencias'
 
 /**
@@ -24,7 +25,9 @@ const ATRASO_FECHAR = 200
 
 /** Texto puro → nós React com as referências virando links. */
 export function TextoComReferencias({ texto }: { texto: string }) {
-  const achados = encontrarReferencias(texto)
+  // idioma da interface só desempata abreviações como "Jn" (Jonas/João)
+  const idioma = useIdiomaDiscipulei()
+  const achados = encontrarReferencias(texto, { idioma })
   if (!achados.length) return <>{texto}</>
   const partes: React.ReactNode[] = []
   let cursor = 0

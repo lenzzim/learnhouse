@@ -6,7 +6,7 @@
  * O caminho /biblia-dados/ é excluído do proxy de tenancy (ver proxy.ts),
  * então tudo é servido direto do /public.
  */
-import { intervaloVersos, livroPorId, type Referencia } from './referencias'
+import { intervaloVersos, livroPorId, type NomesLivros, type Referencia } from './referencias'
 import { VERSAO_PADRAO, versaoPorId } from './versoes'
 import { caminhoLexico, type CapituloOriginal, type Verbete } from './original'
 
@@ -51,6 +51,22 @@ export function carregarLivro(livroId: string, versao: string = VERSAO_PADRAO): 
   return buscarJson<LivroDados>(`${RAIZ}/${versao}/${livroId}.json`)
 }
 
+interface IndiceVersao {
+  livros: { id: string; nome: string; abrev: string }[]
+}
+
+/**
+ * Nomes dos livros na versão (do index.json dela, já localizados: WEB/KJV em
+ * inglês, RV1909/VBL em espanhol). Para o seletor de livro e os títulos.
+ */
+export async function carregarNomesLivros(versao: string = VERSAO_PADRAO): Promise<NomesLivros> {
+  if (!versaoPorId(versao)) throw new Error(`versão desconhecida: ${versao}`)
+  const indice = await buscarJson<IndiceVersao>(`${RAIZ}/${versao}/index.json`)
+  const nomes: NomesLivros = {}
+  for (const l of indice.livros) nomes[l.id] = { nome: l.nome, abrev: l.abrev }
+  return nomes
+}
+
 /** Versículos cobertos pela referência (capítulo inteiro se não houver versículo); vazios ficam de fora. */
 export async function versiculosDaReferencia(ref: Referencia, versao: string = VERSAO_PADRAO): Promise<Versiculo[]> {
   const livro = await carregarLivro(ref.livroId, versao)
@@ -80,9 +96,13 @@ export async function carregarVerbete(strong: string): Promise<Verbete | null> {
   return bloco[strong] ?? null
 }
 
-/** URL relativa do leitor para uma referência (mesmo host da org). */
-export function hrefLeitor(codigo: string, versao?: string): string {
+/**
+ * URL relativa do leitor para uma referência (mesmo host da org). Sem `v`, o
+ * leitor abre na versão padrão do idioma de quem lê; `padrao` é essa versão,
+ * para não repetir na URL.
+ */
+export function hrefLeitor(codigo: string, versao?: string, padrao: string = VERSAO_PADRAO): string {
   let href = `/biblia?ref=${encodeURIComponent(codigo)}`
-  if (versao && versao !== VERSAO_PADRAO && versaoPorId(versao)) href += `&v=${versao}`
+  if (versao && versao !== padrao && versaoPorId(versao)) href += `&v=${versao}`
   return href
 }

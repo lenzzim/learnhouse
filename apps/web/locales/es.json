@@ -6415,6 +6415,15 @@
     "so_tr": "Solo en el Textus Receptus (base de la KJV)",
     "definicao_ingles": "Definición (en inglés)",
     "credito_stepbible": "Datos de STEPBible.org (Tyndale House, Cambridge), CC BY 4.0",
+    "creditos": {
+      "blivre": "Bíblia Livre (BLIVRE), Copyright © Diego Santos, Mario Sérgio y Marco Teles, http://sites.google.com/site/biblialivre/ — Licencia Creative Commons Atribución 4.0 Brasil.",
+      "onbv": "Biblica® Open Nova Bíblia Viva 2007, Copyright © 2007, 2010 Biblica, Inc. Licencia Creative Commons Atribución-CompartirIgual 4.0.",
+      "bpm": "Bíblia Portuguesa Mundial. Dominio público (traducción todavía en revisión por sus autores).",
+      "kjv": "King James Version (Authorized Version), texto estandarizado de 1769. Dominio público fuera del Reino Unido.",
+      "web": "World English Bible. Dominio público; \"World English Bible\" es marca registrada de eBible.org.",
+      "rv1909": "Santa Biblia, Reina-Valera 1909. Dominio público.",
+      "vbl": "Versión Biblia Libre, Copyright © 2018-2020 Jonathan Gallagher y Shelly Barrios de Avila. Licencia Creative Commons Atribución-CompartirIgual 4.0."
+    },
     "fechar": "Cerrar"
   },
   "nav": {
