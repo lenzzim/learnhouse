@@ -14,8 +14,10 @@ import {
   intervaloVersos,
   lerCodigoReferencia,
 } from '@/lib/biblia/referencias'
-import { carregarOriginal, carregarVerbete, hrefLeitor, versiculosDaReferencia, type Versiculo } from '@/lib/biblia/dados'
-import { VERSAO_PADRAO, ehLicenciada, versaoPorId } from '@/lib/biblia/versoes'
+import { carregarOriginal, carregarVerbete, hrefLeitor, type Versiculo } from '@/lib/biblia/dados'
+import { VERSAO_PADRAO, ehLicenciada, versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
+import { getVerses, rotuloVerso, type Capitulo } from '@/lib/biblia/fontes'
+import { mensagemErroBiblia, useAcessoBiblia, useFums } from '@components/Biblia/useFonteBiblia'
 import {
   CREDITO_STEPBIBLE,
   URL_STEPBIBLE,
@@ -34,11 +36,19 @@ const CHAVE_VERSAO = 'discipulei_caderno_versao'
 const CHAVE_COMPARAR = 'discipulei_caderno_comparar'
 
 /**
- * O painel lê só os arquivos estáticos das versões abertas; licenciadas (NVI etc.)
- * ficam para o leitor. Devolve o id se for uma versão aberta conhecida.
+ * Versão conhecida (aberta ou licenciada). As licenciadas (NVI, ARA...) vêm do
+ * proxy da API com o token da sessão, como no leitor; o texto só é exibido,
+ * nunca gravado na nota, e o crédito fica sempre visível.
  */
-function versaoAberta(id: string | null | undefined): string | null {
-  return id && versaoPorId(id) && !ehLicenciada(id) ? id : null
+function versaoConhecida(id: string | null | undefined): string | null {
+  return id && versaoPorId(id) ? id : null
+}
+
+/** Crédito exibido sob o texto: licenciada usa o copyright que a API entrega. */
+function credito(info: VersaoInfo | undefined, cap: Capitulo | null | undefined): string {
+  if (!info) return ''
+  if (info.fonte === 'licenciada') return cap?.copyrightCurto || info.credito || info.sigla
+  return `${info.sigla} · ${info.licenca}`
 }
 
 function lerPreferencia(chave: string, padrao: string): string {
@@ -98,7 +108,10 @@ function CampoReferencia({ inicial, aoIr }: { inicial: string; aoIr: (codigo: st
   )
 }
 
-type Estado = { tipo: 'carregando' } | { tipo: 'erro' } | { tipo: 'pronto'; versos: Versiculo[]; comparar: Versiculo[] }
+type Estado =
+  | { tipo: 'carregando' }
+  | { tipo: 'erro'; erro?: unknown }
+  | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo; comparar: Versiculo[]; capCmp: Capitulo | null }
 
 function AbaBiblia() {
   const { t } = useTranslation()
@@ -107,30 +120,44 @@ function AbaBiblia() {
   const [versao, setVersao] = useState(VERSAO_PADRAO)
   const [comparar, setComparar] = useState('')
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
+  const acesso = useAcessoBiblia()
 
   useEffect(() => {
-    setVersao(versaoAberta(lerPreferencia(CHAVE_VERSAO, VERSAO_PADRAO)) ?? VERSAO_PADRAO)
-    setComparar(versaoAberta(lerPreferencia(CHAVE_COMPARAR, '')) ?? '')
+    setVersao(versaoConhecida(lerPreferencia(CHAVE_VERSAO, VERSAO_PADRAO)) ?? VERSAO_PADRAO)
+    setComparar(versaoConhecida(lerPreferencia(CHAVE_COMPARAR, '')) ?? '')
   }, [])
 
-  // Referência clicada com versão citada ("Jo 3:16 KJV"): mostra nessa versão, se for aberta.
+  // Referência clicada com versão citada ("Jo 3:16 NVI"): mostra nessa versão.
   useEffect(() => {
-    const pedida = versaoAberta(c.versaoPedida?.id)
+    const pedida = versaoConhecida(c.versaoPedida?.id)
     if (pedida) setVersao(pedida)
   }, [c.versaoPedida])
 
+  const precisaSessao = ehLicenciada(versao) || (!!comparar && ehLicenciada(comparar))
   useEffect(() => {
     if (!ref) return
+    // licenciada: espera a sessão para mandar o token (senão o proxy responde 401)
+    if (precisaSessao && acesso.carregandoSessao) {
+      setEstado({ tipo: 'carregando' })
+      return
+    }
     let vivo = true
     setEstado({ tipo: 'carregando' })
-    Promise.all([versiculosDaReferencia(ref, versao), comparar ? versiculosDaReferencia(ref, comparar) : Promise.resolve([])])
-      .then(([versos, cmp]) => vivo && setEstado({ tipo: 'pronto', versos, comparar: cmp }))
-      .catch(() => vivo && setEstado({ tipo: 'erro' }))
+    const principal = getVerses(versao, ref, acesso)
+    // a comparação falhar (limite, sem login) não derruba o texto principal
+    const extra = comparar ? getVerses(comparar, ref, acesso).catch(() => null) : Promise.resolve(null)
+    Promise.all([principal, extra])
+      .then(([p, cmp]) =>
+        vivo &&
+        setEstado({ tipo: 'pronto', versos: p.versos, capitulo: p.capitulo, comparar: cmp?.versos ?? [], capCmp: cmp?.capitulo ?? null })
+      )
+      .catch((erro) => vivo && setEstado({ tipo: 'erro', erro }))
     return () => {
       vivo = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [c.passagem, versao, comparar])
+  }, [c.passagem, versao, comparar, acesso.token, acesso.carregandoSessao])
+  useFums(estado.tipo === 'pronto' ? [estado.capitulo.fums, estado.capCmp?.fums] : [])
 
   const info = versaoPorId(versao)
   const infoCmp = comparar ? versaoPorId(comparar) : undefined
@@ -155,7 +182,6 @@ function AbaBiblia() {
           <div className="grid grid-cols-2 gap-1.5">
             <SeletorVersao
               curto
-              semLicenciadas
               rotulo={t('biblia.versao')}
               valor={versao}
               onChange={(v) => {
@@ -166,7 +192,6 @@ function AbaBiblia() {
             />
             <SeletorVersao
               curto
-              semLicenciadas
               rotulo={t('caderno.comparar_com')}
               opcaoVazia={t('caderno.comparar_com')}
               excluir={versao}
@@ -193,7 +218,7 @@ function AbaBiblia() {
           </div>
 
           {estado.tipo === 'carregando' && <p className="text-sm text-[var(--text-3)]">{t('biblia.carregando')}</p>}
-          {estado.tipo === 'erro' && <p className="text-sm text-[var(--text-2)]">{t('biblia.erro_carregar')}</p>}
+          {estado.tipo === 'erro' && <p className="text-sm text-[var(--text-2)]">{mensagemErroBiblia(estado.erro, t, info?.sigla)}</p>}
           {estado.tipo === 'pronto' && (
             <ol className="flex flex-col gap-2.5" lang={info?.idioma ?? 'pt'}>
               {estado.versos.map((v) => (
@@ -205,7 +230,7 @@ function AbaBiblia() {
                     aria-label={t('caderno.estudar_verso', { n: v.numero })}
                     className={`mt-1 inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded px-1 font-sans text-[0.7rem] tabular-nums text-[var(--text-3)] hover:bg-[var(--surface)] hover:text-[var(--text)] ${FOCO}`}
                   >
-                    {v.numero}
+                    {rotuloVerso(estado.capitulo, v.numero)}
                   </button>
                   <div className="min-w-0">
                     <p className="text-[1rem] leading-relaxed text-[var(--text)]" style={SERIF}>{v.texto}</p>
@@ -220,10 +245,10 @@ function AbaBiblia() {
               ))}
             </ol>
           )}
-          <div className="flex items-center justify-between gap-2 border-t border-[var(--line)] pt-2.5 text-xs text-[var(--text-3)]">
-            <span className="min-w-0 truncate">
-              {info?.sigla} · {info?.licenca}
-              {infoCmp ? ` | ${infoCmp.sigla} · ${infoCmp.licenca}` : ''}
+          <div className="flex items-start justify-between gap-2 border-t border-[var(--line)] pt-2.5 text-xs text-[var(--text-3)]">
+            <span className="min-w-0 break-words">
+              {credito(info, estado.tipo === 'pronto' ? estado.capitulo : null)}
+              {infoCmp ? ` | ${credito(infoCmp, estado.tipo === 'pronto' ? estado.capCmp : null)}` : ''}
             </span>
             <Link href={hrefLeitor(c.passagem as string, versao)} className="shrink-0 underline decoration-[var(--link-underline)] underline-offset-2 hover:text-[var(--text-2)]">
               {t('biblia.abrir_na_biblia')}

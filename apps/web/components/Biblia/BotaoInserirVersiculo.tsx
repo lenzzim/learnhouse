@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { Editor } from '@tiptap/react'
 import { useTranslation } from 'react-i18next'
 import { BookOpen } from 'lucide-react'
@@ -18,8 +19,12 @@ import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
  * - Versões licenciadas (API.Bible, YouVersion): SÓ a linha "— João 3:16-18 (ARA)". O
  *   texto não é gravado no post (termos da licença); quem lê vê o texto ao
  *   vivo pelo widget de citacaoViva.ts, com o copyright.
- * O painel fica dentro da árvore do editor (não em portal) para funcionar
- * dentro do modal (foco preso).
+ * Posição do painel:
+ * - dentro de um modal (editor de discussões): fica na árvore do editor, logo
+ *   abaixo do botão, para o foco preso do modal continuar valendo;
+ * - fora de modal (Caderno): vai para um portal com posição fixa, porque a
+ *   barra de formatação rola de lado (overflow) e recortava o painel no
+ *   celular. A altura respeita o teclado aberto (visualViewport).
  */
 
 const MAX_VERSOS = 30
@@ -66,7 +71,10 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
   const licenciada = info.fonte === 'licenciada'
   const acesso = useAcessoBiblia()
   const [deslocamento, setDeslocamento] = useState(0)
+  const [fixo, setFixo] = useState<{ top: number; left: number; largura: number; alturaMax: number } | null>(null)
+  const [emModal, setEmModal] = useState(true)
   const raizRef = useRef<HTMLDivElement | null>(null)
+  const painelRef = useRef<HTMLDivElement | null>(null)
   const botaoRef = useRef<HTMLButtonElement | null>(null)
   const idPainel = useId()
   const idEntrada = useId()
@@ -100,18 +108,54 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
 
   // mantém o painel dentro da viewport (a barra pode estar perto da borda)
   useLayoutEffect(() => {
-    if (!aberto || !botaoRef.current) return
-    const r = botaoRef.current.getBoundingClientRect()
-    const largura = Math.min(LARGURA, window.innerWidth - 32)
-    const excesso = r.left + largura - (window.innerWidth - 16)
-    setDeslocamento(excesso > 0 ? -Math.min(excesso, r.left - 16) : 0)
+    if (!aberto || !botaoRef.current) {
+      setFixo(null)
+      return
+    }
+    const modal = !!raizRef.current?.parentElement?.closest('[role="dialog"],[aria-modal="true"]')
+    setEmModal(modal)
+    const calcular = () => {
+      const botao = botaoRef.current
+      if (!botao) return
+      const r = botao.getBoundingClientRect()
+      const vw = window.innerWidth
+      const largura = Math.min(LARGURA, vw - 32)
+      if (modal) {
+        const excesso = r.left + largura - (vw - 16)
+        setDeslocamento(excesso > 0 ? -Math.min(excesso, r.left - 16) : 0)
+        return
+      }
+      const vv = window.visualViewport
+      const baseVisivel = vv ? vv.offsetTop + vv.height : window.innerHeight
+      const top = Math.max(8, r.bottom + 8)
+      setFixo({
+        top,
+        left: Math.min(Math.max(16, r.left), vw - 16 - largura),
+        largura,
+        alturaMax: Math.max(180, baseVisivel - top - 12),
+      })
+    }
+    calcular()
+    if (modal) return
+    const vv = window.visualViewport
+    window.addEventListener('resize', calcular)
+    window.addEventListener('scroll', calcular, true)
+    vv?.addEventListener('resize', calcular)
+    vv?.addEventListener('scroll', calcular)
+    return () => {
+      window.removeEventListener('resize', calcular)
+      window.removeEventListener('scroll', calcular, true)
+      vv?.removeEventListener('resize', calcular)
+      vv?.removeEventListener('scroll', calcular)
+    }
   }, [aberto])
 
-  // clique fora fecha
+  // clique fora fecha (o painel pode estar num portal, fora da raiz)
   useEffect(() => {
     if (!aberto) return
     const onFora = (e: PointerEvent) => {
-      if (!raizRef.current?.contains(e.target as Node)) setAberto(false)
+      const alvo = e.target as Node
+      if (!raizRef.current?.contains(alvo) && !painelRef.current?.contains(alvo)) setAberto(false)
     }
     document.addEventListener('pointerdown', onFora)
     return () => document.removeEventListener('pointerdown', onFora)
@@ -146,6 +190,10 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
     setAberto(false)
   }
 
+  // fora de modal o painel sai da barra (portal), para o overflow dela não recortá-lo
+  const envolver = (no: React.ReactElement) =>
+    !emModal && fixo && typeof document !== 'undefined' ? createPortal(no, document.body) : no
+
   return (
     <div ref={raizRef} className="relative">
       <button
@@ -164,8 +212,9 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
         <BookOpen size={16} />
       </button>
 
-      {aberto && (
+      {aberto && (emModal || fixo) && envolver(
         <div
+          ref={painelRef}
           id={idPainel}
           role="dialog"
           aria-label={t('biblia.inserir_versiculo')}
@@ -176,8 +225,14 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
               fechar()
             }
           }}
-          style={{ left: deslocamento, width: `min(${LARGURA}px, calc(100vw - 32px))`, boxShadow: 'var(--sombra-md)' }}
-          className="absolute top-full z-50 mt-2 rounded-xl border border-[var(--line-strong)] bg-[var(--panel)] p-3 text-[var(--text)]"
+          style={
+            !emModal && fixo
+              ? { position: 'fixed', top: fixo.top, left: fixo.left, width: fixo.largura, maxHeight: fixo.alturaMax, boxShadow: 'var(--sombra-md)' }
+              : { left: deslocamento, width: `min(${LARGURA}px, calc(100vw - 32px))`, boxShadow: 'var(--sombra-md)' }
+          }
+          className={`${
+            !emModal && fixo ? 'z-[70] overflow-y-auto overscroll-contain' : 'absolute top-full z-50 mt-2'
+          } rounded-xl border border-[var(--line-strong)] bg-[var(--panel)] p-3 text-[var(--text)]`}
         >
           <div className="mb-1 flex items-center justify-between gap-2">
             <label htmlFor={idEntrada} className="block text-xs font-medium text-[var(--text-2)]">
