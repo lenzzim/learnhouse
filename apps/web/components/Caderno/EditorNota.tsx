@@ -64,6 +64,8 @@ import { BOTAO_SECUNDARIO, CAMPO, FOCO, ICONE_PEQUENO, SERIF } from './estilos'
 type Status = 'salvo' | 'salvando' | 'pendente' | 'offline' | 'erro'
 
 const ATRASO_SALVAR = 1500
+/** JSON que o TipTap produz para um documento vazio (um parágrafo vazio). */
+const DOC_VAZIO_JSON = '{"type":"doc","content":[{"type":"paragraph"}]}'
 
 /** Referências do texto para o servidor (o parser robusto é o do cliente). */
 function refsDoTexto(texto: string): RefBiblica[] {
@@ -154,8 +156,12 @@ export function EditorNota({
   const vivo = useRef({
     titulo: notaInicial.title,
     uuid: notaInicial.note_uuid,
-    /** Documento (JSON) carregado ou último salvo: só mudança real em relação a ele agenda salvamento. */
-    ultimoJson: null as string | null,
+    /**
+     * Documento (JSON) salvo no servidor: só mudança real em relação a ele agenda
+     * salvamento. Começa com o content_json guardado (o editor produz exatamente a
+     * mesma string) ou com o documento vazio canônico do TipTap.
+     */
+    ultimoJson: notaInicial.content_json?.trim() ? notaInicial.content_json : DOC_VAZIO_JSON,
     pendente: false,
     salvando: false,
     timer: 0 as any,
@@ -359,12 +365,10 @@ export function EditorNota({
         return true
       },
     },
-    onCreate: ({ editor: ed }) => {
-      vivo.current.ultimoJson = JSON.stringify(ed.getJSON())
-    },
-    // O editor dispara uma transação ao montar sem mudar o conteúdo: agendar
-    // nela re-salvava toda nota só de abrir (updated_at mudava, a lista
-    // reordenava) e criava o TCD do dia só de visitar. Só mudança real agenda.
+    // O editor dispara uma transação ao montar (antes até do evento create) sem
+    // mudar o conteúdo: agendar nela re-salvava toda nota só de abrir
+    // (updated_at mudava, a lista reordenava) e criava o TCD do dia só de
+    // visitar. Só mudança real em relação ao salvo agenda.
     onUpdate: ({ editor: ed }) => {
       if (JSON.stringify(ed.getJSON()) === vivo.current.ultimoJson) return
       agendar()
