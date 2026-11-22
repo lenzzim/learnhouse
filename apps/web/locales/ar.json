@@ -6419,6 +6419,18 @@
       "rv1909": "Santa Biblia, Reina-Valera 1909. Public domain.",
       "vbl": "Versión Biblia Libre, Copyright © 2018-2020 Jonathan Gallagher and Shelly Barrios de Avila. Creative Commons Attribution-ShareAlike 4.0 license."
     },
+    "grupo_licenciadas": "Licensed",
+    "grupo_licenciadas_idioma": "Licensed · {{idioma}}",
+    "nota_licenciadas": "Licensed version: signed-in members only. The text is loaded on demand and is not stored in the app.",
+    "licenciada_entrar": "Sign in to read the {{sigla}}.",
+    "licenciada_indisponivel": "The {{sigla}} is not available right now.",
+    "licenciada_limite": "Too many readings right now. Please try again in a moment.",
+    "entrar": "Sign in",
+    "fornecido_api_bible": "Text provided by API.Bible.",
+    "fornecido_youversion": "Text provided by YouVersion.",
+    "verso_ausente": "Verse not present in this version",
+    "verso_incluido": "(in v. {{n}})",
+    "nota_citacao_licenciada": "Licensed version: the post stores only the reference and version; readers see the text live.",
     "fechar": "Close"
   },
   "mfa": {

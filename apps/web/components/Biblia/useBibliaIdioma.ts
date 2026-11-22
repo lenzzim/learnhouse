@@ -22,10 +22,22 @@ export function useBibliaIdioma(): { idioma: IdiomaReferencia; versaoPadrao: str
 }
 
 /**
+ * Versão de onde vêm os nomes dos livros: a própria, se aberta; se licenciada
+ * (sem index.json estático), a aberta padrão do idioma dela (ARA -> BLIVRE,
+ * NIV -> WEB).
+ */
+export function versaoDosNomes(versao: string | null | undefined): string | null {
+  const info = versaoPorId(versao)
+  if (!info) return null
+  return info.fonte === 'licenciada' ? versaoPadraoDoIdioma(info.idioma) : info.id
+}
+
+/**
  * Nomes dos livros na versão (index.json dela). null até o primeiro carregar
  * ou se falhar — quem usa cai nos nomes em português de LIVROS.
  */
-export function useNomesLivros(versao: string | null | undefined): NomesLivros | null {
+export function useNomesLivros(versaoPedida: string | null | undefined): NomesLivros | null {
+  const versao = versaoDosNomes(versaoPedida)
   const [nomes, setNomes] = useState<{ versao: string; nomes: NomesLivros } | null>(null)
   useEffect(() => {
     if (!versao || !versaoPorId(versao)) return

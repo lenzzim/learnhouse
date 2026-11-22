@@ -7,8 +7,9 @@ import { VERSOES_EXTERNAS, urlYouVersion } from '@/lib/biblia/versoes'
 
 /**
  * "Ler em outra tradução": links para a mesma passagem na YouVersion
- * (NVI, ARA, ARC, NTLH, NAA). Essas versões são protegidas e NÃO são
- * embutidas aqui — só o link, em nova aba.
+ * (hoje só a NAA). Essas versões são protegidas, sem licença aqui, e NÃO são
+ * embutidas — só o link, em nova aba. ARA, ARC e NTLH (API.Bible) e a NVI
+ * (YouVersion Platform) agora são lidas no próprio app.
  * `flutuante`: a lista abre sobre o conteúdo (leitor); senão empurra para
  * baixo (popover, onde não há espaço para outra camada).
  */

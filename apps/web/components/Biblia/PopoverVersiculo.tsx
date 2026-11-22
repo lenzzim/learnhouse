@@ -3,9 +3,11 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { formatarReferencia, lerCodigoReferencia } from '@/lib/biblia/referencias'
-import { hrefLeitor, versiculosDaReferencia, type Versiculo } from '@/lib/biblia/dados'
+import { hrefLeitor, type Versiculo } from '@/lib/biblia/dados'
 import { versaoPadraoDoIdioma, versaoPorId } from '@/lib/biblia/versoes'
+import { getVerses, rotuloVerso, type Capitulo } from '@/lib/biblia/fontes'
 import { idiomaDiscipulei } from '@/lib/discipulei/nav'
+import { mensagemErroBiblia, useAcessoBiblia, useFums } from './useFonteBiblia'
 import { useNomesLivros } from './useBibliaIdioma'
 import { Z_INDEX } from '@/lib/z-index'
 import { SeletorVersao } from './SeletorVersao'
@@ -25,42 +27,50 @@ interface Props {
   onMouseEnter: () => void
   onMouseLeave: () => void
   onNavegar: (href: string, e: React.MouseEvent<HTMLAnchorElement>) => void
+  /** versão citada no texto ("— Jo 3:16 (ARA)"); senão BLIVRE */
+  versaoInicial?: string
 }
 
-type Estado = { tipo: 'carregando' } | { tipo: 'erro' } | { tipo: 'pronto'; versos: Versiculo[] }
+type Estado = { tipo: 'carregando' } | { tipo: 'erro'; erro?: unknown } | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo }
 
 /**
  * Cartão flutuante com o texto do versículo. Renderizado num portal com
  * position: fixed — não empurra nada na página (sem layout shift). Quem abre,
  * fecha e trata Escape é o host (ReferenciasNoTexto).
  */
-export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter, onMouseLeave, onNavegar }: Props) {
+export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter, onMouseLeave, onNavegar, versaoInicial }: Props) {
   const { t, i18n } = useTranslation()
   const ref = lerCodigoReferencia(codigo)
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
-  // começa na versão do idioma da interface (pt BLIVRE, en WEB, es RV1909);
-  // o seletor troca só neste popover. O popover só existe no cliente, depois
-  // de uma interação, então ler o idioma direto do i18next não quebra a
-  // hidratação.
+  // começa na versão citada no texto ("— Jo 3:16 (ARA)") ou, sem citação, na
+  // versão do idioma da interface (pt BLIVRE, en WEB, es RV1909); o seletor
+  // troca só neste popover. O popover só existe no cliente, depois de uma
+  // interação, então ler o idioma direto do i18next não quebra a hidratação.
   const padrao = versaoPadraoDoIdioma(idiomaDiscipulei(i18n.language))
-  const [escolhida, setVersao] = useState<string | null>(null)
+  const [escolhida, setVersao] = useState<string | null>(versaoPorId(versaoInicial) ? (versaoInicial as string) : null)
   const versao = escolhida ?? padrao
   const nomes = useNomesLivros(versao)
+  const acesso = useAcessoBiblia()
+  const info = versaoPorId(versao)
+  const esperaSessao = info?.fonte === 'licenciada' && acesso.carregandoSessao
   const [pos, setPos] = useState<{ top: number; left: number; largura: number } | null>(null)
   const localRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const r = lerCodigoReferencia(codigo)
-    if (!r) return
+    if (!r || esperaSessao) return
     let vivo = true
     setEstado({ tipo: 'carregando' })
-    versiculosDaReferencia(r, versao)
-      .then((versos) => vivo && setEstado({ tipo: 'pronto', versos }))
-      .catch(() => vivo && setEstado({ tipo: 'erro' }))
+    getVerses(versao, r, acesso)
+      .then(({ versos, capitulo }) => vivo && setEstado({ tipo: 'pronto', versos, capitulo }))
+      .catch((erro) => vivo && setEstado({ tipo: 'erro', erro }))
     return () => {
       vivo = false
     }
-  }, [codigo, versao])
+    // o token entra pela chave `acesso.logado`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [codigo, versao, esperaSessao, acesso.logado])
+  useFums(estado.tipo === 'pronto' ? [estado.capitulo.fums] : [])
 
   // posiciona abaixo do link (ou acima, se não couber), dentro da viewport
   useLayoutEffect(() => {
@@ -87,7 +97,7 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
   if (!ref || typeof document === 'undefined') return null
   const titulo = formatarReferencia(ref, false, nomes)
   const href = hrefLeitor(codigo, versao, padrao)
-  const info = versaoPorId(versao)
+  const capitulo = estado.tipo === 'pronto' ? estado.capitulo : null
   const versos = estado.tipo === 'pronto' ? estado.versos : []
   const visiveis = versos.slice(0, MAX_VERSOS)
   const mostrarNumeros = versos.length > 1
@@ -130,19 +140,24 @@ export function PopoverVersiculo({ codigo, ancora, id, popoverRef, onMouseEnter,
         style={{ fontFamily: "var(--font-serif), Georgia, 'Times New Roman', serif" }}
       >
         {estado.tipo === 'carregando' && <p className="text-sm text-[var(--text-3)]">{t('biblia.carregando')}</p>}
-        {estado.tipo === 'erro' && <p className="text-sm text-[var(--text-2)]">{t('biblia.erro_carregar')}</p>}
+        {estado.tipo === 'erro' && (
+          <p className="text-sm text-[var(--text-2)]">{mensagemErroBiblia(estado.erro, t, info?.sigla)}</p>
+        )}
         {estado.tipo === 'pronto' && (
           <p>
             {visiveis.map((v) => (
               <span key={v.numero}>
                 {mostrarNumeros && (
-                  <sup className="me-0.5 font-sans text-xs text-[var(--text-3)]">{v.numero}</sup>
+                  <sup className="me-0.5 font-sans text-xs text-[var(--text-3)]">{rotuloVerso(capitulo, v.numero)}</sup>
                 )}
                 {v.texto}{' '}
               </span>
             ))}
             {versos.length > visiveis.length && <span className="text-[var(--text-3)]">…</span>}
           </p>
+        )}
+        {estado.tipo === 'pronto' && info?.fonte === 'licenciada' && capitulo?.copyrightCurto && (
+          <p className="mt-2 font-sans text-[0.7rem] leading-snug text-[var(--text-3)]">{capitulo.copyrightCurto}</p>
         )}
       </div>
       <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-2.5 text-xs">
