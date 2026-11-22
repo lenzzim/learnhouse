@@ -14,6 +14,7 @@ import { CHAVE_ULTIMO_CAPITULO } from '@/lib/discipulei/nav'
 import { useBibliaIdioma, useNomesLivros } from '@components/Biblia/useBibliaIdioma'
 import { primeiroNome, useDadosNav } from '@components/Discipulei/Navegacao/useDadosNav'
 import { useEscrever } from '@components/Discipulei/Navegacao/EscreverContexto'
+import { CartaoDesafio } from '@components/Discipulei/Aprender/CartaoDesafio'
 import {
   BOTAO_PRIMARIO,
   BOTAO_SECUNDARIO,
@@ -242,6 +243,9 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
           </section>
         </div>
       )}
+
+      {/* Desafio atual: apoio discreto, some quando não há desafio aberto. */}
+      <CartaoDesafio orgslug={orgslug} />
 
       <section aria-labelledby="hoje-comunidades" className="mt-10">
         <div className="flex items-baseline justify-between gap-3">

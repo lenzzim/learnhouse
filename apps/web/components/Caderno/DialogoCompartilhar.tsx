@@ -211,8 +211,11 @@ export function DialogoCompartilhar({
             <label htmlFor="comp-comunidade" className="text-sm text-[var(--text-2)]">{t('caderno.escolha_comunidade')}</label>
             <select id="comp-comunidade" value={comunidade} onChange={(e) => { setComunidade(e.target.value); setConfirmou(false) }} className={`${CAMPO} h-11`}>
               <option value="">{t('caderno.escolha')}</option>
+              {/* A comunidade do desafio só vem na lista para quem está inscrito (a API filtra). */}
               {comunidades.map((x) => (
-                <option key={x.community_uuid} value={x.community_uuid}>{x.name}</option>
+                <option key={x.community_uuid} value={x.community_uuid}>
+                  {x.course_id ? `${x.name} · ${t('aprender.selo_desafio')}` : x.name}
+                </option>
               ))}
             </select>
             {comunidade && (

@@ -70,6 +70,7 @@ class ResourceAccessChecker:
         self._public_published_cache: dict[str, tuple[bool, bool]] = {}
         self._usergroup_cache: dict[tuple[str, bool], bool] = {}
         self._parent_uuid_cache: dict[str, Optional[str]] = {}
+        self._enrollment_cache: dict[tuple[int, int], bool] = {}
 
     async def check_access(
         self,
@@ -158,7 +159,12 @@ class ResourceAccessChecker:
 
         # Route to appropriate check based on action
         if action == AccessAction.READ:
-            return await self._check_read_access(resource_uuid, context, config)
+            decision = await self._check_read_access(resource_uuid, context, config)
+            if decision.allowed and config.resource_type == "communities":
+                # Discussions delegate to the parent community above, so this
+                # also covers reading, posting, comments, votes and reactions.
+                decision = await self._apply_course_enrollment_gate(resource_uuid, config, decision)
+            return decision
         else:
             return await self._check_write_access(resource_uuid, action, config, require_ownership)
 
@@ -825,6 +831,63 @@ class ResourceAccessChecker:
         self._admin_cache[resource_uuid] = result
         return result
 
+    async def _apply_course_enrollment_gate(
+        self,
+        resource_uuid: str,
+        config: ResourceConfig,
+        decision: AccessDecision,
+    ) -> AccessDecision:
+        """Comunidade de desafio (Discipulei, decisão de 22/11/2026).
+
+        Uma comunidade ligada a um curso (``Community.course_id``) é o espaço
+        do desafio: além das regras normais (pública/grupo/membros), só lê e
+        publica quem está inscrito no curso (tem ``TrailRun``, criado pelo
+        "começar curso" nativo) ou administra a comunidade (admin/mantenedor
+        da org, ou papel com ``update`` em comunidades). Nem ``public=True``
+        abre a comunidade para quem não se inscreveu, nem para visitantes.
+
+        Mantenha em sincronia com ``community_read_clause_for_user`` (SQL).
+        """
+        community = await self._get_resource(resource_uuid, config)
+        course_id = getattr(community, "course_id", None) if community else None
+        if not course_id or decision.via_admin:
+            return decision
+
+        user_id = self._get_user_id()
+        if user_id and await self.can_bypass_course_enrollment(resource_uuid):
+            return decision
+        if user_id and await self._is_enrolled_in_course(course_id, user_id):
+            return decision
+
+        return AccessDecision(
+            allowed=False,
+            reason="Only participants enrolled in the linked course can access this community",
+            resource_uuid=resource_uuid,
+            user_id=user_id,
+            action="read",
+        )
+
+    async def can_bypass_course_enrollment(self, community_uuid: str) -> bool:
+        """Admin/mantenedor da org ou papel com ``update`` na comunidade."""
+        user_id = self._get_user_id()
+        if not user_id:
+            return False
+        if await self._is_admin_or_maintainer(community_uuid):
+            return True
+        return await authorization_verify_based_on_roles(
+            self.request, user_id, "update", community_uuid, self.db_session
+        )
+
+    async def _is_enrolled_in_course(self, course_id: int, user_id: int) -> bool:
+        """O usuário "começou" o curso (existe um TrailRun dele para o curso)?"""
+        cache_key = (course_id, user_id)
+        cached = self._enrollment_cache.get(cache_key)
+        if cached is not None:
+            return cached
+        result = await is_enrolled_in_course(self.db_session, course_id, user_id)
+        self._enrollment_cache[cache_key] = result
+        return result
+
     async def _check_usergroup_membership(self, resource_uuid: str, is_public: bool = False) -> bool:
         """Check if user has access via UserGroup membership."""
         user_id = self._get_user_id()
@@ -1012,6 +1075,47 @@ def api_token_has_right(
 #
 # Communities have no authorship (Rule 2) and Rule 4 (role permission) only ever
 # applies to public resources, which Rule 1 already admits.
+#
+# Comunidade de desafio (Discipulei): quando ``Community.course_id`` está
+# preenchido, o resultado acima ainda precisa de inscrição no curso
+# (``TrailRun``), salvo admin/mantenedor — espelho de
+# ``ResourceAccessChecker._apply_course_enrollment_gate``. Visitantes nunca
+# veem comunidades de desafio.
+
+
+async def is_enrolled_in_course(db_session: AsyncSession, course_id: int, user_id: int) -> bool:
+    """Inscrição = o "começar curso" nativo, que cria um ``TrailRun``."""
+    from src.db.trail_runs import TrailRun
+
+    if not course_id or not user_id:
+        return False
+    run_id = (await db_session.execute(
+        select(TrailRun.id).where(
+            TrailRun.course_id == course_id,
+            TrailRun.user_id == user_id,
+        ).limit(1)
+    )).scalars().first()
+    return run_id is not None
+
+
+def course_enrollment_clause(user_id: int):
+    """SQL sobre ``Community``: sem curso ligado OU o usuário está inscrito."""
+    from sqlalchemy import or_
+    from src.db.communities.communities import Community
+    from src.db.trail_runs import TrailRun
+
+    no_course = Community.course_id.is_(None)  # type: ignore[union-attr]
+    if not user_id:
+        return no_course
+    enrolled = (
+        select(TrailRun.id)
+        .where(
+            TrailRun.course_id == Community.course_id,
+            TrailRun.user_id == user_id,
+        )
+        .exists()
+    )
+    return or_(no_course, enrolled)
 
 
 def community_read_clause_for_user(user_id: int, org_id: int, is_org_member: bool):
@@ -1025,7 +1129,7 @@ def community_read_clause_for_user(user_id: int, org_id: int, is_org_member: boo
 
     is_public = Community.public == sa_true()
     if not user_id:
-        return is_public
+        return and_(is_public, course_enrollment_clause(0))
 
     in_linked_group = (
         select(UserGroupResource.id)
@@ -1046,7 +1150,7 @@ def community_read_clause_for_user(user_id: int, org_id: int, is_org_member: boo
         )
         clauses.append(and_(Community.org_id == org_id, ~has_linked_group))
 
-    return or_(*clauses)
+    return and_(or_(*clauses), course_enrollment_clause(user_id))
 
 
 async def readable_communities_clause(
@@ -1080,7 +1184,7 @@ async def readable_communities_clause(
 
     user_id = getattr(current_user, "id", 0) or 0
     if not user_id:
-        return Community.public == sa_true()
+        return community_read_clause_for_user(0, org.id, False)
 
     if await authorization_verify_based_on_org_admin_status(
         request, user_id, "read", org.org_uuid, db_session

@@ -9,6 +9,7 @@ import { getCanonicalUrl, getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
 import { JsonLd } from '@components/SEO/JsonLd'
 import CommunityClient from './community'
+import SemAcessoComunidade from '@components/Discipulei/Aprender/SemAcessoComunidade'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; communityuuid: string }>
@@ -128,15 +129,10 @@ const CommunityPage = async (params: any) => {
     notFound()
   }
 
+  // Discipulei: tela traduzida; na comunidade de um desafio, oferece a
+  // inscrição (só inscritos leem as conversas do desafio).
   if (!community) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-600">You don't have access</h1>
-          <p className="text-gray-400 mt-2">You do not have permission to view this community.</p>
-        </div>
-      </div>
-    )
+    return <SemAcessoComunidade communityUuid={communityUuid} orgslug={orgslug} />
   }
 
   const communityJsonLd = {

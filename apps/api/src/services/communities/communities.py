@@ -25,6 +25,7 @@ from src.security.rbac import (
     authorization_verify_based_on_org_admin_status,
     authorization_verify_based_on_roles,
     community_read_clause_for_user,
+    is_enrolled_in_course,
 )
 from src.security.org_auth import is_org_member
 
@@ -125,11 +126,13 @@ async def get_communities_by_org(
     # admin / membership checks run against a real user_id.
     acting_user_id = resolve_acting_user_id(current_user)
 
-    # For anonymous users, only show public communities
+    # For anonymous users, only show public communities (comunidades de
+    # desafio, ligadas a um curso, exigem inscrição: nunca para visitantes)
     if isinstance(current_user, AnonymousUser) or acting_user_id == 0:
         query = select(Community).where(
             Community.org_id == org_id,
-            Community.public == True
+            Community.public == True,
+            Community.course_id.is_(None),  # type: ignore[union-attr]
         )
         query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
         communities = (await db_session.execute(query)).scalars().all()
@@ -422,12 +425,18 @@ async def get_community_user_rights(
             "via_public": False,
             "via_usergroups": [],
             "has_usergroup_restriction": False,
+            # Comunidade de desafio: ligada a um curso, só para inscritos.
+            "requires_enrollment": community.course_id is not None,
+            "is_enrolled": False,
+            # Só preenchido quando a pessoa pode ver o curso (para o botão
+            # "Inscrever-se"); nunca revela o curso de um desafio restrito.
+            "course_uuid": None,
         },
     }
 
     # Handle anonymous users
     if acting_user_id == 0:
-        if community.public:
+        if community.public and community.course_id is None:
             rights["permissions"]["read"] = True
             rights["access"]["via_public"] = True
         return rights
@@ -467,6 +476,23 @@ async def get_community_user_rights(
         len(rights["access"]["via_usergroups"]) > 0 or
         is_admin_or_maintainer
     )
+
+    # Comunidade de desafio: além disso, só inscritos no curso (ou admins).
+    if community.course_id is not None:
+        is_enrolled = await is_enrolled_in_course(db_session, community.course_id, acting_user_id)
+        rights["access"]["is_enrolled"] = is_enrolled
+        course = (await db_session.execute(
+            select(Course).where(Course.id == community.course_id)
+        )).scalars().first()
+        if course:
+            course_access = await check_resource_access(
+                request, db_session, current_user, course.course_uuid,
+                AccessAction.READ, raise_on_deny=False,
+            )
+            if course_access.allowed:
+                rights["access"]["course_uuid"] = course.course_uuid
+        if not (is_enrolled or is_admin_or_maintainer):
+            has_access = False
 
     if has_access:
         rights["permissions"]["read"] = True

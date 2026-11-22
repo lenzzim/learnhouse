@@ -8,9 +8,12 @@
    - Celular e tablet (< 1024px): barra superior (logo, busca, avatar) e barra
      de abas fixa embaixo, na zona do polegar.
    - Desktop (>= 1024px): barra lateral no estilo Notion/Discord.
-   - O que é de LMS (cursos, biblioteca, podcasts...) some da navegação para
-     todos e as rotas ficam fechadas para quem não é admin. Admin continua
-     chegando ao painel pelo menu do avatar e pode abrir qualquer rota.
+   - O que é de LMS (biblioteca, podcasts...) some da navegação para todos e
+     as rotas ficam fechadas para quem não é admin. Admin continua chegando ao
+     painel pelo menu do avatar e pode abrir qualquer rota.
+   - Cursos voltaram (dono, 22/11/2026) como a área discreta "Aprender":
+     apoio aos desafios, não protagonista. Sem aba na barra inferior; entra na
+     barra lateral do computador e no menu do perfil no celular.
 
    Este arquivo não importa React nem nada do navegador: o proxy (edge) também
    o usa.
@@ -99,19 +102,22 @@ export const NAV_PRINCIPAL: ItemNav[] = [
  * é admin, a rota redireciona para a tela inicial.
  */
 export const SEGMENTOS_OCULTOS = new Set([
-  'courses',
-  'course',
   'library',
   'podcasts',
   'podcast',
   'playgrounds',
   'playground',
   'store',
-  'trail',
   'boards',
   'copilot',
-  'certificates',
 ])
+
+/**
+ * Área "Aprender" (cursos e desafios, dono 22/11/2026): lista de cursos,
+ * curso, aula, certificados e a trilha de quem estuda. Liberada para todos.
+ */
+export const ROTA_APRENDER = '/courses'
+export const SEGMENTOS_APRENDER = new Set(['courses', 'course', 'certificates', 'trail'])
 
 /** O selo "Feito com LearnHouse" e o logo do rodapé só aparecem para admin. */
 export const MARCA_LEARNHOUSE_SO_ADMIN = true
@@ -123,6 +129,11 @@ function segmentosDe(pathname: string | null | undefined): string[] {
 /** A rota é de uma área do LMS escondida nesta comunidade? */
 export function rotaOculta(pathname: string | null | undefined): boolean {
   return segmentosDe(pathname).some((s) => SEGMENTOS_OCULTOS.has(s))
+}
+
+/** A rota é da área "Aprender" (cursos, aulas, certificados, trilha)? */
+export function rotaAprender(pathname: string | null | undefined): boolean {
+  return segmentosDe(pathname).some((s) => SEGMENTOS_APRENDER.has(s))
 }
 
 /** Qual item principal está ativo nesta rota (ou null). */

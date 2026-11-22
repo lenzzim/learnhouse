@@ -68,6 +68,11 @@ export interface CommunityRights {
     via_public: boolean
     via_usergroups: number[]
     has_usergroup_restriction: boolean
+    /** Discipulei: comunidade de desafio (ligada a um curso), só para inscritos. */
+    requires_enrollment?: boolean
+    is_enrolled?: boolean
+    /** Curso do desafio, só quando a pessoa pode vê-lo (para "Inscrever-se"). */
+    course_uuid?: string | null
   }
 }
 

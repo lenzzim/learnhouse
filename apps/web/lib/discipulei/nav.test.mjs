@@ -33,3 +33,18 @@ test('urlAgendar aponta para a página do idioma e mantém a atribuição', () =
     'https://www.discipulei.com.br/es/discipulado-biblico/?o=comunidade-lista#como-funciona'
   )
 })
+
+test('cursos voltaram: área Aprender liberada, resto do LMS continua oculto', async () => {
+  const { rotaOculta, rotaAprender } = await import('./nav.ts')
+  for (const rota of ['/courses', '/course/abc', '/course/abc/activity/x', '/certificates/u/verify', '/trail']) {
+    assert.equal(rotaOculta(rota), false, rota)
+    assert.equal(rotaAprender(rota), true, rota)
+  }
+  for (const rota of ['/library', '/podcasts', '/podcast/x', '/playgrounds', '/store', '/boards', '/copilot']) {
+    assert.equal(rotaOculta(rota), true, rota)
+    assert.equal(rotaAprender(rota), false, rota)
+  }
+  assert.equal(rotaAprender('/hoje'), false)
+  assert.equal(rotaAprender('/community/abc'), false)
+  assert.equal(rotaAprender(null), false)
+})
