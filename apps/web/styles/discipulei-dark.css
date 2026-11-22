@@ -624,3 +624,154 @@ html:not(.dark) .logo img {
     to   { opacity: 0; }
   }
 }
+
+/* ------------------------------------------------------------ caderno */
+/* Área de 3 painéis (components/Caderno). Abaixo de 1024px a barra superior
+   do shell (56px) fica acima; no desktop a área ocupa a altura toda. */
+.discipulei-app {
+  --altura-topo-caderno: 3.5rem;
+}
+@media (min-width: 1024px) {
+  .discipulei-app {
+    --altura-topo-caderno: 0px;
+  }
+}
+
+/* Rótulos de seção dos painéis ficam em Inter (a regra de títulos acima
+   poria a serifa). */
+html:not([dir='rtl']) .caderno-area :is(h1, h2, h3).caderno-secao {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.caderno-area ::selection {
+  background: var(--line-strong);
+  color: var(--text);
+}
+.caderno-area * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* Texto da nota: Newsreader, medida de leitura, ritmo de diário. */
+.caderno-prosa {
+  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--text);
+  caret-color: var(--text);
+  outline: none;
+  min-height: 40vh;
+  overflow-wrap: anywhere;
+}
+/* Título e corpo da nota são a própria página: sem caixa nem anel de foco (o
+   cursor já mostra onde se escreve). Precisa vencer `.dark :focus-visible`
+   (contenteditable sempre casa com :focus-visible) e `.dark textarea`. */
+.dark .caderno-prosa:focus-visible,
+.dark #caderno-titulo:focus-visible {
+  outline: none;
+}
+.dark #caderno-titulo {
+  background-color: transparent;
+  border: 0;
+}
+.caderno-prosa > * + * {
+  margin-top: 0.85em;
+}
+.caderno-prosa :is(h1, h2, h3) {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: var(--text);
+}
+.caderno-prosa h1 { font-size: 1.75rem; margin-top: 1.6em; }
+.caderno-prosa h2 { font-size: 1.375rem; margin-top: 1.5em; }
+.caderno-prosa h3 { font-size: 1.15rem; margin-top: 1.3em; }
+.caderno-prosa > :first-child { margin-top: 0; }
+.caderno-prosa :is(ul, ol) { padding-inline-start: 1.4em; }
+.caderno-prosa ul { list-style: disc; }
+.caderno-prosa ol { list-style: decimal; }
+.caderno-prosa li + li { margin-top: 0.25em; }
+.caderno-prosa li::marker { color: var(--text-3); }
+.caderno-prosa blockquote {
+  border-inline-start: 1px solid var(--line-strong);
+  padding-inline-start: 1em;
+  color: var(--text-2);
+  font-style: italic;
+}
+.caderno-prosa code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  background: var(--surface);
+  border-radius: 4px;
+  padding: 0.1em 0.3em;
+}
+.caderno-prosa pre {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 0.9em 1em;
+  overflow-x: auto;
+  font-size: 0.875rem;
+}
+.caderno-prosa pre code { background: none; padding: 0; }
+.caderno-prosa hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+.caderno-prosa a[href]:not(.biblia-ref):not(.nota-ligacao):not(.nota-tag) {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--link-underline);
+  text-underline-offset: 3px;
+}
+.caderno-prosa strong { font-weight: 600; }
+
+/* Placeholders do editor (modelo do TCD e nota vazia). */
+.caderno-prosa .is-empty::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  pointer-events: none;
+  color: var(--text-3);
+  font-style: italic;
+}
+.caderno-prosa :is(h1, h2, h3).is-empty::before { font-style: normal; }
+
+/* [[ligações]] e #tags (decorações; o texto salvo é puro). */
+.caderno-prosa a.nota-ligacao {
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 3px;
+  background: linear-gradient(var(--line-strong), var(--line-strong)) 0 100% / 100% 1px no-repeat;
+  padding-bottom: 1px;
+  cursor: pointer;
+}
+.caderno-prosa a.nota-ligacao:hover { background-color: var(--surface); }
+.caderno-prosa a.nota-tag {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.82em;
+  color: var(--text-2);
+  text-decoration: none;
+  background: var(--surface);
+  border-radius: 9999px;
+  padding: 0.05em 0.5em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.caderno-prosa a.nota-tag:hover { color: var(--text); }
+.caderno-prosa .suggestion { background: var(--surface); border-radius: 3px; }
+
+/* Gavetas do caderno (celular/tablet). */
+@media (prefers-reduced-motion: no-preference) {
+  .gaveta-caderno[data-state='open'][data-lado='inicio'] { animation: gaveta-inicio 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .gaveta-caderno[data-state='open'][data-lado='fim'] { animation: gaveta-fim 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+}
+@keyframes gaveta-inicio {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+@keyframes gaveta-fim {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+[dir='rtl'] .gaveta-caderno[data-lado='inicio'] { animation-name: gaveta-fim; }
+[dir='rtl'] .gaveta-caderno[data-lado='fim'] { animation-name: gaveta-inicio; }

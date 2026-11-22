@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import {
-  buildDevotionalTemplate,
   createDiscussion,
   DISCUSSION_LABELS,
   DiscussionVisibility,
@@ -54,15 +53,6 @@ function defaultVisibilityFor(label: string): DiscussionVisibility {
   return label === DEVOTIONAL_LABEL ? 'private' : 'public'
 }
 
-// O editor está "vazio" quando não há nenhum texto digitado (parágrafos vazios
-// não contam). Assim o template nunca sobrescreve o que a pessoa escreveu.
-function editorHasText(node: any): boolean {
-  if (!node) return false
-  if (node.type === 'text') return !!(node.text && node.text.trim())
-  if (Array.isArray(node.content)) return node.content.some(editorHasText)
-  return false
-}
-
 export function CreateDiscussionModal({
   isOpen,
   onClose,
@@ -83,14 +73,9 @@ export function CreateDiscussionModal({
   const mutateDiscussions = useMutateDiscussions()
   const { track } = useLHAnalytics('learner')
 
-  const devotionalTemplate = () =>
-    buildDevotionalTemplate({
-      passage: t('communities.devotional_template.passage'),
-      learned: t('communities.devotional_template.learned'),
-      apply: t('communities.devotional_template.apply'),
-      prayer: t('communities.devotional_template.prayer'),
-    })
-  const initialContent = () => (initialLabel === DEVOTIONAL_LABEL ? devotionalTemplate() : null)
+  // Decisão do dono (21/11): nenhuma nota nasce com texto. O modelo devocional
+  // não é mais aplicado sozinho; modelos ficam no Caderno, quando a pessoa escolhe.
+  const initialContent = () => null
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -135,10 +120,6 @@ export function CreateDiscussionModal({
     setSelectedLabel(labelId)
     if (!visibilityTouched) {
       setVisibility(defaultVisibilityFor(labelId))
-    }
-    if (labelId === DEVOTIONAL_LABEL && !editorHasText(content)) {
-      setContent(devotionalTemplate())
-      setEditorKey((k) => k + 1)
     }
   }
 

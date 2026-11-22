@@ -12,6 +12,7 @@ import {
 } from '@components/Objects/Modals/Communities/CreateDiscussionModal'
 import { DiscussionWithAuthor } from '@services/communities/discussions'
 import { comunidadeDaRota } from '@/lib/discipulei/nav'
+import { dataLocal } from '@/lib/caderno/conteudo'
 import { FolhaInferior } from './FolhaInferior'
 import { CHAVES_NAV, useDadosNav } from './useDadosNav'
 import { FOCO, caminhoDiscussao } from './estilos'
@@ -53,17 +54,35 @@ export function EscreverProvider({ orgslug, children }: { orgslug: string; child
     [comunidades]
   )
 
-  const abrirEscrever = useCallback((novoModo?: ModoEscrever) => {
-    if (novoModo) {
+  // Nota privada e devocional vão para o Caderno (nota nova / TCD de hoje);
+  // só a pergunta na comunidade usa o modal.
+  const irParaCaderno = useCallback(
+    (novoModo: ModoEscrever) => {
+      const caminho = novoModo === 'devocional' ? `/caderno/tcd/${dataLocal()}` : '/caderno/new'
+      router.push(getUriWithOrg(orgslug, caminho))
+    },
+    [router, orgslug]
+  )
+
+  const abrirEscrever = useCallback(
+    (novoModo?: ModoEscrever) => {
+      if (!novoModo) {
+        setFolhaAberta(true)
+        return
+      }
       setFolhaAberta(false)
-      setModo(novoModo)
-    } else {
-      setFolhaAberta(true)
-    }
-  }, [])
+      if (novoModo === 'pergunta') setModo(novoModo)
+      else irParaCaderno(novoModo)
+    },
+    [irParaCaderno]
+  )
 
   const escolher = (novoModo: ModoEscrever) => {
     setFolhaAberta(false)
+    if (novoModo !== 'pergunta') {
+      irParaCaderno(novoModo)
+      return
+    }
     // Deixa a folha fechar antes do modal abrir: dois diálogos Radix ao mesmo
     // tempo disputam o foco.
     window.setTimeout(() => setModo(novoModo), 120)

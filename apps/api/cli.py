@@ -626,6 +626,41 @@ async def _demo_teardown() -> None:
         await async_engine.dispose()
 
 
+async def _with_session(fn):
+    learnhouse_config = get_learnhouse_config()
+    sql_url = learnhouse_config.database_config.sql_connection_string  # type: ignore
+    async_engine = create_async_engine(_to_async_url(sql_url), echo=False, pool_pre_ping=True)
+    try:
+        async with AsyncSession(async_engine, expire_on_commit=False) as db_session:
+            return await fn(db_session)
+    finally:
+        await async_engine.dispose()
+
+
+@cli.command(name="migrate-notebook-to-notes")
+def migrate_notebook_to_notes():
+    """Copia o caderno antigo (discussions privadas) para o Caderno Bíblico.
+
+    Idempotente (pula o que já foi copiado) e não altera as discussions
+    originais. Roda no servidor; nenhum conteúdo é impresso.
+    """
+    from src.services.notes.notes import migrate_legacy_all
+
+    copied = asyncio.run(_with_session(migrate_legacy_all))
+    print(f"Notas copiadas: {copied}")
+
+
+@cli.command(name="purge-notes-trash")
+def purge_notes_trash(
+    days: Annotated[int, typer.Option(help="Dias na lixeira antes de apagar de vez")] = 30,
+):
+    """Apaga de vez as notas que estão na lixeira há mais de N dias (padrão 30)."""
+    from src.services.notes.notes import purge_expired_trash
+
+    purged = asyncio.run(_with_session(lambda db: purge_expired_trash(db, days=days)))
+    print(f"Notas apagadas da lixeira: {purged}")
+
+
 @cli.command()
 def main():
     cli()

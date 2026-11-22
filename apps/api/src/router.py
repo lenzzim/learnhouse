@@ -30,6 +30,8 @@ from src.routers.media import media as media_router_module
 from src.routers.courses import migration as migration_router_module
 from src.routers.communities import communities as communities_router_module
 from src.routers.communities import discussions as discussions_router_module
+# Discipulei: Caderno Bíblico (notas pessoais, separadas das discussions)
+from src.routers import notes as notes_router_module
 from src.routers.courses.activities import activities, blocks
 from src.routers.podcasts import podcasts as podcasts_router_module
 from src.routers.podcasts import episodes as episodes_router_module
@@ -237,6 +239,9 @@ v1_router.include_router(
     tags=["discussions"],
     dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
 )
+# Caderno Bíblico: sem gate de plano. Cada rota exige sessão de pessoa (exceto
+# GET /notes/shared/{token}) e só devolve as notas da própria pessoa.
+v1_router.include_router(notes_router_module.router, prefix="/notes", tags=["notes"])
 v1_router.include_router(
     podcasts_router_module.router,
     prefix="/podcasts",

@@ -9,7 +9,7 @@ import { ArrowUpRight, Hash, Lock, MagnifyingGlass, Note } from '@phosphor-icons
 import { getUriWithOrg } from '@services/config/config'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { useDadosNav } from './useDadosNav'
-import { FOCO, caminhoDiscussao, semPrefixo } from './estilos'
+import { FOCO, caminhoNota, semPrefixo } from './estilos'
 
 interface BuscaDialogoProps {
   orgslug: string
@@ -137,9 +137,9 @@ export function BuscaDialogo({ orgslug, aberta, aoMudar }: BuscaDialogoProps) {
                 </h2>
                 <ul>
                   {achados.notas.map((n) => (
-                    <li key={n.discussion_uuid}>
+                    <li key={n.note_uuid}>
                       <Link
-                        href={getUriWithOrg(orgslug, caminhoDiscussao(n.community_uuid, n.discussion_uuid))}
+                        href={getUriWithOrg(orgslug, caminhoNota(n))}
                         onClick={fechar}
                         className={linha}
                       >
