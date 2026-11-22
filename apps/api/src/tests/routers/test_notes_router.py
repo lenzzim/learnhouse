@@ -316,7 +316,8 @@ class TestTcd:
     async def test_calendar_and_streak(self, env):
         e = env
         for d in ("2026-11-21", "2026-11-20", "2026-11-19", "2026-11-15", "2026-10-31"):
-            await e["c"].post("/api/v1/notes/tcd", json={"org_id": 1, "date": d})
+            t = (await e["c"].post("/api/v1/notes/tcd", json={"org_id": 1, "date": d})).json()
+            await e["c"].put(f"/api/v1/notes/{t['note_uuid']}", json={"content_json": _doc("Sl 23")})
         r = (await e["c"].get("/api/v1/notes/tcd-calendar",
                               params={"org_id": 1, "month": "2026-11", "today": "2026-11-21"})).json()
         assert r["dates"] == ["2026-11-15", "2026-11-19", "2026-11-20", "2026-11-21"]
@@ -330,6 +331,29 @@ class TestTcd:
         assert r["streak"] == 0
         assert (await e["c"].get("/api/v1/notes/tcd-calendar",
                                  params={"org_id": 1, "month": "2026-1"})).status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_empty_tcd_does_not_count(self, env):
+        e = env
+        # dia 2 com texto, dia 3 criado mas vazio, dia 4 só com espaços: só o 2 conta
+        t2 = (await e["c"].post("/api/v1/notes/tcd", json={"org_id": 1, "date": "2026-11-02"})).json()
+        await e["c"].put(f"/api/v1/notes/{t2['note_uuid']}", json={"content_json": _doc("Leitura do dia")})
+        await e["c"].post("/api/v1/notes/tcd", json={"org_id": 1, "date": "2026-11-03"})
+        t4 = (await e["c"].post("/api/v1/notes/tcd", json={"org_id": 1, "date": "2026-11-04"})).json()
+        await e["c"].put(f"/api/v1/notes/{t4['note_uuid']}", json={"content_json": _doc("   ")})
+        r = (await e["c"].get("/api/v1/notes/tcd-calendar",
+                              params={"org_id": 1, "month": "2026-11", "today": "2026-11-03"})).json()
+        assert r["dates"] == ["2026-11-02"]
+        assert r["streak"] == 1
+        r = (await e["c"].get("/api/v1/notes/tcd-calendar",
+                              params={"org_id": 1, "month": "2026-11", "today": "2026-11-04"})).json()
+        assert r["streak"] == 0
+        # escrever no dia vazio passa a contar
+        t3 = (await e["c"].get("/api/v1/notes/tcd/2026-11-03", params={"org_id": 1})).json()
+        await e["c"].put(f"/api/v1/notes/{t3['note_uuid']}", json={"content_json": _doc("Jo 1")})
+        r = (await e["c"].get("/api/v1/notes/tcd-calendar",
+                              params={"org_id": 1, "month": "2026-11", "today": "2026-11-03"})).json()
+        assert r["dates"] == ["2026-11-02", "2026-11-03"] and r["streak"] == 2
 
 
 # ---------------------------------------------------------------------------

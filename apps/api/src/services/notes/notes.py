@@ -761,10 +761,13 @@ async def tcd_calendar(
         raise HTTPException(status_code=422, detail="Invalid month: expected YYYY-MM")
     today_d = _parse_date(today, "today") if today else datetime.now(timezone.utc).date()
 
+    # Só conta (calendário e sequência) o TCD com corpo escrito: abrir o dia ou
+    # deixar a nota vazia não marca o dia.
     base = [
         Note.user_id == user_id, Note.org_id == org_id,
         Note.kind == NOTE_KIND_TCD, Note.deleted_at.is_(None),  # type: ignore[union-attr]
         Note.tcd_date.is_not(None),  # type: ignore[union-attr]
+        func.length(func.trim(func.coalesce(Note.content_text, ""))) > 0,
     ]
     in_month = (await db.execute(
         select(Note.tcd_date).where(*base, Note.tcd_date.like(f"{month}-%"))  # type: ignore[union-attr]
