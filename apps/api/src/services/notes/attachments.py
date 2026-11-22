@@ -397,6 +397,7 @@ async def collect_garbage(
     *,
     grace_hours: int = GRACE_HOURS,
     only_note_ids: Optional[List[int]] = None,
+    only_attachment_ids: Optional[List[int]] = None,
     now: Optional[datetime] = None,
 ) -> int:
     """Apaga anexos privados que nenhuma nota/modelo da pessoa cita mais e as
@@ -405,10 +406,18 @@ async def collect_garbage(
     ``only_note_ids`` (exclusão definitiva): olha só os anexos enviados para
     essas notas, sem carência. Sem ele, considera os anexos com mais de
     ``grace_hours`` (a imagem acabou de subir e a nota ainda vai salvar).
+
+    ``only_attachment_ids`` (exclusão definitiva no Postgres): os ids lidos
+    ANTES de apagar a nota. Lá ``note_attachment.note_id`` é ``ON DELETE SET
+    NULL``, então depois do DELETE a busca por ``note_id`` não acha mais nada.
     """
     now = now or datetime.now(timezone.utc)
     conds = [NoteAttachment.user_id == user_id, NoteAttachment.scope == ATTACHMENT_SCOPE_NOTE]
-    if only_note_ids is not None:
+    if only_attachment_ids is not None:
+        if not only_attachment_ids:
+            return 0
+        conds.append(NoteAttachment.id.in_(only_attachment_ids))  # type: ignore[union-attr]
+    elif only_note_ids is not None:
         if not only_note_ids:
             return 0
         conds.append(NoteAttachment.note_id.in_(only_note_ids))  # type: ignore[union-attr]
@@ -419,7 +428,7 @@ async def collect_garbage(
     referenced = await _referenced_uuids(db, user_id, [a.attachment_uuid for a in candidates])
     removed = await _delete_attachments(db, [a for a in candidates if a.attachment_uuid not in referenced])
 
-    if only_note_ids is None:
+    if only_note_ids is None and only_attachment_ids is None:
         from src.db.communities.discussions import Discussion
 
         orphans = (await db.execute(

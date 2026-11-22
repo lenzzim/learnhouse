@@ -404,6 +404,30 @@ class TestLifecycle:
         assert (await db.execute(select(NoteAttachment))).scalars().all()[0].attachment_uuid == y
 
     @pytest.mark.asyncio
+    async def test_permanent_delete_with_on_delete_set_null(self, env):
+        """No Postgres, note_attachment.note_id é ON DELETE SET NULL: a imagem
+        tem de sumir mesmo assim ao apagar a nota de vez (trigger imita o FK)."""
+        from sqlalchemy import text
+
+        e = env
+        db = e["db"]
+        await db.execute(text(
+            "CREATE TRIGGER IF NOT EXISTS emula_set_null AFTER DELETE ON note "
+            "BEGIN UPDATE note_attachment SET note_id = NULL WHERE note_id = OLD.id; END"
+        ))
+        await db.commit()
+        n = await _note(e)
+        x = (await _upload(e, n["note_uuid"], _png())).json()["attachment_uuid"]
+        await e["c"].put(f"{API}/{n['note_uuid']}", json={"content_json": _doc(_img(x))})
+        await e["c"].delete(f"{API}/{n['note_uuid']}")
+        assert (await e["c"].delete(f"{API}/{n['note_uuid']}/permanent")).status_code == 200
+        assert (await e["c"].get(f"{API}/attachments/{x}")).status_code == 404
+        assert (await db.execute(select(NoteAttachment))).scalars().all() == []
+        assert _stored_files(e["root"]) == []
+        await db.execute(text("DROP TRIGGER IF EXISTS emula_set_null"))
+        await db.commit()
+
+    @pytest.mark.asyncio
     async def test_unreferenced_after_grace_collected_when_trash_listed(self, env):
         e = env
         db = e["db"]

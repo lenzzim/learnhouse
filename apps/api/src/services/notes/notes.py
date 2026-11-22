@@ -519,11 +519,20 @@ async def _hard_delete(db: AsyncSession, note_ids: List[int]) -> None:
     owners = (await db.execute(
         select(Note.user_id).where(Note.id.in_(note_ids)).distinct()  # type: ignore[union-attr]
     )).scalars().all()
+    # Lidos ANTES do DELETE: no Postgres note_attachment.note_id é ON DELETE
+    # SET NULL, e depois dele a busca por note_id não acharia nada (a imagem
+    # ficava no disco e servida ao dono até o GC de 24 h).
+    att_ids = list((await db.execute(
+        select(att_svc.NoteAttachment.id).where(
+            att_svc.NoteAttachment.note_id.in_(note_ids),  # type: ignore[union-attr]
+            att_svc.NoteAttachment.scope == att_svc.ATTACHMENT_SCOPE_NOTE,
+        )
+    )).scalars().all())
     await db.execute(delete(Note).where(Note.id.in_(note_ids)))  # type: ignore[union-attr]
     await db.flush()
     # Imagens enviadas para essas notas que nenhuma outra nota/modelo cita.
     for owner in owners:
-        await att_svc.collect_garbage(db, owner, only_note_ids=list(note_ids))
+        await att_svc.collect_garbage(db, owner, only_attachment_ids=att_ids)
 
 
 async def delete_note_permanently(db: AsyncSession, current_user: CurrentUser, note_uuid: str) -> dict:
