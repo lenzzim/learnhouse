@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import {
   ArrowCounterClockwise,
@@ -17,7 +17,8 @@ import {
   Trash,
   UploadSimple,
 } from '@phosphor-icons/react'
-import { apagarDeVez, idDaNota, listarNotas, restaurarNota, type NotaResumo } from '@services/caderno/notas'
+import { apagarDeVez, idDaNota, listarNotas, listarPropriedades, restaurarNota, type NotaResumo } from '@services/caderno/notas'
+import { valorDe } from '@/lib/caderno/propriedades'
 import { dataBR, dataLocal } from '@/lib/caderno/conteudo'
 import { parseApiDate } from '@/lib/datas'
 import { useCaderno, CHAVES_CADERNO } from './CadernoContexto'
@@ -41,7 +42,25 @@ export function ListaNotas() {
   const tag = params?.get('tag') || undefined
   const q = params?.get('q') || undefined
   const lixeira = params?.get('lixeira') === '1'
-  const filtros = { collection_uuid: colecao, tag, q, trash: lixeira || undefined }
+  // Filtros por propriedade (?tipo=Culto&livro=João)
+  const tipo = params?.get('tipo') || undefined
+  const livro = params?.get('livro') || undefined
+  const prop = [tipo && `tipo:${tipo}`, livro && `livro:${livro}`].filter(Boolean) as string[]
+  const filtros = { collection_uuid: colecao, tag, q, trash: lixeira || undefined, prop: prop.length ? prop : undefined }
+  const usadas = useQuery({
+    queryKey: ['caderno', 'propriedades', c.orgId ?? 0],
+    queryFn: () => listarPropriedades(c.orgId as number, c.token),
+    enabled: c.autenticado && !!c.orgId && !!c.token && !lixeira,
+    staleTime: 60_000,
+  })
+  const valoresDe = (chave: string) => usadas.data?.find((u) => u.key === chave)?.values ?? []
+  const filtrar = (chave: 'tipo' | 'livro', valor: string) => {
+    const novo = new URLSearchParams(params?.toString() ?? '')
+    if (valor) novo.set(chave, valor)
+    else novo.delete(chave)
+    const qs = novo.toString()
+    router.replace(hrefCaderno(c.orgslug, qs ? `?${qs}` : ''))
+  }
 
   const consulta = useInfiniteQuery({
     queryKey: CHAVES_CADERNO.lista(c.orgId, filtros),
@@ -89,7 +108,7 @@ export function ListaNotas() {
     )
   }
 
-  const vazioGeral = !consulta.isLoading && !itens.length && !colecao && !tag && !q && !lixeira
+  const vazioGeral = !consulta.isLoading && !itens.length && !colecao && !tag && !q && !lixeira && !prop.length
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -133,6 +152,49 @@ export function ListaNotas() {
               </div>
             )}
           </div>
+
+          {!lixeira && (valoresDe('tipo').length > 0 || valoresDe('livro').length > 0 || prop.length > 0) && (
+            <div className="mb-5 flex flex-wrap items-center gap-2" role="group" aria-label={t('caderno_editor.filtros')}>
+              {(['tipo', 'livro'] as const).map((chave) => {
+                const atual = chave === 'tipo' ? tipo : livro
+                const valores = valoresDe(chave)
+                if (!valores.length && !atual) return null
+                return (
+                  <label key={chave} className="flex items-center gap-1.5 text-sm text-[var(--text-2)]">
+                    <span>{t(`caderno_editor.prop.chave.${chave}`)}</span>
+                    <select
+                      value={atual ?? ''}
+                      onChange={(e) => filtrar(chave, e.target.value)}
+                      className={`h-10 max-w-[11rem] rounded-lg border border-[var(--line)] bg-[var(--page)] px-2 text-sm text-[var(--text)] ${FOCO}`}
+                    >
+                      <option value="">{t('caderno_editor.filtro_todos')}</option>
+                      {atual && !valores.some((v) => v.value.toLowerCase() === atual.toLowerCase()) && <option value={atual}>{atual}</option>}
+                      {valores.map((v) => (
+                        <option key={v.value} value={v.value}>
+                          {v.value} ({v.count})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )
+              })}
+              {prop.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const novo = new URLSearchParams(params?.toString() ?? '')
+                    novo.delete('tipo')
+                    novo.delete('livro')
+                    const qs = novo.toString()
+                    router.replace(hrefCaderno(c.orgslug, qs ? `?${qs}` : ''))
+                  }}
+                  className={`min-h-10 rounded-md px-2 text-sm text-[var(--text-2)] underline decoration-[var(--link-underline)] underline-offset-4 hover:text-[var(--text)] ${FOCO}`}
+                >
+                  {t('caderno_editor.limpar_filtros')}
+                </button>
+              )}
+            </div>
+          )}
 
           {vazioGeral && (
             <div className="flex flex-col items-start gap-4 border-t border-[var(--line)] pt-8">
@@ -185,6 +247,8 @@ export function ListaNotas() {
                               ? dataBR(n.tcd_date)
                               : parseApiDate(n.updated_at).toDate().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </span>
+                          {valorDe(n.properties, 'tipo') && <span>{valorDe(n.properties, 'tipo')}</span>}
+                          {valorDe(n.properties, 'livro') && <span>{valorDe(n.properties, 'livro')}</span>}
                           {n.tags.slice(0, 4).map((tg) => (
                             <span key={tg}>#{tg}</span>
                           ))}

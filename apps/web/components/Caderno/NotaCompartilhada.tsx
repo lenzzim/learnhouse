@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -10,9 +10,12 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import { ReferenciasBiblicas } from '@components/Biblia/extensaoReferencias'
 import { ReferenciasNoTexto } from '@components/Biblia/ReferenciasNoTexto'
-import { lerCompartilhada, type NotaCompartilhada } from '@services/caderno/notas'
+import { lerCompartilhada, urlAnexo, type NotaCompartilhada } from '@services/caderno/notas'
 import { dataBR, lerDoc } from '@/lib/caderno/conteudo'
 import { LigacoesETags } from './editor/extensoes'
+import { extensoesConteudoCaderno } from './editor/extensoesConteudo'
+import { criarCarregadorAnexos } from './editor/carregadorAnexos'
+import { BlocoPropriedades } from './Propriedades'
 import { BOTAO_PRIMARIO, SERIF } from './estilos'
 
 type Estado =
@@ -21,12 +24,27 @@ type Estado =
   | { tipo: 'indisponivel' }
   | { tipo: 'pronto'; nota: NotaCompartilhada }
 
-function Leitura({ nota }: { nota: NotaCompartilhada }) {
+function Leitura({ nota, tokenLink, tokenSessao }: { nota: NotaCompartilhada; tokenLink: string; tokenSessao?: string }) {
   const { t } = useTranslation()
+  // Imagens pelo próprio token do link (valida escopo e revogação), sem cache.
+  const carregador = useMemo(
+    () => criarCarregadorAnexos(urlAnexo.link(tokenLink), () => tokenSessao, { semCache: true }),
+    [tokenLink, tokenSessao]
+  )
+  useEffect(() => () => carregador.liberar(), [carregador])
   const editor = useEditor({
     immediatelyRender: false,
     editable: false,
-    extensions: [StarterKit.configure({ link: { openOnClick: true, HTMLAttributes: { rel: 'noopener noreferrer nofollow', target: '_blank' } } }), ReferenciasBiblicas, LigacoesETags],
+    extensions: [
+      StarterKit.configure({ link: { openOnClick: true, HTMLAttributes: { rel: 'noopener noreferrer nofollow', target: '_blank' } } }),
+      ...extensoesConteudoCaderno({
+        carregar: (anexo) => carregador.carregar(anexo),
+        rotuloErroImagem: t('caderno_editor.imagem_indisponivel'),
+        rotuloCaixaTarefa: t('caderno_editor.tarefa_concluida'),
+      }),
+      ReferenciasBiblicas,
+      LigacoesETags,
+    ],
     content: lerDoc(nota.content_json) as any,
     editorProps: { attributes: { class: 'caderno-prosa', lang: 'pt-BR' } },
   })
@@ -40,6 +58,7 @@ function Leitura({ nota }: { nota: NotaCompartilhada }) {
         {nota.author_name ? t('caderno.por_autor', { nome: nota.author_name }) + ' · ' : ''}
         {data}
       </p>
+      <BlocoPropriedades propriedades={nota.properties ?? []} aoMudar={() => {}} usados={[]} somenteLeitura />
       {/* [[ligações]] não levam a lugar nenhum fora do caderno de quem escreveu. */}
       <ReferenciasNoTexto className="caderno-leitura mt-10">
         <div onClickCapture={(e) => (e.target as HTMLElement).closest('a.nota-ligacao, a.nota-tag') && e.preventDefault()}>
@@ -87,7 +106,7 @@ export default function NotaCompartilhadaCliente({ token, orgslug }: { token: st
             <div className="mt-3 h-4 w-5/6 animate-pulse rounded bg-[var(--surface)]" />
           </div>
         )}
-        {estado.tipo === 'pronto' && <Leitura nota={estado.nota} />}
+        {estado.tipo === 'pronto' && <Leitura nota={estado.nota} tokenLink={token} tokenSessao={tokenSessao} />}
         {estado.tipo === 'login' && (
           <div className="flex flex-col items-start gap-4">
             <Lock size={24} aria-hidden="true" className="text-[var(--text-2)]" />

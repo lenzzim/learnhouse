@@ -1,10 +1,15 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import { ReferenciasBiblicas } from '@components/Biblia/extensaoReferencias'
 import { ReferenciasNoTexto, TextoComReferencias } from '@components/Biblia/ReferenciasNoTexto'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { extensoesConteudoCaderno } from '@components/Caderno/editor/extensoesConteudo'
+import { criarCarregadorAnexos } from '@components/Caderno/editor/carregadorAnexos'
+import { urlAnexo } from '@services/caderno/notas'
 
 interface DiscussionContentProps {
   content: any
@@ -35,6 +40,15 @@ export function DiscussionContent({ content }: DiscussionContentProps) {
 }
 
 function DiscussionContentEditor({ content }: { content: any }) {
+  const { t } = useTranslation()
+  const session = useLHSession() as any
+  const token: string | undefined = session?.data?.tokens?.access_token
+  // Discipulei: imagens de notas publicadas do Caderno são cópias servidas
+  // com a regra de leitura desta discussion (nunca pela pasta pública).
+  const tokenRef = useRef(token)
+  tokenRef.current = token
+  const carregador = useMemo(() => criarCarregadorAnexos(urlAnexo.discussao, () => tokenRef.current), [])
+  useEffect(() => () => carregador.liberar(), [carregador])
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -74,6 +88,12 @@ function DiscussionContentEditor({ content }: { content: any }) {
       }),
       // Discipulei: referências bíblicas viram links (decoração, não altera o conteúdo)
       ReferenciasBiblicas,
+      // Discipulei: imagem, tarefas, destaque, vídeo e tabela vindos do Caderno
+      ...extensoesConteudoCaderno({
+        carregar: (anexo) => carregador.carregar(anexo),
+        rotuloErroImagem: t('caderno_editor.imagem_indisponivel'),
+        rotuloCaixaTarefa: t('caderno_editor.tarefa_concluida'),
+      }),
     ],
     content,
     editable: false,
