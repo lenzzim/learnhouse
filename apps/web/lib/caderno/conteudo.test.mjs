@@ -8,6 +8,7 @@ import {
   dataValida,
   dataBR,
   mesVizinho,
+  rotuloMes,
   gradeDoMes,
   lerDoc,
   textoDoDoc,
@@ -31,6 +32,12 @@ test('datas locais e validação', () => {
   assert.equal(dataBR('2026-11-21'), '21/11/2026')
   assert.equal(mesVizinho('2026-01', -1), '2025-12')
   assert.equal(mesVizinho('2026-12', 1), '2027-01')
+})
+
+test('cabeçalho do mês: só a primeira letra maiúscula', () => {
+  assert.equal(rotuloMes('2026-11', 'pt-BR'), 'Novembro de 2026')
+  assert.equal(rotuloMes('2027-01', 'pt-BR'), 'Janeiro de 2027')
+  assert.equal(rotuloMes('2026-11', 'en'), 'November 2026')
 })
 
 test('grade do mês começa no domingo e completa semanas', () => {

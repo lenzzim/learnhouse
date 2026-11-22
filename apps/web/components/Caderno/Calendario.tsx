@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { calendarioTcd } from '@services/caderno/notas'
-import { dataLocal, gradeDoMes, mesDe, mesVizinho } from '@/lib/caderno/conteudo'
+import { dataLocal, gradeDoMes, mesDe, mesVizinho, rotuloMes } from '@/lib/caderno/conteudo'
 import { useCaderno, CHAVES_CADERNO } from './CadernoContexto'
 import { ICONE_PEQUENO, SECAO, FOCO } from './estilos'
 import { hrefCaderno } from './PainelEsquerdo'
@@ -35,7 +35,7 @@ export function Calendario() {
   const local = i18n.language?.startsWith('pt') ? 'pt-BR' : i18n.language || 'pt-BR'
 
   const [a, m] = mes.split('-').map(Number)
-  const nomeMes = new Date(a, m - 1, 1).toLocaleDateString(local, { month: 'long', year: 'numeric' })
+  const nomeMes = rotuloMes(mes, local)
   // Iniciais dos dias da semana, a partir de um domingo conhecido (2026-11-01).
   const iniciais = Array.from({ length: 7 }, (_, i) =>
     new Date(2026, 10, 1 + i).toLocaleDateString(local, { weekday: 'narrow' })
@@ -48,7 +48,7 @@ export function Calendario() {
   return (
     <section aria-labelledby="caderno-calendario" className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between ps-2.5">
-        <h2 id="caderno-calendario" className="text-sm font-medium capitalize text-[var(--text)]">
+        <h2 id="caderno-calendario" className="text-sm font-medium text-[var(--text)]">
           {nomeMes}
         </h2>
         <div className="flex items-center">

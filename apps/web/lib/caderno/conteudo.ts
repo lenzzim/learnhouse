@@ -42,6 +42,16 @@ export function dataBR(s: string): string {
 /** "2026-11" a partir de "2026-11-21" */
 export const mesDe = (data: string) => data.slice(0, 7)
 
+/**
+ * Nome do mês para o cabeçalho do calendário: rotuloMes("2026-11", "pt-BR") →
+ * "Novembro de 2026". Só a primeira letra sobe (CSS capitalize faria "De").
+ */
+export function rotuloMes(mes: string, local: string): string {
+  const [a, m] = mes.split('-').map(Number)
+  const cru = new Date(a, m - 1, 1).toLocaleDateString(local, { month: 'long', year: 'numeric' })
+  return cru.charAt(0).toLocaleUpperCase(local) + cru.slice(1)
+}
+
 /** Mês vizinho: mesVizinho("2026-01", -1) → "2025-12" */
 export function mesVizinho(mes: string, delta: number): string {
   const [a, m] = mes.split('-').map(Number)
