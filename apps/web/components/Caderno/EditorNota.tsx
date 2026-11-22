@@ -154,6 +154,8 @@ export function EditorNota({
   const vivo = useRef({
     titulo: notaInicial.title,
     uuid: notaInicial.note_uuid,
+    /** Documento (JSON) carregado ou último salvo: só mudança real em relação a ele agenda salvamento. */
+    ultimoJson: null as string | null,
     pendente: false,
     salvando: false,
     timer: 0 as any,
@@ -181,6 +183,12 @@ export function EditorNota({
     const ed = v.editor
     if (!ed || !v.pendente) return
     if (v.salvando) return // o término do salvamento atual reagenda
+    // Nota ainda não criada e nada escrito (ou tudo apagado), título intacto: não cria.
+    if (!v.uuid && ed.isEmpty && v.titulo.trim() === notaInicial.title.trim()) {
+      v.pendente = false
+      setStatus('salvo')
+      return
+    }
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       setStatus('offline')
       return
@@ -199,12 +207,14 @@ export function EditorNota({
       }
       // JSON lido só agora: inclui o que foi digitado enquanto a nota era criada.
       const json = ed.getJSON() as NoTiptap
+      const jsonTexto = JSON.stringify(json)
       const texto = textoDoDoc(json)
       const salva = await salvarNota(
         v.uuid,
-        { title: v.titulo.trim(), content_json: JSON.stringify(json), bible_refs: refsDoTexto(texto) },
+        { title: v.titulo.trim(), content_json: jsonTexto, bible_refs: refsDoTexto(texto) },
         ctxRef.current.token
       )
+      v.ultimoJson = jsonTexto
       // Só metadados: o conteúdo do editor nunca é reaplicado a partir da resposta.
       setNota((n) => ({ ...n, ...salva }))
       setStatus(v.pendente ? 'pendente' : 'salvo')
@@ -349,7 +359,16 @@ export function EditorNota({
         return true
       },
     },
-    onUpdate: () => agendar(),
+    onCreate: ({ editor: ed }) => {
+      vivo.current.ultimoJson = JSON.stringify(ed.getJSON())
+    },
+    // O editor dispara uma transação ao montar sem mudar o conteúdo: agendar
+    // nela re-salvava toda nota só de abrir (updated_at mudava, a lista
+    // reordenava) e criava o TCD do dia só de visitar. Só mudança real agenda.
+    onUpdate: ({ editor: ed }) => {
+      if (JSON.stringify(ed.getJSON()) === vivo.current.ultimoJson) return
+      agendar()
+    },
   })
 
   useEffect(() => {
