@@ -294,6 +294,9 @@ class TestResourceAccessChecker:
         mock_community = Mock()
         mock_community.public = True
         mock_community.org_id = 1
+        # Comunidade comum, sem curso ligado (com curso, vira comunidade de
+        # desafio e exige inscrição).
+        mock_community.course_id = None
         # Community doesn't have published field
         del mock_community.published
         mock_db_session.execute.return_value.scalars.return_value.first.return_value = mock_community
