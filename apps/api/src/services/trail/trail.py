@@ -485,15 +485,17 @@ async def add_course_to_trail(
             status_code=status.HTTP_400_BAD_REQUEST, detail="TrailRun already exists"
         )
 
-    statement = select(Trail).where(
-        Trail.org_id == course.org_id, Trail.user_id == user.id
+    # Discipulei: o "Inscrever-se" do desafio (cartão em /hoje e tela sem
+    # acesso da comunidade) chama isto direto, sem a pessoa ter aberto a
+    # página do curso — que é onde o upstream cria a trilha (GET
+    # /trail/org/{id}/trail). Sem trilha, criar em vez de devolver 404.
+    trail = await check_trail_presence(
+        org_id=course.org_id,
+        user_id=user.id,
+        request=request,
+        user=user,
+        db_session=db_session,
     )
-    trail = (await db_session.execute(statement)).scalars().first()
-
-    if not trail:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Trail not found"
-        )
 
     statement = select(TrailRun).where(
         TrailRun.trail_id == trail.id, TrailRun.course_id == course.id, TrailRun.user_id == user.id

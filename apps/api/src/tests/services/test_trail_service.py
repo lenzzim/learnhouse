@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from sqlmodel import select
 from fastapi import HTTPException
 
 from src.db.courses.activities import Activity, ActivitySubTypeEnum, ActivityTypeEnum
@@ -370,9 +371,10 @@ class TestTrailService:
         assert mock_webhooks.await_count == 1
 
     @pytest.mark.asyncio
-    async def test_add_course_to_trail_rejects_missing_trail(
+    async def test_add_course_to_trail_creates_missing_trail(
         self, db, org, admin_user, mock_request
     ):
+        """Inscrever-se no desafio sem nunca ter aberto um curso cria a trilha."""
         course = await _make_course(
             db,
             org,
@@ -381,15 +383,27 @@ class TestTrailService:
             name="Course Without Trail",
         )
 
-        with pytest.raises(HTTPException) as exc_info:
-            await add_course_to_trail(
+        with patch(
+            "src.services.trail.trail.track",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.trail.trail.dispatch_webhooks",
+            new_callable=AsyncMock,
+        ):
+            result = await add_course_to_trail(
                 mock_request,
                 admin_user,
                 course.course_uuid,
                 db,
             )
 
-        assert exc_info.value.status_code == 404
+        assert len(result.runs) == 1
+        trail = (
+            await db.execute(
+                select(Trail).where(Trail.org_id == org.id, Trail.user_id == admin_user.id)
+            )
+        ).scalars().first()
+        assert trail is not None
 
     @pytest.mark.asyncio
     async def test_remove_course_from_trail_deletes_course_steps_and_checks_missing_trail(
