@@ -6453,6 +6453,7 @@
     "biblia": "Bible",
     "caderno": "Notebook",
     "comunidades": "Communities",
+    "aprender": "Learn",
     "navegacao_principal": "Main navigation",
     "ir_inicio": "{{nome}}: go to home",
     "fechar": "Close",
@@ -6519,6 +6520,24 @@
     "primeira_nota_descricao": "It stays in your notebook. Only you can see it.",
     "anonimo_titulo": "Your day with the Word",
     "anonimo_descricao": "Sign in to keep reading, see your drafts and what's new in your communities."
+  },
+  "aprender": {
+    "desafio_atual": "Current challenge",
+    "participando": "You're taking part",
+    "convite": "Sign up to follow the lessons and talk with everyone in the challenge.",
+    "continuar_descricao": "Pick up where you left off.",
+    "inscrever": "Sign up",
+    "inscrevendo": "Signing up…",
+    "inscricao_ok": "You're in. Enjoy the challenge!",
+    "erro_inscricao": "We couldn't sign you up. Please try again.",
+    "continuar": "Continue",
+    "conversas": "Challenge conversations",
+    "ver_desafio": "See the challenge",
+    "selo_desafio": "challenge",
+    "sem_acesso_titulo": "This space belongs to the challenge",
+    "sem_acesso_descricao": "The conversations here are for people taking part in the challenge. Sign up to read and post.",
+    "restrita_titulo": "You don't have access",
+    "restrita_descricao": "This community is restricted."
   },
   "erros": {
     "version_mismatch": {

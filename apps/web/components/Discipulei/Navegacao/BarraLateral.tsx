@@ -4,10 +4,18 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { CalendarCheck, CaretRight, Hash, Lock, MagnifyingGlass, Plus } from '@phosphor-icons/react'
+import { CalendarCheck, CaretRight, GraduationCap, Hash, Lock, MagnifyingGlass, Plus } from '@phosphor-icons/react'
 import { getUriWithOrg } from '@services/config/config'
 import { useIdiomaDiscipulei } from '../useIdioma'
-import { NAV_PRINCIPAL, abaAtiva, comunidadeDaRota, urlAgendar, type AbaId } from '@/lib/discipulei/nav'
+import {
+  NAV_PRINCIPAL,
+  ROTA_APRENDER,
+  abaAtiva,
+  comunidadeDaRota,
+  rotaAprender,
+  urlAgendar,
+  type AbaId,
+} from '@/lib/discipulei/nav'
 import { useDadosNav } from './useDadosNav'
 import { MenuAvatar } from './MenuAvatar'
 import { Logo } from './Logo'
@@ -50,7 +58,8 @@ const SUBITEM =
 /**
  * Barra lateral do desktop (>= 1024px), no estilo Notion/Discord: Buscar,
  * + Nova nota, Início, Bíblia, Caderno (5 notas recentes), Comunidades (como
- * canais, cadeado nas restritas), Agendar estudo e o avatar no rodapé.
+ * canais, cadeado nas restritas), Aprender (cursos e desafios, discreto),
+ * Agendar estudo e o avatar no rodapé.
  */
 export function BarraLateral({
   orgslug,
@@ -71,6 +80,7 @@ export function BarraLateral({
 
   const ativa = abaAtiva(pathname)
   const comunidadeAberta = comunidadeDaRota(pathname)
+  const aprenderAtivo = rotaAprender(pathname)
 
   const classeItem = (id: AbaId) =>
     `${ITEM_BASE} ${
@@ -200,6 +210,22 @@ export function BarraLateral({
               </li>
             )
           })}
+          {autenticado && (
+            <li>
+              <Link
+                href={getUriWithOrg(orgslug, ROTA_APRENDER)}
+                aria-current={aprenderAtivo ? 'page' : undefined}
+                className={`${ITEM_BASE} ${
+                  aprenderAtivo
+                    ? 'bg-[var(--surface)] font-semibold text-[var(--text)]'
+                    : 'font-medium text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
+                }`}
+              >
+                <GraduationCap size={20} weight={aprenderAtivo ? 'fill' : 'regular'} aria-hidden="true" />
+                <span>{t('nav.aprender')}</span>
+              </Link>
+            </li>
+          )}
         </ul>
 
         <div className="my-3 h-px bg-[var(--line)]" role="separator" />

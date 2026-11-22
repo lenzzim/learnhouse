@@ -6438,6 +6438,7 @@
     "biblia": "Bíblia",
     "caderno": "Caderno",
     "comunidades": "Comunidades",
+    "aprender": "Aprender",
     "navegacao_principal": "Navegação principal",
     "ir_inicio": "{{nome}}: ir para o início",
     "fechar": "Fechar",
@@ -6504,6 +6505,24 @@
     "primeira_nota_descricao": "Fica no seu caderno. Só você vê.",
     "anonimo_titulo": "Seu dia com a Palavra",
     "anonimo_descricao": "Entre para continuar a leitura, ver seus rascunhos e o que há de novo nas suas comunidades."
+  },
+  "aprender": {
+    "desafio_atual": "Desafio atual",
+    "participando": "Você está participando",
+    "convite": "Inscreva-se para acompanhar as aulas e conversar com quem está no desafio.",
+    "continuar_descricao": "Continue de onde parou.",
+    "inscrever": "Inscrever-se",
+    "inscrevendo": "Inscrevendo…",
+    "inscricao_ok": "Inscrição feita. Bom desafio!",
+    "erro_inscricao": "Não foi possível fazer a inscrição. Tente de novo.",
+    "continuar": "Continuar",
+    "conversas": "Conversas do desafio",
+    "ver_desafio": "Ver o desafio",
+    "selo_desafio": "desafio",
+    "sem_acesso_titulo": "Este espaço é do desafio",
+    "sem_acesso_descricao": "As conversas daqui são de quem está participando do desafio. Inscreva-se para ler e publicar.",
+    "restrita_titulo": "Você não tem acesso",
+    "restrita_descricao": "Esta comunidade é restrita."
   },
   "erros": {
     "version_mismatch": {

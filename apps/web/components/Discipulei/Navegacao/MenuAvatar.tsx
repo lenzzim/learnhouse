@@ -3,7 +3,16 @@
 import React from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRight, CalendarCheck, CaretUpDown, Globe, SignOut, SquaresFour, UserCircle } from '@phosphor-icons/react'
+import {
+  ArrowUpRight,
+  CalendarCheck,
+  CaretUpDown,
+  Globe,
+  GraduationCap,
+  SignOut,
+  SquaresFour,
+  UserCircle,
+} from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +25,7 @@ import {
 } from '@components/ui/dropdown-menu'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { signOut } from '@components/Contexts/AuthContext'
-import { urlAgendar } from '@/lib/discipulei/nav'
+import { ROTA_APRENDER, urlAgendar } from '@/lib/discipulei/nav'
 import { IDIOMAS_SELETOR, escolherIdioma } from '@components/Utils/LanguageSwitcher'
 import { useDadosNav } from './useDadosNav'
 import { useIdiomaDiscipulei } from '../useIdioma'
@@ -27,8 +36,9 @@ const ITEM =
   'focus:bg-[var(--surface)] data-[highlighted]:bg-[var(--surface)] outline-none'
 
 /**
- * Menu do avatar: Perfil/Conta, Agendar estudo (site), Painel admin (só
- * admin), Idioma (PT/EN/ES) e Sair. `variante="completa"` é a linha do rodapé da barra lateral;
+ * Menu do avatar: Perfil/Conta, Aprender (só no celular; no computador está
+ * na barra lateral), Agendar estudo (site), Painel admin (só admin), Idioma
+ * (PT/EN/ES) e Sair. `variante="completa"` é a linha do rodapé da barra lateral;
  * `compacta` é só o avatar, na barra superior do celular.
  */
 export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) {
@@ -87,6 +97,14 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
             {t('nav.perfil_conta')}
           </Link>
         </DropdownMenuItem>
+        {variante === 'compacta' && (
+          <DropdownMenuItem asChild className={ITEM}>
+            <Link href={ROTA_APRENDER}>
+              <GraduationCap size={18} aria-hidden="true" />
+              {t('nav.aprender')}
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild className={ITEM}>
           <a href={urlAgendar('menu', 'agendar', idioma)} target="_blank" rel="noopener">
             <CalendarCheck size={18} aria-hidden="true" />
