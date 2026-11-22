@@ -23,7 +23,8 @@ from src.db.notes import (
     TemplateRead,
     TemplateUpdate,
 )
-from src.services.notes.notes import CurrentUser, _new_uuid, now_iso, require_member, require_user_id
+from src.services.notes.notes import CurrentUser, _new_uuid, _props_out, now_iso, require_member, require_user_id
+from src.services.notes.properties import normalize_properties
 
 NOT_FOUND = "Template not found"
 
@@ -67,6 +68,7 @@ def _read(t: NoteTemplate) -> TemplateRead:
         name=t.name,
         kind=t.kind,
         content_json=t.content_json or "",
+        properties=_props_out(t.properties),
         created_at=t.created_at,
         updated_at=t.updated_at,
     )
@@ -113,6 +115,7 @@ async def create_template(db: AsyncSession, current_user: CurrentUser, data: Tem
         name=name,
         content_json=content,
         kind=kind,
+        properties=normalize_properties(data.properties),
         created_at=now,
         updated_at=now,
     )
@@ -134,6 +137,8 @@ async def update_template(
         t.content_json = _validate_content(data.content_json)
     if "kind" in fields:
         t.kind = _validate_kind(data.kind)
+    if "properties" in fields:
+        t.properties = normalize_properties(data.properties)
     t.updated_at = now_iso()
     db.add(t)
     await db.commit()

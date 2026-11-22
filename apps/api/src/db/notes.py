@@ -13,6 +13,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 from sqlalchemy import (
+    JSON,
     Column,
     ForeignKey,
     Index,
@@ -22,6 +23,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 
@@ -40,6 +42,23 @@ SHARE_SCOPES = (SHARE_SCOPE_ANYONE, SHARE_SCOPE_MEMBERS)
 
 TITLE_MAX = 300
 CONTENT_MAX = 1_000_000
+
+# Propriedades (metadados estilo Obsidian): lista ordenada de pares
+# {"key", "value"}. Lista (e não objeto) porque o JSONB do Postgres reordena
+# as chaves de um objeto e a ordem importa para quem escreveu.
+PROPERTY_KEY_MAX = 40
+PROPERTY_VALUE_MAX = 200
+PROPERTIES_MAX = 30
+
+# Anexos (imagens) das notas: guardados FORA da pasta de conteúdo pública do
+# LearnHouse e servidos só por endpoint autenticado (ver
+# services/notes/attachments.py).
+ATTACHMENT_SCOPE_NOTE = "note"
+ATTACHMENT_SCOPE_DISCUSSION = "discussion"
+
+
+def _json_list_column() -> Column:
+    return Column(JSON().with_variant(JSONB(), "postgresql"), nullable=False, default=list, server_default="[]")
 
 
 class NoteCollection(SQLModel, table=True):
@@ -95,6 +114,7 @@ class Note(SQLModel, table=True):
         sa_column=Column(Integer, ForeignKey("discussion.id", ondelete="SET NULL"), nullable=True),
     )
     legacy_discussion_id: Optional[int] = Field(default=None, sa_column=Column(Integer, nullable=True))
+    properties: list = Field(default_factory=list, sa_column=_json_list_column())
     created_at: str = Field(default="", sa_column=Column(String(40), nullable=False, default=""))
     updated_at: str = Field(default="", sa_column=Column(String(40), nullable=False, default=""))
     deleted_at: Optional[str] = Field(default=None, sa_column=Column(String(40), nullable=True))
@@ -152,6 +172,61 @@ class NoteBibleRef(SQLModel, table=True):
     verse_end: Optional[int] = Field(default=None, sa_column=Column(Integer, nullable=True))
 
 
+class NoteProperty(SQLModel, table=True):
+    """Índice das propriedades de cada nota (para filtrar a lista).
+
+    Espelho de ``note.properties``, refeito a cada salvamento, como as tags.
+    """
+
+    __tablename__ = "note_property"
+    __table_args__ = (Index("ix_note_property_key_value", "key_lower", "value_lower"),)
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    note_id: int = Field(
+        sa_column=Column(Integer, ForeignKey("note.id", ondelete="CASCADE"), nullable=False, index=True)
+    )
+    key_lower: str = Field(sa_column=Column(String(PROPERTY_KEY_MAX), nullable=False))
+    value: str = Field(default="", sa_column=Column(String(PROPERTY_VALUE_MAX), nullable=False, default=""))
+    value_lower: str = Field(default="", sa_column=Column(String(PROPERTY_VALUE_MAX), nullable=False, default=""))
+
+
+class NoteAttachment(SQLModel, table=True):
+    """Imagem anexada a uma nota (ou cópia dela numa discussion publicada).
+
+    - ``scope='note'``: privada ao dono (``user_id``); conta na quota.
+    - ``scope='discussion'``: cópia feita ao publicar na comunidade; servida
+      com a regra de leitura da discussion (``discussion_id``).
+    ``storage_key`` é gerado pelo servidor (nunca vem do cliente).
+    """
+
+    __tablename__ = "note_attachment"
+    __table_args__ = (Index("ix_note_attachment_user_scope", "user_id", "scope"),)
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    attachment_uuid: str = Field(sa_column=Column(String(64), nullable=False, unique=True, index=True))
+    user_id: int = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False))
+    org_id: int = Field(sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"), nullable=False))
+    scope: str = Field(
+        default=ATTACHMENT_SCOPE_NOTE,
+        sa_column=Column(String(12), nullable=False, default=ATTACHMENT_SCOPE_NOTE,
+                         server_default=ATTACHMENT_SCOPE_NOTE),
+    )
+    note_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("note.id", ondelete="SET NULL"), nullable=True, index=True),
+    )
+    discussion_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("discussion.id", ondelete="SET NULL"), nullable=True, index=True),
+    )
+    storage_key: str = Field(sa_column=Column(String(200), nullable=False))
+    mime: str = Field(sa_column=Column(String(40), nullable=False))
+    size: int = Field(default=0, sa_column=Column(Integer, nullable=False, default=0))
+    width: Optional[int] = Field(default=None, sa_column=Column(Integer, nullable=True))
+    height: Optional[int] = Field(default=None, sa_column=Column(Integer, nullable=True))
+    created_at: str = Field(default="", sa_column=Column(String(40), nullable=False, default=""))
+
+
 class NoteShare(SQLModel, table=True):
     __tablename__ = "note_share"
 
@@ -185,6 +260,7 @@ class NoteTemplate(SQLModel, table=True):
     name: str = Field(sa_column=Column(String(TEMPLATE_NAME_MAX), nullable=False))
     content_json: str = Field(default="", sa_column=Column(Text, nullable=False, default=""))
     kind: Optional[str] = Field(default=None, sa_column=Column(String(10), nullable=True))
+    properties: list = Field(default_factory=list, sa_column=_json_list_column())
     created_at: str = Field(default="", sa_column=Column(String(40), nullable=False, default=""))
     updated_at: str = Field(default="", sa_column=Column(String(40), nullable=False, default=""))
 
@@ -208,6 +284,35 @@ class BibleRefOut(BaseModel):
     verse_end: Optional[int] = None
 
 
+class PropertyItem(BaseModel):
+    key: str
+    value: str = ""
+
+
+class PropertyValueCount(BaseModel):
+    value: str
+    count: int = 0
+
+
+class PropertyKeyValues(BaseModel):
+    key: str
+    values: List[PropertyValueCount] = []
+
+
+class AttachmentRead(BaseModel):
+    attachment_uuid: str
+    mime: str
+    size: int
+    width: Optional[int] = None
+    height: Optional[int] = None
+
+
+class AttachmentUsage(BaseModel):
+    used: int
+    quota: int
+    max_file: int
+
+
 class NoteLinkOut(BaseModel):
     target_title: str
     target_note_uuid: Optional[str] = None
@@ -222,6 +327,7 @@ class NoteSummary(BaseModel):
     visibility: str
     excerpt: str = ""
     tags: List[str] = []
+    properties: List[PropertyItem] = []
     created_at: str
     updated_at: str
     deleted_at: Optional[str] = None
@@ -237,6 +343,7 @@ class NoteRead(BaseModel):
     collection_uuid: Optional[str] = None
     visibility: str
     tags: List[str] = []
+    properties: List[PropertyItem] = []
     links: List[NoteLinkOut] = []
     bible_refs: List[BibleRefOut] = []
     published_discussion_uuid: Optional[str] = None
@@ -260,6 +367,7 @@ class NoteCreate(BaseModel):
     kind: str = NOTE_KIND_NOTE
     collection_uuid: Optional[str] = None
     bible_refs: Optional[List[BibleRefIn]] = None
+    properties: Optional[List[PropertyItem]] = None
 
 
 class NoteUpdate(BaseModel):
@@ -267,6 +375,7 @@ class NoteUpdate(BaseModel):
     content_json: Optional[str] = None
     collection_uuid: Optional[str] = None
     bible_refs: Optional[List[BibleRefIn]] = None
+    properties: Optional[List[PropertyItem]] = None
 
 
 class TcdRequest(BaseModel):
@@ -333,6 +442,7 @@ class SharedNoteRead(BaseModel):
     updated_at: str
     author_name: str = ""
     scope: str
+    properties: List[PropertyItem] = []
 
 
 class PublishRequest(BaseModel):
@@ -354,6 +464,7 @@ class TemplateRead(BaseModel):
     name: str
     kind: Optional[str] = None
     content_json: str
+    properties: List[PropertyItem] = []
     created_at: str
     updated_at: str
 
@@ -363,9 +474,11 @@ class TemplateCreate(BaseModel):
     name: str
     content_json: str = ""
     kind: Optional[str] = None
+    properties: Optional[List[PropertyItem]] = None
 
 
 class TemplateUpdate(BaseModel):
     name: Optional[str] = None
     content_json: Optional[str] = None
     kind: Optional[str] = None
+    properties: Optional[List[PropertyItem]] = None
