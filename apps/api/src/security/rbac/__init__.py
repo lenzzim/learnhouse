@@ -52,6 +52,8 @@ from src.security.rbac.resource_access import (
     ResourceAccessChecker,
     check_resource_access,
     community_read_clause_for_user,
+    course_enrollment_clause,
+    is_enrolled_in_course,
     readable_communities_clause,
 )
 
@@ -110,6 +112,8 @@ __all__ = [
     "ResourceAccessChecker",
     "check_resource_access",
     "community_read_clause_for_user",
+    "course_enrollment_clause",
+    "is_enrolled_in_course",
     "readable_communities_clause",
     # FastAPI Dependencies
     "require_resource_access",
