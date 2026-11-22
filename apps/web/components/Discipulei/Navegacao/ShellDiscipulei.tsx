@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { getUriWithOrg } from '@services/config/config'
 import { useJoinBannerVisible, JOIN_BANNER_HEIGHT } from '@components/Objects/Banners/OrgJoinBanner'
-import { ROTA_INICIAL, rotaOculta } from '@/lib/discipulei/nav'
+import { ROTA_INICIAL, rotaAprender, rotaOculta } from '@/lib/discipulei/nav'
 import { useDadosNav } from './useDadosNav'
 import { EscreverProvider } from './EscreverContexto'
 import { BarraLateral } from './BarraLateral'
@@ -20,6 +20,9 @@ import { BuscaDialogo } from './BuscaDialogo'
  * - Ctrl/⌘+K abre a busca em qualquer tela.
  * - Rotas do LMS escondidas (lib/discipulei/nav.ts) levam quem não é admin
  *   para a tela inicial.
+ * - Na área "Aprender" (cursos, aulas, certificados) o conteúdo ganha
+ *   `data-area="aprender"`, que o styles/discipulei-dark.css usa para trazer
+ *   as cores do LMS para o preto e branco da marca.
  */
 export function ShellDiscipulei({ orgslug, children }: { orgslug: string; children: React.ReactNode }) {
   const pathname = usePathname()
@@ -54,6 +57,7 @@ export function ShellDiscipulei({ orgslug, children }: { orgslug: string; childr
       <BarraSuperior orgslug={orgslug} topo={topo} aoBuscar={() => setBuscaAberta(true)} />
       <BarraLateral orgslug={orgslug} topo={topo} aoBuscar={() => setBuscaAberta(true)} />
       <div
+        data-area={rotaAprender(pathname) ? 'aprender' : undefined}
         className="flex min-w-0 flex-1 flex-col lg:ps-64"
         style={{ paddingBottom: 'var(--altura-barra-inferior, 0px)' }}
       >
