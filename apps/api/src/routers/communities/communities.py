@@ -19,6 +19,7 @@ from src.services.communities.communities import (
     unlink_community_from_course,
     get_community_user_rights,
 )
+from src.services.communities.desafio import DesafioAtualRead, get_current_challenge
 from src.services.communities.thumbnails import upload_community_thumbnail
 from src.db.communities.communities import Community
 from src.security.rbac import check_resource_access, AccessAction
@@ -144,6 +145,25 @@ async def api_get_communities_by_org(
     return await get_communities_by_org(
         request, org_id, current_user, db_session, page, limit
     )
+
+
+@router.get(
+    "/org/{org_id}/current-challenge",
+    response_model=DesafioAtualRead | None,
+    summary="Get the current challenge (Discipulei)",
+    description=(
+        "The most recently created published course that has a linked community "
+        "and that the current user can read, with the user's enrollment status. "
+        "Returns null when there is none, and for anonymous users or API tokens."
+    ),
+)
+async def api_get_current_challenge(
+    request: Request,
+    org_id: int,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_db_session),
+) -> DesafioAtualRead | None:
+    return await get_current_challenge(request, org_id, current_user, db_session)
 
 
 @router.get(
