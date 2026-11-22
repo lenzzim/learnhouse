@@ -389,6 +389,14 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
     [router, salvarAgora, t]
   )
 
+  // Sem isto, o mousedown põe o cursor dentro de "[[...]]", a sugestão redecora o
+  // link antes do mouseup e o navegador não dispara o click (o alvo some da árvore).
+  // Com defaultPrevented o ProseMirror ignora o evento e o cursor fica onde estava.
+  const aoPressionarNoCorpo = (e: React.MouseEvent) => {
+    if (e.button !== 0) return
+    if ((e.target as HTMLElement).closest('a[data-nota-titulo], a[data-nota-tag]')) e.preventDefault()
+  }
+
   const aoClicarNoCorpo = (e: React.MouseEvent) => {
     const alvo = e.target as HTMLElement
     const lig = alvo.closest('a[data-nota-titulo]') as HTMLElement | null
@@ -679,7 +687,7 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
             />
           )}
           <ReferenciasNoTexto className="mt-6" aoClicar={(codigo) => c.abrirPassagem(codigo)}>
-            <div onClick={aoClicarNoCorpo}>
+            <div onMouseDownCapture={aoPressionarNoCorpo} onClick={aoClicarNoCorpo}>
               <EditorContent editor={editor} />
             </div>
           </ReferenciasNoTexto>

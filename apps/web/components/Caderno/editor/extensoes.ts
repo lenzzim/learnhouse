@@ -152,7 +152,12 @@ export function criarSugestoes(fontes: () => FontesSugestao) {
           debounce: 150,
           allow: ({ state, range }) => {
             const trecho = state.doc.textBetween(range.from, range.to)
-            return !trecho.slice(2).includes(']') && !trecho.slice(2).includes('[')
+            if (trecho.slice(2).includes(']') || trecho.slice(2).includes('[')) return false
+            // Cursor no meio de um [[...]] já fechado (setas): trocar só até o cursor
+            // quebraria o link. Logo antes do "]]" continua valendo (o comando aproveita).
+            const $fim = state.doc.resolve(range.to)
+            const depois = $fim.parent.textBetween($fim.parentOffset, $fim.parent.content.size)
+            return !/^[^[\]\n]+\]\]/.test(depois)
           },
           items: ({ query }) => fontes().notas(query),
           command: ({ editor: ed, range, props }) => {
