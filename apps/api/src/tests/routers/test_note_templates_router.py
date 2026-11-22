@@ -39,7 +39,7 @@ class TestTemplatesCrud:
         assert t["name"] == "Diário"
         assert t["kind"] == "tcd"
         assert json.loads(t["content_json"])["type"] == "doc"
-        assert set(t) == {"template_uuid", "name", "kind", "content_json", "created_at", "updated_at"}
+        assert set(t) == {"template_uuid", "name", "kind", "content_json", "properties", "created_at", "updated_at"}
 
         await _create(e, name="Ata de culto")
         lista = (await e["c"].get(f"{BASE}?org_id=1")).json()

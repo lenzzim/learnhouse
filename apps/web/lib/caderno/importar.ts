@@ -2,8 +2,10 @@
  * Importação de arquivos para o Caderno, toda no navegador (o arquivo não vai
  * para o servidor; só a nota convertida). As bibliotecas pesadas são
  * carregadas sob demanda.
- *  - .md / .markdown: @tiptap/markdown (frontmatter do Obsidian é removido;
- *    [[ligações]] e #tags continuam como texto e viram links no editor)
+ *  - .md / .markdown: @tiptap/markdown + markdownExtra (tarefas, imagens,
+ *    destaque > [!note], tabelas, vídeo por link). O frontmatter YAML do
+ *    Obsidian vira as PROPRIEDADES da nota; [[ligações]] e #tags continuam
+ *    como texto e viram links no editor
  *  - .txt: parágrafos (linha em branco separa)
  *  - .docx: mammoth → HTML → JSON do TipTap
  *  - .pdf: só o texto (pdfjs-dist, worker do próprio bundle), até 200 páginas
@@ -12,6 +14,8 @@
  * Fora por enquanto: .odt e .rtf (sem biblioteca leve e segura no navegador).
  */
 import { textoParaDoc, tituloImportado, type NoTiptap } from './conteudo'
+import { ajustarDoc, prepararMarkdown } from './markdownExtra'
+import { lerFrontmatter, type Propriedade } from './propriedades'
 
 export const EXTENSOES_ACEITAS = ['.md', '.markdown', '.txt', '.docx', '.pdf', '.html', '.htm', '.json']
 export const ACCEPT = EXTENSOES_ACEITAS.join(',')
@@ -26,6 +30,8 @@ export interface Importado {
   doc: NoTiptap
   /** formatação simplificada (PDF): avisar a pessoa */
   simplificado?: boolean
+  /** propriedades lidas do frontmatter (.md) */
+  propriedades?: Propriedade[]
 }
 
 export function extensaoDe(nome: string): string {
@@ -38,19 +44,18 @@ export function formatoAceito(nome: string): boolean {
 }
 
 async function extensoesBase() {
-  const [{ default: StarterKit }] = await Promise.all([import('@tiptap/starter-kit')])
-  return [StarterKit.configure({ link: { openOnClick: false } })]
-}
-
-/** Tira o frontmatter YAML (--- ... ---) do topo, comum no Obsidian. */
-export function semFrontmatter(md: string): string {
-  return md.replace(/^﻿?---\r?\n[\s\S]*?\r?\n---\r?\n?/, '')
+  const [{ default: StarterKit }, { TableKit }] = await Promise.all([
+    import('@tiptap/starter-kit'),
+    import('@tiptap/extension-table'),
+  ])
+  return [StarterKit.configure({ link: { openOnClick: false } }), TableKit]
 }
 
 async function markdownParaDoc(md: string): Promise<NoTiptap> {
   const { MarkdownManager } = await import('@tiptap/markdown')
   const gerenciador = new MarkdownManager({ extensions: await extensoesBase() })
-  return gerenciador.parse(md) as NoTiptap
+  const { md: preparado, imagens } = prepararMarkdown(md)
+  return ajustarDoc(gerenciador.parse(preparado) as NoTiptap, imagens)
 }
 
 /** HTML qualquer → JSON do TipTap, sempre sanitizado antes. */
@@ -160,11 +165,13 @@ export async function importarArquivo(arquivo: File): Promise<Importado> {
     }
     const texto = await arquivo.text()
     if (ext === '.txt') return { titulo: tituloImportado(arquivo.name), doc: textoParaDoc(texto) }
-    let md = semFrontmatter(texto)
+    // Frontmatter YAML (Obsidian) → propriedades da nota.
+    const { propriedades, corpo } = lerFrontmatter(texto)
+    let md = corpo
     const titulo = tituloImportado(arquivo.name, md)
     // O 1º "# Título" vira o título da nota (não repete no corpo).
     md = md.replace(/^\s*#\s+.+\r?\n?/, '')
-    return { titulo, doc: await markdownParaDoc(md) }
+    return { titulo, doc: await markdownParaDoc(md), propriedades }
   } catch (e: any) {
     if (e?.codigo) throw e
     throw Object.assign(new Error('leitura'), { codigo: 'leitura' as ErroImportacao })

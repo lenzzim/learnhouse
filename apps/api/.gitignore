@@ -11,6 +11,8 @@ __pycache__/
 
 # Learnhouse
 content/*
+# Imagens privadas do Caderno (fora de content/)
+note_media/
 
 # Flyio
 fly.toml

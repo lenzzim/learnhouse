@@ -1,17 +1,20 @@
 """Caderno Bíblico — /api/v1/notes.
 
 Tudo aqui é da própria pessoa logada (sessão; tokens de API e visitantes
-recusados). A única rota aberta é ``GET /shared/{token}``, que lê uma nota
-compartilhada por link com token válido.
+recusados). As rotas abertas são ``GET /shared/{token}`` (e as imagens dessa
+nota), que leem uma nota compartilhada por link com token válido, e a imagem
+copiada para uma discussion publicada, que segue a regra de leitura dela.
 """
 
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Response, UploadFile
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.core.events.database import get_db_session
 from src.db.notes import (
+    AttachmentRead,
+    AttachmentUsage,
     CollectionCreate,
     CollectionRead,
     CollectionUpdate,
@@ -21,6 +24,7 @@ from src.db.notes import (
     NoteRead,
     NoteSummary,
     NoteUpdate,
+    PropertyKeyValues,
     PublishRequest,
     PublishResult,
     ShareCreate,
@@ -36,6 +40,7 @@ from src.db.notes import (
     TemplateUpdate,
 )
 from src.security.auth import get_current_user
+from src.services.notes import attachments as att_svc
 from src.services.notes import notes as svc
 from src.services.notes import templates as tpl_svc
 
@@ -57,11 +62,12 @@ async def api_list_notes(
     trash: bool = Query(default=False),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=50, ge=1, le=100),
+    prop: Optional[List[str]] = Query(default=None, description="Filtro por propriedade: chave:valor (repetível)"),
     current_user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ):
     return await svc.list_notes(db, current_user, org_id, collection_uuid, tag, kind, q,
-                                date_from, date_to, trash, page, limit)
+                                date_from, date_to, trash, page, limit, prop)
 
 
 @router.post("", response_model=NoteRead, summary="Create a note")
@@ -142,6 +148,36 @@ async def api_delete_collection(collection_uuid: str, current_user=Depends(get_c
     return await svc.delete_collection(db, current_user, collection_uuid)
 
 
+@router.get("/properties", response_model=List[PropertyKeyValues], summary="Property keys and values in use")
+async def api_list_properties(org_id: int = Query(...), current_user=Depends(get_current_user),
+                              db: AsyncSession = Depends(get_db_session)):
+    return await svc.list_property_values(db, current_user, org_id)
+
+
+@router.get("/attachments/usage", response_model=AttachmentUsage, summary="My image storage usage")
+async def api_attachment_usage(current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db_session)):
+    user_id = await svc.require_user_id(current_user)
+    return await att_svc.usage(db, user_id)
+
+
+@router.get("/attachments/{attachment_uuid}", summary="Image of my note (owner only)")
+async def api_get_attachment(attachment_uuid: str, current_user=Depends(get_current_user),
+                             db: AsyncSession = Depends(get_db_session)):
+    user_id = await svc.require_user_id(current_user)
+    att = await att_svc.owned_attachment(db, user_id, attachment_uuid)
+    data = await att_svc.load_bytes(att.storage_key)
+    return Response(content=data, headers=att_svc.image_headers(att, cache="private, max-age=3600"))
+
+
+@router.get("/discussion-attachments/{attachment_uuid}", summary="Image of a note published in a community")
+async def api_get_discussion_attachment(attachment_uuid: str, request: Request,
+                                        current_user=Depends(get_current_user),
+                                        db: AsyncSession = Depends(get_db_session)):
+    att = await att_svc.discussion_attachment(request, db, current_user, attachment_uuid)
+    data = await att_svc.load_bytes(att.storage_key)
+    return Response(content=data, headers=att_svc.image_headers(att, cache="private, max-age=300"))
+
+
 @router.get("/tags", response_model=List[TagRead], summary="List my tags")
 async def api_list_tags(org_id: int = Query(...), current_user=Depends(get_current_user),
                         db: AsyncSession = Depends(get_db_session)):
@@ -168,6 +204,17 @@ async def api_read_shared(token: str, response: Response, current_user=Depends(g
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
     response.headers["Referrer-Policy"] = "no-referrer"
     return await svc.read_shared(db, current_user, token)
+
+
+@router.get("/shared/{token}/attachments/{attachment_uuid}", summary="Image of a note shared by link")
+async def api_shared_attachment(token: str, attachment_uuid: str, current_user=Depends(get_current_user),
+                                db: AsyncSession = Depends(get_db_session)):
+    _share, note = await svc.resolve_share(db, current_user, token)
+    att = await att_svc.shared_attachment(db, note, attachment_uuid)
+    data = await att_svc.load_bytes(att.storage_key)
+    headers = att_svc.image_headers(att, cache="no-store")
+    headers["X-Robots-Tag"] = "noindex, nofollow"
+    return Response(content=data, headers=headers)
 
 
 # --- nota ------------------------------------------------------------------
@@ -221,6 +268,18 @@ async def api_export(note_uuid: str, current_user=Depends(get_current_user),
             "Cache-Control": "no-store",
         },
     )
+
+
+@router.post("/{note_uuid}/attachments", response_model=AttachmentRead, summary="Upload an image to my note")
+async def api_upload_attachment(note_uuid: str, file: UploadFile = File(...),
+                                current_user=Depends(get_current_user),
+                                db: AsyncSession = Depends(get_db_session)):
+    user_id = await svc.require_user_id(current_user)
+    note = await svc.get_owned_note(db, note_uuid, user_id)
+    if note.deleted_at:
+        raise HTTPException(status_code=404, detail="Note not found")
+    await svc.require_member(db, user_id, note.org_id)
+    return await att_svc.upload(db, user_id, note, file)
 
 
 @router.get("/{note_uuid}/shares", response_model=List[ShareRead], summary="Active share links")

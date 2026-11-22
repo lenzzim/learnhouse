@@ -1,11 +1,16 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Bold, Italic, Strikethrough, Code, Link as LinkIcon, List, ListOrdered, Heading2, Quote } from 'lucide-react'
 import { BotaoInserirVersiculo } from '@components/Biblia/BotaoInserirVersiculo'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { extensoesConteudoCaderno } from '@components/Caderno/editor/extensoesConteudo'
+import { criarCarregadorAnexos } from '@components/Caderno/editor/carregadorAnexos'
+import { urlAnexo } from '@services/caderno/notas'
 
 interface DiscussionEditorProps {
   content: any
@@ -50,6 +55,14 @@ export function DiscussionEditor({
   editable = true,
   minHeight = '150px',
 }: DiscussionEditorProps) {
+  const { t } = useTranslation()
+  const session = useLHSession() as any
+  const tokenRef = useRef<string | undefined>(undefined)
+  tokenRef.current = session?.data?.tokens?.access_token
+  // Discipulei: editar uma nota publicada do Caderno não pode apagar as
+  // imagens, tarefas, destaques, vídeos e tabelas que vieram dela.
+  const carregador = useMemo(() => criarCarregadorAnexos(urlAnexo.discussao, () => tokenRef.current), [])
+  useEffect(() => () => carregador.liberar(), [carregador])
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -87,6 +100,12 @@ export function DiscussionEditor({
       }),
       Placeholder.configure({
         placeholder,
+      }),
+      ...extensoesConteudoCaderno({
+        carregar: (anexo) => carregador.carregar(anexo),
+        rotuloErroImagem: t('caderno_editor.imagem_indisponivel'),
+        rotuloCaixaTarefa: t('caderno_editor.tarefa_concluida'),
+        colarImagensHtml: false,
       }),
     ],
     content: content || '',

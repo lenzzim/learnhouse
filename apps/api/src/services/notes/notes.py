@@ -46,11 +46,15 @@ from src.db.notes import (
     NoteLink,
     NoteLinkOut,
     NoteListResponse,
+    NoteProperty,
     NoteRead,
     NoteShare,
     NoteSummary,
     NoteTag,
     NoteTagMap,
+    PropertyItem,
+    PropertyKeyValues,
+    PropertyValueCount,
     PublishResult,
     ShareCreated,
     ShareRead,
@@ -61,6 +65,8 @@ from src.db.notes import (
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, APITokenUser, PublicUser, User
 from src.security.rbac import authorization_verify_if_user_is_anon
+from src.services.notes import attachments as att_svc
+from src.services.notes.properties import index_rows, normalize_properties, properties_to_frontmatter
 from src.services.notes.parsing import (
     extract_links,
     extract_tags,
@@ -216,6 +222,14 @@ async def _collection_uuids(db: AsyncSession, ids: Iterable[Optional[int]]) -> D
     return {i: u for i, u in rows}
 
 
+def _props_out(raw) -> List[PropertyItem]:
+    out = []
+    for p in raw or []:
+        if isinstance(p, dict) and p.get("key"):
+            out.append(PropertyItem(key=str(p["key"]), value=str(p.get("value") or "")))
+    return out
+
+
 async def summaries(db: AsyncSession, notes: Sequence[Note]) -> List[NoteSummary]:
     tags = await _tags_by_note(db, [n.id for n in notes])
     cols = await _collection_uuids(db, [n.collection_id for n in notes])
@@ -229,6 +243,7 @@ async def summaries(db: AsyncSession, notes: Sequence[Note]) -> List[NoteSummary
             visibility=n.visibility,
             excerpt=_excerpt(n.content_text),
             tags=tags.get(n.id, []),
+            properties=_props_out(n.properties),
             created_at=n.created_at,
             updated_at=n.updated_at,
             deleted_at=n.deleted_at,
@@ -269,6 +284,7 @@ async def note_read(db: AsyncSession, note: Note) -> NoteRead:
         collection_uuid=cols.get(note.collection_id) if note.collection_id else None,
         visibility=note.visibility,
         tags=tags,
+        properties=_props_out(note.properties),
         links=[NoteLinkOut(target_title=t, target_note_uuid=u) for t, u in link_rows],
         bible_refs=[
             BibleRefOut(book=r.book, chapter=r.chapter, verse_start=r.verse_start, verse_end=r.verse_end)
@@ -344,6 +360,15 @@ async def _replace_refs(db: AsyncSession, note: Note, refs) -> None:
         db.add(NoteBibleRef(note_id=note.id, **r))
 
 
+async def _replace_properties(db: AsyncSession, note: Note, items) -> None:
+    """Grava ``note.properties`` (já normalizadas) e refaz o índice de filtro."""
+    props = normalize_properties(items)
+    note.properties = props
+    await db.execute(delete(NoteProperty).where(NoteProperty.note_id == note.id))
+    for key_lower, value, value_lower in index_rows(props):
+        db.add(NoteProperty(note_id=note.id, key_lower=key_lower, value=value, value_lower=value_lower))
+
+
 async def _apply_content(db: AsyncSession, note: Note) -> None:
     note.content_text = tiptap_to_text(note.content_json)
     await _replace_links(db, note, extract_links(note.content_text))
@@ -405,6 +430,8 @@ async def create_note(db: AsyncSession, current_user: CurrentUser, data) -> Note
     await _apply_content(db, note)
     if data.bible_refs is not None:
         await _replace_refs(db, note, data.bible_refs)
+    if data.properties is not None:
+        await _replace_properties(db, note, data.properties)
     await _resolve_dangling_links(db, note)
     await db.commit()
     await db.refresh(note)
@@ -436,6 +463,8 @@ async def update_note(db: AsyncSession, current_user: CurrentUser, note_uuid: st
         await _apply_content(db, note)
     if data.bible_refs is not None:
         await _replace_refs(db, note, data.bible_refs)
+    if data.properties is not None:
+        await _replace_properties(db, note, data.properties)
     if title_changed:
         await _resolve_dangling_links(db, note)
     await db.commit()
@@ -486,7 +515,15 @@ async def _hard_delete(db: AsyncSession, note_ids: List[int]) -> None:
     )
     await db.execute(delete(NoteBibleRef).where(NoteBibleRef.note_id.in_(note_ids)))  # type: ignore[attr-defined]
     await db.execute(delete(NoteShare).where(NoteShare.note_id.in_(note_ids)))  # type: ignore[attr-defined]
+    await db.execute(delete(NoteProperty).where(NoteProperty.note_id.in_(note_ids)))  # type: ignore[attr-defined]
+    owners = (await db.execute(
+        select(Note.user_id).where(Note.id.in_(note_ids)).distinct()  # type: ignore[union-attr]
+    )).scalars().all()
     await db.execute(delete(Note).where(Note.id.in_(note_ids)))  # type: ignore[union-attr]
+    await db.flush()
+    # Imagens enviadas para essas notas que nenhuma outra nota/modelo cita.
+    for owner in owners:
+        await att_svc.collect_garbage(db, owner, only_note_ids=list(note_ids))
 
 
 async def delete_note_permanently(db: AsyncSession, current_user: CurrentUser, note_uuid: str) -> dict:
@@ -528,6 +565,10 @@ async def purge_expired_trash(
         for uid, oid in owners:
             await _delete_orphan_tags(db, uid, oid)
         await db.commit()
+    if user_id is not None:
+        # Imagens tiradas do texto há mais de um dia e não citadas em nada.
+        if await att_svc.collect_garbage(db, user_id):
+            await db.commit()
     return len(expired)
 
 
@@ -590,6 +631,7 @@ async def list_notes(
     trash: bool = False,
     page: int = 1,
     limit: int = 50,
+    props: Optional[List[str]] = None,
 ) -> NoteListResponse:
     user_id = await require_user_id(current_user)
     await require_member(db, user_id, org_id)
@@ -634,6 +676,10 @@ async def list_notes(
         clause = await _search_clause(db, q)
         if clause is not None:
             conds.append(clause)
+    for key, value in _parse_prop_filters(props):
+        conds.append(Note.id.in_(  # type: ignore[union-attr]
+            select(NoteProperty.note_id).where(NoteProperty.key_lower == key, NoteProperty.value_lower == value)
+        ))
 
     total = (await db.execute(select(func.count()).select_from(Note).where(*conds))).scalar() or 0
     notes = (await db.execute(
@@ -642,6 +688,46 @@ async def list_notes(
         .offset((page - 1) * limit).limit(limit)
     )).scalars().all()
     return NoteListResponse(items=await summaries(db, notes), total=total, page=page, limit=limit)
+
+
+def _parse_prop_filters(props: Optional[List[str]]) -> List[Tuple[str, str]]:
+    """``["tipo:Culto", "livro:João"]`` → ``[("tipo", "culto"), ("livro", "joão")]``."""
+    out: List[Tuple[str, str]] = []
+    for raw in props or []:
+        if not isinstance(raw, str) or ":" not in raw or len(raw) > 260:
+            raise HTTPException(status_code=422, detail="Invalid property filter (use key:value)")
+        key, value = raw.split(":", 1)
+        key, value = key.strip().lower(), value.strip().lower()
+        if not key or not value:
+            raise HTTPException(status_code=422, detail="Invalid property filter (use key:value)")
+        out.append((key, value))
+    return out[:5]
+
+
+async def list_property_values(
+    db: AsyncSession, current_user: CurrentUser, org_id: int
+) -> List[PropertyKeyValues]:
+    """Chaves e valores já usados nas notas (fora da lixeira), com contagem."""
+    user_id = await require_user_id(current_user)
+    await require_member(db, user_id, org_id)
+    rows = (await db.execute(
+        select(NoteProperty.key_lower, NoteProperty.value, NoteProperty.value_lower, func.count(Note.id))
+        .join(Note, Note.id == NoteProperty.note_id)
+        .where(Note.user_id == user_id, Note.org_id == org_id, Note.deleted_at.is_(None))  # type: ignore[union-attr]
+        .group_by(NoteProperty.key_lower, NoteProperty.value, NoteProperty.value_lower)
+        .order_by(NoteProperty.key_lower, NoteProperty.value_lower)
+    )).all()
+    grouped: Dict[str, Dict[str, PropertyValueCount]] = {}
+    for key, value, value_lower, count in rows:
+        values = grouped.setdefault(key, {})
+        if value_lower in values:
+            values[value_lower].count += int(count)
+        else:
+            values[value_lower] = PropertyValueCount(value=value, count=int(count))
+    return [
+        PropertyKeyValues(key=k, values=sorted(v.values(), key=lambda x: (-x.count, x.value.lower()))[:100])
+        for k, v in grouped.items()
+    ]
 
 
 async def resolve_title(db: AsyncSession, current_user: CurrentUser, org_id: int, title: str) -> NoteSummary:
@@ -686,7 +772,8 @@ async def export_markdown(db: AsyncSession, current_user: CurrentUser, note_uuid
     note = await get_owned_note(db, note_uuid, user_id)
     title = note.title or "Sem título"
     body = tiptap_to_markdown(note.content_json)
-    return f"# {title}\n\n{body}", f"{_slug(title)}.md"
+    front = properties_to_frontmatter(note.properties)
+    return f"{front}{chr(10) if front else ''}# {title}\n\n{body}", f"{_slug(title)}.md"
 
 
 # ---------------------------------------------------------------------------
@@ -1065,6 +1152,19 @@ _SHARE_NOT_FOUND = HTTPException(status_code=404, detail="Shared note not found"
 
 
 async def read_shared(db: AsyncSession, current_user: CurrentUser, token: str) -> SharedNoteRead:
+    share, note = await resolve_share(db, current_user, token)
+    author = (await db.execute(select(User).where(User.id == note.user_id))).scalars().first()
+    author_name = ""
+    if author:
+        author_name = (author.first_name or "").strip() or (author.username or "")
+    return SharedNoteRead(title=note.title, content_json=note.content_json, kind=note.kind,
+                          tcd_date=note.tcd_date, updated_at=note.updated_at, author_name=author_name,
+                          scope=share.scope, properties=_props_out(note.properties))
+
+
+async def resolve_share(db: AsyncSession, current_user: CurrentUser, token: str) -> Tuple[NoteShare, Note]:
+    """Valida o token do link privado (hash, revogação, validade, escopo) →
+    (share, nota). Qualquer falha é 404, igual a "não existe"."""
     if not token or len(token) > 200:
         raise _SHARE_NOT_FOUND
     digest = hash_token(token)
@@ -1093,13 +1193,7 @@ async def read_shared(db: AsyncSession, current_user: CurrentUser, token: str) -
         )).first()
         if not member:
             raise _SHARE_NOT_FOUND
-    author = (await db.execute(select(User).where(User.id == note.user_id))).scalars().first()
-    author_name = ""
-    if author:
-        author_name = (author.first_name or "").strip() or (author.username or "")
-    return SharedNoteRead(title=note.title, content_json=note.content_json, kind=note.kind,
-                          tcd_date=note.tcd_date, updated_at=note.updated_at, author_name=author_name,
-                          scope=share.scope)
+    return share, note
 
 
 # ---------------------------------------------------------------------------
@@ -1115,10 +1209,16 @@ async def publish_note(request: Request, db: AsyncSession, current_user: Current
     if note.deleted_at:
         raise HTTPException(status_code=404, detail=NOT_FOUND)
     label = data.label or ("devocional" if note.kind == NOTE_KIND_TCD else "general")
+    # Imagens: cada anexo citado ganha uma cópia própria da discussion (outro
+    # uuid, outro arquivo), servida com a regra de leitura da discussion. O
+    # anexo privado da nota continua sem caminho público.
+    content, plan = await att_svc.copy_for_discussion(db, user_id, note.content_json or "")
     discussion = await create_discussion(
-        request, data.community_uuid, note.title or "Sem título", note.content_json or "",
+        request, data.community_uuid, note.title or "Sem título", content,
         label, current_user, db, visibility="public",
     )
+    if plan:
+        await att_svc.materialize_discussion_copies(db, discussion.id, plan)
     note = await get_owned_note(db, note_uuid, user_id)
     note.published_discussion_id = discussion.id
     note.visibility = NOTE_VISIBILITY_COMMUNITY

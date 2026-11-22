@@ -826,3 +826,183 @@ html:not([dir='rtl']) .caderno-area :is(h1, h2, h3).caderno-secao {
   background-image: none;
   background-color: var(--surface);
 }
+
+/* ------------------------------------------------------------------ */
+/* Caderno — editor v2: imagens, tarefas, destaque, vídeo, tabelas,   */
+/* menu "/" e guia. P&B quente, só tokens (claro e escuro).           */
+/* Vale para o editor (.caderno-prosa) e para a discussion publicada. */
+/* ------------------------------------------------------------------ */
+
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) figure.caderno-imagem {
+  margin: 1.4em 0;
+  position: relative;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) figure.caderno-imagem img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) figure.caderno-imagem[data-estado] {
+  min-height: 7rem;
+  border-radius: 10px;
+  background: var(--surface);
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) figure.caderno-imagem[data-estado] img {
+  display: none;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) figure.caderno-imagem[data-estado='erro'] {
+  min-height: 3.5rem;
+  border: 1px dashed var(--line-strong);
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) figure.caderno-imagem[data-estado='erro']::after {
+  content: attr(title);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-3);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .caderno-prosa figure.caderno-imagem[data-estado='carregando'] {
+    animation: caderno-pulso 1.4s ease-in-out infinite;
+  }
+}
+@keyframes caderno-pulso {
+  50% { opacity: 0.55; }
+}
+.caderno-prosa .ProseMirror-selectednode:is(figure, div.caderno-video),
+.caderno-prosa figure.caderno-imagem.ProseMirror-selectednode,
+.caderno-prosa .caderno-video.ProseMirror-selectednode {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* Lista de tarefas: caixa com alvo de toque de 40px sem inflar a linha. */
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) ul[data-type='taskList'] {
+  list-style: none;
+  padding-inline-start: 0;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) li[data-type='taskItem'] {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35em;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) li[data-type='taskItem'] > label {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: calc((1.7em - 40px) / 2) -6px calc((1.7em - 40px) / 2) -12px;
+  cursor: pointer;
+  user-select: none;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) li[data-type='taskItem'] > label input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  accent-color: var(--text);
+  cursor: inherit;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) li[data-type='taskItem'] > div {
+  flex: 1;
+  min-width: 0;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) li[data-type='taskItem'][data-checked='true'] > div {
+  color: var(--text-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--line-strong);
+}
+[dir='rtl'] :is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) li[data-type='taskItem'] > label {
+  margin-inline: -12px -6px;
+}
+
+/* Destaque (callout). */
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) aside.caderno-destaque {
+  border: 1px solid var(--line-strong);
+  border-inline-start-width: 3px;
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 0.75em 1em;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) aside.caderno-destaque > * + * {
+  margin-top: 0.6em;
+}
+
+/* Vídeo (YouTube nocookie, Vimeo dnt=1). */
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) .caderno-video {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin: 1.4em 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) .caderno-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) .caderno-video[data-video-invalido] {
+  aspect-ratio: auto;
+  min-height: 3rem;
+  border-style: dashed;
+}
+
+/* Tabelas: rolam de lado no celular. */
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) :is(th, td) {
+  border: 1px solid var(--line);
+  padding: 0.4em 0.65em;
+  min-width: 6em;
+  vertical-align: top;
+  text-align: start;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) th {
+  background: var(--surface);
+  font-weight: 600;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror) :is(th, td) > p { margin: 0; }
+.caderno-prosa .selectedCell { background: var(--surface); }
+
+/* Guia de Markdown: prévias pequenas, mesmas regras do texto da nota. */
+.caderno-prosa.guia-previa {
+  min-height: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.guia-previa > * { margin: 0 !important; }
+.guia-previa :is(h1, h2, h3) { margin: 0; }
+.guia-previa .nota-ligacao-previa {
+  background: linear-gradient(var(--line-strong), var(--line-strong)) 0 100% / 100% 1px no-repeat;
+}
+.guia-previa .nota-tag-previa {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.82em;
+  color: var(--text-2);
+  background: var(--surface);
+  border-radius: 9999px;
+  padding: 0.05em 0.5em;
+}
+
+/* Menu "/" (fica num portal no <body>). */
+.caderno-menu-comandos [role='option'][aria-selected='true'] {
+  outline: 1px solid var(--line-strong);
+}

@@ -101,3 +101,44 @@ class TestMarkdown:
 def test_hash_token_is_sha256_hex():
     h = hash_token("abc")
     assert len(h) == 64 and h == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+
+
+def test_markdown_export_editor_v2_nodes():
+    """Imagem, vídeo, tarefas, destaque e tabela no .md exportado."""
+    doc = json.dumps({"type": "doc", "content": [
+        {"type": "image", "attrs": {"anexo": "noteatt_00000000-0000-0000-0000-000000000001", "alt": "Monte"}},
+        {"type": "image", "attrs": {"src": "https://exemplo.org/a.png", "alt": "ext"}},
+        {"type": "image", "attrs": {"src": "javascript:alert(1)", "alt": "x"}},
+        {"type": "youtube", "attrs": {"src": "https://www.youtube.com/watch?v=abc"}},
+        {"type": "vimeo", "attrs": {"id": "123456"}},
+        {"type": "taskList", "content": [
+            {"type": "taskItem", "attrs": {"checked": True}, "content": [
+                {"type": "paragraph", "content": [{"type": "text", "text": "Ler Jo 3"}]}]},
+            {"type": "taskItem", "attrs": {"checked": False}, "content": [
+                {"type": "paragraph", "content": [{"type": "text", "text": "Orar"}]}]},
+        ]},
+        {"type": "callout", "content": [
+            {"type": "paragraph", "content": [{"type": "text", "text": "Deus é fiel"}]}]},
+        {"type": "table", "content": [
+            {"type": "tableRow", "content": [
+                {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Livro"}]}]},
+                {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Tema"}]}]},
+            ]},
+            {"type": "tableRow", "content": [
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "João"}]}]},
+                {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "a|b"}]}]},
+            ]},
+        ]},
+    ]})
+    md = tiptap_to_markdown(doc)
+    assert md == (
+        "![Monte](caderno:anexo/noteatt_00000000-0000-0000-0000-000000000001)\n\n"
+        "![ext](https://exemplo.org/a.png)\n\n"
+        "https://www.youtube.com/watch?v=abc\n\n"
+        "https://vimeo.com/123456\n\n"
+        "- [x] Ler Jo 3\n- [ ] Orar\n\n"
+        "> [!note]\n> Deus é fiel\n\n"
+        "| Livro | Tema |\n| --- | --- |\n| João | a\\|b |\n"
+    )
+    text = tiptap_to_text(doc)
+    assert "Ler Jo 3" in text and "Deus é fiel" in text and "João" in text

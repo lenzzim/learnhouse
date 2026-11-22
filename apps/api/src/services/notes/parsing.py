@@ -22,6 +22,7 @@ MAX_REFS = 200
 _BLOCK_TYPES = {
     "paragraph", "heading", "blockquote", "codeBlock", "listItem", "bulletList",
     "orderedList", "taskList", "taskItem", "horizontalRule", "table", "tableRow",
+    "tableCell", "tableHeader", "callout", "image", "youtube", "vimeo",
 }
 
 _LINK_RE = re.compile(r"\[\[([^\[\]\n]{0,300})\]\]")
@@ -202,10 +203,52 @@ def _md_inline(nodes: List[dict]) -> str:
     return "".join(out)
 
 
+def _md_cell(cell: dict) -> str:
+    parts = []
+    for child in cell.get("content") or []:
+        if isinstance(child, dict):
+            parts.append(" ".join(_md_block(child)).strip())
+    return " ".join(p for p in parts if p).replace("|", r"\|")
+
+
+def _md_table(node: dict, indent: str) -> List[str]:
+    rows = [r for r in node.get("content") or [] if isinstance(r, dict)]
+    grid = [[_md_cell(c) for c in r.get("content") or [] if isinstance(c, dict)] for r in rows]
+    grid = [r for r in grid if r]
+    if not grid:
+        return []
+    width = max(len(r) for r in grid)
+    grid = [r + [""] * (width - len(r)) for r in grid]
+    lines = ["| " + " | ".join(grid[0]) + " |", "| " + " | ".join(["---"] * width) + " |"]
+    lines += ["| " + " | ".join(r) + " |" for r in grid[1:]]
+    return [indent + line for line in lines]
+
+
 def _md_block(node: dict, indent: str = "") -> List[str]:
     """Linhas de um bloco (sem a linha em branco de separação)."""
     t = node.get("type")
     content = [c for c in node.get("content") or [] if isinstance(c, dict)]
+    attrs = node.get("attrs") or {}
+    if t == "image":
+        alt = str(attrs.get("alt") or "").replace("]", "")
+        if attrs.get("anexo"):
+            # imagem privada do Caderno: só reabre na conta de quem escreveu
+            return [indent + f"![{alt}](caderno:anexo/{attrs['anexo']})"]
+        src = str(attrs.get("src") or "")
+        return [indent + f"![{alt}]({src})"] if src.startswith("https://") else []
+    if t == "youtube":
+        src = str(attrs.get("src") or "")
+        return [indent + src] if src.startswith("https://") else []
+    if t == "vimeo":
+        vid = str(attrs.get("id") or "")
+        return [indent + f"https://vimeo.com/{vid}"] if vid.isdigit() else []
+    if t == "callout":
+        lines = ["> [!note]"]
+        for child in content:
+            lines.extend("> " + line if line else ">" for line in _md_block(child))
+        return [indent + line for line in lines]
+    if t == "table":
+        return _md_table(node, indent)
     if t == "heading":
         level = int((node.get("attrs") or {}).get("level") or 1)
         return [indent + "#" * max(1, min(level, 6)) + " " + _md_inline(content)]
@@ -225,6 +268,8 @@ def _md_block(node: dict, indent: str = "") -> List[str]:
         lines = []
         for i, item in enumerate(content, start=1):
             marker = f"{i}. " if t == "orderedList" else "- "
+            if t == "taskList":
+                marker = "- [x] " if (item.get("attrs") or {}).get("checked") else "- [ ] "
             item_children = [c for c in item.get("content") or [] if isinstance(c, dict)]
             first = True
             for child in item_children:
