@@ -5,6 +5,9 @@
  */
 import { getAPIUrl } from '@services/config/config'
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests'
+import type { Propriedade } from '@/lib/caderno/propriedades'
+
+export type { Propriedade }
 
 export type TipoNota = 'note' | 'tcd' | 'study'
 export type Visibilidade = 'private' | 'link' | 'community'
@@ -26,6 +29,7 @@ export interface NotaResumo {
   visibility: Visibilidade
   excerpt: string
   tags: string[]
+  properties?: Propriedade[]
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -41,6 +45,7 @@ export interface Nota {
   collection_uuid: string | null
   visibility: Visibilidade
   tags: string[]
+  properties?: Propriedade[]
   links: { target_title: string; target_note_uuid: string | null }[]
   bible_refs: RefBiblica[]
   published_discussion_uuid: string | null
@@ -90,6 +95,7 @@ export interface NotaCompartilhada {
   updated_at: string
   author_name: string
   scope: EscopoLink
+  properties?: Propriedade[]
 }
 
 export interface FiltrosNotas {
@@ -102,6 +108,8 @@ export interface FiltrosNotas {
   trash?: boolean
   page?: number
   limit?: number
+  /** filtros por propriedade: ["tipo:Culto", "livro:João"] */
+  prop?: string[]
 }
 
 const base = () => `${getAPIUrl()}notes`
@@ -119,13 +127,21 @@ export function listarNotas(orgId: number, filtros: FiltrosNotas, token?: string
   const p = new URLSearchParams({ org_id: String(orgId) })
   for (const [k, v] of Object.entries(filtros)) {
     if (v === undefined || v === null || v === '') continue
-    p.set(k, String(v))
+    if (Array.isArray(v)) v.forEach((x) => x && p.append(k, String(x)))
+    else p.set(k, String(v))
   }
   return chamar<ListaNotas>(`${base()}?${p}`, 'GET', null, token)
 }
 
 export function criarNota(
-  dados: { org_id: number; title?: string; content_json?: string; kind?: TipoNota; collection_uuid?: string | null },
+  dados: {
+    org_id: number
+    title?: string
+    content_json?: string
+    kind?: TipoNota
+    collection_uuid?: string | null
+    properties?: Propriedade[]
+  },
   token?: string
 ) {
   return chamar<Nota>(base(), 'POST', dados, token)
@@ -137,7 +153,13 @@ export function obterNota(noteUuid: string, token?: string) {
 
 export function salvarNota(
   noteUuid: string,
-  dados: { title?: string; content_json?: string; collection_uuid?: string; bible_refs?: RefBiblica[] },
+  dados: {
+    title?: string
+    content_json?: string
+    collection_uuid?: string
+    bible_refs?: RefBiblica[]
+    properties?: Propriedade[]
+  },
   token?: string
 ) {
   return chamar<Nota>(`${base()}/${encodeURIComponent(noteUuid)}`, 'PUT', dados, token)
@@ -285,6 +307,7 @@ export interface ModeloUsuario {
   name: string
   kind: TipoNota | null
   content_json: string
+  properties?: Propriedade[]
   created_at: string
   updated_at: string
 }
@@ -294,7 +317,7 @@ export function listarModelos(orgId: number, token?: string) {
 }
 
 export function criarModelo(
-  dados: { org_id: number; name: string; content_json: string; kind?: TipoNota | null },
+  dados: { org_id: number; name: string; content_json: string; kind?: TipoNota | null; properties?: Propriedade[] },
   token?: string
 ) {
   return chamar<ModeloUsuario>(`${base()}/templates`, 'POST', dados, token)
@@ -302,4 +325,51 @@ export function criarModelo(
 
 export function apagarModelo(uuid: string, token?: string) {
   return chamar<{ ok: boolean }>(`${base()}/templates/${encodeURIComponent(uuid)}`, 'DELETE', null, token)
+}
+
+/* ------------------------------------------------------- propriedades */
+
+export interface ValoresPropriedade {
+  key: string
+  values: { value: string; count: number }[]
+}
+
+/** Chaves e valores já usados nas notas (para sugestões e filtros). */
+export function listarPropriedades(orgId: number, token?: string) {
+  return chamar<ValoresPropriedade[]>(`${base()}/properties?org_id=${orgId}`, 'GET', null, token)
+}
+
+/* ------------------------------------------------------------ imagens */
+
+export interface Anexo {
+  attachment_uuid: string
+  mime: string
+  size: number
+  width: number | null
+  height: number | null
+}
+
+export const TIPOS_IMAGEM = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+export const IMAGEM_MAX_BYTES = 5 * 1024 * 1024
+
+/** Envia uma imagem para a nota (privada; só o dono lê). */
+export async function enviarImagem(noteUuid: string, arquivo: File | Blob, token?: string): Promise<Anexo> {
+  const corpo = new FormData()
+  corpo.append('file', arquivo, (arquivo as File).name || 'imagem')
+  const res = await fetch(`${base()}/${encodeURIComponent(noteUuid)}/attachments`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    credentials: 'include',
+    cache: 'no-store',
+    body: corpo,
+  })
+  return errorHandling(res)
+}
+
+/** Endereço de leitura de um anexo em cada contexto. */
+export const urlAnexo = {
+  dono: (anexo: string) => `${base()}/attachments/${encodeURIComponent(anexo)}`,
+  link: (tokenLink: string) => (anexo: string) =>
+    `${base()}/shared/${encodeURIComponent(tokenLink)}/attachments/${encodeURIComponent(anexo)}`,
+  discussao: (anexo: string) => `${base()}/discussion-attachments/${encodeURIComponent(anexo)}`,
 }

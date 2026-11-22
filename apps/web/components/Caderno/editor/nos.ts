@@ -50,6 +50,8 @@ export interface OpcoesImagem {
    */
   carregar: ((anexo: string) => Promise<string>) | null
   rotuloErro: string
+  /** Aceitar <img> vindo de HTML colado (falso no editor de discussões). */
+  colarHtml: boolean
 }
 
 export const CadernoImagem = Node.create<OpcoesImagem>({
@@ -60,7 +62,7 @@ export const CadernoImagem = Node.create<OpcoesImagem>({
   selectable: true,
 
   addOptions() {
-    return { carregar: null, rotuloErro: 'Imagem indisponível' }
+    return { carregar: null, rotuloErro: 'Imagem indisponível', colarHtml: true }
   },
 
   addAttributes() {
@@ -81,6 +83,7 @@ export const CadernoImagem = Node.create<OpcoesImagem>({
   },
 
   parseHTML() {
+    if (!this.options.colarHtml) return []
     return [
       {
         tag: 'img',

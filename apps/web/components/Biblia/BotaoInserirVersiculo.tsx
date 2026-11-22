@@ -56,7 +56,14 @@ type Previa =
   | { tipo: 'erro'; erro?: unknown }
   | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo }
 
-export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
+export function BotaoInserirVersiculo({
+  editor,
+  abrirSinal = 0,
+}: {
+  editor: Editor
+  /** Caderno: muda (incrementa) para abrir o painel pelo comando "/versículo". */
+  abrirSinal?: number
+}) {
   const { t } = useTranslation()
   // padrão: a versão do idioma da interface (BLIVRE, WEB ou RV1909) até o
   // usuário escolher outra no seletor; nomes dos livros seguem a versão
@@ -65,6 +72,9 @@ export function BotaoInserirVersiculo({ editor }: { editor: Editor }) {
   const versao = escolhida ?? versaoPadrao
   const nomes = useNomesLivros(versao)
   const [aberto, setAberto] = useState(false)
+  useEffect(() => {
+    if (abrirSinal > 0) setAberto(true)
+  }, [abrirSinal])
   const [entrada, setEntrada] = useState('')
   const [previa, setPrevia] = useState<Previa>({ tipo: 'vazio' })
   const info = versaoPorId(versao) ?? versaoPorId(VERSAO_PADRAO)!

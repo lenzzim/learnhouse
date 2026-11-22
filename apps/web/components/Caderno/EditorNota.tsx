@@ -31,6 +31,9 @@ import {
   Warning,
   FileDashed,
   FloppyDisk,
+  Plus,
+  Question,
+  CheckSquare,
 } from '@phosphor-icons/react'
 import { ReferenciasBiblicas } from '@components/Biblia/extensaoReferencias'
 import { ReferenciasNoTexto } from '@components/Biblia/ReferenciasNoTexto'
@@ -38,10 +41,15 @@ import { BotaoInserirVersiculo } from '@components/Biblia/BotaoInserirVersiculo'
 import { codigoReferencia, encontrarReferencias } from '@/lib/biblia/referencias'
 import {
   criarNota,
+  enviarImagem,
   exportarMarkdown,
   idDaNota,
+  IMAGEM_MAX_BYTES,
   listarNotas,
+  listarPropriedades,
   listarTags,
+  TIPOS_IMAGEM,
+  urlAnexo,
   moverParaLixeira,
   resolverTitulo,
   restaurarNota,
@@ -51,7 +59,17 @@ import {
 } from '@services/caderno/notas'
 import { dataBR, dataLocal, lerDoc, pareceMarkdown, textoDoDoc, type NoTiptap } from '@/lib/caderno/conteudo'
 import { markdownParaDocPublico } from '@/lib/caderno/importar'
-import { DialogoModelos, DialogoSalvarModelo, SeletorModelosVazio } from './Modelos'
+import { COMANDOS, filtrarComandos, type IdComando } from '@/lib/caderno/comandos'
+import { definirPropriedade, mesmasPropriedades, normalizarPropriedades, valorDe, type Propriedade } from '@/lib/caderno/propriedades'
+import { useQuery } from '@tanstack/react-query'
+import { DialogoModelos, DialogoSalvarModelo, SeletorModelosVazio, type OpcaoModelo } from './Modelos'
+import { abrirMenuComandos, criarBarraComandos, type OpcoesBarraComandos } from './editor/barraComandos'
+import { renderizadorMenuComandos } from './editor/MenuComandos'
+import { extensoesConteudoCaderno } from './editor/extensoesConteudo'
+import { criarCarregadorAnexos } from './editor/carregadorAnexos'
+import { DialogoImagem, DialogoVideo } from './DialogosMidia'
+import { BlocoPropriedades } from './Propriedades'
+import { GuiaMarkdown } from './GuiaMarkdown'
 import { useCaderno } from './CadernoContexto'
 import { criarSugestoes, LigacoesETags, type FontesSugestao } from './editor/extensoes'
 import type { ItemSugestao } from './editor/MenuSugestao'
@@ -100,7 +118,7 @@ function BotaoBarra({
       aria-label={rotulo}
       aria-pressed={ativo}
       title={rotulo}
-      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${FOCO} ${
+      className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors lg:h-9 lg:w-9 ${FOCO} ${
         ativo ? 'bg-[var(--surface)] text-[var(--text)]' : 'text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
       }`}
     >
@@ -136,7 +154,7 @@ export function EditorNota({
   /** Nota ainda não salva (TCD em branco): cria no servidor no primeiro salvamento. */
   aoCriar?: () => Promise<Nota>
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const c = useCaderno()
   const router = useRouter()
   const colecoes = useColecoes()
@@ -162,15 +180,48 @@ export function EditorNota({
      * mesma string) ou com o documento vazio canônico do TipTap.
      */
     ultimoJson: notaInicial.content_json?.trim() ? notaInicial.content_json : DOC_VAZIO_JSON,
+    /** Propriedades atuais (tela) e as últimas gravadas no servidor. */
+    propriedades: normalizarPropriedades(notaInicial.properties),
+    ultimasPropriedades: normalizarPropriedades(notaInicial.properties),
+    /** Criação em andamento de uma nota ainda não salva (TCD em branco). */
+    criando: null as Promise<string> | null,
     pendente: false,
     salvando: false,
     timer: 0 as any,
     editor: null as Editor | null,
   })
+  const [propriedades, setPropriedades] = useState<Propriedade[]>(() => normalizarPropriedades(notaInicial.properties))
+  const [sinalPropriedade, setSinalPropriedade] = useState(0)
+  const [sinalVersiculo, setSinalVersiculo] = useState(0)
+  const [imagemAberta, setImagemAberta] = useState(false)
+  const [videoAberto, setVideoAberto] = useState(false)
+  const [guiaAberto, setGuiaAberto] = useState(false)
+  const usadas = useQuery({
+    queryKey: ['caderno', 'propriedades', c.orgId ?? 0],
+    queryFn: () => listarPropriedades(c.orgId as number, c.token),
+    enabled: c.autenticado && !!c.orgId && !!c.token && !lixeira,
+    staleTime: 60_000,
+  })
+  // Imagens privadas: buscadas com a sessão do dono e guardadas como blob:.
+  const carregador = useMemo(() => criarCarregadorAnexos(urlAnexo.dono, () => ctxRef.current.token), []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => carregador.liberar(), [carregador])
   const ctxRef = useRef(c)
   useEffect(() => {
     ctxRef.current = c
   }, [c])
+  // A pessoa já tocou na página depois de abrir a nota? (teclado, toque,
+  // colar ou soltar). Antes disso nenhuma transação do editor salva.
+  const interagiu = useRef(false)
+  useEffect(() => {
+    const marcar = () => {
+      interagiu.current = true
+    }
+    const eventos = ['keydown', 'pointerdown', 'paste', 'drop', 'beforeinput'] as const
+    for (const ev of eventos) window.addEventListener(ev, marcar, true)
+    return () => {
+      for (const ev of eventos) window.removeEventListener(ev, marcar, true)
+    }
+  }, [])
   const aoCriarRef = useRef(aoCriar)
   useEffect(() => {
     aoCriarRef.current = aoCriar
@@ -184,13 +235,35 @@ export function EditorNota({
 
   /* ------------------------------------------------------ salvar */
 
+  /** uuid da nota; cria no servidor se ainda não existe (uma vez só, mesmo com chamadas simultâneas). */
+  const garantirUuid = useCallback(async (): Promise<string> => {
+    const v = vivo.current
+    if (v.uuid) return v.uuid
+    if (!v.criando) {
+      const criar = aoCriarRef.current
+      if (!criar) throw new Error('nota sem uuid')
+      v.criando = criar()
+        .then((criada) => {
+          v.uuid = criada.note_uuid
+          setNota((n) => ({ ...n, ...criada }))
+          const ed = v.editor
+          if (ed) ctxRef.current.setNotaAberta({ note_uuid: v.uuid, title: v.titulo, doc: ed.getJSON() as NoTiptap })
+          return v.uuid
+        })
+        .finally(() => {
+          v.criando = null
+        })
+    }
+    return v.criando
+  }, [])
+
   const salvarAgora = useCallback(async () => {
     const v = vivo.current
     const ed = v.editor
     if (!ed || !v.pendente) return
     if (v.salvando) return // o término do salvamento atual reagenda
     // Nota ainda não criada e nada escrito (ou tudo apagado), título intacto: não cria.
-    if (!v.uuid && ed.isEmpty && v.titulo.trim() === notaInicial.title.trim()) {
+    if (!v.uuid && ed.isEmpty && v.titulo.trim() === notaInicial.title.trim() && !v.propriedades.length) {
       v.pendente = false
       setStatus('salvo')
       return
@@ -203,24 +276,25 @@ export function EditorNota({
     v.pendente = false
     setStatus('salvando')
     try {
-      if (!v.uuid) {
-        const criar = aoCriarRef.current
-        if (!criar) throw new Error('nota sem uuid')
-        const criada = await criar()
-        v.uuid = criada.note_uuid
-        setNota((n) => ({ ...n, ...criada }))
-        ctxRef.current.setNotaAberta({ note_uuid: v.uuid, title: v.titulo, doc: ed.getJSON() as NoTiptap })
-      }
+      if (!v.uuid) await garantirUuid()
       // JSON lido só agora: inclui o que foi digitado enquanto a nota era criada.
       const json = ed.getJSON() as NoTiptap
       const jsonTexto = JSON.stringify(json)
       const texto = textoDoDoc(json)
+      const props = v.propriedades
+      const mudouProps = !mesmasPropriedades(props, v.ultimasPropriedades)
       const salva = await salvarNota(
         v.uuid,
-        { title: v.titulo.trim(), content_json: jsonTexto, bible_refs: refsDoTexto(texto) },
+        {
+          title: v.titulo.trim(),
+          content_json: jsonTexto,
+          bible_refs: refsDoTexto(texto),
+          ...(mudouProps ? { properties: props } : {}),
+        },
         ctxRef.current.token
       )
       v.ultimoJson = jsonTexto
+      if (mudouProps) v.ultimasPropriedades = props
       // Só metadados: o conteúdo do editor nunca é reaplicado a partir da resposta.
       setNota((n) => ({ ...n, ...salva }))
       setStatus(v.pendente ? 'pendente' : 'salvo')
@@ -235,7 +309,7 @@ export function EditorNota({
         v.timer = window.setTimeout(salvarAgora, ATRASO_SALVAR)
       }
     }
-  }, [])
+  }, [garantirUuid]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const agendar = useCallback(() => {
     const v = vivo.current
@@ -313,6 +387,107 @@ export function EditorNota({
     fontesRef.current = fontes
   }, [fontes])
 
+  /* ------------------------------------------------- propriedades */
+
+  const mudarPropriedades = useCallback(
+    (lista: Propriedade[]) => {
+      setPropriedades(lista)
+      vivo.current.propriedades = normalizarPropriedades(lista)
+      // só mudança de verdade agenda (abrir a nota nunca salva)
+      if (!mesmasPropriedades(vivo.current.propriedades, vivo.current.ultimasPropriedades)) agendar()
+    },
+    [agendar]
+  )
+
+  /* ------------------------------------------------------ imagens */
+
+  const enviarArquivos = useCallback(
+    async (arquivos: File[], alt = '', pos?: number) => {
+      const ed = vivo.current.editor
+      const imagens = arquivos.filter((a) => TIPOS_IMAGEM.includes(a.type))
+      if (!ed || !imagens.length) {
+        if (arquivos.length) toast.error(t('caderno_editor.imagem_tipo_invalido'))
+        return
+      }
+      const grandes = imagens.filter((a) => a.size > IMAGEM_MAX_BYTES)
+      if (grandes.length) toast.error(t('caderno_editor.imagem_grande'))
+      const validas = imagens.filter((a) => a.size <= IMAGEM_MAX_BYTES)
+      if (!validas.length) return
+      const aviso = toast.loading(t('caderno_editor.imagem_enviando'))
+      try {
+        const uuid = await garantirUuid()
+        let onde = pos
+        for (const arquivo of validas) {
+          const anexo = await enviarImagem(uuid, arquivo, ctxRef.current.token)
+          carregador.registrar(anexo.attachment_uuid, arquivo)
+          const no = { type: 'image', attrs: { anexo: anexo.attachment_uuid, src: null, alt: alt.slice(0, 300) } }
+          const ed2 = vivo.current.editor
+          if (!ed2) break
+          if (typeof onde === 'number') {
+            ed2.chain().insertContentAt(onde, no).run()
+            onde += 1
+          } else {
+            ed2.chain().focus().insertContent([no, { type: 'paragraph' }]).run()
+          }
+        }
+        toast.success(t('caderno_editor.imagem_enviada'), { id: aviso })
+      } catch (e: any) {
+        const quota = e?.detail?.code === 'NOTE_MEDIA_QUOTA'
+        const msg = quota
+          ? 'caderno_editor.imagem_quota'
+          : e?.status === 413
+            ? 'caderno_editor.imagem_grande'
+            : e?.status === 415
+              ? 'caderno_editor.imagem_tipo_invalido'
+              : 'caderno_editor.imagem_erro'
+        toast.error(t(msg), { id: aviso })
+      }
+    },
+    [carregador, garantirUuid, t]
+  )
+  const enviarRef = useRef(enviarArquivos)
+  useEffect(() => {
+    enviarRef.current = enviarArquivos
+  }, [enviarArquivos])
+
+  /* --------------------------------------------------- comandos "/" */
+
+  const pedirComando = useCallback((id: IdComando) => {
+    if (id === 'imagem') setImagemAberta(true)
+    else if (id === 'video') setVideoAberto(true)
+    else if (id === 'versiculo') setSinalVersiculo((n) => n + 1)
+    else if (id === 'modelo') setDialogoModelos(true)
+    else if (id === 'propriedade') setSinalPropriedade((n) => n + 1)
+    else if (id === 'guia') setGuiaAberto(true)
+  }, [])
+
+  const opcoesComandos = useCallback(
+    (): OpcoesBarraComandos => ({
+      itens: (consulta) =>
+        filtrarComandos(COMANDOS, consulta, (cmd) => t(`caderno_editor.cmd.${cmd.id}`)).map((cmd) => ({
+          id: cmd.id,
+          rotulo: t(`caderno_editor.cmd.${cmd.id}`),
+          descricao: t(`caderno_editor.cmd_desc.${cmd.id}`),
+          atalho: cmd.atalho,
+        })),
+      render: renderizadorMenuComandos(() => ({
+        rotulo: t('caderno_editor.menu_rotulo'),
+        vazio: t('caderno_editor.menu_vazio'),
+        dica: t('caderno_editor.menu_dica'),
+      })),
+      aoPedir: (id) => pedirComando(id),
+      dataDeHoje: () => {
+        const hoje = dataLocal()
+        return i18n.language?.startsWith('pt') ? dataBR(hoje) : new Date().toLocaleDateString(i18n.language || undefined)
+      },
+    }),
+    [t, i18n.language, pedirComando]
+  )
+  const comandosRef = useRef(opcoesComandos)
+  useEffect(() => {
+    comandosRef.current = opcoesComandos
+  }, [opcoesComandos])
+
   /* ------------------------------------------------------- editor */
 
   const editor = useEditor({
@@ -334,15 +509,21 @@ export function EditorNota({
             if (antes?.type.name === 'heading') return t('caderno.escreva_aqui')
           }
           if (ed.state.doc.childCount <= 1) {
-            if (notaInicial.kind !== 'tcd') return t('caderno.placeholder_corpo')
+            if (notaInicial.kind !== 'tcd') return t('caderno_editor.placeholder_corpo')
             return tcdDeHoje ? t('caderno.placeholder_tcd') : t('caderno.placeholder_tcd_outro_dia')
           }
           return ''
         },
       }),
+      ...extensoesConteudoCaderno({
+        carregar: (anexo) => carregador.carregar(anexo),
+        rotuloErroImagem: t('caderno_editor.imagem_indisponivel'),
+        rotuloCaixaTarefa: t('caderno_editor.tarefa_concluida'),
+      }),
       ReferenciasBiblicas,
       LigacoesETags,
       criarSugestoes(() => fontesRef.current()),
+      criarBarraComandos(() => comandosRef.current()),
     ],
     content: docInicial as any,
     editorProps: {
@@ -352,9 +533,24 @@ export function EditorNota({
         spellcheck: 'true',
         lang: 'pt-BR',
       },
-      // Colar markdown (sem HTML junto) converte a formatação.
+      // Soltar imagens do computador: envia (privada) e insere onde caiu.
+      handleDrop: (view, event, _slice, movido) => {
+        const arquivos = Array.from((event as DragEvent).dataTransfer?.files ?? []).filter((a) => a.type.startsWith('image/'))
+        if (movido || !arquivos.length || !view.editable) return false
+        event.preventDefault()
+        const pos = view.posAtCoords({ left: (event as DragEvent).clientX, top: (event as DragEvent).clientY })?.pos
+        enviarRef.current(arquivos, '', pos)
+        return true
+      },
+      // Colar markdown (sem HTML junto) converte a formatação; colar imagem envia.
       handlePaste: (_view, event) => {
         const dados = event.clipboardData
+        const imagens = Array.from(dados?.files ?? []).filter((a) => a.type.startsWith('image/'))
+        if (imagens.length) {
+          event.preventDefault()
+          enviarRef.current(imagens)
+          return true
+        }
         if (!dados || dados.getData('text/html')) return false
         const texto = dados.getData('text/plain')
         if (!pareceMarkdown(texto)) return false
@@ -369,8 +565,16 @@ export function EditorNota({
     // mudar o conteúdo: agendar nela re-salvava toda nota só de abrir
     // (updated_at mudava, a lista reordenava) e criava o TCD do dia só de
     // visitar. Só mudança real em relação ao salvo agenda.
+    // Normalizações do próprio editor ao abrir (atributos padrão de um nó
+    // importado, parágrafo final depois de tabela/imagem) também chegam aqui
+    // antes de qualquer toque da pessoa: viram a nova base em vez de salvar.
     onUpdate: ({ editor: ed }) => {
-      if (JSON.stringify(ed.getJSON()) === vivo.current.ultimoJson) return
+      const json = JSON.stringify(ed.getJSON())
+      if (json === vivo.current.ultimoJson) return
+      if (!interagiu.current) {
+        vivo.current.ultimoJson = json
+        return
+      }
       agendar()
     },
   })
@@ -467,11 +671,17 @@ export function EditorNota({
 
   /* --------------------------------------------------- ações */
 
-  const aplicarModelo = (doc: NoTiptap, modo: 'substituir' | 'inserir') => {
+  const aplicarModelo = (doc: NoTiptap, modo: 'substituir' | 'inserir', modelo?: OpcaoModelo) => {
     if (!editor) return
     if (modo === 'substituir') editor.chain().setContent(doc as any).focus('end').run()
     else editor.chain().focus().insertContent((doc.content ?? []) as any).run()
     setSemModelo(true)
+    // O modelo pode preencher propriedades (ex.: tipo = Culto) que ainda não existem.
+    let props = vivo.current.propriedades
+    for (const p of modelo?.propriedades ?? []) {
+      if (!valorDe(props, p.key)) props = definirPropriedade(props, p.key, p.value)
+    }
+    if (!mesmasPropriedades(props, vivo.current.propriedades)) mudarPropriedades(props)
     agendar()
   }
 
@@ -664,6 +874,21 @@ export function EditorNota({
       {/* Barra de formatação: pequena, rola de lado no celular */}
       {!lixeira && editor && (
         <div className="flex items-center gap-0.5 overflow-x-auto border-b border-[var(--line)] px-2 py-1 [scrollbar-width:none] sm:px-3" role="toolbar" aria-label={t('caderno.formatacao')}>
+          {/* Atalho visível para o menu "/" (no celular digitar "/" é menos óbvio). */}
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => abrirMenuComandos(editor)}
+            aria-label={t('caderno_editor.abrir_menu')}
+            title={t('caderno_editor.abrir_menu')}
+            aria-haspopup="listbox"
+            className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-[var(--line)] px-2.5 text-sm text-[var(--text)] transition-colors hover:bg-[var(--surface)] lg:h-9 ${FOCO}`}
+          >
+            <Plus size={16} weight="bold" aria-hidden="true" />
+            <span className="hidden sm:inline">{t('caderno_editor.inserir')}</span>
+            <kbd className="hidden rounded border border-[var(--line)] px-1 font-mono text-[0.7rem] text-[var(--text-3)] sm:inline">/</kbd>
+          </button>
+          <span className="mx-1 h-5 w-px shrink-0 bg-[var(--line)]" aria-hidden="true" />
           <BotaoBarra rotulo={t('caderno.negrito')} ativo={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>
             <TextB size={17} aria-hidden="true" />
           </BotaoBarra>
@@ -682,6 +907,9 @@ export function EditorNota({
           <BotaoBarra rotulo={t('caderno.lista_numerada')} ativo={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
             <ListNumbers size={17} aria-hidden="true" />
           </BotaoBarra>
+          <BotaoBarra rotulo={t('caderno_editor.cmd.tarefas')} ativo={editor.isActive('taskList')} onClick={() => editor.chain().focus().toggleTaskList().run()}>
+            <CheckSquare size={17} aria-hidden="true" />
+          </BotaoBarra>
           <BotaoBarra rotulo={t('caderno.citacao')} ativo={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
             <Quotes size={17} aria-hidden="true" />
           </BotaoBarra>
@@ -693,8 +921,36 @@ export function EditorNota({
             <Hash size={17} aria-hidden="true" />
           </BotaoBarra>
           <div className="caderno-inserir-versiculo shrink-0">
-            <BotaoInserirVersiculo editor={editor} />
+            <BotaoInserirVersiculo editor={editor} abrirSinal={sinalVersiculo} />
           </div>
+          {editor.isActive('table') && (
+            <>
+              <span className="mx-1 h-5 w-px shrink-0 bg-[var(--line)]" aria-hidden="true" />
+              {(
+                [
+                  ['tabela_linha', () => editor.chain().focus().addRowAfter().run()],
+                  ['tabela_coluna', () => editor.chain().focus().addColumnAfter().run()],
+                  ['tabela_tirar_linha', () => editor.chain().focus().deleteRow().run()],
+                  ['tabela_tirar_coluna', () => editor.chain().focus().deleteColumn().run()],
+                  ['tabela_apagar', () => editor.chain().focus().deleteTable().run()],
+                ] as const
+              ).map(([chave, f]) => (
+                <button
+                  key={chave}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={f}
+                  className={`inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-md px-2 text-xs text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)] lg:h-9 ${FOCO}`}
+                >
+                  {t(`caderno_editor.${chave}`)}
+                </button>
+              ))}
+            </>
+          )}
+          <span className="flex-1" />
+          <BotaoBarra rotulo={t('caderno_editor.cmd.guia')} onClick={() => setGuiaAberto(true)}>
+            <Question size={17} aria-hidden="true" />
+          </BotaoBarra>
         </div>
       )}
 
@@ -734,11 +990,18 @@ export function EditorNota({
             className="w-full resize-none overflow-hidden bg-transparent text-[2rem] font-medium leading-tight tracking-[-0.02em] text-[var(--text)] outline-none placeholder:text-[var(--text-3)] sm:text-[2.375rem]"
             style={SERIF}
           />
+          <BlocoPropriedades
+            propriedades={propriedades}
+            aoMudar={mudarPropriedades}
+            usados={usadas.data ?? []}
+            somenteLeitura={lixeira}
+            sinalAdicionar={sinalPropriedade}
+          />
           {!lixeira && editor && editor.isEmpty && !semModelo && (
             <SeletorModelosVazio
               tcd={nota.kind === 'tcd'}
               tcdDeHoje={tcdDeHoje}
-              aoEscolher={(m) => aplicarModelo(m.doc, 'substituir')}
+              aoEscolher={(m) => aplicarModelo(m.doc, 'substituir', m)}
               aoComecar={() => {
                 setSemModelo(true)
                 editor.commands.focus('start')
@@ -772,8 +1035,8 @@ export function EditorNota({
             aoMudar={setDialogoModelos}
             tcd={nota.kind === 'tcd'}
             notaVazia={editor.isEmpty}
-            aoInserir={(doc) => aplicarModelo(doc, 'inserir')}
-            aoSubstituir={(doc) => aplicarModelo(doc, 'substituir')}
+            aoInserir={(doc, m) => aplicarModelo(doc, 'inserir', m)}
+            aoSubstituir={(doc, m) => aplicarModelo(doc, 'substituir', m)}
           />
           <DialogoSalvarModelo
             aberto={salvarModelo}
@@ -781,7 +1044,24 @@ export function EditorNota({
             doc={() => editor.getJSON() as NoTiptap}
             kind={nota.kind}
             nomeSugerido={titulo.trim() || t('caderno.sem_titulo')}
+            propriedades={() => vivo.current.propriedades}
           />
+          <DialogoImagem
+            aberto={imagemAberta}
+            aoMudar={setImagemAberta}
+            aoEnviar={(arquivos, alt) => enviarArquivos(arquivos, alt)}
+            aoInserirLink={(url, alt) => editor.chain().focus().inserirImagem({ src: url, alt }).run()}
+          />
+          <DialogoVideo
+            aberto={videoAberto}
+            aoMudar={setVideoAberto}
+            aoInserir={(v) => {
+              const ch = editor.chain().focus()
+              if (v.tipo === 'youtube') ch.insertContent([{ type: 'youtube', attrs: { src: v.url, start: v.inicio ?? 0 } }, { type: 'paragraph' }]).run()
+              else ch.inserirVimeo({ id: v.id, hash: v.hash ?? null }).run()
+            }}
+          />
+          <GuiaMarkdown aberto={guiaAberto} aoMudar={setGuiaAberto} />
         </>
       )}
       {!lixeira && (

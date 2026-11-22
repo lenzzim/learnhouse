@@ -8,6 +8,7 @@ import { FileDashed, Sparkle, Trash, UserCircle } from '@phosphor-icons/react'
 import { FolhaInferior } from '@components/Discipulei/Navegacao/FolhaInferior'
 import { apagarModelo, criarModelo, listarModelos, type ModeloUsuario, type TipoNota } from '@services/caderno/notas'
 import { MODELOS_PRONTOS, docDoModelo, lerDoc, type NoTiptap } from '@/lib/caderno/conteudo'
+import { TIPO_DO_MODELO, type Propriedade } from '@/lib/caderno/propriedades'
 import { useCaderno } from './CadernoContexto'
 import { BOTAO_PRIMARIO, BOTAO_SECUNDARIO, CAMPO, FOCO, ICONE_PEQUENO } from './estilos'
 
@@ -18,6 +19,8 @@ export interface OpcaoModelo {
   doc: NoTiptap
   meu?: ModeloUsuario
   paraTcd?: boolean
+  /** propriedades que o modelo preenche (ex.: tipo = Culto) */
+  propriedades?: Propriedade[]
 }
 
 const chaveModelos = (orgId?: number) => ['caderno', 'modelos', orgId ?? 0] as const
@@ -40,6 +43,7 @@ export function useModelos(tcd: boolean) {
       descricao: t(`caderno.modelos.${m.id}.descricao`),
       doc: docDoModelo(Array.isArray(secoes) ? (secoes as string[]) : [], m.lista),
       paraTcd: m.paraTcd,
+      propriedades: TIPO_DO_MODELO[m.id] ? [{ key: 'tipo', value: TIPO_DO_MODELO[m.id] }] : undefined,
     }
   })
   if (tcd) prontos.sort((a, b) => Number(!!b.paraTcd) - Number(!!a.paraTcd))
@@ -48,6 +52,7 @@ export function useModelos(tcd: boolean) {
     nome: m.name,
     doc: lerDoc(m.content_json),
     meu: m,
+    propriedades: m.properties?.length ? m.properties : undefined,
   }))
   return { prontos, proprios, recarregar: meus.refetch }
 }
@@ -127,8 +132,8 @@ export function DialogoModelos({
   aoMudar: (v: boolean) => void
   tcd: boolean
   notaVazia: boolean
-  aoInserir: (doc: NoTiptap) => void
-  aoSubstituir: (doc: NoTiptap) => void
+  aoInserir: (doc: NoTiptap, modelo?: OpcaoModelo) => void
+  aoSubstituir: (doc: NoTiptap, modelo?: OpcaoModelo) => void
 }) {
   const { t } = useTranslation()
   const c = useCaderno()
@@ -141,7 +146,7 @@ export function DialogoModelos({
   }
   const escolher = (m: OpcaoModelo) => {
     if (notaVazia) {
-      aoSubstituir(m.doc)
+      aoSubstituir(m.doc, m)
       fechar(false)
     } else setEscolhido(m)
   }
@@ -184,7 +189,7 @@ export function DialogoModelos({
         <div className="flex flex-col gap-3">
           <p className="text-sm text-[var(--text)]">{t('caderno.modelo_como', { nome: escolhido.nome })}</p>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <button type="button" className={`${BOTAO_PRIMARIO} min-h-11 flex-1 px-4 text-sm`} onClick={() => { aoInserir(escolhido.doc); fechar(false) }}>
+            <button type="button" className={`${BOTAO_PRIMARIO} min-h-11 flex-1 px-4 text-sm`} onClick={() => { aoInserir(escolhido.doc, escolhido); fechar(false) }}>
               {t('caderno.inserir_no_cursor')}
             </button>
             <button
@@ -192,7 +197,7 @@ export function DialogoModelos({
               className={`${BOTAO_SECUNDARIO} min-h-11 flex-1 px-4 text-sm`}
               onClick={() => {
                 if (!window.confirm(t('caderno.confirmar_substituir'))) return
-                aoSubstituir(escolhido.doc)
+                aoSubstituir(escolhido.doc, escolhido)
                 fechar(false)
               }}
             >
@@ -231,12 +236,15 @@ export function DialogoSalvarModelo({
   doc,
   kind,
   nomeSugerido,
+  propriedades,
 }: {
   aberto: boolean
   aoMudar: (v: boolean) => void
   doc: () => NoTiptap
   kind: TipoNota
   nomeSugerido: string
+  /** propriedades da nota (a data não vai para o modelo) */
+  propriedades?: () => Propriedade[]
 }) {
   const { t } = useTranslation()
   const c = useCaderno()
@@ -248,7 +256,8 @@ export function DialogoSalvarModelo({
     if (!n || !c.orgId) return
     setOcupado(true)
     try {
-      await criarModelo({ org_id: c.orgId, name: n, content_json: JSON.stringify(doc()), kind }, c.token)
+      const props = (propriedades?.() ?? []).filter((p) => p.key.toLowerCase() !== 'data')
+      await criarModelo({ org_id: c.orgId, name: n, content_json: JSON.stringify(doc()), kind, properties: props }, c.token)
       c.invalidar()
       toast.success(t('caderno.modelo_salvo'))
       aoMudar(false)

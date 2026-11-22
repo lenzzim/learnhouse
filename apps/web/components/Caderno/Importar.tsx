@@ -91,11 +91,17 @@ export function ImportarProvider({ children }: { children: React.ReactNode }) {
     const falhas: string[] = []
     for (const arquivo of arquivos) {
       try {
-        const { titulo, doc, simplificado } = await importarArquivo(arquivo)
+        const { titulo, doc, simplificado, propriedades } = await importarArquivo(arquivo)
         const conteudo = JSON.stringify(doc)
         if (conteudo.length > 1_000_000) throw Object.assign(new Error(), { codigo: 'grande_demais' as ErroImportacao })
         const nota = await criarNota(
-          { org_id: c.orgId, title: titulo, content_json: conteudo, collection_uuid: colecao || null },
+          {
+            org_id: c.orgId,
+            title: titulo,
+            content_json: conteudo,
+            collection_uuid: colecao || null,
+            properties: propriedades?.length ? propriedades : undefined,
+          },
           c.token
         )
         ultima = nota.note_uuid
