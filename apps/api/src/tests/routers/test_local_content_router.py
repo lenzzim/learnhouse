@@ -62,6 +62,41 @@ class TestLocalContentRouter:
         assert head_response.headers["content-type"] == "image/png"
         assert head_response.headers["content-length"] == "3"
 
+    async def test_private_note_media_never_served(self, client, app, tmp_path):
+        """content/private/ (imagens privadas do Caderno) dá 404 até para admin."""
+        content_root = tmp_path / "content"
+        arquivo = content_root / "private" / "note_media" / "1" / "2" / ("a" * 32 + ".jpg")
+        arquivo.parent.mkdir(parents=True)
+        arquivo.write_bytes(b"jpg")
+
+        from src.routers import local_content
+
+        original_dir = local_content.CONTENT_DIR
+        local_content.CONTENT_DIR = content_root
+        try:
+            rel = "private/note_media/1/2/" + "a" * 32 + ".jpg"
+            respostas = [
+                await client.get(f"/content/{rel}"),
+                await client.head(f"/content/{rel}"),
+                await client.get(f"/content/./{rel}"),
+                await client.get("/content/" + rel.replace("/", "%2F")),
+            ]
+        finally:
+            local_content.CONTENT_DIR = original_dir
+
+        assert [r.status_code for r in respostas] == [404, 404, 404, 404]
+        assert all(r.content != b"jpg" for r in respostas)
+
+    def test_note_media_default_dir_is_content_private(self, monkeypatch):
+        """Sem LEARNHOUSE_NOTE_MEDIA_DIR, as imagens ficam em content/private/note_media."""
+        import os
+        from src.services.notes import attachments
+
+        monkeypatch.delenv("LEARNHOUSE_NOTE_MEDIA_DIR", raising=False)
+        assert attachments._media_root() == os.path.realpath(
+            os.path.join("content", "private", "note_media")
+        )
+
     async def test_private_course_activity_requires_membership(
         self, client, db, org, regular_user, anonymous_user, app, tmp_path
     ):

@@ -2,12 +2,17 @@
 
 Privacidade (fé é dado sensível, LGPD art. 11):
 
-- o arquivo NUNCA vai para a pasta ``content/`` do LearnHouse (servida pelo
-  roteador de conteúdo, que libera ``orgs/...`` a qualquer um). Fica num
-  armazenamento separado: pasta ``LEARNHOUSE_NOTE_MEDIA_DIR`` (padrão
-  ``note_media/`` ao lado de ``content/``) ou, com S3, o prefixo
+- o arquivo NUNCA vai para a área pública de ``content/`` do LearnHouse
+  (``orgs/...`` e ``users/...``, que o roteador de conteúdo libera a qualquer
+  um). Fica na pasta ``LEARNHOUSE_NOTE_MEDIA_DIR`` (padrão
+  ``content/private/note_media/``) ou, com S3, no prefixo
   ``private/note_media/`` — fora de ``content/``, que é o único prefixo que
-  o roteador de conteúdo S3 serve;
+  o roteador de conteúdo S3 serve. O padrão local fica DENTRO de ``content/``
+  de propósito: é a pasta que o deploy persiste (volume ``/app/api/content``
+  no compose oficial), então as imagens sobrevivem ao redeploy sem
+  configuração extra. ``content/private/`` é recusado com 404 pelos dois
+  roteadores de ``/content`` (``local_content`` e ``content_files``), para
+  qualquer usuário, e há teste para isso;
 - o nome no disco é gerado pelo servidor (``<org>/<user>/<hex>.<ext>``); nada
   do nome enviado pelo cliente chega ao caminho;
 - leitura só por endpoint: o dono (sessão), o link privado ``/n/<token>``
@@ -81,8 +86,12 @@ def quota_bytes() -> int:
     return max(1, mb) * 1024 * 1024
 
 
+# Relativo ao cwd da API (/app/api no container): content/ é o volume persistido.
+_DEFAULT_MEDIA_DIR = os.path.join("content", "private", "note_media")
+
+
 def _media_root() -> str:
-    return os.path.realpath(os.environ.get("LEARNHOUSE_NOTE_MEDIA_DIR") or "note_media")
+    return os.path.realpath(os.environ.get("LEARNHOUSE_NOTE_MEDIA_DIR") or _DEFAULT_MEDIA_DIR)
 
 
 def _use_s3() -> bool:

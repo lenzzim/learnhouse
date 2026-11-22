@@ -159,6 +159,13 @@ async def _check_content_access(
     """
     parts = file_path.split('/')
 
+    # Discipulei: content/private/ guarda as imagens privadas das notas do
+    # Caderno (services/notes/attachments.py). Elas só saem pelos endpoints
+    # das notas, que conferem dono, link privado ou leitura da discussion.
+    # Por /content, nunca, para ninguém (nem admin).
+    if parts and parts[0] == 'private':
+        raise HTTPException(status_code=404, detail="File not found")
+
     # Assignment submission files must be gated to the owner or an instructor —
     # not the generic activity-content grant below (which would let any org
     # member, or anyone on a public course, download another learner's work).
