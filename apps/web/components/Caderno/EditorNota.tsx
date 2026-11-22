@@ -49,7 +49,7 @@ import {
   type Nota,
   type RefBiblica,
 } from '@services/caderno/notas'
-import { dataBR, lerDoc, pareceMarkdown, textoDoDoc, type NoTiptap } from '@/lib/caderno/conteudo'
+import { dataBR, dataLocal, lerDoc, pareceMarkdown, textoDoDoc, type NoTiptap } from '@/lib/caderno/conteudo'
 import { markdownParaDocPublico } from '@/lib/caderno/importar'
 import { DialogoModelos, DialogoSalvarModelo, SeletorModelosVazio } from './Modelos'
 import { useCaderno } from './CadernoContexto'
@@ -126,7 +126,14 @@ function StatusSalvo({ status }: { status: Status }) {
   )
 }
 
-export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
+export function EditorNota({
+  notaInicial,
+  aoCriar,
+}: {
+  notaInicial: Nota
+  /** Nota ainda não salva (TCD em branco): cria no servidor no primeiro salvamento. */
+  aoCriar?: () => Promise<Nota>
+}) {
   const { t } = useTranslation()
   const c = useCaderno()
   const router = useRouter()
@@ -138,13 +145,28 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
   const [menu, setMenu] = useState(false)
   const [movendo, setMovendo] = useState(false)
   const lixeira = !!nota.deleted_at
+  const existe = !!nota.note_uuid
+  // TCD de outro dia não fala em "hoje" (placeholder e seletor de modelos).
+  const tcdDeHoje = notaInicial.kind === 'tcd' && notaInicial.tcd_date === dataLocal()
 
-  // Estado vivo para o salvamento (evita closures velhas).
-  const vivo = useRef({ titulo: notaInicial.title, pendente: false, salvando: false, timer: 0 as any, editor: null as Editor | null })
+  // Estado vivo para o salvamento (evita closures velhas). `uuid` fica vazio até
+  // uma nota não salva ser criada no primeiro salvamento.
+  const vivo = useRef({
+    titulo: notaInicial.title,
+    uuid: notaInicial.note_uuid,
+    pendente: false,
+    salvando: false,
+    timer: 0 as any,
+    editor: null as Editor | null,
+  })
   const ctxRef = useRef(c)
   useEffect(() => {
     ctxRef.current = c
   }, [c])
+  const aoCriarRef = useRef(aoCriar)
+  useEffect(() => {
+    aoCriarRef.current = aoCriar
+  }, [aoCriar])
 
   // Toda nota nasce vazia (inclusive o TCD): modelo só quando a pessoa escolhe.
   const docInicial = useMemo<NoTiptap>(() => lerDoc(notaInicial.content_json), [notaInicial.note_uuid]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -166,14 +188,24 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
     v.salvando = true
     v.pendente = false
     setStatus('salvando')
-    const json = ed.getJSON() as NoTiptap
-    const texto = textoDoDoc(json)
     try {
+      if (!v.uuid) {
+        const criar = aoCriarRef.current
+        if (!criar) throw new Error('nota sem uuid')
+        const criada = await criar()
+        v.uuid = criada.note_uuid
+        setNota((n) => ({ ...n, ...criada }))
+        ctxRef.current.setNotaAberta({ note_uuid: v.uuid, title: v.titulo, doc: ed.getJSON() as NoTiptap })
+      }
+      // JSON lido só agora: inclui o que foi digitado enquanto a nota era criada.
+      const json = ed.getJSON() as NoTiptap
+      const texto = textoDoDoc(json)
       const salva = await salvarNota(
-        notaInicial.note_uuid,
+        v.uuid,
         { title: v.titulo.trim(), content_json: JSON.stringify(json), bible_refs: refsDoTexto(texto) },
         ctxRef.current.token
       )
+      // Só metadados: o conteúdo do editor nunca é reaplicado a partir da resposta.
       setNota((n) => ({ ...n, ...salva }))
       setStatus(v.pendente ? 'pendente' : 'salvo')
       ctxRef.current.invalidar()
@@ -187,7 +219,7 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
         v.timer = window.setTimeout(salvarAgora, ATRASO_SALVAR)
       }
     }
-  }, [notaInicial.note_uuid])
+  }, [])
 
   const agendar = useCallback(() => {
     const v = vivo.current
@@ -286,7 +318,8 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
             if (antes?.type.name === 'heading') return t('caderno.escreva_aqui')
           }
           if (ed.state.doc.childCount <= 1) {
-            return notaInicial.kind === 'tcd' ? t('caderno.placeholder_tcd') : t('caderno.placeholder_corpo')
+            if (notaInicial.kind !== 'tcd') return t('caderno.placeholder_corpo')
+            return tcdDeHoje ? t('caderno.placeholder_tcd') : t('caderno.placeholder_tcd_outro_dia')
           }
           return ''
         },
@@ -331,8 +364,8 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
   const publicarAberta = useCallback(() => {
     if (!editor) return
     const doc = editor.getJSON() as NoTiptap
-    ctxRef.current.setNotaAberta({ note_uuid: notaInicial.note_uuid, title: vivo.current.titulo, doc })
-  }, [editor, notaInicial.note_uuid])
+    ctxRef.current.setNotaAberta({ note_uuid: vivo.current.uuid, title: vivo.current.titulo, doc })
+  }, [editor])
 
   useEffect(() => {
     if (!editor) return
@@ -517,10 +550,10 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
               <span className="truncate">{nomeColecao}</span>
             </span>
           )}
-          <SeloVisibilidade visibilidade={nota.visibility} compacto onClick={lixeira ? undefined : () => setCompartilhar(true)} />
+          {existe && <SeloVisibilidade visibilidade={nota.visibility} compacto onClick={lixeira ? undefined : () => setCompartilhar(true)} />}
         </div>
-        <StatusSalvo status={status} />
-        {!lixeira && (
+        {(existe || status !== 'salvo') && <StatusSalvo status={status} />}
+        {existe && !lixeira && (
           <button
             type="button"
             onClick={() => setCompartilhar(true)}
@@ -530,6 +563,7 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
             <span className="hidden sm:inline">{t('caderno.compartilhar')}</span>
           </button>
         )}
+        {existe && (
         <div className="relative" data-menu-nota>
           <button
             type="button"
@@ -562,6 +596,7 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
             </div>
           )}
         </div>
+        )}
         <button
           type="button"
           className={`${ICONE_PEQUENO} ${c.direitaAberta ? 'bg-[var(--surface)] text-[var(--text)]' : ''}`}
@@ -679,6 +714,7 @@ export function EditorNota({ notaInicial }: { notaInicial: Nota }) {
           {!lixeira && editor && editor.isEmpty && !semModelo && (
             <SeletorModelosVazio
               tcd={nota.kind === 'tcd'}
+              tcdDeHoje={tcdDeHoje}
               aoEscolher={(m) => aplicarModelo(m.doc, 'substituir')}
               aoComecar={() => {
                 setSemModelo(true)

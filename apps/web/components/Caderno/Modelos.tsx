@@ -58,10 +58,13 @@ export function useModelos(tcd: boolean) {
  */
 export function SeletorModelosVazio({
   tcd,
+  tcdDeHoje = true,
   aoEscolher,
   aoComecar,
 }: {
   tcd: boolean
+  /** TCD de outro dia: o título não fala em "hoje". */
+  tcdDeHoje?: boolean
   aoEscolher: (m: OpcaoModelo) => void
   aoComecar: () => void
 }) {
@@ -75,7 +78,7 @@ export function SeletorModelosVazio({
     <section aria-labelledby="modelos-vazio" className={`mt-6 rounded-2xl border border-[var(--line)] p-4 ${tcd ? 'bg-[var(--panel)]' : ''}`}>
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="modelos-vazio" className="caderno-secao text-sm font-medium text-[var(--text)]">
-          {tcd ? t('caderno.modelo_tcd_titulo') : t('caderno.usar_modelo')}
+          {tcd ? t(tcdDeHoje ? 'caderno.modelo_tcd_titulo' : 'caderno.modelo_tcd_titulo_outro_dia') : t('caderno.usar_modelo')}
         </h2>
         <button type="button" onClick={aoComecar} className={`rounded text-sm font-medium text-[var(--text)] underline decoration-[var(--link-underline)] underline-offset-4 ${FOCO}`}>
           {t('caderno.comecar_do_zero')}

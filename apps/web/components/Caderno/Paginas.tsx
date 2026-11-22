@@ -3,8 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { abrirTcd, criarNota, idDaNota, obterNota, uuidDaNota, type Nota } from '@services/caderno/notas'
-import { dataLocal, dataValida } from '@/lib/caderno/conteudo'
+import { abrirTcd, criarNota, idDaNota, obterNota, obterTcd, uuidDaNota, type Nota } from '@services/caderno/notas'
+import { dataBR, dataLocal, dataValida } from '@/lib/caderno/conteudo'
 import { useCaderno } from './CadernoContexto'
 import { EditorNota } from './EditorNota'
 import { hrefCaderno } from './PainelEsquerdo'
@@ -51,12 +51,22 @@ function Erro({ status, aoTentar }: { status?: number; aoTentar: () => void }) {
 function useCarregar(carregar: (() => Promise<Nota>) | null, chave: string) {
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
   const [tentativa, setTentativa] = useState(0)
+  // Já carregada para esta chave/tentativa: não recarrega se a sessão oscilar
+  // (token renovado, autenticado false → true). Recarregar remontaria o editor
+  // com o conteúdo do servidor, jogando fora o que está sendo digitado.
+  const carregada = useRef<string | null>(null)
   useEffect(() => {
     if (!carregar) return
+    const marca = `${chave}#${tentativa}`
+    if (carregada.current === marca) return
     let vivo = true
     setEstado({ tipo: 'carregando' })
     carregar()
-      .then((nota) => vivo && setEstado({ tipo: 'pronto', nota }))
+      .then((nota) => {
+        if (!vivo) return
+        carregada.current = marca
+        setEstado({ tipo: 'pronto', nota })
+      })
       .catch((e) => vivo && setEstado({ tipo: 'erro', status: e?.status }))
     return () => {
       vivo = false
@@ -64,6 +74,28 @@ function useCarregar(carregar: (() => Promise<Nota>) | null, chave: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chave, tentativa, !!carregar])
   return { estado, tentar: () => setTentativa((n) => n + 1) }
+}
+
+/** TCD que ainda não existe no servidor: só é criado na primeira edição (ou ao escolher um modelo). */
+function tcdNaoSalvo(orgId: number, data: string): Nota {
+  return {
+    note_uuid: '',
+    org_id: orgId,
+    title: `TCD — ${dataBR(data)}`,
+    content_json: '',
+    kind: 'tcd',
+    tcd_date: data,
+    collection_uuid: null,
+    visibility: 'private',
+    tags: [],
+    links: [],
+    bible_refs: [],
+    published_discussion_uuid: null,
+    published_community_uuid: null,
+    created_at: '',
+    updated_at: '',
+    deleted_at: null,
+  }
 }
 
 /** /caderno/<id> */
@@ -76,7 +108,7 @@ export function PaginaNota({ id }: { id: string }) {
   return <EditorNota key={estado.nota.note_uuid} notaInicial={estado.nota} />
 }
 
-/** /caderno/tcd/<YYYY-MM-DD>: abre ou cria o TCD do dia. */
+/** /caderno/tcd/<YYYY-MM-DD>: abre o TCD do dia; se não existir, abre em branco e só cria ao editar. */
 export function PaginaTcd({ data }: { data: string }) {
   const c = useCaderno()
   const router = useRouter()
@@ -85,14 +117,25 @@ export function PaginaTcd({ data }: { data: string }) {
     if (!valida || data > dataLocal(new Date(Date.now() + 86_400_000))) router.replace(hrefCaderno(c.orgslug, `/tcd/${dataLocal()}`))
   }, [valida, data, c.orgslug, router])
   const pronto = c.autenticado && !!c.token && !!c.orgId && valida
-  const { estado, tentar } = useCarregar(pronto ? () => abrirTcd(c.orgId as number, data, c.token) : null, data)
-  useEffect(() => {
-    if (estado.tipo === 'pronto') c.invalidar()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [estado.tipo])
+  const { estado, tentar } = useCarregar(
+    pronto
+      ? () =>
+          obterTcd(c.orgId as number, data, c.token).catch((e) => {
+            if (e?.status === 404) return tcdNaoSalvo(c.orgId as number, data)
+            throw e
+          })
+      : null,
+    data
+  )
   if (estado.tipo === 'carregando') return <Carregando />
   if (estado.tipo === 'erro') return <Erro status={estado.status} aoTentar={tentar} />
-  return <EditorNota key={estado.nota.note_uuid} notaInicial={estado.nota} />
+  return (
+    <EditorNota
+      key={estado.nota.note_uuid || `tcd-${data}`}
+      notaInicial={estado.nota}
+      aoCriar={estado.nota.note_uuid ? undefined : () => abrirTcd(c.orgId as number, data, c.token)}
+    />
+  )
 }
 
 /** /caderno/new: cria uma nota (na coleção da URL, se houver) e abre. */

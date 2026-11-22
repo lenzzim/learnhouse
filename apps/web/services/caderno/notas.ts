@@ -170,6 +170,11 @@ export async function resolverTitulo(orgId: number, titulo: string, token?: stri
   }
 }
 
+/** TCD do dia, só se já existir (404 quando ainda não foi criado). */
+export function obterTcd(orgId: number, data: string, token?: string) {
+  return chamar<Nota>(`${base()}/tcd/${encodeURIComponent(data)}?org_id=${orgId}`, 'GET', null, token)
+}
+
 /** TCD do dia: abre o que existe ou cria (idempotente). */
 export function abrirTcd(orgId: number, data: string, token?: string) {
   return chamar<Nota>(`${base()}/tcd`, 'POST', { org_id: orgId, date: data }, token)
