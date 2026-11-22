@@ -665,6 +665,17 @@ html:not([dir='rtl']) .caderno-area :is(h1, h2, h3).caderno-secao {
   min-height: 40vh;
   overflow-wrap: anywhere;
 }
+/* Título e corpo da nota são a própria página: sem caixa nem anel de foco (o
+   cursor já mostra onde se escreve). Precisa vencer `.dark :focus-visible`
+   (contenteditable sempre casa com :focus-visible) e `.dark textarea`. */
+.dark .caderno-prosa:focus-visible,
+.dark #caderno-titulo:focus-visible {
+  outline: none;
+}
+.dark #caderno-titulo {
+  background-color: transparent;
+  border: 0;
+}
 .caderno-prosa > * + * {
   margin-top: 0.85em;
 }
