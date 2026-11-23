@@ -1,11 +1,13 @@
 import React from 'react'
 import {
   BookOpen,
+  Church,
   HandHeart,
   HelpCircle,
   Lightbulb,
   Megaphone,
   MessageSquare,
+  NotebookPen,
   Sparkles,
   Star,
 } from 'lucide-react'
@@ -28,6 +30,10 @@ export function getLabelIcon(iconName: string, size: number = 12) {
       return <Megaphone size={size} />
     case 'Star':
       return <Star size={size} />
+    case 'Church':
+      return <Church size={size} />
+    case 'NotebookPen':
+      return <NotebookPen size={size} />
     default:
       return <MessageSquare size={size} />
   }

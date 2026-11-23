@@ -15,13 +15,18 @@ export interface UseDiscussionsOptions {
   page?: number
   limit?: number
   label?: string | null
+  /** "Meus posts" / "posts de…" (N39). */
+  authorUuid?: string | null
 }
 
 export function getDiscussionsKey(options: UseDiscussionsOptions) {
-  const { communityUuid, sortBy = 'recent', page = 1, limit = 10, label } = options
+  const { communityUuid, sortBy = 'recent', page = 1, limit = 10, label, authorUuid } = options
   let url = `${getAPIUrl()}communities/${communityUuid}/discussions?sort_by=${sortBy}&page=${page}&limit=${limit}`
   if (label) {
     url += `&label=${label}`
+  }
+  if (authorUuid) {
+    url += `&author_uuid=${encodeURIComponent(authorUuid)}`
   }
   return url
 }
@@ -29,18 +34,19 @@ export function getDiscussionsKey(options: UseDiscussionsOptions) {
 export function useDiscussions(options: UseDiscussionsOptions) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const { communityUuid, sortBy = 'recent', page = 1, limit = 10, label } = options
+  const { communityUuid, sortBy = 'recent', page = 1, limit = 10, label, authorUuid } = options
   const queryClient = useQueryClient()
 
   const queryKey = [
     ...queryKeys.community.discussions(communityUuid, sortBy, page),
     limit,
     label ?? null,
+    authorUuid ?? null,
   ]
 
   const { data, error, isLoading, isFetching } = useQuery<DiscussionWithAuthor[]>({
     queryKey,
-    queryFn: () => getDiscussions(communityUuid, sortBy, page, limit, null, access_token, label ?? undefined),
+    queryFn: () => getDiscussions(communityUuid, sortBy, page, limit, null, access_token, label ?? undefined, authorUuid ?? undefined),
     enabled: !!communityUuid && !!access_token,
     staleTime: 30_000,
     refetchOnWindowFocus: false,

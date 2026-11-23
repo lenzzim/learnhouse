@@ -11,6 +11,10 @@ import {
 // Só estas são oferecidas para posts novos.
 export const DISCUSSION_LABELS = [
   { id: 'devocional', name: 'Devocional', color: '#8fb8ea', icon: 'BookOpen' },
+  // Tipos de post da decisão N39 (estudo e culto entram aqui; pergunta,
+  // testemunho e oração já existiam). O "tipo de post" é este mesmo campo.
+  { id: 'estudo', name: 'Estudo', color: '#a3a19c', icon: 'NotebookPen' },
+  { id: 'culto', name: 'Anotação de culto', color: '#a3a19c', icon: 'Church' },
   { id: 'testemunho', name: 'Testemunho', color: '#b9a6ec', icon: 'Sparkles' },
   { id: 'oracao', name: 'Pedido de oração', color: '#e5978f', icon: 'HandHeart' },
   { id: 'question', name: 'Pergunta', color: '#a3a19c', icon: 'HelpCircle' },
@@ -81,9 +85,14 @@ export interface Discussion {
   is_locked: boolean
   // Opcional para tolerar respostas de uma API antiga (ausente = pública).
   visibility?: DiscussionVisibility
+  /** Resposta útil (só em perguntas): id do comentário marcado. */
+  accepted_comment_id?: number | null
   creation_date: string
   update_date: string
 }
+
+/** Rótulo das perguntas: só elas têm "resposta útil". */
+export const LABEL_PERGUNTA = 'question'
 
 export interface DiscussionAuthor {
   id: number
@@ -191,11 +200,15 @@ export async function getDiscussions(
   limit: number = 10,
   next: any,
   access_token?: string,
-  label?: string
+  label?: string,
+  author_uuid?: string
 ): Promise<DiscussionWithAuthor[]> {
   let url = `${getAPIUrl()}communities/${community_uuid}/discussions?sort_by=${sort_by}&page=${page}&limit=${limit}`
   if (label) {
     url += `&label=${label}`
+  }
+  if (author_uuid) {
+    url += `&author_uuid=${encodeURIComponent(author_uuid)}`
   }
   const result: any = await fetch(
     url,
