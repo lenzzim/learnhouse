@@ -250,7 +250,10 @@
     "convite_titulo": "Want to study this with someone?",
     "convite_publicado": "Devotional published. Want to study this with someone?",
     "convite_descricao": "Eight Bible studies, free, in groups of 2 or 3. Online or in person.",
-    "dispensar": "Dismiss invitation"
+    "dispensar": "Dismiss invitation",
+    "agora_nao": "Not now",
+    "convite_hoje": "Study with us: eight free Bible studies, in a group of 2 or 3.",
+    "convite_tcd": "Quiet time saved. Want to study the Bible with someone?"
   },
   "banner": {
     "viewing_as_guest": "You're viewing {{name}} as a guest.",
@@ -265,7 +268,11 @@
     "descricao": "Open the community straight from your home screen.",
     "ios_instrucoes": "Tap Share, then Add to Home Screen.",
     "botao_instalar": "Install",
-    "agora_nao": "Not now"
+    "agora_nao": "Not now",
+    "android_instrucoes": "In the browser menu ⋮, tap Install app or Add to Home screen.",
+    "desktop_instrucoes": "In the browser menu ⋮, choose Install Discipulei (or the install icon in the address bar).",
+    "firefox_desktop_instrucoes": "Firefox on desktop can't install apps. Open the community in Chrome or Edge to install.",
+    "safari_mac_instrucoes": "In Safari, open File and choose Add to Dock."
   },
   "auth": {
     "login": "Login",
@@ -429,7 +436,9 @@
     "complete_profile": {
       "title": "Complete your profile",
       "subtitle": "{{org}} needs a little more information before you continue."
-    }
+    },
+    "mostrar_senha": "Show password",
+    "ocultar_senha": "Hide password"
   },
   "validation": {
     "required": "Required",
@@ -833,7 +842,7 @@
       "failed_to_delete": "Failed to delete comment"
     },
     "label_filter": {
-      "label": "Label:",
+      "label": "Type:",
       "all": "All",
       "all_discussions": "All discussions",
       "clear_filter": "Clear filter"
@@ -846,7 +855,9 @@
       "question": "Question",
       "idea": "Idea",
       "announcement": "Announcement",
-      "showcase": "Showcase"
+      "showcase": "Showcase",
+      "estudo": "Study",
+      "culto": "Sermon notes"
     },
     "devotional_template": {
       "passage": "Passage",
@@ -896,7 +907,7 @@
     "create_discussion": {
       "title": "Start a Discussion",
       "description": "Share your thoughts with the community",
-      "category_label": "Category",
+      "category_label": "Post type",
       "title_label": "Discussion Title",
       "title_placeholder": "What would you like to discuss?",
       "emoji_selected": "Custom emoji selected",
@@ -7090,6 +7101,86 @@
           "Three reasons to be grateful"
         ]
       }
+    }
+  },
+  "social": {
+    "autor": {
+      "rotulo": "Author",
+      "todos": "All authors",
+      "meus": "My posts",
+      "de": "Posts by {{nome}}"
+    },
+    "discussao": {
+      "mais_acoes": "More actions",
+      "acoes_comentario": "Comment actions"
+    },
+    "feed": {
+      "filtro": "Show",
+      "todas": "All",
+      "seguindo": "People I follow",
+      "vazio_seguindo": "No posts from people you follow yet. Find people in"
+    },
+    "mencoes": {
+      "rotulo": "Mention someone",
+      "ninguem": "No one in this space with that name.",
+      "resultados": "Suggested people: {{count}}"
+    },
+    "notificacoes": {
+      "titulo": "Notifications",
+      "vazio": "No notifications yet. When someone mentions you, it shows up here.",
+      "mencao_post": "{{nome}} mentioned you in a post",
+      "mencao_comentario": "{{nome}} mentioned you in a comment",
+      "nova": "new",
+      "nao_lidas": "unread: {{count}}"
+    },
+    "perfil": {
+      "titulo": "Your profile",
+      "aparecer": "Show me on the People page",
+      "visivel_descricao": "Signed-in members see your name, photo, bio and public posts. Your email never shows.",
+      "oculto_descricao": "Off: you don't appear on the People page and no one can follow you.",
+      "bio": "Short bio",
+      "bio_placeholder": "E.g.: Servant of Christ, learning to pray.",
+      "salvar_bio": "Save bio",
+      "salvo": "Profile saved",
+      "erro": "Couldn't save your profile",
+      "seguidores": "Followers: {{count}}",
+      "privacidade": "Only you see how many people follow you. Following gives no access beyond what that person could already read.",
+      "como_os_outros_veem": "This is how other members see your profile."
+    },
+    "pessoas": {
+      "titulo": "People",
+      "descricao": "Members who chose to appear here. No private messages.",
+      "buscar": "Search by name",
+      "filtro": "Filter people",
+      "todas": "Everyone",
+      "que_sigo": "Following",
+      "seguir": "Follow",
+      "seguindo": "Following",
+      "seguir_nome": "Follow {{nome}}",
+      "deixar_de_seguir_nome": "Unfollow {{nome}}",
+      "erro_seguir": "Couldn't update. Please try again.",
+      "voce": "you",
+      "vazio": "No one has turned on their profile yet. Turn yours on above to appear here.",
+      "vazio_busca": "No one with that name.",
+      "vazio_seguindo": "You don't follow anyone yet.",
+      "so_membros": "The People page is only for members of this community. Please sign in.",
+      "nao_encontrada": "This person isn't on the People page.",
+      "posts_de": "Posts by {{nome}}",
+      "sem_posts": "No public posts you can read."
+    },
+    "reacoes": {
+      "rotulo": "Reactions",
+      "amem": "Amen",
+      "orando": "Praying",
+      "contagem": "{{count}}",
+      "erro": "Couldn't react. Please try again.",
+      "devagar": "Easy there: too many actions in a short time. Try again shortly."
+    },
+    "resposta_util": {
+      "selo": "Helpful answer",
+      "marcar": "Mark as helpful answer",
+      "desmarcar": "Unmark helpful answer",
+      "erro": "Couldn't mark the answer."
     }
   }
 }

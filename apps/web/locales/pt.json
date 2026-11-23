@@ -250,7 +250,10 @@
     "convite_titulo": "Quer estudar isso com alguém?",
     "convite_publicado": "Devocional publicado. Quer estudar isso com alguém?",
     "convite_descricao": "Oito estudos bíblicos, de graça, em grupo de 2 ou 3 pessoas. Online ou presencial.",
-    "dispensar": "Dispensar convite"
+    "dispensar": "Dispensar convite",
+    "agora_nao": "Agora não",
+    "convite_hoje": "Estude com a gente: oito estudos bíblicos, de graça, em grupo de 2 ou 3.",
+    "convite_tcd": "TCD salvo. Quer estudar a Bíblia com alguém?"
   },
   "banner": {
     "viewing_as_guest": "Você está visualizando {{name}} como convidado.",
@@ -265,7 +268,11 @@
     "descricao": "Abra a comunidade direto da tela inicial.",
     "ios_instrucoes": "Toque em Compartilhar e depois em Adicionar à Tela de Início.",
     "botao_instalar": "Instalar",
-    "agora_nao": "Agora não"
+    "agora_nao": "Agora não",
+    "android_instrucoes": "No menu ⋮ do navegador, toque em Instalar app ou Adicionar à tela inicial.",
+    "desktop_instrucoes": "No menu ⋮ do navegador, escolha Instalar Discipulei (ou o ícone de instalar na barra de endereço).",
+    "firefox_desktop_instrucoes": "O Firefox no computador não instala apps. Abra a comunidade no Chrome ou no Edge para instalar.",
+    "safari_mac_instrucoes": "No Safari, abra Arquivo e escolha Adicionar ao Dock."
   },
   "auth": {
     "login": "Entrar",
@@ -429,7 +436,9 @@
     "complete_profile": {
       "title": "Complete seu perfil",
       "subtitle": "{{org}} precisa de mais algumas informações antes de você continuar."
-    }
+    },
+    "mostrar_senha": "Mostrar senha",
+    "ocultar_senha": "Ocultar senha"
   },
   "validation": {
     "required": "Obrigatório",
@@ -833,7 +842,7 @@
       "failed_to_delete": "Falha ao excluir o comentário"
     },
     "label_filter": {
-      "label": "Rótulo:",
+      "label": "Tipo:",
       "all": "Todos",
       "all_discussions": "Todas as discussões",
       "clear_filter": "Limpar filtro"
@@ -846,7 +855,9 @@
       "question": "Pergunta",
       "idea": "Ideia",
       "announcement": "Aviso",
-      "showcase": "Vitrine"
+      "showcase": "Vitrine",
+      "estudo": "Estudo",
+      "culto": "Anotação de culto"
     },
     "devotional_template": {
       "passage": "Passagem",
@@ -896,7 +907,7 @@
     "create_discussion": {
       "title": "Iniciar uma discussão",
       "description": "Compartilhe suas ideias com a comunidade",
-      "category_label": "Categoria",
+      "category_label": "Tipo de post",
       "title_label": "Título da discussão",
       "title_placeholder": "Sobre o que você gostaria de discutir?",
       "emoji_selected": "Emoji personalizado selecionado",
@@ -7090,6 +7101,86 @@
           "Três motivos de gratidão"
         ]
       }
+    }
+  },
+  "social": {
+    "autor": {
+      "rotulo": "Autor",
+      "todos": "Todos os autores",
+      "meus": "Meus posts",
+      "de": "Posts de {{nome}}"
+    },
+    "discussao": {
+      "mais_acoes": "Mais ações",
+      "acoes_comentario": "Ações do comentário"
+    },
+    "feed": {
+      "filtro": "Mostrar",
+      "todas": "Todas",
+      "seguindo": "Pessoas que sigo",
+      "vazio_seguindo": "Ainda não há posts de quem você segue. Encontre pessoas em"
+    },
+    "mencoes": {
+      "rotulo": "Mencionar alguém",
+      "ninguem": "Ninguém deste espaço com esse nome.",
+      "resultados": "Pessoas sugeridas: {{count}}"
+    },
+    "notificacoes": {
+      "titulo": "Notificações",
+      "vazio": "Nenhuma notificação por enquanto. Quando alguém mencionar você, aparece aqui.",
+      "mencao_post": "{{nome}} mencionou você num post",
+      "mencao_comentario": "{{nome}} mencionou você num comentário",
+      "nova": "nova",
+      "nao_lidas": "não lidas: {{count}}"
+    },
+    "perfil": {
+      "titulo": "Seu perfil",
+      "aparecer": "Aparecer na página Pessoas",
+      "visivel_descricao": "Membros logados veem seu nome, foto, bio e posts públicos. Seu e-mail nunca aparece.",
+      "oculto_descricao": "Desligado: você não aparece na página Pessoas e ninguém pode seguir você.",
+      "bio": "Bio curta",
+      "bio_placeholder": "Ex.: Servo em Cristo, aprendendo a orar.",
+      "salvar_bio": "Salvar bio",
+      "salvo": "Perfil salvo",
+      "erro": "Não foi possível salvar o perfil",
+      "seguidores": "Seguidores: {{count}}",
+      "privacidade": "Só você vê quantas pessoas seguem você. Seguir não dá acesso a nada além do que a pessoa já podia ler.",
+      "como_os_outros_veem": "É assim que os outros membros veem seu perfil."
+    },
+    "pessoas": {
+      "titulo": "Pessoas",
+      "descricao": "Membros que escolheram aparecer aqui. Sem mensagens privadas.",
+      "buscar": "Buscar pelo nome",
+      "filtro": "Filtrar pessoas",
+      "todas": "Todas",
+      "que_sigo": "Que sigo",
+      "seguir": "Seguir",
+      "seguindo": "Seguindo",
+      "seguir_nome": "Seguir {{nome}}",
+      "deixar_de_seguir_nome": "Deixar de seguir {{nome}}",
+      "erro_seguir": "Não foi possível atualizar. Tente de novo.",
+      "voce": "você",
+      "vazio": "Ninguém ligou o perfil ainda. Ligue o seu acima para aparecer aqui.",
+      "vazio_busca": "Ninguém com esse nome.",
+      "vazio_seguindo": "Você ainda não segue ninguém.",
+      "so_membros": "A página Pessoas é só para membros desta comunidade. Entre na sua conta.",
+      "nao_encontrada": "Esta pessoa não está na página Pessoas.",
+      "posts_de": "Posts de {{nome}}",
+      "sem_posts": "Nenhum post público que você possa ler."
+    },
+    "reacoes": {
+      "rotulo": "Reações",
+      "amem": "Amém",
+      "orando": "Orando",
+      "contagem": "{{count}}",
+      "erro": "Não foi possível reagir. Tente de novo.",
+      "devagar": "Calma: muitas ações em pouco tempo. Tente daqui a pouco."
+    },
+    "resposta_util": {
+      "selo": "Resposta útil",
+      "marcar": "Marcar como resposta útil",
+      "desmarcar": "Desmarcar resposta útil",
+      "erro": "Não foi possível marcar a resposta."
     }
   }
 }
