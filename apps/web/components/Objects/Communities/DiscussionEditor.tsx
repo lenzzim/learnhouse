@@ -3,6 +3,7 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { opcoesStarterKitDiscussao } from './starterKitDiscussao'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Bold, Italic, Strikethrough, Code, Link as LinkIcon, List, ListOrdered, Heading2, Quote } from 'lucide-react'
@@ -83,33 +84,7 @@ export function DiscussionEditor({
   useEffect(() => () => carregador.liberar(), [carregador])
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        // Disable link since we configure it separately below
-        link: false,
-        heading: {
-          levels: [2, 3],
-        },
-        bulletList: {
-          HTMLAttributes: {
-            class: 'discussion-bullet-list',
-          },
-        },
-        orderedList: {
-          HTMLAttributes: {
-            class: 'discussion-ordered-list',
-          },
-        },
-        codeBlock: {
-          HTMLAttributes: {
-            class: 'discussion-code-block',
-          },
-        },
-        blockquote: {
-          HTMLAttributes: {
-            class: 'discussion-blockquote',
-          },
-        },
-      }),
+      StarterKit.configure(opcoesStarterKitDiscussao()),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {

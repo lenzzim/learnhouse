@@ -598,3 +598,42 @@ test('trocar versão da menção: troca ou acrescenta a sigla', () => {
   assert.equal(linkDe(ed, 'Rm 8:28').getAttribute('data-biblia-versao'), 'nvi')
   ed.destroy()
 })
+
+test('editor de discussões preserva títulos H1–H4, marca-texto e cor de uma nota publicada', async () => {
+  const { opcoesStarterKitDiscussao } = await import('../../Objects/Communities/starterKitDiscussao.ts')
+  const { extensoesConteudoCaderno } = await import('./extensoesConteudo.ts')
+  const doc = {
+    type: 'doc',
+    content: [
+      { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Título 1' }] },
+      { type: 'heading', attrs: { level: 4 }, content: [{ type: 'text', text: 'Título 4' }] },
+      {
+        type: 'paragraph',
+        content: [
+          { type: 'text', text: 'graça', marks: [{ type: 'highlight', attrs: { cor: 'azul' } }] },
+          { type: 'text', text: ' e ' },
+          { type: 'text', text: 'paz', marks: [{ type: 'corTexto', attrs: { cor: 'rosa' } }] },
+        ],
+      },
+    ],
+  }
+  const ed = new Editor({
+    element: document.createElement('div'),
+    extensions: [
+      StarterKit.configure(opcoesStarterKitDiscussao()),
+      ...extensoesConteudoCaderno({ carregar: null, rotuloErroImagem: 'x', rotuloCaixaTarefa: 'y', colarImagensHtml: false }),
+    ],
+    content: doc,
+  })
+  const json = ed.getJSON()
+  assert.deepEqual(json.content.map((n) => n.attrs?.level ?? null), [1, 4, null])
+  const marcasTexto = json.content[2].content.flatMap((n) => n.marks ?? [])
+  assert.deepEqual(marcasTexto, [
+    { type: 'highlight', attrs: { cor: 'azul' } },
+    { type: 'corTexto', attrs: { cor: 'rosa' } },
+  ])
+  // e a paleta continua fechada também aqui
+  ed.commands.setContent({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'x', marks: [{ type: 'corTexto', attrs: { cor: 'red' } }] }] }] })
+  assert.ok(!JSON.stringify(ed.getJSON()).includes('red'))
+  ed.destroy()
+})

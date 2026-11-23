@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { opcoesStarterKitDiscussao } from './starterKitDiscussao'
 import Link from '@tiptap/extension-link'
 import { ReferenciasBiblicas } from '@components/Biblia/extensaoReferencias'
 import { ReferenciasNoTexto, TextoComReferencias } from '@components/Biblia/ReferenciasNoTexto'
@@ -51,34 +52,7 @@ function DiscussionContentEditor({ content }: { content: any }) {
   useEffect(() => () => carregador.liberar(), [carregador])
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        // Disable link since we configure it separately below
-        link: false,
-        // notas publicadas do Caderno usam de H1 a H4
-        heading: {
-          levels: [1, 2, 3, 4],
-        },
-        bulletList: {
-          HTMLAttributes: {
-            class: 'discussion-bullet-list',
-          },
-        },
-        orderedList: {
-          HTMLAttributes: {
-            class: 'discussion-ordered-list',
-          },
-        },
-        codeBlock: {
-          HTMLAttributes: {
-            class: 'discussion-code-block',
-          },
-        },
-        blockquote: {
-          HTMLAttributes: {
-            class: 'discussion-blockquote',
-          },
-        },
-      }),
+      StarterKit.configure(opcoesStarterKitDiscussao()),
       Link.configure({
         openOnClick: true,
         HTMLAttributes: {
