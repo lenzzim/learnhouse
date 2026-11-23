@@ -24,12 +24,22 @@
    uma linha de import e uma de uso.
    ========================================================================== */
 
-import React, { useId } from 'react'
+import React, { useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowUpRight, BookOpen, X } from 'lucide-react'
+import { ArrowUpRight, BookOpen } from 'lucide-react'
 import { BookOpen as BookOpenMenu } from '@phosphor-icons/react'
 import { URL_DISCIPULADO, urlAgendar, type LugarAgendar } from '@/lib/discipulei/nav'
 import { useIdiomaDiscipulei } from './useIdioma'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import {
+  avisarAgendamento,
+  dispensarConvites,
+  podeConvidar,
+  registrarAgendamento,
+  registrarDiaDeUso,
+  registrarExibicao,
+  type MomentoConvite,
+} from '@/lib/discipulei/convitesEstudo'
 
 export const URL_ESTUDO = URL_DISCIPULADO
 
@@ -81,6 +91,7 @@ function Acoes({ lugar, larguraTotal }: { lugar: LugarChamada; larguraTotal?: bo
         href={urlEstudo(lugar, 'agendar', idioma)}
         target="_blank"
         rel="noopener"
+        onClick={avisarAgendamento}
         className={`${BOTAO_PRIMARIO} ${larguraTotal ? 'w-full' : ''}`}
       >
         {t('chamada_estudo.cta')}
@@ -167,54 +178,95 @@ export function itemMenuChamada(rotulo: string, idioma?: string | null) {
   }
 }
 
+/** Texto de cada momento do convite (N40). */
+const TEXTO_CONVITE: Record<MomentoConvite, string> = {
+  tcd: 'chamada_estudo.convite_tcd',
+  biblia: 'chamada_estudo.convite_titulo',
+  hoje: 'chamada_estudo.convite_hoje',
+  'primeira-nota': 'chamada_estudo.convite_publicado',
+  devocional: 'chamada_estudo.convite_publicado',
+}
+
 /**
- * Convite contextual, no momento em que faz sentido: logo depois de publicar
- * um devocional e no fim de um capítulo da Bíblia. "Quer estudar isso com
- * alguém?" + Agendar estudo (site, nova aba, com a origem na URL).
+ * Convite discreto para agendar estudo (decisão N40): uma linha com o texto,
+ * "Agendar estudo" e "Agora não". Ele mesmo decide se aparece, pelas regras
+ * de lib/discipulei/convitesEstudo.ts (1 por dia, "Agora não" esconde 14 dias,
+ * nunca para quem já clicou em "Agendar estudo"). Quem monta só escolhe o
+ * momento; o leitor da Bíblia, por exemplo, continua com a mesma linha de uso.
  */
 export function ConviteEstudo({
   lugar,
   className = '',
   aoFechar,
 }: {
-  lugar: Extract<LugarChamada, 'devocional' | 'biblia'>
+  lugar: MomentoConvite
   className?: string
   aoFechar?: () => void
 }) {
   const { t } = useTranslation()
   const idioma = useIdiomaDiscipulei()
+  const session = useLHSession() as any
   const id = useId()
+  const status: string = session?.status ?? 'loading'
+  // Visitante (leitor da Bíblia): as regras valem por navegador.
+  const conta: string | null =
+    status === 'authenticated' ? String(session?.data?.user?.id ?? '') || null : status === 'unauthenticated' ? 'anon' : null
+  const [visivel, setVisivel] = useState(false)
+
+  useEffect(() => {
+    if (!conta) return
+    if (lugar === 'hoje') registrarDiaDeUso(conta)
+    if (podeConvidar(conta, lugar)) {
+      registrarExibicao(conta, lugar)
+      setVisivel(true)
+    } else {
+      setVisivel(false)
+    }
+  }, [conta, lugar])
+
+  if (!visivel) return null
+
+  const fechar = () => {
+    setVisivel(false)
+    aoFechar?.()
+  }
+  const lugarAgendar: LugarChamada = lugar
+
   return (
     <section
       aria-labelledby={id}
-      className={`relative flex flex-col gap-3 rounded-[var(--radius-card)] border border-[var(--line)] bg-[var(--panel)] p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5 ${className}`}
+      className={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[var(--radius-card)] border border-[var(--line)] bg-[var(--panel)] px-4 py-2 ${className}`}
     >
-      <div className="min-w-0 pe-8 sm:pe-0">
-        <h2 id={id} className="text-lg leading-snug text-[var(--text)]" style={SERIF}>
-          {lugar === 'devocional' ? t('chamada_estudo.convite_publicado') : t('chamada_estudo.convite_titulo')}
-        </h2>
-        <p className="mt-1 text-sm leading-snug text-[var(--text-2)]">{t('chamada_estudo.convite_descricao')}</p>
-      </div>
-      <a
-        href={urlEstudo(lugar, 'agendar', idioma)}
-        target="_blank"
-        rel="noopener"
-        className={`${BOTAO_PRIMARIO} shrink-0 self-start sm:self-auto`}
-      >
-        {t('chamada_estudo.cta')}
-        <ArrowUpRight size={16} aria-hidden="true" className="rtl:-scale-x-100" />
-        <span className="sr-only"> ({t('chamada_estudo.nova_aba')})</span>
-      </a>
-      {aoFechar && (
+      <p id={id} className="min-w-0 flex-1 basis-56 py-2 text-sm leading-snug text-[var(--text-2)]">
+        {t(TEXTO_CONVITE[lugar])}
+      </p>
+      <div className="flex shrink-0 items-center gap-1">
+        <a
+          href={urlEstudo(lugarAgendar, 'agendar', idioma)}
+          target="_blank"
+          rel="noopener"
+          onClick={() => {
+            if (conta) registrarAgendamento(conta)
+            avisarAgendamento()
+            fechar()
+          }}
+          className={`inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-sm font-semibold text-[var(--text)] underline decoration-[var(--link-underline)] underline-offset-4 hover:decoration-[var(--text)] ${FOCO}`}
+        >
+          {t('chamada_estudo.cta')}
+          <ArrowUpRight size={14} aria-hidden="true" className="rtl:-scale-x-100" />
+          <span className="sr-only"> ({t('chamada_estudo.nova_aba')})</span>
+        </a>
         <button
           type="button"
-          onClick={aoFechar}
-          aria-label={t('chamada_estudo.dispensar')}
-          className={`absolute end-1 top-1 inline-flex h-11 w-11 items-center justify-center rounded-full text-[var(--text-3)] hover:bg-[var(--surface)] hover:text-[var(--text)] sm:static sm:-me-2 ${FOCO}`}
+          onClick={() => {
+            if (conta) dispensarConvites(conta)
+            fechar()
+          }}
+          className={`inline-flex min-h-11 items-center rounded-full px-3 text-sm text-[var(--text-3)] hover:text-[var(--text)] ${FOCO}`}
         >
-          <X size={18} aria-hidden="true" />
+          {t('chamada_estudo.agora_nao')}
         </button>
-      )}
+      </div>
     </section>
   )
 }

@@ -64,6 +64,10 @@ export type LugarAgendar =
   | 'menu-lateral'
   | 'devocional'
   | 'biblia'
+  // Convites da decisão N40
+  | 'hoje'
+  | 'tcd'
+  | 'primeira-nota'
 
 /**
  * Link do "Agendar estudo" — o único lugar que monta essa URL. Em inglês e

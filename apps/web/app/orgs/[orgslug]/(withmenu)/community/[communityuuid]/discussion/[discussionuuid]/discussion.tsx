@@ -40,7 +40,8 @@ const DiscussionPageClient = ({
   })
 
   const handleDiscussionUpdated = (updated: DiscussionWithAuthor) => {
-    if (isPrivateDiscussion(discussion) && !isPrivateDiscussion(updated) && updated.label === 'devocional') {
+    // N40: convite depois da 1ª nota publicada (o componente aplica as regras).
+    if (isPrivateDiscussion(discussion) && !isPrivateDiscussion(updated)) {
       setConvidarEstudo(true)
     }
     setDiscussion(updated)
@@ -74,7 +75,7 @@ const DiscussionPageClient = ({
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           {convidarEstudo && (
-            <ConviteEstudo lugar="devocional" className="mb-4" aoFechar={() => setConvidarEstudo(false)} />
+            <ConviteEstudo lugar="primeira-nota" className="mb-4" aoFechar={() => setConvidarEstudo(false)} />
           )}
           <DiscussionDetail
             discussion={discussion}

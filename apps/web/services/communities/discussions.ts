@@ -256,6 +256,14 @@ export async function createDiscussion(
     error.detail = detail
     throw error
   }
+  // Post publicado direto na comunidade (N40: convite depois da 1ª nota publicada).
+  if (data.visibility !== 'private' && typeof window !== 'undefined') {
+    try {
+      window.dispatchEvent(new CustomEvent('discipulei:nota-publicada', { detail: { discussion_uuid: res.data?.discussion_uuid } }))
+    } catch {
+      // ambiente sem CustomEvent
+    }
+  }
   return res.data
 }
 

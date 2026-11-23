@@ -16,6 +16,7 @@ import {
   urlAgendar,
   type AbaId,
 } from '@/lib/discipulei/nav'
+import { avisarAgendamento } from '@/lib/discipulei/convitesEstudo'
 import { useDadosNav } from './useDadosNav'
 import { MenuAvatar } from './MenuAvatar'
 import { Logo } from './Logo'
@@ -234,6 +235,7 @@ export function BarraLateral({
           href={urlAgendar('menu-lateral', 'agendar', idioma)}
           target="_blank"
           rel="noopener"
+          onClick={avisarAgendamento}
           className={`${ITEM_BASE} font-medium text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]`}
         >
           <CalendarCheck size={20} aria-hidden="true" />

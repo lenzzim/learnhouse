@@ -16,6 +16,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { usePlan } from '@components/Hooks/usePlan'
 import { getGoogleFontUrl, DEFAULT_FONT } from '@/lib/fonts'
 import ConviteInstalar from '@components/Discipulei/ConviteInstalar'
+import ConvitesEstudoGlobais from '@components/Discipulei/ConvitesEstudoGlobais'
 // Discipulei: shell de app (barra lateral / barra de abas) no lugar do OrgMenu.
 import ShellDiscipulei from '@components/Discipulei/Navegacao/ShellDiscipulei'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
@@ -151,6 +152,8 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
       )}
       {/* Discipulei: convite para instalar o app, só para quem está logado. */}
       {!chromeless && <ConviteInstalar />}
+      {/* Discipulei (N40): convites de estudo do fim do TCD e da 1ª nota publicada. */}
+      {!chromeless && <ConvitesEstudoGlobais />}
     </div>
   )
 }

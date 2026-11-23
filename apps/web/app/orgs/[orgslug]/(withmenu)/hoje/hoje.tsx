@@ -15,6 +15,9 @@ import { useBibliaIdioma, useNomesLivros } from '@components/Biblia/useBibliaIdi
 import { primeiroNome, useDadosNav } from '@components/Discipulei/Navegacao/useDadosNav'
 import { useEscrever } from '@components/Discipulei/Navegacao/EscreverContexto'
 import { CartaoDesafio } from '@components/Discipulei/Aprender/CartaoDesafio'
+import { ConviteEstudo } from '@components/Discipulei/ChamadaEstudo'
+import { feedSeguindo } from '@services/communities/social'
+import { ROTA_PESSOAS } from '@components/Discipulei/Social/comum'
 import {
   BOTAO_PRIMARIO,
   BOTAO_SECUNDARIO,
@@ -62,8 +65,10 @@ function TituloSecao({ id, children }: { id: string; children: React.ReactNode }
 
 export default function HojeClient({ orgslug }: { orgslug: string }) {
   const { t, i18n } = useTranslation()
-  const { status, autenticado, token, usuario, comunidades, carregandoComunidades, notasRecentes, carregandoNotas } =
+  const { status, autenticado, token, orgId, usuario, comunidades, carregandoComunidades, notasRecentes, carregandoNotas } =
     useDadosNav()
+  // Filtro "Pessoas que sigo" (N39): só um recorte do que a pessoa já lê.
+  const [filtroFeed, setFiltroFeed] = useState<'todas' | 'seguindo'>('todas')
   const { abrirEscrever } = useEscrever()
   const ultimo = useUltimoCapitulo()
   // nome do livro no idioma da interface (index.json da versão padrão dele)
@@ -107,6 +112,18 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
     enabled: autenticado && alvo.length > 0,
     staleTime: 60_000,
   })
+
+  const seguindoQuery = useQuery<ItemFeed[]>({
+    queryKey: ['social', 'feed-seguindo', orgId ?? 0],
+    queryFn: async () => {
+      const itens = await feedSeguindo(orgId as number, MAX_ITENS, token)
+      return Array.isArray(itens) ? itens : []
+    },
+    enabled: autenticado && !!orgId && !!token && filtroFeed === 'seguindo',
+    staleTime: 60_000,
+  })
+  const feedAtual = filtroFeed === 'seguindo' ? seguindoQuery : feedQuery
+  const carregandoFeed = filtroFeed === 'seguindo' ? seguindoQuery.isLoading : carregandoComunidades || feedQuery.isLoading
 
   const rascunho = notasRecentes[0]
   const pessoaNova = ultimo === null && !carregandoNotas && notasRecentes.length === 0
@@ -244,6 +261,9 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
         </div>
       )}
 
+      {/* Convite discreto para agendar estudo (N40): a cada 3 dias de uso. */}
+      <ConviteEstudo lugar="hoje" className="mt-8" />
+
       {/* Desafio atual: apoio discreto, some quando não há desafio aberto. */}
       <CartaoDesafio orgslug={orgslug} />
 
@@ -258,7 +278,25 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
           </Link>
         </div>
 
-        {(carregandoComunidades || feedQuery.isLoading) && (
+        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label={t('social.feed.filtro')}>
+          {(['todas', 'seguindo'] as const).map((f) => (
+            <button
+              key={f}
+              type="button"
+              aria-pressed={filtroFeed === f}
+              onClick={() => setFiltroFeed(f)}
+              className={`min-h-11 rounded-full border px-4 text-sm transition-colors ${FOCO} ${
+                filtroFeed === f
+                  ? 'border-[var(--text)] bg-[var(--text)] text-[var(--page)]'
+                  : 'border-[var(--line)] text-[var(--text-2)] hover:bg-[var(--surface)]'
+              }`}
+            >
+              {f === 'todas' ? t('social.feed.todas') : t('social.feed.seguindo')}
+            </button>
+          ))}
+        </div>
+
+        {carregandoFeed && (
           <ul className="mt-3 flex flex-col gap-px overflow-hidden rounded-2xl border border-[var(--line)]" aria-hidden="true">
             {[0, 1, 2].map((i) => (
               <li key={i} className="flex flex-col gap-2 bg-[var(--panel)] px-4 py-4">
@@ -269,15 +307,26 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
           </ul>
         )}
 
-        {!carregandoComunidades && !feedQuery.isLoading && (feedQuery.data?.length ?? 0) === 0 && (
+        {!carregandoFeed && (feedAtual.data?.length ?? 0) === 0 && (
           <p className="mt-3 rounded-2xl border border-dashed border-[var(--line-strong)] px-4 py-6 text-sm text-[var(--text-2)]">
-            {comunidades.length === 0 ? t('hoje.sem_comunidades') : t('hoje.comunidades_quietas')}
+            {filtroFeed === 'seguindo' ? (
+              <>
+                {t('social.feed.vazio_seguindo')}{' '}
+                <Link href={ROTA_PESSOAS} className="font-medium text-[var(--text)] underline underline-offset-4">
+                  {t('social.pessoas.titulo')}
+                </Link>
+              </>
+            ) : comunidades.length === 0 ? (
+              t('hoje.sem_comunidades')
+            ) : (
+              t('hoje.comunidades_quietas')
+            )}
           </p>
         )}
 
-        {(feedQuery.data?.length ?? 0) > 0 && (
+        {!carregandoFeed && (feedAtual.data?.length ?? 0) > 0 && (
           <ul className="mt-3 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--panel)]">
-            {feedQuery.data!.map((d) => {
+            {feedAtual.data!.map((d) => {
               const rotulo = getLabelInfo(d.label || 'general')
               const autor = d.author
                 ? `${d.author.first_name || ''} ${d.author.last_name || ''}`.trim() || d.author.username
