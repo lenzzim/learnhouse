@@ -1,42 +1,41 @@
-import { ArrowRight } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import learnhouseIcon from 'public/black_logo.png'
+'use client'
 
+import { useEffect } from 'react'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
+/**
+ * 404 do Discipulei: textos do i18n (erros.not_found), tokens P&B e nada da
+ * marca LearnHouse. Antes era o 404 do LMS, em inglês e com o logo dele.
+ */
 export default function NotFound() {
+  const { t } = useTranslation()
+  const titulo = t('erros.not_found.titulo', { defaultValue: 'Não encontramos isso' })
+
+  useEffect(() => {
+    document.title = `${titulo} — Discipulei`
+  }, [titulo])
+
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center 
-   bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-200 to-slate-300">
-    {/* The nx-* classes here were left over from a Nextra template and never
-        existed in this project's Tailwind build, so they rendered nothing.
-        Only pb-20 was ever doing anything. */}
-    <div className="pb-20">
-        <Image quality={100}
-          width={270}
-          height={100}
-          src={learnhouseIcon}
-          alt="logo"
-        />
-        </div>
-      <div className="space-y-6 text-center">
-        <h1 className="text-8xl leading-7 font-bold text-black drop-shadow-md">
-          404!
-        </h1>
-        <p className='text-lg pt-8 text-black tracking-tight font-medium leading-normal'>
-          We are very sorry for the inconvenience. It looks like you're trying to
-          <span className="block">access a page that has been deleted or never existed before</span>
-        </p>
-      </div>
-      <div className='pt-8 flex flex-col items-center'>
+    <main className="flex min-h-screen w-full flex-col items-center justify-center bg-[var(--page)] px-4 text-center">
+      <p className="font-serif text-7xl text-[var(--text)]" aria-hidden="true">
+        404
+      </p>
+      <h1 className="mt-6 text-2xl font-semibold text-[var(--text)]">{titulo}</h1>
+      <p className="mt-3 max-w-md text-base leading-relaxed text-[var(--text-2)]">
+        {t('erros.not_found.descricao', {
+          defaultValue:
+            'O que você procura pode ter sido movido, apagado ou não estar disponível para você. Não foi nada que você fez de errado.',
+        })}
+      </p>
       <Link
         href="/"
-        className="flex w-fit h-[50px] text-xl space-x-2 bg-black px-6 py-2 text-md rounded-lg font-bold text-white items-center shadow-md gap-2"
+        className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--cta-bg)] px-6 text-base font-semibold text-[var(--cta-fg)] hover:bg-[var(--cta-bg-hover)]"
       >
-        Go back to homepage
-        <ArrowRight className="tracking-tight transition-transform duration-150 ease-in-out ms-1" />
+        {t('erros.acoes.inicio', { defaultValue: 'Início' })}
+        <ArrowRight size={18} aria-hidden="true" className="rtl:rotate-180" />
       </Link>
-    </div>
-    </div>
+    </main>
   )
 }
-
