@@ -96,11 +96,14 @@ function Trail(params: any) {
           )}
         </div>
 
+        {/* Altura mínima igual para esqueleto, vazio e lista: o que vem abaixo
+            (certificados) não pula quando a trilha carrega. */}
+        <div className="min-h-[18rem]">
         {!trail ? (
           <div className="animate-pulse">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="rounded-xl overflow-hidden">
+                <div key={i} className={`rounded-xl overflow-hidden ${i > 0 ? 'hidden sm:block' : ''}`}>
                   {/* Progress thumbnail */}
                   <div className="bg-gray-200 w-full h-40 rounded-xl" />
                   {/* Card body */}
@@ -138,6 +141,7 @@ function Trail(params: any) {
             ))}
           </div>
         )}
+        </div>
       </div>
 
       <UserCertificates orgslug={orgslug} />
