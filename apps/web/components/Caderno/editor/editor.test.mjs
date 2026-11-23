@@ -398,3 +398,97 @@ test('importar .md: o mesmo texto que a exportação do servidor gera', async ()
   const tipos = doc.content.map((n) => n.type)
   assert.deepEqual(tipos, ['image', 'vimeo', 'taskList', 'callout', 'table'])
 })
+
+/* ------------------------------- decorações incrementais (item 1.5) */
+// A cada tecla, [[ligações]], #tags e referências bíblicas eram redecoradas no
+// documento inteiro. Agora só os blocos tocados são refeitos; o resultado
+// precisa ser idêntico ao cálculo completo, em qualquer edição.
+
+const { ReferenciasBiblicas, decorarReferencias } = await import('../../Biblia/extensaoReferencias.ts')
+const { LigacoesETags, decorarLigacoesTags } = await import('./decoracoesCaderno.ts')
+const { DecorationSet } = await import('@tiptap/pm/view')
+const { faixasAlteradas } = await import('../../../lib/editor/decoracoesIncrementais.ts')
+
+function resumoDecoracoes(conjunto, doc) {
+  return conjunto
+    .find(0, doc.content.size)
+    .map((d) => `${d.from}-${d.to}:${JSON.stringify(d.type.attrs ?? d.type.spec?.key ?? '')}`)
+    .sort()
+}
+
+function editorDecorado(content) {
+  return new Editor({
+    element: document.createElement('div'),
+    extensions: [StarterKit.configure({ heading: { levels: [1, 2, 3, 4] } }), ReferenciasBiblicas, LigacoesETags],
+    content,
+  })
+}
+
+const PARAGRAFOS = Array.from({ length: 12 }, (_, i) => ({
+  type: 'paragraph',
+  content: [{ type: 'text', text: `Linha ${i}: Jo 3:16 e Rm 8:28, a [[Nota ${i}]] e a #tag${i}, com Sl 23.` }],
+}))
+
+test('decorações incrementais = cálculo completo depois de apagar, digitar, juntar e colar', () => {
+  const ed = editorDecorado({
+    type: 'doc',
+    content: [...PARAGRAFOS, { type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text: '— João 3:16 (NVI)' }] }] }],
+  })
+  const conferir = (passo) => {
+    for (const [plugin, decorar] of [
+      [ed.state.plugins.find((p) => p.key.startsWith('referenciasBiblicas')), decorarReferencias],
+      [ed.state.plugins.find((p) => p.key.startsWith('cadernoLigacoesTags')), decorarLigacoesTags],
+    ]) {
+      const incremental = plugin.getState(ed.state)
+      const completo = DecorationSet.create(ed.state.doc, decorar(ed.state.doc, 0, ed.state.doc.content.size))
+      assert.deepEqual(resumoDecoracoes(incremental, ed.state.doc), resumoDecoracoes(completo, ed.state.doc), `${passo} (${plugin.key})`)
+    }
+  }
+  conferir('início')
+  // apagar caractere a caractere no fim de "Sl 23" (a referência muda a cada tecla)
+  let fimSl = 0
+  ed.state.doc.descendants((n, pos) => {
+    if (!fimSl && n.isText && n.text.includes('Sl 23')) fimSl = pos + n.text.indexOf('Sl 23') + 5
+  })
+  for (let i = 0; i < 6; i++) {
+    ed.view.dispatch(ed.state.tr.delete(fimSl - 1 - i, fimSl - i))
+    conferir(`apagar ${i}`)
+  }
+  // quebrar um [[ ]] e uma #tag, juntar parágrafos, digitar uma referência nova
+  ed.commands.setTextSelection(30)
+  ed.view.dispatch(ed.state.tr.insertText(' Gn 1:1 #nova [[Outra]] '))
+  conferir('digitar')
+  ed.commands.setTextSelection(ed.state.doc.child(0).nodeSize + 1)
+  ed.commands.joinBackward()
+  conferir('juntar')
+  ed.commands.setTextSelection(5)
+  ed.commands.splitBlock()
+  conferir('quebrar bloco')
+  // editar a citação: a citação viva some e volta
+  let posCit = 0
+  ed.state.doc.descendants((n, pos) => {
+    if (n.isText && n.text.startsWith('— João')) posCit = pos + n.text.length - 1
+  })
+  ed.view.dispatch(ed.state.tr.delete(posCit - 3, posCit))
+  conferir('citação quebrada')
+  ed.view.dispatch(ed.state.tr.insertText('NVI', posCit - 3))
+  conferir('citação de volta')
+  // colar vários blocos e desfazer
+  ed.commands.insertContentAt(3, PARAGRAFOS.slice(0, 3))
+  conferir('colar')
+  ed.commands.undo()
+  conferir('desfazer')
+  ed.commands.setContent({ type: 'doc', content: PARAGRAFOS.slice(0, 2) })
+  conferir('setContent')
+  ed.destroy()
+})
+
+test('decorações incrementais: apagar um caractere redecora só o bloco tocado', () => {
+  const ed = editorDecorado({ type: 'doc', content: PARAGRAFOS })
+  const tr = ed.state.tr.delete(10, 11)
+  const faixas = faixasAlteradas(tr)
+  assert.equal(faixas.length, 1)
+  const bloco = ed.state.doc.child(0).nodeSize
+  assert.deepEqual(faixas[0], [0, bloco - 1])
+  ed.destroy()
+})
