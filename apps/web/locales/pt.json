@@ -6431,7 +6431,8 @@
     "verso_ausente": "Versículo ausente nesta versão",
     "verso_incluido": "(no v. {{n}})",
     "nota_citacao_licenciada": "Versão licenciada: o post guarda só a referência e a versão; o texto aparece na hora para quem lê.",
-    "fechar": "Fechar"
+    "fechar": "Fechar",
+    "nao_comparar": "Não comparar"
   },
   "nav": {
     "inicio": "Início",

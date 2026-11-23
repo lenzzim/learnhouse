@@ -193,7 +193,7 @@ function AbaBiblia() {
             <SeletorVersao
               curto
               rotulo={t('caderno.comparar_com')}
-              opcaoVazia={t('caderno.comparar_com')}
+              opcaoVazia={t('biblia.nao_comparar')}
               excluir={versao}
               valor={comparar}
               onChange={(v) => {

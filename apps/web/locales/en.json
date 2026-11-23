@@ -6431,7 +6431,8 @@
     "verso_ausente": "Verse not present in this version",
     "verso_incluido": "(in v. {{n}})",
     "nota_citacao_licenciada": "Licensed version: the post stores only the reference and version; readers see the text live.",
-    "fechar": "Close"
+    "fechar": "Close",
+    "nao_comparar": "Don't compare"
   },
   "nav": {
     "inicio": "Home",

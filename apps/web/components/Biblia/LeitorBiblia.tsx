@@ -440,7 +440,7 @@ export default function LeitorBiblia() {
             rotulo={t('biblia.comparar_com')}
             className={`${campoClasse} min-w-0 max-w-full`}
             valor={versaoB?.id ?? ''}
-            opcaoVazia={`${t('biblia.comparar_com')}…`}
+            opcaoVazia={t('biblia.nao_comparar')}
             excluir={versaoA.id}
             onChange={(id) => router.replace(montarHref(atual, versaoA.id, id), { scroll: false })}
           />
