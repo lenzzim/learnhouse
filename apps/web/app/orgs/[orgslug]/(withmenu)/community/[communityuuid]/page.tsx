@@ -4,9 +4,9 @@ import { notFound } from 'next/navigation'
 import { getServerSession } from '@/lib/auth/server'
 import { getCommunity } from '@services/communities/communities'
 import { getDiscussions, DiscussionWithAuthor } from '@services/communities/discussions'
-import { getOrgThumbnailMediaDirectory, getOrgOgImageMediaDirectory } from '@services/media/media'
 import { getCanonicalUrl, getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd } from '@/lib/seo/utils'
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
+import { imagensOg } from '@/lib/discipulei/og.server'
 import { JsonLd } from '@components/SEO/JsonLd'
 import CommunityClient from './community'
 import SemAcessoComunidade from '@components/Discipulei/Aprender/SemAcessoComunidade'
@@ -36,11 +36,10 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const title = buildPageTitle(community ? community.name : 'Community', org.name, seoConfig)
   const description = community?.description || seoConfig.default_meta_description || `Community discussions from ${org.name}`
 
-  const ogImageUrl = seoConfig.default_og_image
-    ? getOrgOgImageMediaDirectory(org?.org_uuid, seoConfig.default_og_image)
-    : null
-  const imageUrl = ogImageUrl || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
   const canonical = await getServerCanonicalUrl(params.orgslug, `/community/${params.communityuuid}`)
+
+  // Prévia de link P&B gerada (item 3.4); o que não é público vira a genérica.
+  const og = await imagensOg(params.orgslug, community?.public ? { tipo: 'espaco', comunidade: communityUuid } : { tipo: 'generico' }, org.name)
 
   return {
     title,
@@ -62,20 +61,14 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       title,
       description,
       type: 'website',
-      images: [
-        {
-          url: imageUrl,
-          width: 800,
-          height: 600,
-          alt: org.name,
-        },
-      ],
+      siteName: org.name,
+      images: og.openGraph.images,
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: og.twitter.images,
       ...(seoConfig.twitter_handle && { site: seoConfig.twitter_handle }),
     },
   }

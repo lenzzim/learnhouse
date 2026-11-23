@@ -2,9 +2,9 @@ import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
 import { getServerSession } from '@/lib/auth/server'
 import { getCommunities } from '@services/communities/communities'
-import { getOrgThumbnailMediaDirectory, getOrgOgImageMediaDirectory } from '@services/media/media'
 import { getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd } from '@/lib/seo/utils'
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
+import { imagensOg } from '@/lib/discipulei/og.server'
 import { JsonLd } from '@components/SEO/JsonLd'
 import CommunitiesClient from './communities'
 
@@ -22,13 +22,12 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   const seoConfig = getOrgSeoConfig(org)
 
-  const ogImageUrl = seoConfig.default_og_image
-    ? getOrgOgImageMediaDirectory(org?.org_uuid, seoConfig.default_og_image)
-    : null
-  const imageUrl = ogImageUrl || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
   const title = buildPageTitle('Communities', org.name, seoConfig)
   const description = seoConfig.default_meta_description || `Discussion communities from ${org.name}`
   const canonical = await getServerCanonicalUrl(params.orgslug, '/communities')
+
+  // Prévia de link P&B gerada (item 3.4); o que não é público vira a genérica.
+  const og = await imagensOg(params.orgslug, { tipo: 'comunidades' }, org.name)
 
   return {
     title,
@@ -50,20 +49,14 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       title,
       description,
       type: 'website',
-      images: [
-        {
-          url: imageUrl,
-          width: 800,
-          height: 600,
-          alt: org.name,
-        },
-      ],
+      siteName: org.name,
+      images: og.openGraph.images,
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [imageUrl],
+      images: og.twitter.images,
       ...(seoConfig.twitter_handle && { site: seoConfig.twitter_handle }),
     },
   }
