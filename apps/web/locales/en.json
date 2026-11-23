@@ -947,7 +947,15 @@
       "add": "Upvote",
       "remove": "Remove upvote",
       "join": "Join the organization to vote"
-    }
+    },
+    "no_results": "No communities found for this search.",
+    "search_placeholder": "Search communities...",
+    "sort_label": "Sort by",
+    "sort_name": "Name (A–Z)",
+    "sort_recent": "Most recent",
+    "view_grid": "Grid view",
+    "view_list": "List view",
+    "acoes_comunidade": "Community actions"
   },
   "boards": {
     "boards": "Boards",

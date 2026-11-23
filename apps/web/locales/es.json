@@ -947,7 +947,15 @@
       "add": "Votar",
       "remove": "Quitar voto",
       "join": "Únete a la organización para votar"
-    }
+    },
+    "no_results": "No se encontraron comunidades para esta búsqueda.",
+    "search_placeholder": "Buscar comunidades...",
+    "sort_label": "Ordenar por",
+    "sort_name": "Nombre (A–Z)",
+    "sort_recent": "Más recientes",
+    "view_grid": "Ver en cuadrícula",
+    "view_list": "Ver en lista",
+    "acoes_comunidade": "Acciones de la comunidad"
   },
   "podcasts": {
     "podcasts": "Podcasts",

@@ -957,7 +957,15 @@
       "add": "Upvote",
       "remove": "Remove upvote",
       "join": "Join the organization to vote"
-    }
+    },
+    "no_results": "لم يتم العثور على مجتمعات لهذا البحث.",
+    "search_placeholder": "ابحث في المجتمعات...",
+    "sort_label": "ترتيب حسب",
+    "sort_name": "الاسم (أ–ي)",
+    "sort_recent": "الأحدث",
+    "view_grid": "عرض شبكي",
+    "view_list": "عرض قائمة",
+    "acoes_comunidade": "إجراءات المجتمع"
   },
   "podcasts": {
     "podcasts": "البودكاست",
