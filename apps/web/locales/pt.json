@@ -7233,7 +7233,8 @@
     "titulo_4": "Título 4",
     "editar_nota": "Editar",
     "concluir_edicao": "Concluir",
-    "inserir_na_nota": "Inserir na nota"
+    "inserir_na_nota": "Inserir na nota",
+    "n_notas_zero": "Nenhuma nota"
   },
   "social": {
     "autor": {

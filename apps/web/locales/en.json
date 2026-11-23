@@ -7233,7 +7233,8 @@
     "titulo_4": "Heading 4",
     "editar_nota": "Edit",
     "concluir_edicao": "Done",
-    "inserir_na_nota": "Insert into note"
+    "inserir_na_nota": "Insert into note",
+    "n_notas_zero": "No notes"
   },
   "social": {
     "autor": {

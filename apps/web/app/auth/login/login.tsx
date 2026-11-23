@@ -395,7 +395,13 @@ const LoginClient = (props: LoginClientProps) => {
           if (errorData.code) {
             loginErrorType = errorData.code;
             setErrorType(errorData.code);
-            setError(errorData.message || t('auth.wrong_email_password'));
+            // A mensagem do back vem em inglês: mostra sempre o texto traduzido do código.
+            const mensagens: Record<string, string> = {
+              EMAIL_NOT_VERIFIED: t('auth.email_not_verified_message'),
+              ACCOUNT_LOCKED: t('auth.account_locked_message'),
+              RATE_LIMITED: t('auth.rate_limited_message'),
+            }
+            setError(mensagens[errorData.code] || t('auth.wrong_email_password'));
             if (errorData.code === 'EMAIL_NOT_VERIFIED') {
               setUnverifiedEmail(errorData.email || values.email);
             }

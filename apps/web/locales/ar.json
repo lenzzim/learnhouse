@@ -7248,7 +7248,8 @@
     "titulo_4": "Heading 4",
     "editar_nota": "تحرير",
     "concluir_edicao": "تم",
-    "inserir_na_nota": "إدراج في الملاحظة"
+    "inserir_na_nota": "إدراج في الملاحظة",
+    "n_notas_zero": "لا توجد ملاحظات"
   },
   "social": {
     "autor": {
