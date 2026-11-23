@@ -48,6 +48,17 @@ export function DiscussionList({
   const [searchQuery, setSearchQuery] = useState('')
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({})
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
+  // Filtro por autor (N39): "meus posts" ou "posts de…". Vem também da URL
+  // (?autor=user_…), usado pelo link do perfil na página Pessoas.
+  const currentUserUuid: string | undefined = session?.data?.user?.user_uuid
+  const [autor, setAutor] = useState<{ uuid: string; nome: string } | null>(null)
+  useEffect(() => {
+    // Lido da URL no cliente (sem useSearchParams, que pede Suspense no build).
+    const p = new URLSearchParams(window.location.search)
+    const daUrl = p.get('autor')
+    if (daUrl) setAutor({ uuid: daUrl, nome: p.get('nome') || '' })
+  }, [])
+  const [autoresConhecidos, setAutoresConhecidos] = useState<Record<string, string>>({})
   // Celular: busca, categoria, ordem e seleção ficam numa folha "Filtrar".
   const [filtrosAbertos, setFiltrosAbertos] = useState(false)
 
@@ -63,10 +74,60 @@ export function DiscussionList({
     page: 1,
     limit: 50, // Fetch more initially since we're not paginating for now
     label: selectedLabel,
+    authorUuid: autor?.uuid ?? null,
   })
 
-  // Use SWR data, fall back to initial data if SWR hasn't loaded yet
-  const discussions = swrDiscussions.length > 0 ? swrDiscussions : initialDiscussions
+  // Use SWR data, fall back to initial data if SWR hasn't loaded yet.
+  // Com filtro ativo, nunca cair na lista inicial (sem filtro).
+  const temFiltroServidor = !!selectedLabel || !!autor
+  const discussions = temFiltroServidor
+    ? swrDiscussions
+    : swrDiscussions.length > 0
+      ? swrDiscussions
+      : initialDiscussions
+
+  // Autores vistos na lista sem filtro de autor: opções do "Posts de…".
+  useEffect(() => {
+    if (autor) return
+    const novos: Record<string, string> = {}
+    for (const d of discussions) {
+      if (!d.author) continue
+      novos[d.author.user_uuid] =
+        `${d.author.first_name || ''} ${d.author.last_name || ''}`.trim() || d.author.username
+    }
+    setAutoresConhecidos((anteriores) => ({ ...anteriores, ...novos }))
+  }, [discussions, autor])
+
+  const opcoesAutor = Object.entries(autoresConhecidos)
+    .filter(([uuid]) => uuid !== currentUserUuid)
+    .sort((a, b) => a[1].localeCompare(b[1]))
+  const valorAutor = !autor ? '' : autor.uuid === currentUserUuid ? '__meus__' : autor.uuid
+  const mudarAutor = (valor: string) => {
+    if (!valor) setAutor(null)
+    else if (valor === '__meus__' && currentUserUuid) setAutor({ uuid: currentUserUuid, nome: '' })
+    else setAutor({ uuid: valor, nome: autoresConhecidos[valor] || '' })
+  }
+  const seletorAutor = isUserPartOfTheOrg && !!currentUserUuid && (
+    <label className="inline-flex items-center gap-2 text-xs text-gray-500">
+      <span className="sr-only md:not-sr-only">{t('social.autor.rotulo')}</span>
+      <select
+        value={valorAutor}
+        onChange={(e) => mudarAutor(e.target.value)}
+        className="min-h-11 md:min-h-0 md:h-8 rounded-md border border-gray-200 bg-gray-50 px-2 text-sm md:text-xs text-gray-700"
+      >
+        <option value="">{t('social.autor.todos')}</option>
+        <option value="__meus__">{t('social.autor.meus')}</option>
+        {autor && valorAutor === autor.uuid && !autoresConhecidos[autor.uuid] && (
+          <option value={autor.uuid}>{t('social.autor.de', { nome: autor.nome || t('common.unknown') })}</option>
+        )}
+        {opcoesAutor.map(([uuid, nome]) => (
+          <option key={uuid} value={uuid}>
+            {t('social.autor.de', { nome })}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
 
   const fetchCommentCounts = async (discussionList: DiscussionWithAuthor[]) => {
     if (!discussionList.length) return
@@ -202,7 +263,7 @@ export function DiscussionList({
     <div>
       {/* Header with Search and Filters */}
       {(() => {
-        const filtrosAtivos = (searchQuery.trim() ? 1 : 0) + (selectedLabel ? 1 : 0) + (sortBy !== 'recent' ? 1 : 0)
+        const filtrosAtivos = (searchQuery.trim() ? 1 : 0) + (selectedLabel ? 1 : 0) + (sortBy !== 'recent' ? 1 : 0) + (autor ? 1 : 0)
         const contagem = (
           <span className="text-xs text-gray-500">
             {filteredDiscussions.length} {filteredDiscussions.length === 1 ? t('communities.discussion') : t('communities.discussions')}
@@ -264,6 +325,7 @@ export function DiscussionList({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <LabelFilter value={selectedLabel} onChange={handleLabelChange} />
+                  {seletorAutor}
                   <SortDropdown value={sortBy} onChange={handleSortChange} />
                   {contagem}
                 </div>
@@ -333,6 +395,13 @@ export function DiscussionList({
                   </div>
                 </fieldset>
 
+                {seletorAutor && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-gray-700">{t('social.autor.rotulo')}</span>
+                    {seletorAutor}
+                  </div>
+                )}
+
                 <fieldset>
                   <legend className="mb-2 text-sm font-medium text-gray-700">{t('communities.discussion_list.sort_by')}</legend>
                   <div className="flex flex-wrap gap-2">
@@ -373,6 +442,7 @@ export function DiscussionList({
                         setSearchQuery('')
                         handleLabelChange(null)
                         handleSortChange('recent')
+                        setAutor(null)
                       }}
                       className="min-h-11 px-3 text-sm font-medium text-gray-600 underline underline-offset-4"
                     >

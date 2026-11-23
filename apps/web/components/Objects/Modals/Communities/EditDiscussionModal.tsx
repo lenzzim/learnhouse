@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -15,6 +15,15 @@ interface EditDiscussionModalProps {
   onClose: () => void
   discussion: DiscussionWithAuthor
   onUpdated: (updated: DiscussionWithAuthor) => void
+}
+
+interface EditDiscussionFormProps {
+  discussion: DiscussionWithAuthor
+  onUpdated: (updated: DiscussionWithAuthor) => void
+  /** Cancelar (ou fechar, quando não há mais edições). */
+  onCancel: () => void
+  /** Liga as menções @nome no editor. */
+  communityUuid?: string
 }
 
 // Parse content - handles both JSON (tiptap) and plain text
@@ -34,21 +43,29 @@ function parseContent(content: string | null): any {
 
 const MAX_EDITS = 2
 
-export function EditDiscussionModal({
-  isOpen,
-  onClose,
+/**
+ * Formulário de edição de uma discussão. Discipulei (item 1.6): a página da
+ * discussão abre na leitura para todos, inclusive o autor; o botão "Editar"
+ * troca a leitura por este formulário no lugar, e "Cancelar"/"Salvar" voltam
+ * à leitura. O modal abaixo continua existindo para outros usos.
+ */
+export function EditDiscussionForm({
   discussion,
   onUpdated,
-}: EditDiscussionModalProps) {
+  onCancel,
+  communityUuid,
+}: EditDiscussionFormProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState<any>(null)
+  // Estado inicial direto da discussão: o DiscussionEditor só lê `content`
+  // ao montar, então ele precisa nascer já com o texto.
+  const [title, setTitle] = useState(() => discussion.title || '')
+  const [content, setContent] = useState<any>(() => parseContent(discussion.content))
   const [titleError, setTitleError] = useState<string | null>(null)
-  const [selectedLabel, setSelectedLabel] = useState<string>('general')
-  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
+  const [selectedLabel, setSelectedLabel] = useState<string>(() => discussion.label || 'general')
+  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(() => discussion.emoji || null)
 
   const accessToken = session?.data?.tokens?.access_token
   const remainingEdits = MAX_EDITS - (discussion.edit_count || 0)
@@ -56,17 +73,6 @@ export function EditDiscussionModal({
   const isPrivate = isPrivateDiscussion(discussion)
   const canEdit = isPrivate || remainingEdits > 0
 
-  // Initialize form with discussion data
-  useEffect(() => {
-    if (isOpen && discussion) {
-      setTitle(discussion.title || '')
-      setContent(parseContent(discussion.content))
-      setSelectedLabel(discussion.label || 'general')
-      setSelectedEmoji(discussion.emoji || null)
-      setError(null)
-      setTitleError(null)
-    }
-  }, [isOpen, discussion])
 
   const validateTitle = (value: string) => {
     if (!value.trim()) {
@@ -117,7 +123,6 @@ export function EditDiscussionModal({
 
       if (result) {
         onUpdated(result)
-        onClose()
       }
     } catch (err: any) {
       const message =
@@ -135,17 +140,6 @@ export function EditDiscussionModal({
   const isValid = !validateTitle(title)
 
   return (
-    <Modal
-      isDialogOpen={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          onClose()
-        }
-      }}
-      dialogTitle={t('communities.edit_discussion.title')}
-      dialogDescription={t('communities.edit_discussion.description')}
-      minWidth="lg"
-      dialogContent={
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Edit count warning */}
           {isPrivate ? null : canEdit ? (
@@ -248,6 +242,7 @@ export function EditDiscussionModal({
                 placeholder={t('communities.create_discussion.details_placeholder')}
                 minHeight="180px"
                 editable={canEdit}
+                mencoes={communityUuid ? { communityUuid, discussionUuid: discussion.discussion_uuid } : undefined}
               />
             </div>
           </div>
@@ -264,8 +259,8 @@ export function EditDiscussionModal({
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={onCancel}
+              className="min-h-11 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
               {canEdit ? t('communities.edit_discussion.cancel') : t('communities.edit_discussion.close')}
             </button>
@@ -273,7 +268,7 @@ export function EditDiscussionModal({
               <button
                 type="submit"
                 disabled={isSubmitting || !isValid}
-                className="px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="min-h-11 px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isSubmitting && <Loader2 size={16} className="animate-spin" />}
                 {t('communities.edit_discussion.save')}
@@ -281,6 +276,38 @@ export function EditDiscussionModal({
             )}
           </div>
         </form>
+  )
+}
+
+export function EditDiscussionModal({
+  isOpen,
+  onClose,
+  discussion,
+  onUpdated,
+}: EditDiscussionModalProps) {
+  const { t } = useTranslation()
+  return (
+    <Modal
+      isDialogOpen={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose()
+        }
+      }}
+      dialogTitle={t('communities.edit_discussion.title')}
+      dialogDescription={t('communities.edit_discussion.description')}
+      minWidth="lg"
+      dialogContent={
+        isOpen ? (
+          <EditDiscussionForm
+            discussion={discussion}
+            onUpdated={(updated) => {
+              onUpdated(updated)
+              onClose()
+            }}
+            onCancel={onClose}
+          />
+        ) : null
       }
     />
   )

@@ -1,4 +1,5 @@
 'use client'
+import { CapaAutomatica } from './CapaAutomatica'
 import React from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
@@ -83,9 +84,7 @@ export function CommunitySidebar({
                 className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
               />
             ) : (
-              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                <MessageCircle className="w-5 h-5 text-gray-400" />
-              </div>
+              <CapaAutomatica nome={community.name} variante="icone" className="w-10 h-10 rounded-lg flex-shrink-0" />
             )}
             <div className="min-w-0">
               <h2 className="font-semibold text-gray-900 truncate">{community.name}</h2>

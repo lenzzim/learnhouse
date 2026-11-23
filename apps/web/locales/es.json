@@ -250,7 +250,10 @@
     "convite_titulo": "¿Quieres estudiar esto con alguien?",
     "convite_publicado": "Devocional publicado. ¿Quieres estudiar esto con alguien?",
     "convite_descricao": "Ocho estudios bíblicos, gratis, en grupos de 2 o 3 personas. En línea o en persona.",
-    "dispensar": "Descartar invitación"
+    "dispensar": "Descartar invitación",
+    "agora_nao": "Ahora no",
+    "convite_hoje": "Estudia con nosotros: ocho estudios bíblicos gratis, en grupo de 2 o 3.",
+    "convite_tcd": "TCD guardado. ¿Quieres estudiar la Biblia con alguien?"
   },
   "banner": {
     "viewing_as_guest": "Estás viendo {{name}} como invitado.",
@@ -265,7 +268,11 @@
     "descricao": "Abre la comunidad directo desde tu pantalla de inicio.",
     "ios_instrucoes": "Toca Compartir y luego Agregar a la pantalla de inicio.",
     "botao_instalar": "Instalar",
-    "agora_nao": "Ahora no"
+    "agora_nao": "Ahora no",
+    "android_instrucoes": "En el menú ⋮ del navegador, toca Instalar app o Agregar a la pantalla de inicio.",
+    "desktop_instrucoes": "En el menú ⋮ del navegador, elige Instalar Discipulei (o el ícono de instalar en la barra de direcciones).",
+    "firefox_desktop_instrucoes": "Firefox en la computadora no instala apps. Abre la comunidad en Chrome o Edge para instalarla.",
+    "safari_mac_instrucoes": "En Safari, abre Archivo y elige Agregar al Dock."
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -429,7 +436,9 @@
     "complete_profile": {
       "title": "Completa tu perfil",
       "subtitle": "{{org}} necesita un poco más de información antes de que continúes."
-    }
+    },
+    "mostrar_senha": "Mostrar contraseña",
+    "ocultar_senha": "Ocultar contraseña"
   },
   "validation": {
     "required": "Obligatorio",
@@ -833,7 +842,7 @@
       "failed_to_delete": "Error al eliminar el comentario"
     },
     "label_filter": {
-      "label": "Etiqueta:",
+      "label": "Tipo:",
       "all": "Todas",
       "all_discussions": "Todas las discusiones",
       "clear_filter": "Borrar filtro"
@@ -846,7 +855,9 @@
       "question": "Pregunta",
       "idea": "Idea",
       "announcement": "Anuncio",
-      "showcase": "Muestra"
+      "showcase": "Muestra",
+      "estudo": "Estudio",
+      "culto": "Notas del culto"
     },
     "devotional_template": {
       "passage": "Pasaje",
@@ -896,7 +907,7 @@
     "create_discussion": {
       "title": "Iniciar una discusión",
       "description": "Comparte tus ideas con la comunidad",
-      "category_label": "Categoría",
+      "category_label": "Tipo de publicación",
       "title_label": "Título de la discusión",
       "title_placeholder": "¿De qué te gustaría hablar?",
       "emoji_selected": "Emoji personalizado seleccionado",
@@ -7139,5 +7150,85 @@
     "editar_nota": "Editar",
     "concluir_edicao": "Listo",
     "inserir_na_nota": "Insertar en la nota"
+  },
+  "social": {
+    "autor": {
+      "rotulo": "Autor",
+      "todos": "Todos los autores",
+      "meus": "Mis publicaciones",
+      "de": "Publicaciones de {{nome}}"
+    },
+    "discussao": {
+      "mais_acoes": "Más acciones",
+      "acoes_comentario": "Acciones del comentario"
+    },
+    "feed": {
+      "filtro": "Mostrar",
+      "todas": "Todas",
+      "seguindo": "Personas que sigo",
+      "vazio_seguindo": "Aún no hay publicaciones de quienes sigues. Encuentra personas en"
+    },
+    "mencoes": {
+      "rotulo": "Mencionar a alguien",
+      "ninguem": "Nadie de este espacio con ese nombre.",
+      "resultados": "Personas sugeridas: {{count}}"
+    },
+    "notificacoes": {
+      "titulo": "Notificaciones",
+      "vazio": "Aún no hay notificaciones. Cuando alguien te mencione, aparecerá aquí.",
+      "mencao_post": "{{nome}} te mencionó en una publicación",
+      "mencao_comentario": "{{nome}} te mencionó en un comentario",
+      "nova": "nueva",
+      "nao_lidas": "sin leer: {{count}}"
+    },
+    "perfil": {
+      "titulo": "Tu perfil",
+      "aparecer": "Aparecer en la página Personas",
+      "visivel_descricao": "Los miembros con sesión ven tu nombre, foto, bio y publicaciones públicas. Tu correo nunca aparece.",
+      "oculto_descricao": "Apagado: no apareces en la página Personas y nadie puede seguirte.",
+      "bio": "Bio corta",
+      "bio_placeholder": "Ej.: Siervo de Cristo, aprendiendo a orar.",
+      "salvar_bio": "Guardar bio",
+      "salvo": "Perfil guardado",
+      "erro": "No se pudo guardar el perfil",
+      "seguidores": "Seguidores: {{count}}",
+      "privacidade": "Solo tú ves cuántas personas te siguen. Seguir no da acceso a nada más de lo que esa persona ya podía leer.",
+      "como_os_outros_veem": "Así ven tu perfil los demás miembros."
+    },
+    "pessoas": {
+      "titulo": "Personas",
+      "descricao": "Miembros que eligieron aparecer aquí. Sin mensajes privados.",
+      "buscar": "Buscar por nombre",
+      "filtro": "Filtrar personas",
+      "todas": "Todas",
+      "que_sigo": "Que sigo",
+      "seguir": "Seguir",
+      "seguindo": "Siguiendo",
+      "seguir_nome": "Seguir a {{nome}}",
+      "deixar_de_seguir_nome": "Dejar de seguir a {{nome}}",
+      "erro_seguir": "No se pudo actualizar. Inténtalo de nuevo.",
+      "voce": "tú",
+      "vazio": "Nadie ha activado su perfil todavía. Activa el tuyo arriba para aparecer aquí.",
+      "vazio_busca": "Nadie con ese nombre.",
+      "vazio_seguindo": "Aún no sigues a nadie.",
+      "so_membros": "La página Personas es solo para miembros de esta comunidad. Inicia sesión.",
+      "nao_encontrada": "Esta persona no está en la página Personas.",
+      "posts_de": "Publicaciones de {{nome}}",
+      "sem_posts": "No hay publicaciones públicas que puedas leer."
+    },
+    "reacoes": {
+      "rotulo": "Reacciones",
+      "amem": "Amén",
+      "orando": "Orando",
+      "contagem": "{{count}}",
+      "erro": "No se pudo reaccionar. Inténtalo de nuevo.",
+      "devagar": "Con calma: demasiadas acciones en poco tiempo. Inténtalo en un momento."
+    },
+    "resposta_util": {
+      "selo": "Respuesta útil",
+      "marcar": "Marcar como respuesta útil",
+      "desmarcar": "Desmarcar respuesta útil",
+      "erro": "No se pudo marcar la respuesta."
+    }
   }
 }

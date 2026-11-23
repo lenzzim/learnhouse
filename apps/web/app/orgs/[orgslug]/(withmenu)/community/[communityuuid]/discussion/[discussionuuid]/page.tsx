@@ -5,7 +5,7 @@ import SemAcessoComunidade from '@components/Discipulei/Aprender/SemAcessoComuni
 import { getServerSession } from '@/lib/auth/server'
 import { getCommunity } from '@services/communities/communities'
 import { getDiscussion } from '@services/communities/discussions'
-import { getOrgThumbnailMediaDirectory } from '@services/media/media'
+import { imagensOg } from '@/lib/discipulei/og.server'
 import DiscussionPageClient from './discussion'
 import { getOrgSeoConfig } from '@/lib/seo/utils'
 
@@ -74,6 +74,16 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   // de comunidade fechada) também não pode ser indexado.
   const noindex = !!getOrgSeoConfig(org).noindex_communities || !discussion
 
+  // Prévia de link P&B (item 3.4): a imagem é gerada a partir do que é
+  // público; se a discussão não carregou como visitante, é a genérica.
+  const og = await imagensOg(
+    params.orgslug,
+    discussion
+      ? { tipo: 'discussao', comunidade: `community_${params.communityuuid}`, discussao: discussionUuid }
+      : { tipo: 'generico' },
+    org.name
+  )
+
   return {
     title,
     description,
@@ -91,14 +101,14 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       title,
       description,
       type: 'article',
-      images: [
-        {
-          url: getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
-          width: 800,
-          height: 600,
-          alt: org.name,
-        },
-      ],
+      siteName: org.name,
+      images: og.openGraph.images,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: og.twitter.images,
     },
   }
 }

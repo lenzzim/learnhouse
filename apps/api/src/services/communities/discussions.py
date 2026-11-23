@@ -31,6 +31,7 @@ from src.services.communities.moderation import (
     validate_discussion_content,
     enforce_posting_limits,
 )
+from src.services.communities.social import notify_mentions
 from src.services.communities.visibility import (
     apply_visibility,
     announce_publication,
@@ -174,6 +175,8 @@ async def create_discussion(
     # integrações externas). O anúncio acontece se/quando for publicada.
     if not is_private(discussion):
         await _announce_new_discussion(discussion, community, community_uuid, validated_label, current_user)
+        # Menções @nome (N39): só notifica quem pode ler este espaço.
+        await notify_mentions(request, db_session, current_user.id, discussion, discussion.content)
 
     # Get author info
     author_statement = select(User).where(User.id == discussion.author_id)
@@ -267,10 +270,15 @@ async def get_discussions_by_community(
     page: int = 1,
     limit: int = 10,
     label: Optional[str] = None,
+    author_uuid: Optional[str] = None,
 ) -> List[DiscussionReadWithVoteStatus]:
     """
     Get paginated list of discussions for a community with sorting.
     Pinned discussions are always returned first.
+
+    ``author_uuid`` (Discipulei, N39): "posts de…" / "meus posts". É só um
+    filtro sobre o que a pessoa já pode ler aqui (a checagem de leitura da
+    comunidade e a de privacidade continuam valendo).
     """
     # Check if user can read the community
     await check_resource_access(
@@ -288,12 +296,13 @@ async def get_discussions_by_community(
 
     offset = (page - 1) * limit
 
-    # Base query
-    query = select(Discussion).where(Discussion.community_id == community.id)
-
-    # Apply label filter if specified
-    if label:
-        query = query.where(Discussion.label == label)
+    author_id: Optional[int] = None
+    if author_uuid:
+        author_id = (await db_session.execute(
+            select(User.id).where(User.user_uuid == author_uuid)
+        )).scalars().first()
+        if author_id is None:
+            return []
 
     # Caderno privado: públicas + as privadas do próprio usuário
     visible = visible_discussions_clause(current_user)
@@ -308,6 +317,8 @@ async def get_discussions_by_community(
         )
         if label:
             pinned_query = pinned_query.where(Discussion.label == label)
+        if author_id is not None:
+            pinned_query = pinned_query.where(Discussion.author_id == author_id)
         pinned_discussions = list((await db_session.execute(pinned_query)).scalars().all())
 
     # Get non-pinned discussions with sorting
@@ -318,6 +329,8 @@ async def get_discussions_by_community(
     )
     if label:
         non_pinned_query = non_pinned_query.where(Discussion.label == label)
+    if author_id is not None:
+        non_pinned_query = non_pinned_query.where(Discussion.author_id == author_id)
 
     # Apply sorting
     if sort_by == DiscussionSortBy.RECENT:
@@ -473,6 +486,8 @@ async def update_discussion(
     content_to_check = discussion_object.content if discussion_object.content is not None else discussion.content
     await validate_discussion_content(title_to_check, content_to_check or "", discussion.community_id, db_session)
 
+    old_content = discussion.content
+
     # Update fields
     if discussion_object.title is not None:
         discussion.title = discussion_object.title
@@ -500,6 +515,13 @@ async def update_discussion(
 
     if just_published:
         await announce_publication(discussion, community, current_user)
+
+    # Menções novas (ao publicar, todas contam como novas).
+    if not is_private(discussion):
+        await notify_mentions(
+            request, db_session, discussion.author_id, discussion, discussion.content,
+            None if (just_published or was_private) else old_content,
+        )
 
     # Get author info
     author_statement = select(User).where(User.id == discussion.author_id)

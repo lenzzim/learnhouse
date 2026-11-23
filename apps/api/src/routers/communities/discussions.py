@@ -168,6 +168,7 @@ async def api_get_discussions_by_community(
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=10, ge=1, le=100),
     label: str | None = Query(default=None),
+    author_uuid: str | None = Query(default=None, max_length=100),
     current_user: PublicUser = Depends(get_current_user),
     db_session: AsyncSession = Depends(get_db_session),
 ) -> List[DiscussionReadWithVoteStatus]:
@@ -183,7 +184,8 @@ async def api_get_discussions_by_community(
     Pinned discussions are always returned first.
     """
     return await get_discussions_by_community(
-        request, community_uuid, current_user, db_session, sort_by, page, limit, label
+        request, community_uuid, current_user, db_session, sort_by, page, limit, label,
+        author_uuid,
     )
 
 

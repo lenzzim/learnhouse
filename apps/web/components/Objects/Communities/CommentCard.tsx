@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import { parseApiDate } from '@/lib/datas'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { MoreHorizontal, Pencil, Trash2, X, Check, Loader2, AlertCircle } from 'lucide-react'
+import { SealCheck } from '@phosphor-icons/react'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import {
@@ -23,6 +24,7 @@ import {
 import UserAvatar from '@components/Objects/UserAvatar'
 import { CommentUpvoteButton } from './CommentUpvoteButton'
 import { ReferenciasNoTexto, TextoComReferencias } from '@components/Biblia/ReferenciasNoTexto'
+import { BotoesReacaoFe } from './ReacoesFe'
 
 dayjs.extend(relativeTime)
 
@@ -46,9 +48,24 @@ interface CommentCardProps {
   canManage?: boolean
   onDeleted: (commentUuid: string) => void
   onUpdated: (comment: DiscussionCommentWithAuthor) => void
+  /** Discipulei (N39): reações "Amém/Orando" e resposta útil. */
+  discussionUuid?: string
+  communityUuid?: string
+  reacoesAtivas?: boolean
+  respostaUtil?: boolean
+  aoAlternarUtil?: () => void
 }
 
-export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }: CommentCardProps) {
+export function CommentCard({
+  comment,
+  canManage = false,
+  onDeleted,
+  onUpdated,
+  discussionUuid,
+  reacoesAtivas = false,
+  respostaUtil = false,
+  aoAlternarUtil,
+}: CommentCardProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
@@ -130,12 +147,14 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
 
   return (
     <div
-      className="group flex items-center gap-4 py-3 px-4 transition-colors border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50"
+      className={`group flex items-start sm:items-center gap-3 sm:gap-4 py-3 px-4 transition-colors border-b border-gray-100 last:border-b-0 ${
+        respostaUtil ? 'bg-gray-50 border-s-2 border-s-gray-900' : 'hover:bg-gray-50/50'
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Upvote Section */}
-      <div className="flex-shrink-0 w-12">
+      <div className="hidden sm:block flex-shrink-0 w-12">
         <CommentUpvoteButton
           commentUuid={comment.comment_uuid}
           initialVoteCount={comment.upvote_count || 0}
@@ -201,6 +220,12 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
               </div>
             ) : (
               <>
+                {respostaUtil && (
+                  <p className="mb-1 inline-flex items-center gap-1 text-xs font-semibold text-gray-900">
+                    <SealCheck size={14} weight="fill" aria-hidden="true" />
+                    {t('social.resposta_util.selo')}
+                  </p>
+                )}
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="font-medium text-gray-900 text-sm">{authorName}</span>
                   <span className="text-gray-400 text-xs">{timeAgo}</span>
@@ -210,6 +235,34 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
                     <TextoComReferencias texto={comment.content} />
                   </p>
                 </ReferenciasNoTexto>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <div className="sm:hidden">
+                    <CommentUpvoteButton
+                      commentUuid={comment.comment_uuid}
+                      initialVoteCount={comment.upvote_count || 0}
+                      initialHasVoted={comment.has_voted || false}
+                    />
+                  </div>
+                  {discussionUuid && (
+                    <BotoesReacaoFe
+                      discussionUuid={discussionUuid}
+                      commentUuid={comment.comment_uuid}
+                      desativado={!reacoesAtivas}
+                      compacto
+                    />
+                  )}
+                  {aoAlternarUtil && (
+                    <button
+                      type="button"
+                      onClick={aoAlternarUtil}
+                      aria-pressed={respostaUtil}
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium text-gray-600 underline decoration-[var(--link-underline)] underline-offset-4 hover:text-gray-900"
+                    >
+                      <SealCheck size={14} aria-hidden="true" />
+                      {respostaUtil ? t('social.resposta_util.desmarcar') : t('social.resposta_util.marcar')}
+                    </button>
+                  )}
+                </div>
               </>
             )}
           </div>
@@ -218,10 +271,10 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
 
       {/* Actions - Right side */}
       {showMenu && !isEditing && (
-        <div className={`flex-shrink-0 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`flex-shrink-0 transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 ${isHovered ? 'md:opacity-100' : ''}`}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button aria-label="Comment actions" className="p-1 hover:bg-gray-100 rounded transition-colors">
+              <button aria-label={t('social.discussao.acoes_comentario')} className="inline-flex h-11 w-11 items-center justify-center hover:bg-gray-100 rounded transition-colors">
                 <MoreHorizontal size={16} className="text-gray-400" />
               </button>
             </DropdownMenuTrigger>

@@ -7,7 +7,6 @@ import { DiscussionDetail } from '@components/Objects/Communities/DiscussionDeta
 import { DiscussionSidebar } from '@components/Objects/Communities/DiscussionSidebar'
 import { ConviteEstudo } from '@components/Discipulei/ChamadaEstudo'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
-import { EditDiscussionModal } from '@components/Objects/Modals/Communities/EditDiscussionModal'
 import { Community } from '@services/communities/communities'
 import { DiscussionWithAuthor, isPrivateDiscussion } from '@services/communities/discussions'
 import { MessageCircle } from 'lucide-react'
@@ -31,7 +30,6 @@ const DiscussionPageClient = ({
   const { t } = useTranslation()
   const session = useLHSession() as any
   const [discussion, setDiscussion] = useState(initialDiscussion)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   // Discipulei: convite para estudar com alguém logo depois de publicar um devocional.
   const [convidarEstudo, setConvidarEstudo] = useState(false)
 
@@ -42,7 +40,8 @@ const DiscussionPageClient = ({
   })
 
   const handleDiscussionUpdated = (updated: DiscussionWithAuthor) => {
-    if (isPrivateDiscussion(discussion) && !isPrivateDiscussion(updated) && updated.label === 'devocional') {
+    // N40: convite depois da 1ª nota publicada (o componente aplica as regras).
+    if (isPrivateDiscussion(discussion) && !isPrivateDiscussion(updated)) {
       setConvidarEstudo(true)
     }
     setDiscussion(updated)
@@ -76,25 +75,16 @@ const DiscussionPageClient = ({
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           {convidarEstudo && (
-            <ConviteEstudo lugar="devocional" className="mb-4" aoFechar={() => setConvidarEstudo(false)} />
+            <ConviteEstudo lugar="primeira-nota" className="mb-4" aoFechar={() => setConvidarEstudo(false)} />
           )}
           <DiscussionDetail
             discussion={discussion}
             communityUuid={community.community_uuid}
             orgslug={orgslug}
-            onEdit={() => setIsEditModalOpen(true)}
             onDiscussionUpdated={handleDiscussionUpdated}
           />
         </div>
       </div>
-
-      {/* Edit Modal */}
-      <EditDiscussionModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        discussion={discussion}
-        onUpdated={handleDiscussionUpdated}
-      />
     </GeneralWrapperStyled>
   )
 }

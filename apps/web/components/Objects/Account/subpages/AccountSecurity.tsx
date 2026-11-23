@@ -1,4 +1,5 @@
 'use client'
+import { VerSenha } from '@components/Discipulei/VerSenha'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { updatePassword } from '@services/settings/password'
 import { Formik, Form } from 'formik'
@@ -1172,14 +1173,18 @@ function AccountSecurity() {
               <Form className="w-full max-w-2xl mx-auto space-y-6">
                 <div>
                   <Label htmlFor="old_password">{t('user.settings.password.current_password')}</Label>
-                  <Input
-                    type="password"
-                    autoComplete="current-password"
-                    id="old_password"
-                    name="old_password"
-                    onChange={handleChange}
-                    className="mt-1"
-                  />
+                  <VerSenha className="mt-1">
+                    {(tipo) => (
+                      <Input
+                        type={tipo}
+                        autoComplete="current-password"
+                        id="old_password"
+                        name="old_password"
+                        onChange={handleChange}
+                        className="h-[44px] pe-12"
+                      />
+                    )}
+                  </VerSenha>
                   {touched.old_password && errors.old_password && (
                     <p className="text-red-500 text-sm mt-1">{t(errors.old_password as string)}</p>
                   )}
@@ -1187,14 +1192,18 @@ function AccountSecurity() {
 
                 <div>
                   <Label htmlFor="new_password">{t('user.settings.password.new_password')}</Label>
-                  <Input
-                    type="password"
-                    autoComplete="new-password"
-                    id="new_password"
-                    name="new_password"
-                    onChange={handleChange}
-                    className="mt-1"
-                  />
+                  <VerSenha className="mt-1">
+                    {(tipo) => (
+                      <Input
+                        type={tipo}
+                        autoComplete="new-password"
+                        id="new_password"
+                        name="new_password"
+                        onChange={handleChange}
+                        className="h-[44px] pe-12"
+                      />
+                    )}
+                  </VerSenha>
                   {touched.new_password && errors.new_password && (
                     <p className="text-red-500 text-sm mt-1">{t(errors.new_password as string)}</p>
                   )}

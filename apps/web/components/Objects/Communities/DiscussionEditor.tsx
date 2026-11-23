@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -11,6 +11,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { extensoesConteudoCaderno } from '@components/Caderno/editor/extensoesConteudo'
 import { criarCarregadorAnexos } from '@components/Caderno/editor/carregadorAnexos'
 import { urlAnexo } from '@services/caderno/notas'
+import { ListaMencoes, buscarCandidatos, criarExtensaoMencoes, type ContextoMencao, type EstadoLista } from './Mencoes'
 
 interface DiscussionEditorProps {
   content: any
@@ -18,6 +19,8 @@ interface DiscussionEditorProps {
   placeholder?: string
   editable?: boolean
   minHeight?: string
+  /** Liga as menções @nome (N39): o espaço onde o texto vai ser publicado. */
+  mencoes?: ContextoMencao
 }
 
 // Defined at module level so React keeps the same component identity across
@@ -54,11 +57,26 @@ export function DiscussionEditor({
   placeholder = 'Write your discussion...',
   editable = true,
   minHeight = '150px',
+  mencoes,
 }: DiscussionEditorProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const tokenRef = useRef<string | undefined>(undefined)
   tokenRef.current = session?.data?.tokens?.access_token
+  // Menções: o contexto pode mudar (troca de comunidade no modal) sem recriar o editor.
+  const mencoesRef = useRef(mencoes)
+  mencoesRef.current = mencoes
+  const [listaMencoes, setListaMencoes] = useState<EstadoLista | null>(null)
+  const idListaMencoes = useId()
+  const extensaoMencoes = useMemo(
+    () =>
+      criarExtensaoMencoes({
+        buscar: (termo) =>
+          mencoesRef.current ? buscarCandidatos(mencoesRef.current, termo, tokenRef.current) : Promise.resolve([]),
+        aoMudar: setListaMencoes,
+      }),
+    []
+  )
   // Discipulei: editar uma nota publicada do Caderno não pode apagar as
   // imagens, tarefas, destaques, vídeos e tabelas que vieram dela.
   const carregador = useMemo(() => criarCarregadorAnexos(urlAnexo.discussao, () => tokenRef.current), [])
@@ -107,6 +125,7 @@ export function DiscussionEditor({
         rotuloCaixaTarefa: t('caderno_editor.tarefa_concluida'),
         colarImagensHtml: false,
       }),
+      ...(mencoes ? [extensaoMencoes] : []),
     ],
     content: content || '',
     editable,
@@ -216,6 +235,8 @@ export function DiscussionEditor({
           </div>
         </>
       )}
+
+      {mencoes && <ListaMencoes estado={listaMencoes} id={idListaMencoes} />}
 
       {/* Editor Content */}
       <EditorContent

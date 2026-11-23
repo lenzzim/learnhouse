@@ -8,7 +8,12 @@ from src.db.users import UserReadAuthor
 # Discipulei: categorias do fórum devocional (espelha DISCUSSION_LABELS em
 # apps/web/services/communities/discussions.ts). Só estas são oferecidas.
 DISCUSSION_LABELS = [
+# Tipos de post (decisão N39): pergunta, culto, testemunho, oração e estudo,
+# além de devocional, aviso e geral, que já existiam. O "tipo de post" é este
+# campo ``label`` (um só campo, para não ter rótulo e tipo competindo).
     {"id": "devocional", "name": "Devocional", "color": "#8fb8ea", "icon": "BookOpen"},
+    {"id": "estudo", "name": "Estudo", "color": "#a3a19c", "icon": "Notebook"},
+    {"id": "culto", "name": "Anotação de culto", "color": "#a3a19c", "icon": "Church"},
     {"id": "testemunho", "name": "Testemunho", "color": "#b9a6ec", "icon": "Sparkles"},
     {"id": "oracao", "name": "Pedido de oração", "color": "#e5978f", "icon": "HandHeart"},
     {"id": "question", "name": "Pergunta", "color": "#a3a19c", "icon": "HelpCircle"},
@@ -67,6 +72,11 @@ class Discussion(DiscussionBase, table=True):
             server_default=DISCUSSION_VISIBILITY_PUBLIC,
         ),
     )
+    # Resposta útil (só em perguntas): id do comentário marcado pelo autor ou
+    # por admin/mantenedor. Sem FK de propósito (discussioncomment já aponta
+    # para discussion; a FK circular complicaria o create_all); ao apagar o
+    # comentário, o service limpa este campo.
+    accepted_comment_id: Optional[int] = Field(default=None, sa_column=Column(Integer, nullable=True))
     creation_date: str = ""
     update_date: str = ""
 
@@ -118,6 +128,7 @@ class DiscussionRead(SQLModel):
     is_pinned: bool = False
     is_locked: bool = False
     visibility: str = DISCUSSION_VISIBILITY_PUBLIC
+    accepted_comment_id: Optional[int] = None
     creation_date: str
     update_date: str
 

@@ -6,6 +6,16 @@
 import { getAPIUrl } from '@services/config/config'
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests'
 import type { Propriedade } from '@/lib/caderno/propriedades'
+import { EVENTO_NOTA_PUBLICADA, EVENTO_TCD_SALVO } from '@/lib/discipulei/convitesEstudo'
+
+/** Avisa o app (convites de estudo, N40) sem acoplar o Caderno à comunidade. */
+function avisar(evento: string, detalhe?: unknown) {
+  try {
+    if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent(evento, { detail: detalhe }))
+  } catch {
+    // ambiente sem CustomEvent
+  }
+}
 
 export type { Propriedade }
 
@@ -162,7 +172,13 @@ export function salvarNota(
   },
   token?: string
 ) {
-  return chamar<Nota>(`${base()}/${encodeURIComponent(noteUuid)}`, 'PUT', dados, token)
+  return chamar<Nota>(`${base()}/${encodeURIComponent(noteUuid)}`, 'PUT', dados, token).then((nota) => {
+    // TCD salvo com texto novo (N40). O convite espera a pessoa parar de escrever.
+    if (nota?.kind === 'tcd' && dados.content_json !== undefined) {
+      avisar(EVENTO_TCD_SALVO, { note_uuid: nota.note_uuid })
+    }
+    return nota
+  })
 }
 
 export function moverParaLixeira(noteUuid: string, token?: string) {
@@ -282,7 +298,10 @@ export function publicarNaComunidade(noteUuid: string, communityUuid: string, to
     'POST',
     { community_uuid: communityUuid },
     token
-  )
+  ).then((r) => {
+    avisar(EVENTO_NOTA_PUBLICADA, r)
+    return r
+  })
 }
 
 /** Copia as notas antigas ("Meu caderno" = discussões privadas). Idempotente. */

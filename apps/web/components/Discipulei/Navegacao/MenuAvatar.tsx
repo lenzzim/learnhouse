@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowUpRight,
+  BellSimple,
   CalendarCheck,
   CaretUpDown,
   Globe,
@@ -12,6 +13,7 @@ import {
   SignOut,
   SquaresFour,
   UserCircle,
+  UsersThree,
 } from '@phosphor-icons/react'
 import {
   DropdownMenu,
@@ -26,10 +28,12 @@ import {
 import UserAvatar from '@components/Objects/UserAvatar'
 import { signOut } from '@components/Contexts/AuthContext'
 import { ROTA_APRENDER, urlAgendar } from '@/lib/discipulei/nav'
+import { avisarAgendamento } from '@/lib/discipulei/convitesEstudo'
 import { IDIOMAS_SELETOR, escolherIdioma } from '@components/Utils/LanguageSwitcher'
 import { useDadosNav } from './useDadosNav'
 import { useIdiomaDiscipulei } from '../useIdioma'
 import { FOCO } from './estilos'
+import { ROTA_NOTIFICACOES, ROTA_PESSOAS, useNaoLidas } from '../Social/comum'
 
 const ITEM =
   'flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 text-sm text-[var(--text)] ' +
@@ -45,6 +49,15 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
   const { t } = useTranslation()
   const idioma = useIdiomaDiscipulei()
   const { usuario, ehAdmin } = useDadosNav()
+  const naoLidas = useNaoLidas()
+  // Ponto discreto no avatar quando há menção nova (N39).
+  const ponto = naoLidas > 0 && (
+    <span
+      aria-hidden="true"
+      className="absolute end-1 top-1 h-2.5 w-2.5 rounded-full border-2 border-[var(--page)] bg-[var(--text)]"
+    />
+  )
+  const rotuloMenu = naoLidas > 0 ? `${t('nav.menu_conta')} (${t('social.notificacoes.nao_lidas', { count: naoLidas })})` : t('nav.menu_conta')
 
   const nome =
     `${usuario?.first_name || ''} ${usuario?.last_name || ''}`.trim() || usuario?.username || ''
@@ -55,18 +68,24 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
         {variante === 'compacta' ? (
           <button
             type="button"
-            aria-label={t('nav.menu_conta')}
-            className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full hover:bg-[var(--surface)] ${FOCO}`}
+            aria-label={rotuloMenu}
+            className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full hover:bg-[var(--surface)] ${FOCO}`}
           >
             <UserAvatar width={30} rounded="rounded-full" shadow="shadow-none" borderColor="border-transparent" />
+            {ponto}
           </button>
         ) : (
           <button
             type="button"
-            aria-label={t('nav.menu_conta')}
-            className={`flex min-h-12 w-full items-center gap-3 rounded-lg px-2 text-start hover:bg-[var(--surface)] ${FOCO}`}
+            aria-label={rotuloMenu}
+            className={`relative flex min-h-12 w-full items-center gap-3 rounded-lg px-2 text-start hover:bg-[var(--surface)] ${FOCO}`}
           >
-            <UserAvatar width={32} rounded="rounded-full" shadow="shadow-none" borderColor="border-transparent" />
+            <span className="relative inline-flex">
+              <UserAvatar width={32} rounded="rounded-full" shadow="shadow-none" borderColor="border-transparent" />
+              {naoLidas > 0 && (
+                <span aria-hidden="true" className="absolute -end-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--page)] bg-[var(--text)]" />
+              )}
+            </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium text-[var(--text)]">{nome}</span>
               {usuario?.email && (
@@ -97,6 +116,23 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
             {t('nav.perfil_conta')}
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild className={ITEM}>
+          <Link href={ROTA_NOTIFICACOES}>
+            <BellSimple size={18} aria-hidden="true" />
+            <span className="flex-1">{t('social.notificacoes.titulo')}</span>
+            {naoLidas > 0 && (
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--text)] px-1.5 text-xs font-semibold text-[var(--page)]">
+                {naoLidas}
+              </span>
+            )}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className={ITEM}>
+          <Link href={ROTA_PESSOAS}>
+            <UsersThree size={18} aria-hidden="true" />
+            {t('social.pessoas.titulo')}
+          </Link>
+        </DropdownMenuItem>
         {variante === 'compacta' && (
           <DropdownMenuItem asChild className={ITEM}>
             <Link href={ROTA_APRENDER}>
@@ -106,7 +142,7 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
           </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild className={ITEM}>
-          <a href={urlAgendar('menu', 'agendar', idioma)} target="_blank" rel="noopener">
+          <a href={urlAgendar('menu', 'agendar', idioma)} target="_blank" rel="noopener" onClick={avisarAgendamento}>
             <CalendarCheck size={18} aria-hidden="true" />
             <span className="flex-1">{t('nav.agendar_estudo')}</span>
             <ArrowUpRight size={14} aria-hidden="true" className="text-[var(--text-3)] rtl:-scale-x-100" />

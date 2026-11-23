@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2, User, AlertCircle, Lock, UserPlus } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -10,8 +10,12 @@ import {
   getComments,
   createComment,
   DiscussionCommentWithAuthor,
+  DiscussionWithAuthor,
+  LABEL_PERGUNTA,
 } from '@services/communities/discussions'
+import { marcarRespostaUtil } from '@services/communities/social'
 import { CommentCard } from './CommentCard'
+import { ListaMencoes, useMencoesTextarea } from './Mencoes'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface CommentSectionProps {
@@ -20,9 +24,19 @@ interface CommentSectionProps {
   isLocked?: boolean
   // Nota privada (caderno): sem público, então não há como responder.
   isPrivate?: boolean
+  /** Para a resposta útil das perguntas (N39). */
+  discussion?: DiscussionWithAuthor
+  onDiscussionUpdated?: (updated: DiscussionWithAuthor) => void
 }
 
-export function CommentSection({ discussionUuid, communityUuid, isLocked = false, isPrivate = false }: CommentSectionProps) {
+export function CommentSection({
+  discussionUuid,
+  communityUuid,
+  isLocked = false,
+  isPrivate = false,
+  discussion,
+  onDiscussionUpdated,
+}: CommentSectionProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
@@ -39,6 +53,36 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
   const [isFocused, setIsFocused] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const idListaMencoes = useId()
+  const mencoes = useMencoesTextarea({
+    ref: textareaRef,
+    valor: newComment,
+    setValor: setNewComment,
+    contexto: communityUuid && !isPrivate ? { communityUuid, discussionUuid } : null,
+    token: accessToken,
+  })
+
+  // Resposta útil: só em perguntas; o autor ou quem modera marca.
+  const currentUserId = session?.data?.user?.id
+  const ehPergunta = (discussion?.label || '') === LABEL_PERGUNTA && !isPrivate
+  const podeMarcarUtil = ehPergunta && !!discussion && (currentUserId === discussion.author_id || canManageCommunity)
+  const aceitoId = discussion?.accepted_comment_id ?? null
+  const ordenados = useMemo(() => {
+    if (!ehPergunta || !aceitoId) return comments
+    const aceito = comments.find((c) => c.id === aceitoId)
+    return aceito ? [aceito, ...comments.filter((c) => c.id !== aceitoId)] : comments
+  }, [comments, ehPergunta, aceitoId])
+
+  const alternarUtil = async (comment: DiscussionCommentWithAuthor) => {
+    if (!discussion) return
+    const novo = aceitoId === comment.id ? null : comment
+    try {
+      const r = await marcarRespostaUtil(discussion.discussion_uuid, novo ? novo.comment_uuid : null, accessToken)
+      onDiscussionUpdated?.({ ...discussion, accepted_comment_id: r.accepted_comment_id })
+    } catch (err: any) {
+      toast.error((typeof err?.detail === 'string' && err.detail) || t('social.resposta_util.erro'))
+    }
+  }
 
   useEffect(() => {
     let stale = false
@@ -98,7 +142,8 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (mencoes.onKeyDown(e)) return
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       handleSubmit(e)
     }
@@ -129,13 +174,18 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
         </div>
       ) : (
         <>
-          {comments.map((comment) => (
+          {ordenados.map((comment) => (
             <CommentCard
               key={comment.comment_uuid}
               comment={comment}
               canManage={canManageCommunity}
               onDeleted={handleCommentDeleted}
               onUpdated={handleCommentUpdated}
+              discussionUuid={discussionUuid}
+              communityUuid={communityUuid}
+              reacoesAtivas={!isPrivate}
+              respostaUtil={ehPergunta && comment.id === aceitoId}
+              aoAlternarUtil={podeMarcarUtil ? () => alternarUtil(comment) : undefined}
             />
           ))}
         </>
@@ -162,6 +212,10 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
               </div>
             )}
 
+            <ListaMencoes estado={mencoes.estado} id={idListaMencoes} />
+            <p className="sr-only" aria-live="polite">
+              {mencoes.estado ? t('social.mencoes.resultados', { count: mencoes.estado.itens.length }) : ''}
+            </p>
             <form onSubmit={handleSubmit}>
               <div className={`rounded-md border transition-all ${
                 error
@@ -178,7 +232,14 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
                     if (error) setError(null)
                   }}
                   onFocus={() => setIsFocused(true)}
-                  onBlur={() => !newComment && setIsFocused(false)}
+                  onBlur={() => {
+                    if (!newComment) setIsFocused(false)
+                    // Deixa o toque na lista de menções terminar antes de fechar.
+                    window.setTimeout(mencoes.fechar, 150)
+                  }}
+                  aria-autocomplete="list"
+                  aria-controls={mencoes.estado ? idListaMencoes : undefined}
+                  aria-expanded={!!mencoes.estado}
                   onKeyDown={handleKeyDown}
                   aria-label={t('communities.comments.write_reply')}
                   placeholder={t('communities.comments.write_reply')}
@@ -191,7 +252,7 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
                     <button
                       type="submit"
                       disabled={!newComment.trim() || isSubmitting}
-                      className="px-3 py-1 text-xs font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                      className="min-h-11 px-4 py-1 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                     >
                       {isSubmitting ? (
                         <Loader2 size={12} className="animate-spin" />

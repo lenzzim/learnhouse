@@ -1,4 +1,5 @@
 'use client'
+import { VerSenha } from '@components/Discipulei/VerSenha'
 import React from 'react'
 import FormLayout, {
     FormField,
@@ -199,15 +200,19 @@ function ResetPasswordClient({ org }: ResetPasswordClientProps) {
                                             </div>
                                         )}
                                     </div>
-                                    <Form.Control asChild>
-                                        <input
-                                            onChange={formik.handleChange}
-                                            value={formik.values.new_password}
-                                            type="password"
-                                            autoComplete="new-password"
-                                            className="box-border w-full bg-neutral-50 text-black rounded-lg px-4 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm"
-                                        />
-                                    </Form.Control>
+                                    <VerSenha>
+                                      {(tipo) => (
+                                        <Form.Control asChild>
+                                            <input
+                                                onChange={formik.handleChange}
+                                                value={formik.values.new_password}
+                                                type={tipo}
+                                                autoComplete="new-password"
+                                                className="box-border w-full bg-neutral-50 text-black rounded-lg ps-4 pe-12 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm"
+                                            />
+                                        </Form.Control>
+                                      )}
+                                    </VerSenha>
                                     <PasswordStrengthIndicator password={formik.values.new_password} />
                                 </FormField>
 
@@ -221,15 +226,19 @@ function ResetPasswordClient({ org }: ResetPasswordClientProps) {
                                             </div>
                                         )}
                                     </div>
-                                    <Form.Control asChild>
-                                        <input
-                                            onChange={formik.handleChange}
-                                            value={formik.values.confirm_password}
-                                            type="password"
-                                            autoComplete="new-password"
-                                            className="box-border w-full bg-neutral-50 text-black rounded-lg px-4 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm"
-                                        />
-                                    </Form.Control>
+                                    <VerSenha>
+                                      {(tipo) => (
+                                        <Form.Control asChild>
+                                            <input
+                                                onChange={formik.handleChange}
+                                                value={formik.values.confirm_password}
+                                                type={tipo}
+                                                autoComplete="new-password"
+                                                className="box-border w-full bg-neutral-50 text-black rounded-lg ps-4 pe-12 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm"
+                                            />
+                                        </Form.Control>
+                                      )}
+                                    </VerSenha>
                                 </FormField>
 
                                 <TurnstileWidget

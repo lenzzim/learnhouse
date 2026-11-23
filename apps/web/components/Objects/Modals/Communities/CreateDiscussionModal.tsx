@@ -324,6 +324,7 @@ export function CreateDiscussionModal({
               onChange={setContent}
               placeholder={t('communities.create_discussion.details_placeholder')}
               minHeight="180px"
+              mencoes={{ communityUuid: targetCommunity }}
             />
             <p className="mt-1.5 text-xs text-gray-500">
               {t('communities.create_discussion.editor_hint')}

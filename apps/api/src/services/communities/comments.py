@@ -21,6 +21,7 @@ from src.services.communities.visibility import (
 )
 from src.services.communities.moderation import validate_comment_content, enforce_auto_lock
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.communities.social import notify_mentions
 
 
 async def create_comment(
@@ -104,6 +105,9 @@ async def create_comment(
             "community": {"community_uuid": community.community_uuid},
         },
     )
+
+    # Menções @nome (N39): só notifica quem pode ler este espaço.
+    await notify_mentions(request, db_session, current_user.id, discussion, comment.content, comment=comment)
 
     return DiscussionCommentReadWithVoteStatus(
         **comment.model_dump(),
@@ -234,6 +238,8 @@ async def update_comment(
             comment_update.content, discussion.community_id, db_session
         )
 
+    old_content = comment.content
+
     # Update fields
     if comment_update.content is not None:
         comment.content = comment_update.content
@@ -243,6 +249,11 @@ async def update_comment(
     db_session.add(comment)
     await db_session.commit()
     await db_session.refresh(comment)
+
+    if discussion and comment_update.content is not None:
+        await notify_mentions(
+            request, db_session, current_user.id, discussion, comment.content, old_content, comment=comment
+        )
 
     # Get author info
     author_statement = select(User).where(User.id == comment.author_id)
@@ -323,6 +334,11 @@ async def delete_comment(
                 status_code=403,
                 detail="You can only delete your own comments"
             )
+
+    # Resposta útil apagada: a pergunta volta a ficar sem resposta marcada.
+    if discussion and discussion.accepted_comment_id == comment.id:
+        discussion.accepted_comment_id = None
+        db_session.add(discussion)
 
     await db_session.delete(comment)
     await db_session.commit()

@@ -1,4 +1,5 @@
 'use client'
+import { VerSenha } from '@components/Discipulei/VerSenha'
 import FormLayout, {
   FormField,
 } from '@components/Objects/StyledElements/Form/Form'
@@ -771,16 +772,20 @@ const LoginClient = (props: LoginClientProps) => {
                       {t('auth.forgot_password')}
                     </Link>
                   </div>
-                  <Form.Control asChild>
-                    <input
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      value={formik.values.password}
-                      type="password"
-                      autoComplete="current-password"
-                      className="box-border w-full bg-neutral-50 text-black rounded-lg px-4 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm"
-                    />
-                  </Form.Control>
+                  <VerSenha>
+                    {(tipo) => (
+                      <Form.Control asChild>
+                        <input
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          value={formik.values.password}
+                          type={tipo}
+                          autoComplete="current-password"
+                          className="box-border w-full bg-neutral-50 text-black rounded-lg ps-4 pe-12 border border-neutral-200 inline-flex h-[44px] appearance-none items-center focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-neutral-400 transition-all placeholder:text-black/25 text-sm"
+                        />
+                      </Form.Control>
+                    )}
+                  </VerSenha>
                 </FormField>
 
                 <TurnstileWidget
