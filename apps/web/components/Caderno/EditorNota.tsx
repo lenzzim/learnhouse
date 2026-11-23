@@ -3,7 +3,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { useEditor, EditorContent, type Editor } from '@tiptap/react'
+import { useEditor, useEditorState, EditorContent, type Editor } from '@tiptap/react'
+import type { EditorProps } from '@tiptap/pm/view'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import toast from 'react-hot-toast'
@@ -14,30 +15,23 @@ import {
   DotsThree,
   DownloadSimple,
   FolderSimple,
-  ListBullets,
-  ListNumbers,
-  Quotes,
   ShareNetwork,
   SidebarSimple,
-  TextB,
-  TextHTwo,
-  TextHThree,
-  TextItalic,
   Trash,
   ArrowCounterClockwise,
   Hash,
-  BracketsSquare,
   CircleNotch,
   Warning,
   FileDashed,
   FloppyDisk,
-  Plus,
-  Question,
-  CheckSquare,
+  PencilSimple,
+  Check,
 } from '@phosphor-icons/react'
 import { ReferenciasBiblicas } from '@components/Biblia/extensaoReferencias'
 import { ReferenciasNoTexto } from '@components/Biblia/ReferenciasNoTexto'
-import { BotaoInserirVersiculo } from '@components/Biblia/BotaoInserirVersiculo'
+import type { AcoesEdicao } from '@components/Biblia/PopoverVersiculo'
+import { citacaoNoLugar, inserirCitacao, mencaoDoLink, trocarVersaoDaMencao } from '@components/Biblia/citarNoEditor'
+import { blocoCitacao, textoDoBloco } from '@/lib/biblia/citacao'
 import { codigoReferencia, encontrarReferencias } from '@/lib/biblia/referencias'
 import {
   criarNota,
@@ -63,7 +57,8 @@ import { COMANDOS, filtrarComandos, type IdComando } from '@/lib/caderno/comando
 import { definirPropriedade, mesmasPropriedades, normalizarPropriedades, valorDe, type Propriedade } from '@/lib/caderno/propriedades'
 import { useQuery } from '@tanstack/react-query'
 import { DialogoModelos, DialogoSalvarModelo, SeletorModelosVazio, type OpcaoModelo } from './Modelos'
-import { abrirMenuComandos, criarBarraComandos, type OpcoesBarraComandos } from './editor/barraComandos'
+import { criarBarraComandos, type OpcoesBarraComandos } from './editor/barraComandos'
+import { BarraFormatacao } from './editor/BarraFormatacao'
 import { renderizadorMenuComandos } from './editor/MenuComandos'
 import { extensoesConteudoCaderno } from './editor/extensoesConteudo'
 import { criarCarregadorAnexos } from './editor/carregadorAnexos'
@@ -99,35 +94,12 @@ function refsDoTexto(texto: string): RefBiblica[] {
   return out
 }
 
-function BotaoBarra({
-  onClick,
-  ativo,
-  rotulo,
-  children,
-}: {
-  onClick: () => void
-  ativo?: boolean
-  rotulo: string
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
-      aria-label={rotulo}
-      aria-pressed={ativo}
-      title={rotulo}
-      className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors lg:h-9 lg:w-9 ${FOCO} ${
-        ativo ? 'bg-[var(--surface)] text-[var(--text)]' : 'text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
-      }`}
-    >
-      {children}
-    </button>
-  )
-}
-
-function StatusSalvo({ status }: { status: Status }) {
+/**
+ * Indicador "Salvando…/Salvo" com LARGURA FIXA: antes ele mudava de largura a
+ * cada troca de estado (e aparecia/sumia na nota nova), empurrando os botões
+ * do cabeçalho enquanto a pessoa escrevia (item 1.5).
+ */
+function StatusSalvo({ status, oculto = false }: { status: Status; oculto?: boolean }) {
   const { t } = useTranslation()
   const mapa: Record<Status, { Icone: typeof CloudCheck; texto: string; girar?: boolean }> = {
     salvo: { Icone: CloudCheck, texto: t('caderno.salvo') },
@@ -138,10 +110,14 @@ function StatusSalvo({ status }: { status: Status }) {
   }
   const { Icone, texto, girar } = mapa[status]
   return (
-    <span role="status" aria-live="polite" className="inline-flex shrink-0 items-center gap-1.5 text-xs text-[var(--text-3)]">
-      <Icone size={14} aria-hidden="true" className={girar ? 'animate-spin' : ''} />
-      <span className="hidden sm:inline">{texto}</span>
+    <span
+      role="status"
+      aria-live="polite"
+      className={`inline-flex w-6 shrink-0 items-center justify-end gap-1.5 overflow-hidden whitespace-nowrap text-xs text-[var(--text-3)] sm:w-[7.5rem] ${oculto ? 'invisible' : ''}`}
+    >
+      <span className="hidden truncate sm:inline">{texto}</span>
       <span className="sr-only sm:hidden">{texto}</span>
+      <Icone size={14} aria-hidden="true" className={`shrink-0 ${girar ? 'animate-spin' : ''}`} />
     </span>
   )
 }
@@ -165,6 +141,11 @@ export function EditorNota({
   const [menu, setMenu] = useState(false)
   const [movendo, setMovendo] = useState(false)
   const lixeira = !!nota.deleted_at
+  // Item 1.6: nota publicada na comunidade abre em LEITURA (mesmo visual, sem
+  // barra); "Editar" liga a edição e "Concluir" volta. Nota não publicada e o
+  // TCD do dia (ainda não salvo, sem publicação) continuam abrindo editáveis.
+  const [lendo, setLendo] = useState(() => !!notaInicial.published_discussion_uuid)
+  const somenteLeitura = lixeira || lendo
   const existe = !!nota.note_uuid
   // TCD de outro dia não fala em "hoje" (placeholder e seletor de modelos).
   const tcdDeHoje = notaInicial.kind === 'tcd' && notaInicial.tcd_date === dataLocal()
@@ -193,6 +174,7 @@ export function EditorNota({
   const [propriedades, setPropriedades] = useState<Propriedade[]>(() => normalizarPropriedades(notaInicial.properties))
   const [sinalPropriedade, setSinalPropriedade] = useState(0)
   const [sinalVersiculo, setSinalVersiculo] = useState(0)
+  const [sinalCor, setSinalCor] = useState(0)
   const [imagemAberta, setImagemAberta] = useState(false)
   const [videoAberto, setVideoAberto] = useState(false)
   const [guiaAberto, setGuiaAberto] = useState(false)
@@ -459,6 +441,7 @@ export function EditorNota({
     else if (id === 'modelo') setDialogoModelos(true)
     else if (id === 'propriedade') setSinalPropriedade((n) => n + 1)
     else if (id === 'guia') setGuiaAberto(true)
+    else if (id === 'cor_texto') setSinalCor((n) => n + 1)
   }, [])
 
   const opcoesComandos = useCallback(
@@ -490,46 +473,50 @@ export function EditorNota({
 
   /* ------------------------------------------------------- editor */
 
-  const editor = useEditor({
-    immediatelyRender: false,
-    shouldRerenderOnTransaction: true,
-    editable: !lixeira,
-    extensions: [
+  // Opções do editor estáveis (memo): com objetos novos a cada render, o
+  // useEditor chamava editor.setOptions() em todo render, refazendo as props
+  // do ProseMirror. Os textos vêm de tRef (idioma atual) e o resto de refs.
+  const tRef = useRef(t)
+  tRef.current = t
+  const extensoes = useMemo(
+    () => [
       StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
+        heading: { levels: [1, 2, 3, 4] },
         link: { openOnClick: false, autolink: true, HTMLAttributes: { rel: 'noopener noreferrer nofollow', target: '_blank' } },
       }),
       Placeholder.configure({
         includeChildren: false,
         placeholder: ({ editor: ed, node, pos }) => {
-          if (node.type.name === 'heading') return t('caderno.titulo_secao')
+          if (node.type.name === 'heading') return tRef.current('caderno.titulo_secao')
           if (node.type.name === 'paragraph') {
             const $pos = ed.state.doc.resolve(pos)
             const antes = $pos.depth === 0 && $pos.index(0) > 0 ? ed.state.doc.child($pos.index(0) - 1) : null
-            if (antes?.type.name === 'heading') return t('caderno.escreva_aqui')
+            if (antes?.type.name === 'heading') return tRef.current('caderno.escreva_aqui')
           }
           if (ed.state.doc.childCount <= 1) {
-            if (notaInicial.kind !== 'tcd') return t('caderno_editor.placeholder_corpo')
-            return tcdDeHoje ? t('caderno.placeholder_tcd') : t('caderno.placeholder_tcd_outro_dia')
+            if (notaInicial.kind !== 'tcd') return tRef.current('caderno_editor.placeholder_corpo')
+            return tcdDeHoje ? tRef.current('caderno.placeholder_tcd') : tRef.current('caderno.placeholder_tcd_outro_dia')
           }
           return ''
         },
       }),
       ...extensoesConteudoCaderno({
         carregar: (anexo) => carregador.carregar(anexo),
-        rotuloErroImagem: t('caderno_editor.imagem_indisponivel'),
-        rotuloCaixaTarefa: t('caderno_editor.tarefa_concluida'),
+        rotuloErroImagem: tRef.current('caderno_editor.imagem_indisponivel'),
+        rotuloCaixaTarefa: tRef.current('caderno_editor.tarefa_concluida'),
       }),
       ReferenciasBiblicas,
       LigacoesETags,
       criarSugestoes(() => fontesRef.current()),
       criarBarraComandos(() => comandosRef.current()),
     ],
-    content: docInicial as any,
-    editorProps: {
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  )
+  const propsEditor = useMemo<EditorProps>(
+    () => ({
       attributes: {
         class: 'caderno-prosa',
-        'aria-label': t('caderno.corpo_nota'),
+        'aria-label': tRef.current('caderno.corpo_nota'),
         spellcheck: 'true',
         lang: 'pt-BR',
       },
@@ -560,7 +547,21 @@ export function EditorNota({
           .catch(() => vivo.current.editor?.chain().focus().insertContent(texto).run())
         return true
       },
-    },
+    }),
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  )
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    // A tela NÃO re-renderiza a cada transação (cada tecla): isso refazia a
+    // árvore React inteira da nota e, em cada commit, o React mede a seleção
+    // do contenteditable focado percorrendo o DOM do editor (custo que cresce
+    // com a nota). Quem precisa do estado do editor usa useEditorState.
+    shouldRerenderOnTransaction: false,
+    editable: !somenteLeitura,
+    extensions: extensoes,
+    content: docInicial as any,
+    editorProps: propsEditor,
     // O editor dispara uma transação ao montar (antes até do evento create) sem
     // mudar o conteúdo: agendar nela re-salvava toda nota só de abrir
     // (updated_at mudava, a lista reordenava) e criava o TCD do dia só de
@@ -569,6 +570,12 @@ export function EditorNota({
     // importado, parágrafo final depois de tabela/imagem) também chegam aqui
     // antes de qualquer toque da pessoa: viram a nova base em vez de salvar.
     onUpdate: ({ editor: ed }) => {
+      // Já há salvamento agendado depois de um toque: só reagenda (evita
+      // serializar a nota inteira a cada tecla).
+      if (interagiu.current && vivo.current.pendente) {
+        agendar()
+        return
+      }
       const json = JSON.stringify(ed.getJSON())
       if (json === vivo.current.ultimoJson) return
       if (!interagiu.current) {
@@ -583,9 +590,13 @@ export function EditorNota({
     vivo.current.editor = editor ?? null
   }, [editor])
 
+  // Única leitura do estado do editor no corpo da tela: re-renderiza só
+  // quando a nota passa de vazia a escrita (ou volta).
+  const notaVazia = useEditorState({ editor, selector: ({ editor: ed }) => ed?.isEmpty ?? true }) ?? true
+
   useEffect(() => {
-    editor?.setEditable(!lixeira)
-  }, [editor, lixeira])
+    editor?.setEditable(!somenteLeitura)
+  }, [editor, somenteLeitura])
 
   // Sumário/backlinks do painel direito; passagem padrão = 1ª referência.
   const publicarAberta = useCallback(() => {
@@ -614,11 +625,47 @@ export function EditorNota({
     }
   }, [editor, publicarAberta])
 
+  // Painel Bíblia (computador): "Inserir na nota" põe a citação no cursor.
+  useEffect(() => {
+    if (!editor || somenteLeitura) return
+    c.registrarInsercao((bloco) => inserirCitacao(editor, bloco as any))
+    return () => c.registrarInsercao(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, somenteLeitura])
+
+  // Pop-up de uma referência escrita na nota (item 2.3): "Inserir passagem
+  // completa" (a menção vira citação no lugar) e "Trocar versão". A linha de
+  // uma citação ("— João 3:16 (NVI)") já é citação: sem ações.
+  const edicaoReferencia = useCallback(
+    (ancora: HTMLAnchorElement): AcoesEdicao | undefined => {
+      const ed = vivo.current.editor
+      if (!ed || lixeira || !ed.isEditable || ancora.closest('blockquote')) return undefined
+      if (!mencaoDoLink(ed, ancora)) return undefined
+      return {
+        inserirCompleta: ({ versao, versos, titulo }) => {
+          const faixa = mencaoDoLink(ed, ancora)
+          if (!faixa) return
+          const licenciada = versao.fonte === 'licenciada'
+          citacaoNoLugar(
+            ed,
+            faixa,
+            blocoCitacao({ referencia: titulo, sigla: versao.sigla, licenciada, texto: licenciada ? undefined : textoDoBloco(versos) })
+          )
+        },
+        trocarVersao: (versao) => {
+          const faixa = mencaoDoLink(ed, ancora)
+          if (faixa) trocarVersaoDaMencao(ed, faixa, versao.sigla)
+        },
+      }
+    },
+    [lixeira]
+  )
+
   // Sumário → rolar até o heading.
   useEffect(() => {
     if (!editor) return
     c.registrarIrParaTitulo((i) => {
-      const hs = editor.view.dom.querySelectorAll('h1, h2, h3')
+      const hs = editor.view.dom.querySelectorAll('h1, h2, h3, h4')
       const alvo = hs[i] as HTMLElement | undefined
       alvo?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
@@ -785,7 +832,26 @@ export function EditorNota({
           )}
           {existe && <SeloVisibilidade visibilidade={nota.visibility} compacto onClick={lixeira ? undefined : () => setCompartilhar(true)} />}
         </div>
-        {(existe || status !== 'salvo') && <StatusSalvo status={status} />}
+        <StatusSalvo status={status} oculto={!existe && status === 'salvo'} />
+        {existe && !lixeira && nota.published_discussion_uuid && (
+          <button
+            type="button"
+            onClick={async () => {
+              if (lendo) {
+                setLendo(false)
+                window.setTimeout(() => editor?.commands.focus('end'), 0)
+              } else {
+                if (vivo.current.pendente) await salvarAgora()
+                setLendo(true)
+              }
+            }}
+            aria-pressed={!lendo}
+            className={`${BOTAO_SECUNDARIO} ms-1 min-h-11 px-3 text-sm lg:min-h-9`}
+          >
+            {lendo ? <PencilSimple size={16} aria-hidden="true" /> : <Check size={16} aria-hidden="true" />}
+            <span>{lendo ? t('caderno.editar_nota') : t('caderno.concluir_edicao')}</span>
+          </button>
+        )}
         {existe && !lixeira && (
           <button
             type="button"
@@ -871,87 +937,15 @@ export function EditorNota({
         </div>
       )}
 
-      {/* Barra de formatação: pequena, rola de lado no celular */}
-      {!lixeira && editor && (
-        <div className="flex items-center gap-0.5 overflow-x-auto border-b border-[var(--line)] px-2 py-1 [scrollbar-width:none] sm:px-3" role="toolbar" aria-label={t('caderno.formatacao')}>
-          {/* Atalho visível para o menu "/" (no celular digitar "/" é menos óbvio). */}
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => abrirMenuComandos(editor)}
-            aria-label={t('caderno_editor.abrir_menu')}
-            title={t('caderno_editor.abrir_menu')}
-            aria-haspopup="listbox"
-            className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-[var(--line)] px-2.5 text-sm text-[var(--text)] transition-colors hover:bg-[var(--surface)] lg:h-9 ${FOCO}`}
-          >
-            <Plus size={16} weight="bold" aria-hidden="true" />
-            <span className="hidden sm:inline">{t('caderno_editor.inserir')}</span>
-            <kbd className="hidden rounded border border-[var(--line)] px-1 font-mono text-[0.7rem] text-[var(--text-3)] sm:inline">/</kbd>
-          </button>
-          <span className="mx-1 h-5 w-px shrink-0 bg-[var(--line)]" aria-hidden="true" />
-          <BotaoBarra rotulo={t('caderno.negrito')} ativo={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>
-            <TextB size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <BotaoBarra rotulo={t('caderno.italico')} ativo={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}>
-            <TextItalic size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <BotaoBarra rotulo={t('caderno.titulo_2')} ativo={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
-            <TextHTwo size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <BotaoBarra rotulo={t('caderno.titulo_3')} ativo={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
-            <TextHThree size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <BotaoBarra rotulo={t('caderno.lista')} ativo={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}>
-            <ListBullets size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <BotaoBarra rotulo={t('caderno.lista_numerada')} ativo={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
-            <ListNumbers size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <BotaoBarra rotulo={t('caderno_editor.cmd.tarefas')} ativo={editor.isActive('taskList')} onClick={() => editor.chain().focus().toggleTaskList().run()}>
-            <CheckSquare size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <BotaoBarra rotulo={t('caderno.citacao')} ativo={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
-            <Quotes size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <span className="mx-1 h-5 w-px shrink-0 bg-[var(--line)]" aria-hidden="true" />
-          <BotaoBarra rotulo={t('caderno.inserir_ligacao')} onClick={() => editor.chain().focus().insertContent('[[').run()}>
-            <BracketsSquare size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <BotaoBarra rotulo={t('caderno.inserir_tag')} onClick={() => editor.chain().focus().insertContent(' #').run()}>
-            <Hash size={17} aria-hidden="true" />
-          </BotaoBarra>
-          <div className="caderno-inserir-versiculo shrink-0">
-            <BotaoInserirVersiculo editor={editor} abrirSinal={sinalVersiculo} />
-          </div>
-          {editor.isActive('table') && (
-            <>
-              <span className="mx-1 h-5 w-px shrink-0 bg-[var(--line)]" aria-hidden="true" />
-              {(
-                [
-                  ['tabela_linha', () => editor.chain().focus().addRowAfter().run()],
-                  ['tabela_coluna', () => editor.chain().focus().addColumnAfter().run()],
-                  ['tabela_tirar_linha', () => editor.chain().focus().deleteRow().run()],
-                  ['tabela_tirar_coluna', () => editor.chain().focus().deleteColumn().run()],
-                  ['tabela_apagar', () => editor.chain().focus().deleteTable().run()],
-                ] as const
-              ).map(([chave, f]) => (
-                <button
-                  key={chave}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={f}
-                  className={`inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-md px-2 text-xs text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)] lg:h-9 ${FOCO}`}
-                >
-                  {t(`caderno_editor.${chave}`)}
-                </button>
-              ))}
-            </>
-          )}
-          <span className="flex-1" />
-          <BotaoBarra rotulo={t('caderno_editor.cmd.guia')} onClick={() => setGuiaAberto(true)}>
-            <Question size={17} aria-hidden="true" />
-          </BotaoBarra>
-        </div>
+      {/* Barra de formatação: duas linhas no celular, uma no computador */}
+      {!somenteLeitura && editor && (
+        <BarraFormatacao
+          editor={editor}
+          sinalVersiculo={sinalVersiculo}
+          sinalCor={sinalCor}
+          aoAbrirGuia={() => setGuiaAberto(true)}
+          aoInserirImagem={() => setImagemAberta(true)}
+        />
       )}
 
       {/* Corpo */}
@@ -965,7 +959,7 @@ export function EditorNota({
             id="caderno-titulo"
             rows={1}
             value={titulo}
-            readOnly={lixeira}
+            readOnly={somenteLeitura}
             maxLength={300}
             placeholder={t('caderno.sem_titulo')}
             onChange={(e) => {
@@ -994,10 +988,10 @@ export function EditorNota({
             propriedades={propriedades}
             aoMudar={mudarPropriedades}
             usados={usadas.data ?? []}
-            somenteLeitura={lixeira}
+            somenteLeitura={somenteLeitura}
             sinalAdicionar={sinalPropriedade}
           />
-          {!lixeira && editor && editor.isEmpty && !semModelo && (
+          {!somenteLeitura && editor && notaVazia && !semModelo && (
             <SeletorModelosVazio
               tcd={nota.kind === 'tcd'}
               tcdDeHoje={tcdDeHoje}
@@ -1008,7 +1002,11 @@ export function EditorNota({
               }}
             />
           )}
-          <ReferenciasNoTexto className="mt-6" aoClicar={(codigo, versao) => c.abrirPassagem(codigo, 'biblia', versao)}>
+          <ReferenciasNoTexto
+            className="mt-6"
+            aoClicar={(codigo, versao) => c.abrirPassagem(codigo, 'biblia', versao)}
+            edicao={edicaoReferencia}
+          >
             <div onMouseDownCapture={aoPressionarNoCorpo} onClick={aoClicarNoCorpo}>
               <EditorContent editor={editor} />
             </div>
@@ -1034,7 +1032,7 @@ export function EditorNota({
             aberto={dialogoModelos}
             aoMudar={setDialogoModelos}
             tcd={nota.kind === 'tcd'}
-            notaVazia={editor.isEmpty}
+            notaVazia={notaVazia}
             aoInserir={(doc, m) => aplicarModelo(doc, 'inserir', m)}
             aoSubstituir={(doc, m) => aplicarModelo(doc, 'substituir', m)}
           />

@@ -1,6 +1,7 @@
 import { Extension } from '@tiptap/core'
-import { Plugin, PluginKey } from '@tiptap/pm/state'
-import { Decoration, DecorationSet } from '@tiptap/pm/view'
+import { PluginKey } from '@tiptap/pm/state'
+import { Decoration, type DecorationSet } from '@tiptap/pm/view'
+import { pluginDecoracoes } from '@/lib/editor/decoracoesIncrementais'
 import type { Node as PMNode } from '@tiptap/pm/model'
 import { codigoReferencia, encontrarReferencias } from '@/lib/biblia/referencias'
 import { hrefLeitor } from '@/lib/biblia/dados'
@@ -32,9 +33,9 @@ export function versaoCitadaApos(texto: string, fim: number): string | undefined
 export const CLASSE_REF = 'biblia-ref'
 const chave = new PluginKey<DecorationSet>('referenciasBiblicas')
 
-function decorar(doc: PMNode): DecorationSet {
+export function decorarReferencias(doc: PMNode, de: number, ate: number): Decoration[] {
   const decos: Decoration[] = []
-  doc.descendants((node, pos) => {
+  doc.nodesBetween(de, ate, (node, pos) => {
     if (node.type.spec.code) return false
     if (node.type.name === 'blockquote') {
       const citacao = lerCitacaoLicenciada(node.textContent)
@@ -85,7 +86,7 @@ function decorar(doc: PMNode): DecorationSet {
     fechar()
     return false
   })
-  return DecorationSet.create(doc, decos)
+  return decos
 }
 
 export const ReferenciasBiblicas = Extension.create({
@@ -93,16 +94,7 @@ export const ReferenciasBiblicas = Extension.create({
 
   addProseMirrorPlugins() {
     return [
-      new Plugin<DecorationSet>({
-        key: chave,
-        state: {
-          init: (_, state) => decorar(state.doc),
-          apply: (tr, anterior) => (tr.docChanged ? decorar(tr.doc) : anterior),
-        },
-        props: {
-          decorations: (state) => chave.getState(state),
-        },
-      }),
+      pluginDecoracoes(chave, decorarReferencias),
     ]
   },
 })

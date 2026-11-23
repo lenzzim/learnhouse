@@ -13,9 +13,12 @@ export type IdComando =
   | 'titulo1'
   | 'titulo2'
   | 'titulo3'
+  | 'titulo4'
   | 'lista'
   | 'lista_numerada'
   | 'tarefas'
+  | 'marca_texto'
+  | 'cor_texto'
   | 'citacao'
   | 'destaque'
   | 'divisor'
@@ -45,9 +48,12 @@ export const COMANDOS: Comando[] = [
   { id: 'titulo1', grupo: 'basico', atalho: '#', palavras: ['titulo', 'h1', 'heading', 'cabecalho', 'encabezado'] },
   { id: 'titulo2', grupo: 'basico', atalho: '##', palavras: ['titulo', 'h2', 'heading', 'subtitulo', 'encabezado'] },
   { id: 'titulo3', grupo: 'basico', atalho: '###', palavras: ['titulo', 'h3', 'heading', 'encabezado'] },
+  { id: 'titulo4', grupo: 'basico', atalho: '####', palavras: ['titulo', 'h4', 'heading', 'encabezado', 'subsecao'] },
   { id: 'lista', grupo: 'basico', atalho: '-', palavras: ['lista', 'marcadores', 'bullet', 'list', 'topicos', 'vinetas'] },
   { id: 'lista_numerada', grupo: 'basico', atalho: '1.', palavras: ['lista', 'numerada', 'numbered', 'ordered', 'ordenada', 'numeros'] },
   { id: 'tarefas', grupo: 'basico', atalho: '[ ]', palavras: ['tarefa', 'tarefas', 'checkbox', 'todo', 'task', 'checklist', 'caixa', 'tareas', 'pendente'] },
+  { id: 'marca_texto', grupo: 'basico', atalho: '==', palavras: ['marca', 'marca-texto', 'marcatexto', 'destacar', 'grifar', 'highlight', 'resaltar', 'realce', 'fundo'] },
+  { id: 'cor_texto', grupo: 'basico', palavras: ['cor', 'colorir', 'color', 'colour', 'texto', 'pintar', 'verde', 'azul', 'rosa', 'grafite'] },
   { id: 'citacao', grupo: 'blocos', atalho: '>', palavras: ['citacao', 'quote', 'blockquote', 'cita', 'citar'] },
   { id: 'destaque', grupo: 'blocos', atalho: '!>', palavras: ['destaque', 'callout', 'aviso', 'nota', 'caixa', 'importante', 'destacado'] },
   { id: 'divisor', grupo: 'blocos', atalho: '---', palavras: ['divisor', 'linha', 'separador', 'divider', 'hr', 'rule'] },

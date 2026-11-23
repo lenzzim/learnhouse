@@ -1,24 +1,44 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { versaoPadraoDoIdioma, versaoPorId } from '@/lib/biblia/versoes'
+import { versaoPadraoDoIdioma, versaoPadraoPara, versaoPorId } from '@/lib/biblia/versoes'
 import { carregarNomesLivros } from '@/lib/biblia/dados'
 import type { IdiomaReferencia, NomesLivros } from '@/lib/biblia/referencias'
 import { useIdiomaDiscipulei } from '@components/Discipulei/useIdioma'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 
 /**
  * Bíblia no idioma da interface:
  *  - `idioma`: pt | en | es (seguro para a hidratação: 'pt' até montar);
- *  - `versaoPadrao`: versão usada quando o usuário não escolheu outra
- *    (pt -> BLIVRE, en -> WEB, es -> RV1909);
- *  - `montado`: false no servidor e no primeiro render (o idioma real ainda
- *    não é conhecido; quem carrega texto pode esperar para não buscar duas
- *    versões).
+ *  - `versaoPadrao`: versão usada quando o usuário não escolheu outra.
+ *    Logado em português: NVI (decisão N38, 23/11/2026). Visitante e link
+ *    privado: a aberta do idioma (pt -> BLIVRE, en -> WEB, es -> RV1909);
+ *  - `versaoAberta`: a aberta do idioma (recuo quando a NVI falha);
+ *  - `logado`: há sessão;
+ *  - `montado`: false no servidor, no primeiro render e enquanto a sessão
+ *    carrega (o idioma e a sessão ainda não são conhecidos; quem carrega
+ *    texto espera para não buscar duas versões).
  */
-export function useBibliaIdioma(): { idioma: IdiomaReferencia; versaoPadrao: string; montado: boolean } {
+export function useBibliaIdioma(): {
+  idioma: IdiomaReferencia
+  versaoPadrao: string
+  versaoAberta: string
+  logado: boolean
+  montado: boolean
+} {
   const idioma = useIdiomaDiscipulei()
+  const sessao = useLHSession()
   const [montado, setMontado] = useState(false)
   useEffect(() => setMontado(true), [])
-  return { idioma, versaoPadrao: versaoPadraoDoIdioma(idioma), montado }
+  // sem provedor de sessão (páginas públicas) = visitante
+  const carregandoSessao = !!sessao && sessao.status === 'loading'
+  const logado = sessao?.status === 'authenticated'
+  return {
+    idioma,
+    versaoPadrao: versaoPadraoPara(idioma, logado),
+    versaoAberta: versaoPadraoDoIdioma(idioma),
+    logado,
+    montado: montado && !carregandoSessao,
+  }
 }
 
 /**

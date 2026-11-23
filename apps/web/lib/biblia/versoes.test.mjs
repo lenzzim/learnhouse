@@ -115,3 +115,17 @@ test('política de cópia por versão (abertas livres; licenciadas até 25 vers�
   assert.equal(politicaCopia('xyz').permiteImagem, false)
   assert.ok(Object.isFrozen(politicaCopia('nvi')))
 })
+
+test('NVI padrão só para logado em português; recuo para a aberta do idioma (N38)', async () => {
+  const { versaoPadraoPara, versaoDeRecuo } = await import('./versoes.ts')
+  assert.equal(versaoPadraoPara('pt-BR', true), 'nvi')
+  assert.equal(versaoPadraoPara('pt', false), 'blivre')
+  assert.equal(versaoPadraoPara('en', true), 'web')
+  assert.equal(versaoPadraoPara('es', true), 'rv1909')
+  assert.equal(versaoPadraoPara('ar', true), 'blivre')
+  assert.equal(versaoDeRecuo('nvi'), 'blivre')
+  assert.equal(versaoDeRecuo('ara'), 'blivre')
+  assert.equal(versaoDeRecuo('niv'), 'web')
+  assert.equal(versaoDeRecuo('web'), 'web')
+  assert.equal(versaoDeRecuo('???'), VERSAO_PADRAO)
+})

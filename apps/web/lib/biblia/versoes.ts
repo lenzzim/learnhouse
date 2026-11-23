@@ -165,6 +165,37 @@ export function versaoPadraoDoIdioma(lng: string | null | undefined): string {
   return VERSAO_PADRAO_POR_IDIOMA[base as Idioma] ?? VERSAO_PADRAO
 }
 
+/**
+ * Versão padrão de quem está LOGADO (decisão N38, dono, 23/11/2026): em
+ * português, a NVI (licenciada, YouVersion). en -> WEB e es -> RV1909 não
+ * mudam. Visitante, link privado /n/<token> e o site continuam na aberta do
+ * idioma (BLIVRE): a NVI exige sessão e tem limite diário de chamadas.
+ */
+export const VERSAO_PADRAO_LOGADO_POR_IDIOMA: Partial<Record<Idioma, string>> = {
+  pt: 'nvi',
+}
+
+/** Padrão quando o usuário não escolheu outra: NVI para logado em pt; senão a aberta do idioma. */
+export function versaoPadraoPara(lng: string | null | undefined, logado: boolean): string {
+  if (logado) {
+    const base = String(lng || '').split('-')[0].toLowerCase()
+    const v = VERSAO_PADRAO_LOGADO_POR_IDIOMA[base as Idioma]
+    if (v) return v
+  }
+  return versaoPadraoDoIdioma(lng)
+}
+
+/**
+ * Versão aberta usada quando uma licenciada não pode ser lida (sem sessão,
+ * limite diário, chave ausente, versão desligada): a padrão do idioma dela
+ * (NVI/ARA -> BLIVRE, NIV -> WEB). Aberta devolve ela mesma.
+ */
+export function versaoDeRecuo(id: string | null | undefined): string {
+  const info = versaoPorId(id)
+  if (!info) return VERSAO_PADRAO
+  return info.fonte === 'licenciada' ? versaoPadraoDoIdioma(info.idioma) : info.id
+}
+
 export function versaoPorId(id: string | null | undefined): VersaoInfo | undefined {
   if (!id) return undefined
   return VERSOES.find((v) => v.id === id) ?? VERSOES_LICENCIADAS.find((v) => v.id === id)

@@ -6431,7 +6431,19 @@
     "verso_ausente": "Versículo ausente nesta versão",
     "verso_incluido": "(no v. {{n}})",
     "nota_citacao_licenciada": "Versão licenciada: o post guarda só a referência e a versão; o texto aparece na hora para quem lê.",
-    "fechar": "Fechar"
+    "fechar": "Fechar",
+    "nao_comparar": "Não comparar",
+    "recuo_entrar": "Entre para ler na {{sigla}}. Mostrando a {{recuo}}.",
+    "recuo_limite": "A {{sigla}} chegou ao limite de leituras de hoje. Mostrando a {{recuo}}.",
+    "recuo_indisponivel": "A {{sigla}} está indisponível agora. Mostrando a {{recuo}}.",
+    "entre_para_nvi": "Entre para ler na NVI",
+    "inserir_passagem_completa": "Inserir passagem completa",
+    "trocar_versao_nota": "Trocar para a {{sigla}} na nota",
+    "modo_citar": "Como citar",
+    "citacao_completa": "Citação completa",
+    "citacao_completa_desc": "Bloco com o texto e a referência",
+    "mencao": "Só a referência",
+    "mencao_desc": "\"Jo 3:16 (NVI)\" no texto, clicável"
   },
   "nav": {
     "inicio": "Início",
@@ -6643,7 +6655,10 @@
       "data_hoje": "Data de hoje",
       "modelo": "Modelo",
       "propriedade": "Propriedade",
-      "guia": "Guia de Markdown"
+      "guia": "Guia de Markdown",
+      "titulo4": "Título 4",
+      "marca_texto": "Marca-texto",
+      "cor_texto": "Cor do texto"
     },
     "cmd_desc": {
       "texto": "Parágrafo simples",
@@ -6666,7 +6681,10 @@
       "data_hoje": "Escreve a data de hoje",
       "modelo": "Usar um modelo pronto ou seu",
       "propriedade": "Tipo, livro, tema…",
-      "guia": "O que dá para fazer no Caderno"
+      "guia": "O que dá para fazer no Caderno",
+      "titulo4": "Subdivisão discreta",
+      "marca_texto": "Fundo verde no texto (== de cada lado)",
+      "cor_texto": "Verde, azul, rosa ou grafite"
     },
     "imagem_descricao": "A imagem fica privada na sua nota.",
     "imagem_alt": "Descrição (opcional, para leitores de tela)",
@@ -6769,13 +6787,20 @@
         "k_sublinhado": "Sublinhado",
         "k_riscado": "Riscado",
         "k_codigo": "Código",
-        "k_titulo2": "Título 2 (Ctrl/⌘ + Alt + 1, 2 ou 3)",
+        "k_titulo2": "Título 2",
         "k_lista": "Lista",
         "k_numerada": "Lista numerada",
         "k_tarefas": "Lista de tarefas",
         "k_citacao": "Citação",
         "k_quebra": "Quebra de linha sem novo parágrafo",
-        "k_desfazer": "Desfazer (Ctrl/⌘ + Shift + Z refaz)"
+        "k_desfazer": "Desfazer (também o botão ↶ na barra)",
+        "titulo4": "Subtítulo discreto: #### e espaço.",
+        "marca": "Marca-texto: dois sinais de igual de cada lado.",
+        "cor": "Cor do texto: selecione e escolha na barra (ou /cor). No .md fica <span data-cor=\"azul\">.",
+        "k_titulo3": "Título 3",
+        "k_titulo4": "Título 4 (Ctrl/⌘ + Alt + 1 a 4 para os outros)",
+        "k_marca": "Marca-texto",
+        "k_refazer": "Refazer (Ctrl + Y no Windows; também o botão ↷)"
       },
       "amostra_codigo": "Salmo 23",
       "abre_menu": "menu de comandos",
@@ -6785,7 +6810,21 @@
       "backlinks": "Backlinks: no painel da direita, veja as notas que apontam para a nota aberta com [[ ]].",
       "propriedades": "Propriedades: filtre a lista de notas por tipo e por livro. Modelos podem preencher o tipo.",
       "privacidade_imagens": "Imagens enviadas são privadas. Só aparecem para quem tem o link privado da nota ou quando você publica na comunidade (aí vai uma cópia).",
-      "exportar": "Exportar .md: as propriedades viram o cabeçalho YAML (frontmatter) e voltam ao importar."
+      "exportar": "Exportar .md: as propriedades viram o cabeçalho YAML (frontmatter) e voltam ao importar.",
+      "refaz": "refaz o que foi desfeito"
+    },
+    "desfazer": "Desfazer",
+    "refazer": "Refazer",
+    "barra_texto": "Texto",
+    "barra_inserir": "Inserir",
+    "biblia_curto": "Bíblia",
+    "sem_marca": "Sem marca-texto",
+    "sem_cor": "Cor normal",
+    "cores": {
+      "verde": "Verde",
+      "azul": "Azul",
+      "rosa": "Rosa",
+      "grafite": "Grafite"
     }
   },
   "caderno": {
@@ -7090,6 +7129,10 @@
           "Três motivos de gratidão"
         ]
       }
-    }
+    },
+    "titulo_4": "Título 4",
+    "editar_nota": "Editar",
+    "concluir_edicao": "Concluir",
+    "inserir_na_nota": "Inserir na nota"
   }
 }

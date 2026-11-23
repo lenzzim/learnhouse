@@ -7,18 +7,24 @@ import { BookOpen } from 'lucide-react'
 import { formatarReferencia, interpretarReferencia } from '@/lib/biblia/referencias'
 import { type Versiculo } from '@/lib/biblia/dados'
 import { VERSAO_PADRAO, versaoPorId } from '@/lib/biblia/versoes'
-import { getVerses, rotuloVerso, type Capitulo } from '@/lib/biblia/fontes'
+import { getVersesComRecuo, rotuloVerso, type Capitulo, type Recuo } from '@/lib/biblia/fontes'
+import { blocoCitacao, modoValido, textoDoBloco, textoMencao, type ModoCitacao } from '@/lib/biblia/citacao'
+import { inserirCitacao, inserirMencao } from './citarNoEditor'
+import { AvisoRecuo } from './AvisoRecuo'
 import { SeletorVersao } from './SeletorVersao'
 import { mensagemErroBiblia, useAcessoBiblia, useFums } from './useFonteBiblia'
 import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
 
 /**
- * Botão da barra do editor de discussões: o usuário digita uma referência
- * ("Jo 3:16-18"), escolhe a versão, vê o texto e insere um <blockquote>.
- * - Versões abertas: os versículos e, na última linha, "— João 3:16-18 (BLIVRE)".
- * - Versões licenciadas (API.Bible, YouVersion): SÓ a linha "— João 3:16-18 (ARA)". O
- *   texto não é gravado no post (termos da licença); quem lê vê o texto ao
- *   vivo pelo widget de citacaoViva.ts, com o copyright.
+ * Botão "Inserir versículo" (Caderno e editor de discussões): o usuário digita
+ * uma referência ("Jo 3:16-18"), escolhe a versão e o modo (item 2.2):
+ * - Citação completa: um <blockquote>. Versões abertas levam os versículos e,
+ *   na última linha, "— João 3:16-18 (BLIVRE)"; licenciadas (NVI, ARA...)
+ *   gravam SÓ a linha "— João 3:16-18 (NVI)" e quem lê vê o texto ao vivo
+ *   (citacaoViva.ts), com o crédito. O texto licenciado nunca é gravado.
+ * - Só a referência (menção): "Jo 3:16-18 (NVI)" no meio do texto, clicável.
+ * O modo e a versão escolhidos ficam lembrados (localStorage). Sem escolha,
+ * a versão é a padrão: NVI para quem está logado (decisão N38).
  * Posição do painel:
  * - dentro de um modal (editor de discussões): fica na árvore do editor, logo
  *   abaixo do botão, para o foco preso do modal continuar valendo;
@@ -29,19 +35,24 @@ import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
 
 const MAX_VERSOS = 30
 const LARGURA = 352
-const SOBRESCRITO = '⁰¹²³⁴⁵⁶⁷⁸⁹'
+const CHAVE_MODO = 'discipulei_citar_modo'
+const CHAVE_VERSAO = 'discipulei_citar_versao'
 
-function sobrescrito(n: number): string {
-  return String(n)
-    .split('')
-    .map((d) => SOBRESCRITO[Number(d)])
-    .join('')
+export { textoDoBloco }
+
+function ler(chave: string): string | null {
+  try {
+    return window.localStorage.getItem(chave)
+  } catch {
+    return null
+  }
 }
-
-/** Texto do bloco: um versículo sem número; vários com números sobrescritos. */
-export function textoDoBloco(versos: Versiculo[]): string {
-  if (versos.length === 1) return versos[0].texto
-  return versos.map((v) => `${sobrescrito(v.numero)} ${v.texto}`).join(' ')
+function gravar(chave: string, valor: string) {
+  try {
+    window.localStorage.setItem(chave, valor)
+  } catch {
+    /* modo privado */
+  }
 }
 
 /** Prévia de licenciada: números com o rótulo do combinado ("25-26"). Só exibição, nunca gravado. */
@@ -54,21 +65,41 @@ type Previa =
   | { tipo: 'vazio' }
   | { tipo: 'carregando' }
   | { tipo: 'erro'; erro?: unknown }
-  | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo }
+  | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo; recuo?: Recuo }
 
 export function BotaoInserirVersiculo({
   editor,
   abrirSinal = 0,
+  rotuloVisivel,
+  classeBotao,
 }: {
   editor: Editor
   /** Caderno: muda (incrementa) para abrir o painel pelo comando "/versículo". */
   abrirSinal?: number
+  /** Texto curto ao lado do ícone (Caderno: "Bíblia"). */
+  rotuloVisivel?: string
+  /** Classes do botão (o Caderno usa os alvos de 44 px da barra dele). */
+  classeBotao?: string
 }) {
   const { t } = useTranslation()
   // padrão: a versão do idioma da interface (BLIVRE, WEB ou RV1909) até o
   // usuário escolher outra no seletor; nomes dos livros seguem a versão
   const { idioma, versaoPadrao } = useBibliaIdioma()
-  const [escolhida, setEscolhida] = useState<string | null>(null)
+  const [escolhida, setEscolhidaState] = useState<string | null>(null)
+  const [modo, setModoState] = useState<ModoCitacao>('completa')
+  useEffect(() => {
+    const salva = ler(CHAVE_VERSAO)
+    if (salva && versaoPorId(salva)) setEscolhidaState(salva)
+    setModoState(modoValido(ler(CHAVE_MODO)))
+  }, [])
+  const setEscolhida = (v: string) => {
+    setEscolhidaState(v)
+    gravar(CHAVE_VERSAO, v)
+  }
+  const setModo = (m: ModoCitacao) => {
+    setModoState(m)
+    gravar(CHAVE_MODO, m)
+  }
   const versao = escolhida ?? versaoPadrao
   const nomes = useNomesLivros(versao)
   const [aberto, setAberto] = useState(false)
@@ -105,8 +136,8 @@ export function BotaoInserirVersiculo({
     }
     let vivo = true
     setPrevia({ tipo: 'carregando' })
-    getVerses(versao, ref, acesso)
-      .then(({ versos, capitulo }) => vivo && setPrevia({ tipo: 'pronto', versos, capitulo }))
+    getVersesComRecuo(versao, ref, acesso)
+      .then(({ versos, capitulo, recuo }) => vivo && setPrevia({ tipo: 'pronto', versos, capitulo, recuo }))
       .catch((erro) => vivo && setPrevia({ tipo: 'erro', erro }))
     return () => {
       vivo = false
@@ -176,26 +207,25 @@ export function BotaoInserirVersiculo({
     botaoRef.current?.focus()
   }
 
+  // Menção e citação licenciada só gravam a referência: não dependem da
+  // prévia. Citação de versão aberta embute o texto (precisa da prévia).
+  const prontoAberto = previa.tipo === 'pronto' && previa.versos.length > 0 && !previa.recuo
+  const podeInserir = valida && !!ref && (modo === 'mencao' || licenciada || prontoAberto)
   const inserir = () => {
-    if (!valida || !ref || previa.tipo !== 'pronto' || !previa.versos.length) return
-    const citacao = {
-      type: 'paragraph',
-      content: [{ type: 'text', text: `— ${formatarReferencia(ref, false, nomes)} (${info.sigla})` }],
+    if (!podeInserir || !ref) return
+    if (modo === 'mencao') {
+      inserirMencao(editor, textoMencao(formatarReferencia(ref, true, nomes), info.sigla))
+    } else {
+      inserirCitacao(
+        editor,
+        blocoCitacao({
+          referencia: formatarReferencia(ref, false, nomes),
+          sigla: info.sigla,
+          licenciada,
+          texto: !licenciada && previa.tipo === 'pronto' ? textoDoBloco(previa.versos) : undefined,
+        })
+      )
     }
-    editor
-      .chain()
-      .focus()
-      .insertContent([
-        {
-          type: 'blockquote',
-          // licenciada: só a referência + versão; o texto aparece ao vivo para quem lê
-          content: licenciada
-            ? [citacao]
-            : [{ type: 'paragraph', content: [{ type: 'text', text: textoDoBloco(previa.versos) }] }, citacao],
-        },
-        { type: 'paragraph' },
-      ])
-      .run()
     setEntrada('')
     setAberto(false)
   }
@@ -215,11 +245,14 @@ export function BotaoInserirVersiculo({
         aria-haspopup="dialog"
         aria-expanded={aberto}
         aria-controls={aberto ? idPainel : undefined}
-        className={`p-1.5 rounded transition-colors ${
-          aberto ? 'bg-gray-200 text-gray-900' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-        }`}
+        className={
+          classeBotao
+            ? `${classeBotao} ${aberto ? 'bg-[var(--surface)] text-[var(--text)]' : ''}`
+            : `p-1.5 rounded transition-colors ${aberto ? 'bg-gray-200 text-gray-900' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`
+        }
       >
-        <BookOpen size={16} />
+        <BookOpen size={16} aria-hidden="true" />
+        {rotuloVisivel && <span>{rotuloVisivel}</span>}
       </button>
 
       {aberto && (emModal || fixo) && envolver(
@@ -272,6 +305,23 @@ export function BotaoInserirVersiculo({
             }}
             className="h-9 w-full rounded-lg border border-[var(--line-strong)] bg-[var(--page)] px-2.5 text-sm text-[var(--text)] placeholder:text-[var(--text-3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
           />
+          <fieldset className="mt-2.5">
+            <legend className="mb-1 text-xs font-medium text-[var(--text-2)]">{t('biblia.modo_citar')}</legend>
+            <div className="grid grid-cols-2 gap-1.5">
+              {(['completa', 'mencao'] as ModoCitacao[]).map((m) => (
+                <label
+                  key={m}
+                  className={`flex min-h-11 cursor-pointer flex-col justify-center rounded-lg border px-2.5 py-1.5 text-xs ${
+                    modo === m ? 'border-[var(--text)] bg-[var(--surface)] text-[var(--text)]' : 'border-[var(--line-strong)] text-[var(--text-2)] hover:bg-[var(--surface)]'
+                  } has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--focus)]`}
+                >
+                  <input type="radio" name={`${idPainel}-modo`} value={m} checked={modo === m} onChange={() => setModo(m)} className="sr-only" />
+                  <span className="font-medium">{m === 'completa' ? t('biblia.citacao_completa') : t('biblia.mencao')}</span>
+                  <span className="text-[0.7rem] text-[var(--text-3)]">{m === 'completa' ? t('biblia.citacao_completa_desc') : t('biblia.mencao_desc')}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <div className="mt-2 min-h-[1.25rem] text-sm" aria-live="polite">
             {aviso && <p className="text-xs text-[var(--text-2)]">{aviso}</p>}
             {!aviso && previa.tipo === 'carregando' && <p className="text-xs text-[var(--text-3)]">{t('biblia.carregando')}</p>}
@@ -283,16 +333,17 @@ export function BotaoInserirVersiculo({
                 className="max-h-40 overflow-y-auto border-s-2 border-[var(--line-strong)] ps-3 leading-relaxed"
                 style={{ fontFamily: "var(--font-serif), Georgia, 'Times New Roman', serif" }}
               >
-                <p>{licenciada ? textoComRotulos(previa.versos, previa.capitulo) : textoDoBloco(previa.versos)}</p>
+                <p>{licenciada || previa.recuo ? textoComRotulos(previa.versos, previa.capitulo) : textoDoBloco(previa.versos)}</p>
                 <p className="mt-1 font-sans text-xs text-[var(--text-3)]">
-                  — {formatarReferencia(ref, false, nomes)} ({info.sigla})
+                  {modo === 'mencao' ? textoMencao(formatarReferencia(ref, true, nomes), info.sigla) : `— ${formatarReferencia(ref, false, nomes)} (${info.sigla})`}
                 </p>
-                {licenciada && previa.capitulo.copyrightCurto && (
+                {(licenciada || previa.recuo) && previa.capitulo.copyrightCurto && (
                   <p className="mt-1 font-sans text-[0.7rem] text-[var(--text-3)]">{previa.capitulo.copyrightCurto}</p>
                 )}
               </blockquote>
             )}
-            {!aviso && licenciada && previa.tipo === 'pronto' && (
+            {!aviso && previa.tipo === 'pronto' && <AvisoRecuo recuo={previa.recuo} className="mt-2" />}
+            {!aviso && licenciada && modo === 'completa' && previa.tipo === 'pronto' && (
               <p className="mt-2 text-xs text-[var(--text-3)]">{t('biblia.nota_citacao_licenciada')}</p>
             )}
           </div>
@@ -307,7 +358,7 @@ export function BotaoInserirVersiculo({
             <button
               type="button"
               onClick={inserir}
-              disabled={!valida || previa.tipo !== 'pronto'}
+              disabled={!podeInserir}
               className="rounded-lg bg-[var(--cta-bg)] px-3 py-1.5 text-xs font-medium text-[var(--cta-fg)] hover:bg-[var(--cta-bg-hover)] disabled:opacity-50"
             >
               {t('biblia.inserir')}

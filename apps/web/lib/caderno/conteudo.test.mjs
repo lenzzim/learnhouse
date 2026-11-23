@@ -121,11 +121,13 @@ test('árvore de coleções: ordem, órfãos e ciclos', () => {
 
 import { docDoModelo, pareceMarkdown, MODELOS_PRONTOS } from './conteudo.ts'
 
-test('modelos: h3 + parágrafo por seção; gratidão vira lista de 3', () => {
+test('modelos: h2 + parágrafo por seção; gratidão vira lista de 3', () => {
   const d = docDoModelo(['Escritura', 'Observação', 'Aplicação', 'Oração'])
   assert.equal(d.content.length, 8)
-  assert.equal(d.content[0].attrs.level, 3)
+  assert.equal(d.content[0].attrs.level, 2)
+  assert.ok(d.content.every((n, i) => (i % 2 ? n.type === 'paragraph' && !n.content : n.type === 'heading' && n.attrs.level === 2)))
   const g = docDoModelo(['Três motivos de gratidão'], 'ordenada')
+  assert.equal(g.content[0].attrs.level, 2)
   assert.equal(g.content[1].type, 'orderedList')
   assert.equal(g.content[1].content.length, 3)
   assert.ok(MODELOS_PRONTOS.some((m) => m.id === 'soap'))

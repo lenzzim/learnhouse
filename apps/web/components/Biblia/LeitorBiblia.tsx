@@ -16,7 +16,8 @@ import {
 import { versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
 import { CREDITO_STEPBIBLE, URL_STEPBIBLE, type CapituloOriginal, type PalavraOriginal } from '@/lib/biblia/original'
 import { carregarOriginal } from '@/lib/biblia/dados'
-import { ErroFonte, getChapter, rotuloVerso, versoIncluidoEm, type Capitulo } from '@/lib/biblia/fontes'
+import { ErroFonte, getChapterComRecuo, rotuloVerso, versoIncluidoEm, type Capitulo, type Recuo } from '@/lib/biblia/fontes'
+import { AvisoRecuo, DicaEntrarNvi } from './AvisoRecuo'
 import { mensagemErroBiblia, useAcessoBiblia, useFums } from './useFonteBiblia'
 import { SeletorVersao } from './SeletorVersao'
 import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
@@ -130,7 +131,7 @@ export default function LeitorBiblia() {
   const vParam = params.get('v')
   const cParam = params.get('c')
   const ref = useMemo(() => lerCodigoReferencia(refParam), [refParam])
-  const { versaoPadrao, montado } = useBibliaIdioma()
+  const { versaoPadrao, versaoAberta, idioma, logado, montado } = useBibliaIdioma()
 
   // preferências guardadas (lidas depois de montar, para não quebrar a hidratação)
   const [padrao, setPadrao] = useState<Referencia>({ livroId: 'GEN', capitulo: 1 })
@@ -178,14 +179,16 @@ export default function LeitorBiblia() {
     if (acesso.carregandoSessao) return null
     return `${v.id}/${livroInfo.id}/${atual.capitulo}/${acesso.logado ? 1 : 0}`
   }
-  const estadoA = useCarregar<Capitulo>(
+  // Licenciada que não pode ser lida agora (sem sessão, limite diário, chave
+  // ausente): o texto vem da aberta do idioma, com aviso (decisão N38).
+  const estadoA = useCarregar<Capitulo & { recuo?: Recuo }>(
     chaveCapitulo(versaoA),
-    () => getChapter(versaoA.id, livroInfo.id, atual.capitulo, acesso),
+    () => getChapterComRecuo(versaoA.id, livroInfo.id, atual.capitulo, acesso),
     tentativa
   )
-  const estadoB = useCarregar<Capitulo>(
+  const estadoB = useCarregar<Capitulo & { recuo?: Recuo }>(
     chaveCapitulo(versaoB),
-    () => getChapter(versaoB?.id ?? '', livroInfo.id, atual.capitulo, acesso),
+    () => getChapterComRecuo(versaoB?.id ?? '', livroInfo.id, atual.capitulo, acesso),
     tentativa
   )
 
@@ -440,7 +443,7 @@ export default function LeitorBiblia() {
             rotulo={t('biblia.comparar_com')}
             className={`${campoClasse} min-w-0 max-w-full`}
             valor={versaoB?.id ?? ''}
-            opcaoVazia={`${t('biblia.comparar_com')}…`}
+            opcaoVazia={t('biblia.nao_comparar')}
             excluir={versaoA.id}
             onChange={(id) => router.replace(montarHref(atual, versaoA.id, id), { scroll: false })}
           />
@@ -458,6 +461,11 @@ export default function LeitorBiblia() {
           <OutrasTraducoes referencia={refPassagem} flutuante />
         </div>
         {temLicenciada && <p className="-mt-1 text-xs text-[var(--text-3)]">{t('biblia.nota_licenciadas')}</p>}
+        <AvisoRecuo recuo={prontoA?.recuo ?? prontoB?.recuo} className="-mt-1" />
+        <DicaEntrarNvi
+          className="-mt-1"
+          mostrar={montado && !logado && idioma === 'pt' && versaoA.id === versaoAberta && !vParam && !versaoSalva}
+        />
       </header>
 
       {versaoB && (
@@ -516,8 +524,8 @@ export default function LeitorBiblia() {
       {estadoTexto?.tipo === 'pronto' && <ConviteEstudo lugar="biblia" className="mt-10" />}
 
       <footer className="mt-12 border-t border-[var(--line)] pt-4 text-xs leading-relaxed text-[var(--text-3)]">
-        <Credito versao={versaoA} copyright={prontoA?.copyright} />
-        {versaoB && <Credito versao={versaoB} copyright={prontoB?.copyright} />}
+        <Credito versao={versaoPorId(prontoA?.recuo?.para) ?? versaoA} copyright={prontoA?.copyright} />
+        {versaoB && <Credito versao={versaoPorId(prontoB?.recuo?.para) ?? versaoB} copyright={prontoB?.copyright} />}
         {precisaOriginal && (
           <p className="mt-1">
             <a href={URL_STEPBIBLE} target="_blank" rel="noopener noreferrer" className="underline decoration-dotted underline-offset-2 hover:text-[var(--text-2)]">

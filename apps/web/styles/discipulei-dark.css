@@ -53,6 +53,18 @@
      classes no <html> (app/layout.tsx). O globals.css do upstream lê
      --font-default para html/body; aqui ele passa a apontar para a Inter. */
   --font-default: var(--font-sans);
+
+  /* Caderno: marca-texto (fundo) e cor do texto. Contraste >= 4,5:1 com o
+     texto e os fundos do tema, inclusive cor sobre marca-texto
+     (lib/caderno/cores.ts). Sem dourado, âmbar ou roxo. */
+  --marca-verde: #d3ecd8;
+  --marca-azul: #d5e5f5;
+  --marca-rosa: #f5d8e2;
+  --marca-grafite: #e3e1dc;
+  --cor-verde: #1d6636;
+  --cor-azul: #1c4e8f;
+  --cor-rosa: #9e2656;
+  --cor-grafite: #4a4844;
 }
 
 /* Tema escuro, o padrão. */
@@ -74,6 +86,14 @@
   --link-underline: rgb(244 243 240 / 0.35);
   --sombra-lg: 0 28px 60px -22px rgb(0 0 0 / 0.7);
   --sombra-md: 0 12px 32px -16px rgb(0 0 0 / 0.6);
+  --marca-verde: #1e4a2b;
+  --marca-azul: #1c3a5e;
+  --marca-rosa: #5a2238;
+  --marca-grafite: #3b3a37;
+  --cor-verde: #86d6a0;
+  --cor-azul: #97bdf0;
+  --cor-rosa: #f2a3c2;
+  --cor-grafite: #c9c6bf;
 
   /* Vocabulário antigo deste arquivo, derivado dos tokens. O upstream tem
      mais degraus de cinza que a marca; os intermediários (surface-2,
@@ -679,16 +699,20 @@ html:not([dir='rtl']) .caderno-area :is(h1, h2, h3).caderno-secao {
 .caderno-prosa > * + * {
   margin-top: 0.85em;
 }
-.caderno-prosa :is(h1, h2, h3) {
+.caderno-prosa :is(h1, h2, h3, h4) {
   font-family: var(--font-serif), Georgia, serif;
   font-weight: 500;
   letter-spacing: -0.015em;
   line-height: 1.25;
   color: var(--text);
 }
-.caderno-prosa h1 { font-size: 1.75rem; margin-top: 1.6em; }
-.caderno-prosa h2 { font-size: 1.375rem; margin-top: 1.5em; }
-.caderno-prosa h3 { font-size: 1.15rem; margin-top: 1.3em; }
+/* Escala do corpo (1.125rem): 1.875 / 1.5 / 1.25 / 1.125. O H4 é discreto:
+   do tamanho do corpo, só mais firme, para subdivisões dentro de um tópico. */
+.caderno-prosa h1 { font-size: 1.875rem; margin-top: 1.6em; }
+.caderno-prosa h2 { font-size: 1.5rem; margin-top: 1.5em; }
+.caderno-prosa h3 { font-size: 1.25rem; margin-top: 1.3em; }
+.caderno-prosa h4 { font-size: 1.125rem; font-weight: 600; letter-spacing: 0; margin-top: 1.2em; }
+.caderno-prosa :is(h1, h2, h3, h4) + p { margin-top: 0.4em; }
 .caderno-prosa > :first-child { margin-top: 0; }
 .caderno-prosa :is(ul, ol) { padding-inline-start: 1.4em; }
 .caderno-prosa ul { list-style: disc; }
@@ -734,7 +758,7 @@ html:not([dir='rtl']) .caderno-area :is(h1, h2, h3).caderno-secao {
   color: var(--text-3);
   font-style: italic;
 }
-.caderno-prosa :is(h1, h2, h3).is-empty::before { font-style: normal; }
+.caderno-prosa :is(h1, h2, h3, h4).is-empty::before { font-style: normal; }
 
 /* [[ligações]] e #tags (decorações; o texto salvo é puro). */
 .caderno-prosa a.nota-ligacao {
@@ -759,6 +783,42 @@ html:not([dir='rtl']) .caderno-area :is(h1, h2, h3).caderno-secao {
 }
 .caderno-prosa a.nota-tag:hover { color: var(--text); }
 .caderno-prosa .suggestion { background: var(--surface); border-radius: 3px; }
+
+/* Marca-texto e cor do texto (só os nomes da paleta; ver lib/caderno/cores.ts).
+   Vale no editor, na leitura por link, na discussion publicada e no guia. */
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) mark.caderno-marca {
+  background-color: var(--marca-verde);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0.04em 0.12em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) mark.caderno-marca[data-cor='azul'] { background-color: var(--marca-azul); }
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) mark.caderno-marca[data-cor='rosa'] { background-color: var(--marca-rosa); }
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) mark.caderno-marca[data-cor='grafite'] { background-color: var(--marca-grafite); }
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) span.caderno-cor[data-cor='verde'] { color: var(--cor-verde); }
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) span.caderno-cor[data-cor='azul'] { color: var(--cor-azul); }
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) span.caderno-cor[data-cor='rosa'] { color: var(--cor-rosa); }
+:is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) span.caderno-cor[data-cor='grafite'] { color: var(--cor-grafite); }
+@media (forced-colors: active) {
+  :is(.caderno-prosa, .discussion-content-readonly .ProseMirror, .guia-previa) mark.caderno-marca { outline: 1px solid CanvasText; }
+}
+
+/* Amostras da paleta na barra do Caderno (menu de cores e o traço sob o ícone). */
+.caderno-amostra-marca { box-shadow: inset 0 0 0 1px var(--line-strong); }
+:is(.caderno-marca-amostra, .caderno-amostra-marca)[data-cor='verde'] { background-color: var(--marca-verde); }
+:is(.caderno-cor-amostra)[data-cor='verde'] { color: var(--cor-verde); }
+.caderno-amostra-cor[data-cor='verde'] { background-color: var(--cor-verde); }
+:is(.caderno-marca-amostra, .caderno-amostra-marca)[data-cor='azul'] { background-color: var(--marca-azul); }
+:is(.caderno-cor-amostra)[data-cor='azul'] { color: var(--cor-azul); }
+.caderno-amostra-cor[data-cor='azul'] { background-color: var(--cor-azul); }
+:is(.caderno-marca-amostra, .caderno-amostra-marca)[data-cor='rosa'] { background-color: var(--marca-rosa); }
+:is(.caderno-cor-amostra)[data-cor='rosa'] { color: var(--cor-rosa); }
+.caderno-amostra-cor[data-cor='rosa'] { background-color: var(--cor-rosa); }
+:is(.caderno-marca-amostra, .caderno-amostra-marca)[data-cor='grafite'] { background-color: var(--marca-grafite); }
+:is(.caderno-cor-amostra)[data-cor='grafite'] { color: var(--cor-grafite); }
+.caderno-amostra-cor[data-cor='grafite'] { background-color: var(--cor-grafite); }
 
 /* Gavetas do caderno (celular/tablet). */
 @media (prefers-reduced-motion: no-preference) {

@@ -6431,7 +6431,19 @@
     "verso_ausente": "Verse not present in this version",
     "verso_incluido": "(in v. {{n}})",
     "nota_citacao_licenciada": "Licensed version: the post stores only the reference and version; readers see the text live.",
-    "fechar": "Close"
+    "fechar": "Close",
+    "nao_comparar": "Don't compare",
+    "recuo_entrar": "Sign in to read the {{sigla}}. Showing the {{recuo}}.",
+    "recuo_limite": "The {{sigla}} reached today's reading limit. Showing the {{recuo}}.",
+    "recuo_indisponivel": "The {{sigla}} is unavailable right now. Showing the {{recuo}}.",
+    "entre_para_nvi": "Sign in to read the NVI",
+    "inserir_passagem_completa": "Insert full passage",
+    "trocar_versao_nota": "Switch to {{sigla}} in the note",
+    "modo_citar": "How to cite",
+    "citacao_completa": "Full quote",
+    "citacao_completa_desc": "Block with the text and the reference",
+    "mencao": "Reference only",
+    "mencao_desc": "\"Jn 3:16 (NIV)\" in the text, clickable"
   },
   "nav": {
     "inicio": "Home",
@@ -6643,7 +6655,10 @@
       "data_hoje": "Today's date",
       "modelo": "Template",
       "propriedade": "Property",
-      "guia": "Markdown guide"
+      "guia": "Markdown guide",
+      "titulo4": "Heading 4",
+      "marca_texto": "Highlight",
+      "cor_texto": "Text color"
     },
     "cmd_desc": {
       "texto": "Plain paragraph",
@@ -6666,7 +6681,10 @@
       "data_hoje": "Writes today's date",
       "modelo": "Use a ready-made or saved template",
       "propriedade": "Type, book, theme…",
-      "guia": "What you can do in the Notebook"
+      "guia": "What you can do in the Notebook",
+      "titulo4": "Subtle subsection",
+      "marca_texto": "Green background (== on each side)",
+      "cor_texto": "Green, blue, pink or graphite"
     },
     "imagem_descricao": "The image stays private in your note.",
     "imagem_alt": "Description (optional, for screen readers)",
@@ -6769,13 +6787,20 @@
         "k_sublinhado": "Underline",
         "k_riscado": "Strikethrough",
         "k_codigo": "Code",
-        "k_titulo2": "Heading 2 (Ctrl/⌘ + Alt + 1, 2 or 3)",
+        "k_titulo2": "Heading 2",
         "k_lista": "Bulleted list",
         "k_numerada": "Numbered list",
         "k_tarefas": "To-do list",
         "k_citacao": "Quote",
         "k_quebra": "Line break without a new paragraph",
-        "k_desfazer": "Undo (Ctrl/⌘ + Shift + Z redoes)"
+        "k_desfazer": "Undo (also the ↶ button on the toolbar)",
+        "titulo4": "Subtle subheading: #### and a space.",
+        "marca": "Highlight: two equals signs on each side.",
+        "cor": "Text color: select and pick it on the toolbar (or /color). In .md it is saved as <span data-cor=\"azul\">.",
+        "k_titulo3": "Heading 3",
+        "k_titulo4": "Heading 4 (Ctrl/⌘ + Alt + 1 to 4 for the others)",
+        "k_marca": "Highlight",
+        "k_refazer": "Redo (Ctrl + Y on Windows; also the ↷ button)"
       },
       "amostra_codigo": "Psalm 23",
       "abre_menu": "command menu",
@@ -6785,7 +6810,21 @@
       "backlinks": "Backlinks: in the right panel, see the notes that point to the open note with [[ ]].",
       "propriedades": "Properties: filter the note list by type and by book. Templates can fill in the type.",
       "privacidade_imagens": "Uploaded images are private. They only show to people with the note’s private link or when you publish to the community (a copy goes along).",
-      "exportar": "Export .md: properties become the YAML header (frontmatter) and come back when you import."
+      "exportar": "Export .md: properties become the YAML header (frontmatter) and come back when you import.",
+      "refaz": "redoes what was undone"
+    },
+    "desfazer": "Undo",
+    "refazer": "Redo",
+    "barra_texto": "Text",
+    "barra_inserir": "Insert",
+    "biblia_curto": "Bible",
+    "sem_marca": "No highlight",
+    "sem_cor": "Default color",
+    "cores": {
+      "verde": "Green",
+      "azul": "Blue",
+      "rosa": "Pink",
+      "grafite": "Graphite"
     }
   },
   "caderno": {
@@ -7090,6 +7129,10 @@
           "Three reasons to be grateful"
         ]
       }
-    }
+    },
+    "titulo_4": "Heading 4",
+    "editar_nota": "Edit",
+    "concluir_edicao": "Done",
+    "inserir_na_nota": "Insert into note"
   }
 }

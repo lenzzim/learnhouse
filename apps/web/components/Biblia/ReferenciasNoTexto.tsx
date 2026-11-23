@@ -5,7 +5,7 @@ import { codigoReferencia, encontrarReferencias } from '@/lib/biblia/referencias
 import { hrefLeitor } from '@/lib/biblia/dados'
 import { versaoCitadaApos } from './extensaoReferencias'
 import { useAcessoBiblia } from './useFonteBiblia'
-import { PopoverVersiculo } from './PopoverVersiculo'
+import { PopoverVersiculo, type AcoesEdicao } from './PopoverVersiculo'
 import { useIdiomaDiscipulei } from '@components/Discipulei/useIdioma'
 import { CLASSE_REF } from './extensaoReferencias'
 
@@ -50,10 +50,26 @@ export function TextoComReferencias({ texto }: { texto: string }) {
 
 type Aberto = { codigo: string; ancora: HTMLAnchorElement; versao?: string }
 
+/** Depois de mexer no texto, o pop-up fecha (o link antigo some do documento). */
+function acoesComFechar(acoes: AcoesEdicao | undefined, fechar: () => void): AcoesEdicao | undefined {
+  if (!acoes) return undefined
+  return {
+    inserirCompleta: (dados) => {
+      acoes.inserirCompleta(dados)
+      fechar()
+    },
+    trocarVersao: (versao) => {
+      acoes.trocarVersao(versao)
+      fechar()
+    },
+  }
+}
+
 export function ReferenciasNoTexto({
   children,
   className,
   aoClicar,
+  edicao,
 }: {
   children: React.ReactNode
   className?: string
@@ -62,6 +78,11 @@ export function ReferenciasNoTexto({
    * `versao` é a versão citada logo depois da referência no texto ("Jo 3:16 NVI"), se houver.
    */
   aoClicar?: (codigo: string, versao?: string) => void
+  /**
+   * Conteúdo editável (Caderno): ações do pop-up para a referência aberta
+   * ("Inserir passagem completa", "Trocar versão"). Sem isto, só leitura.
+   */
+  edicao?: (ancora: HTMLAnchorElement) => AcoesEdicao | undefined
 }) {
   const router = useRouter()
   useAcessoBiblia() // deixa o token da sessão para as citações vivas (versões licenciadas)
@@ -244,6 +265,7 @@ export function ReferenciasNoTexto({
               if (!popoverRef.current?.contains(document.activeElement)) agendar(fechar, ATRASO_FECHAR)
             }}
             onNavegar={navegar}
+            edicao={acoesComFechar(edicao?.(aberto.ancora), fechar)}
           />
         </div>
       )}

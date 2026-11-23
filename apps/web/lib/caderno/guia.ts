@@ -22,12 +22,12 @@ export type Verificacao =
 
 /** Desenho do "resultado" ao lado do exemplo. */
 export type Previa =
-  | 'h1' | 'h2' | 'h3'
-  | 'negrito' | 'italico' | 'riscado' | 'sublinhado' | 'codigo'
+  | 'h1' | 'h2' | 'h3' | 'h4'
+  | 'negrito' | 'italico' | 'riscado' | 'sublinhado' | 'codigo' | 'marca' | 'cor'
   | 'lista' | 'numerada' | 'tarefa' | 'tarefa_feita'
   | 'citacao' | 'destaque' | 'divisor' | 'bloco_codigo'
   | 'ligacao' | 'tag' | 'referencia' | 'referencia_versao'
-  | 'imagem' | 'video' | 'tabela' | 'propriedades' | 'menu' | 'quebra' | 'desfazer'
+  | 'imagem' | 'video' | 'tabela' | 'propriedades' | 'menu' | 'quebra' | 'desfazer' | 'refazer'
 
 export interface ExemploGuia {
   id: string
@@ -55,6 +55,8 @@ export const GUIA: SecaoGuia[] = [
       { id: 'negrito', digitar: '**graça**', amostra: 'graça', previa: 'negrito', verificar: { tipo: 'marca', marca: 'bold', texto: 'graça' } },
       { id: 'italico', digitar: '*fé*', amostra: 'fé', previa: 'italico', verificar: { tipo: 'marca', marca: 'italic', texto: 'fé' } },
       { id: 'riscado', digitar: '~~antes~~', amostra: 'antes', previa: 'riscado', verificar: { tipo: 'marca', marca: 'strike', texto: 'antes' } },
+      { id: 'marca', digitar: '==graça==', amostra: 'graça', previa: 'marca', verificar: { tipo: 'marca', marca: 'highlight', texto: 'graça' } },
+      { id: 'cor', digitar: '/cor', mostrar: '/cor', amostra: 'graça', previa: 'cor', verificar: { tipo: 'menu' } },
       { id: 'codigo', digitar: '`Rm 8:28`', amostra: 'Rm 8:28', previa: 'codigo', verificar: { tipo: 'marca', marca: 'code', texto: 'Rm 8:28' } },
     ],
   },
@@ -65,6 +67,7 @@ export const GUIA: SecaoGuia[] = [
       { id: 'titulo1', digitar: '# Salmo 23', amostra: 'Salmo 23', previa: 'h1', verificar: { tipo: 'bloco', no: 'heading', attrs: { level: 1 } } },
       { id: 'titulo2', digitar: '## O pastor', amostra: 'O pastor', previa: 'h2', verificar: { tipo: 'bloco', no: 'heading', attrs: { level: 2 } } },
       { id: 'titulo3', digitar: '### Versos 1-3', amostra: 'Versos 1-3', previa: 'h3', verificar: { tipo: 'bloco', no: 'heading', attrs: { level: 3 } } },
+      { id: 'titulo4', digitar: '#### Verso 1', amostra: 'Verso 1', previa: 'h4', verificar: { tipo: 'bloco', no: 'heading', attrs: { level: 4 } } },
       { id: 'lista', digitar: '- oração', amostra: 'oração', previa: 'lista', verificar: { tipo: 'bloco', no: 'bulletList' } },
       { id: 'numerada', digitar: '1. ler', amostra: 'ler', previa: 'numerada', verificar: { tipo: 'bloco', no: 'orderedList' } },
       { id: 'tarefa', digitar: '[ ] ler Rute', amostra: 'ler Rute', previa: 'tarefa', verificar: { tipo: 'bloco', no: 'taskItem', attrs: { checked: false } } },
@@ -117,14 +120,18 @@ export const ATALHOS_TECLADO: ExemploGuia[] = [
   { id: 'k_italico', digitar: 'Mod-i', amostra: 'fé', previa: 'italico', verificar: { tipo: 'atalho', tecla: 'Mod-i', marca: 'italic' } },
   { id: 'k_sublinhado', digitar: 'Mod-u', amostra: 'paz', previa: 'sublinhado', verificar: { tipo: 'atalho', tecla: 'Mod-u', marca: 'underline' } },
   { id: 'k_riscado', digitar: 'Mod-Shift-s', amostra: 'antes', previa: 'riscado', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-s', marca: 'strike' } },
+  { id: 'k_marca', digitar: 'Mod-Shift-h', amostra: 'graça', previa: 'marca', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-h', marca: 'highlight' } },
   { id: 'k_codigo', digitar: 'Mod-e', amostra: 'Rm 8:28', previa: 'codigo', verificar: { tipo: 'atalho', tecla: 'Mod-e', marca: 'code' } },
   { id: 'k_titulo2', digitar: 'Mod-Alt-2', amostra: 'O pastor', previa: 'h2', verificar: { tipo: 'atalho', tecla: 'Mod-Alt-2', no: 'heading', attrs: { level: 2 } } },
+  { id: 'k_titulo3', digitar: 'Mod-Alt-3', amostra: 'Versos 1-3', previa: 'h3', verificar: { tipo: 'atalho', tecla: 'Mod-Alt-3', no: 'heading', attrs: { level: 3 } } },
+  { id: 'k_titulo4', digitar: 'Mod-Alt-4', amostra: 'Verso 1', previa: 'h4', verificar: { tipo: 'atalho', tecla: 'Mod-Alt-4', no: 'heading', attrs: { level: 4 } } },
   { id: 'k_lista', digitar: 'Mod-Shift-8', amostra: 'oração', previa: 'lista', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-8', no: 'bulletList' } },
   { id: 'k_numerada', digitar: 'Mod-Shift-7', amostra: 'ler', previa: 'numerada', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-7', no: 'orderedList' } },
   { id: 'k_tarefas', digitar: 'Mod-Shift-9', amostra: 'ler Rute', previa: 'tarefa', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-9', no: 'taskList' } },
   { id: 'k_citacao', digitar: 'Mod-Shift-b', amostra: 'Deus é amor', previa: 'citacao', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-b', no: 'blockquote' } },
   { id: 'k_quebra', digitar: 'Shift-Enter', previa: 'quebra', verificar: { tipo: 'atalho', tecla: 'Shift-Enter', no: 'hardBreak' } },
   { id: 'k_desfazer', digitar: 'Mod-z', previa: 'desfazer', verificar: { tipo: 'atalho', tecla: 'Mod-z' } },
+  { id: 'k_refazer', digitar: 'Mod-Shift-z', previa: 'refazer', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-z' } },
 ]
 
 /** "Mod-Shift-8" → "Ctrl + Shift + 8" (ou "⌘ + Shift + 8" no Mac). */
