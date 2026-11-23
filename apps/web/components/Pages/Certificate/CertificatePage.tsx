@@ -15,6 +15,7 @@ import {
   certificateFileName,
   downloadCertificateNodeAsPdf,
 } from '@services/courses/certificateDownload';
+import { useTranslation } from 'react-i18next';
 
 interface CertificatePageProps {
   orgslug: string;
@@ -31,6 +32,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   const [linkCopied, setLinkCopied] = useState(false);
   const certificateCaptureRef = useRef<HTMLDivElement>(null);
   const { track } = useLHAnalytics('learner');
+  const { t, i18n } = useTranslation();
+  const idioma = i18n?.language || 'pt-BR';
 
   useTrackView(AnalyticsEvent.CertificateViewed, {}, !!userCertificate);
 
@@ -52,7 +55,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   useEffect(() => {
     const fetchCertificate = async () => {
       if (!session?.data?.tokens?.access_token) {
-        setError('Authentication required to view certificate');
+        setError(t('certificate.pagina.login_necessario'));
         setIsLoading(false);
         return;
       }
@@ -72,11 +75,11 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
         } else {
-          setError('No certificate found for this course');
+          setError(t('certificate.pagina.sem_certificado_curso'));
         }
       } catch (error) {
         console.error('Error fetching certificate:', error);
-        setError('Failed to load certificate. Please try again later.');
+        setError(t('certificate.pagina.erro_carregar'));
       } finally {
         setIsLoading(false);
       }
@@ -101,14 +104,14 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       certificateInstructor: config.certificate_instructor,
       certificateId: userCertificate.certificate_user.user_certification_uuid,
       learnerName,
-      awardedDate: new Date(userCertificate.certificate_user.created_at).toLocaleDateString('en-US', {
+      awardedDate: new Date(userCertificate.certificate_user.created_at).toLocaleDateString(idioma, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
       }),
       qrCodeLink,
     };
-  }, [userCertificate, learnerName, qrCodeLink]);
+  }, [userCertificate, learnerName, qrCodeLink, idioma]);
 
   // Generate the PDF from the SAME <CertificatePreview> the learner sees.
   //
@@ -134,7 +137,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF. Please try again.');
+      toast.error(t('certificate.download_failed'));
     }
   };
 
@@ -173,11 +176,11 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
     try {
       await navigator.clipboard.writeText(qrCodeLink);
       setLinkCopied(true);
-      toast.success('Verification link copied to clipboard');
+      toast.success(t('certificate.pagina.link_copiado'));
       setTimeout(() => setLinkCopied(false), 2000);
     } catch (error) {
       console.error('Error copying verification link:', error);
-      toast.error('Failed to copy link. Please try again.');
+      toast.error(t('certificate.pagina.falha_copiar'));
     }
   };
 
@@ -185,8 +188,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading certificate...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--text)] mx-auto mb-4"></div>
+          <p className="text-[var(--text-2)]">{t('certificate.loading_certificate')}</p>
         </div>
       </div>
     );
@@ -196,15 +199,15 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-red-800 mb-2">Certificate Not Available</h2>
-            <p className="text-red-600 mb-4">{error}</p>
+          <div className="bg-[var(--surface)] border border-[var(--line)] rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-[var(--text)] mb-2">{t('certificate.pagina.indisponivel')}</h2>
+            <p className="text-[var(--text-2)] mb-4">{error}</p>
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
-              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-[var(--cta-bg)] text-[var(--cta-fg)] px-6 py-3 rounded-full hover:bg-[var(--cta-bg-hover)] transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Back to Course</span>
+              <span>{t('certificate.pagina.voltar_curso')}</span>
             </Link>
           </div>
         </div>
@@ -216,17 +219,17 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-yellow-800 mb-2">No Certificate Found</h2>
-            <p className="text-yellow-600 mb-4">
-              No certificate is available for this course. Please contact your instructor for more information.
+          <div className="bg-[var(--surface)] border border-[var(--line)] rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-[var(--text)] mb-2">{t('certificate.pagina.nenhum')}</h2>
+            <p className="text-[var(--text-2)] mb-4">
+              {t('certificate.no_certificate_available')}
             </p>
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
-              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-[var(--cta-bg)] text-[var(--cta-fg)] px-6 py-3 rounded-full hover:bg-[var(--cta-bg-hover)] transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Back to Course</span>
+              <span>{t('certificate.pagina.voltar_curso')}</span>
             </Link>
           </div>
         </div>
@@ -235,48 +238,48 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-[var(--page)] py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-wrap gap-3 items-center justify-between mb-8">
           <Link
             href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
-            className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition duration-200"
+            className="inline-flex items-center space-x-2 text-[var(--text-2)] hover:text-[var(--text)] transition duration-200"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Course</span>
+            <span>{t('certificate.pagina.voltar_curso')}</span>
           </Link>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={copyVerificationLink}
-              aria-label="Copy certificate verification link"
-              className="inline-flex items-center space-x-2 bg-gray-100 text-gray-700 px-5 py-3 rounded-full hover:bg-gray-200 transition duration-200"
+              aria-label={t('certificate.pagina.copiar_link_aria')}
+              className="inline-flex items-center space-x-2 bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] px-5 py-3 rounded-full hover:bg-[var(--line)] transition duration-200"
             >
               {linkCopied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
-              <span>{linkCopied ? 'Copied' : 'Copy link'}</span>
+              <span>{linkCopied ? t('certificate.pagina.copiado') : t('certificate.pagina.copiar_link')}</span>
             </button>
             <button
               onClick={shareToLinkedIn}
-              aria-label="Add this certificate to your LinkedIn profile"
-              className="inline-flex items-center space-x-2 bg-[#0a66c2] text-white px-6 py-3 rounded-full hover:bg-[#004182] transition duration-200"
+              aria-label={t('certificate.pagina.linkedin_aria')}
+              className="inline-flex items-center space-x-2 bg-[var(--surface)] text-[var(--text)] border border-[var(--line-strong)] px-5 py-3 rounded-full hover:bg-[var(--line)] transition duration-200"
             >
               <Share2 className="w-5 h-5" />
-              <span>Share on LinkedIn</span>
+              <span>{t('certificate.pagina.linkedin')}</span>
             </button>
             <button
               onClick={downloadCertificate}
-              aria-label="Download certificate as PDF"
-              className="inline-flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition duration-200"
+              aria-label={t('certificate.pagina.baixar_aria')}
+              className="inline-flex items-center space-x-2 bg-[var(--cta-bg)] text-[var(--cta-fg)] px-5 py-3 rounded-full hover:bg-[var(--cta-bg-hover)] transition duration-200"
             >
               <Download className="w-5 h-5" />
-              <span>Download PDF</span>
+              <span>{t('certificate.pagina.baixar_pdf')}</span>
             </button>
           </div>
         </div>
 
         {/* Certificate Display */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-[var(--panel)] rounded-2xl shadow-lg p-8">
           <div className="max-w-2xl mx-auto">
             {certificatePreviewProps && <CertificatePreview {...certificatePreviewProps} />}
           </div>
@@ -299,12 +302,12 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         )}
 
         {/* Instructions */}
-        <div className="mt-8 text-center text-gray-600">
+        <div className="mt-8 text-center text-[var(--text-2)]">
           <p className="mb-2">
-            Click "Download PDF" to generate and download a high-quality certificate PDF.
+            {t('certificate.pagina.instrucao_1')}
           </p>
           <p className="text-sm">
-            The PDF includes a scannable QR code for certificate verification.
+            {t('certificate.pagina.instrucao_2')}
           </p>
         </div>
       </div>
