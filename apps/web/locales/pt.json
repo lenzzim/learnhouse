@@ -756,7 +756,7 @@
     "created": "Criado",
     "linked_course": "Curso vinculado",
     "community_guidelines": "Diretrizes da comunidade",
-    "community_guidelines_text": "Seja respeitoso e construtivo. Ajude os outros e compartilhe seu conhecimento com a comunidade.",
+    "community_guidelines_text": "Fale com carinho e respeito. Compartilhe o que Deus tem ensinado e ajude quem está começando.",
     "new_discussion": "Nova discussão",
     "manage": "Gerenciar",
     "sidebar": {
@@ -1375,7 +1375,15 @@
     "benefits": "Benefícios:",
     "min_price": "Preço mínimo:",
     "choose_price": "Escolha seu preço",
-    "stripe_denied": "A conexão com o Stripe foi cancelada."
+    "stripe_denied": "A conexão com o Stripe foi cancelada.",
+    "oferta": {
+      "recorrente": "recorrente",
+      "minimo": "mín.",
+      "mostrar_menos": "Mostrar menos",
+      "mais_beneficios_one": "mais {{count}} benefício",
+      "mais_beneficios_other": "mais {{count}} benefícios",
+      "obter_acesso": "Obter acesso"
+    }
   },
   "account": {
     "title": "Conta",

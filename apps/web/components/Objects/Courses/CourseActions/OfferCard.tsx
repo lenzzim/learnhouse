@@ -23,7 +23,7 @@ interface OfferCardProps {
 }
 
 export function OfferCard({ offer, orgslug }: OfferCardProps) {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { track } = useLHAnalytics('learner')
   const [expanded, setExpanded] = useState(false)
   const isSubscription = offer.offer_type === 'subscription'
@@ -36,10 +36,10 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
   return (
     <div className="bg-white rounded-xl nice-shadow overflow-hidden">
       {/* Type stripe */}
-      <div className={`px-4 py-2 flex items-center gap-2 ${isSubscription ? 'bg-indigo-50' : 'bg-gray-50'}`}>
+      <div className={`px-4 py-2 flex items-center gap-2 ${isSubscription ? 'bg-neutral-50' : 'bg-gray-50'}`}>
         {isSubscription
-          ? <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700"><RefreshCcw size={11} /> Subscription</span>
-          : <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600"><SquareCheck size={11} /> One-time payment</span>
+          ? <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-700"><RefreshCcw size={11} /> {t('payments.subscription')}</span>
+          : <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600"><SquareCheck size={11} /> {t('payments.one_time_payment')}</span>
         }
       </div>
 
@@ -53,14 +53,14 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
             )}
           </div>
           <div className="shrink-0 text-end">
-            <div className={`text-xl font-black ${isSubscription ? 'text-indigo-700' : 'text-gray-900'}`}>
+            <div className={`text-xl font-black ${isSubscription ? 'text-neutral-700' : 'text-gray-900'}`}>
               {formattedPrice}
             </div>
             {offer.price_type === 'customer_choice' && (
-              <p className="text-xs text-gray-400 leading-none">min.</p>
+              <p className="text-xs text-gray-400 leading-none">{t('payments.oferta.minimo')}</p>
             )}
             {isSubscription && (
-              <p className="text-xs text-indigo-400 leading-none font-medium">recurring</p>
+              <p className="text-xs text-neutral-400 leading-none font-medium">{t('payments.oferta.recorrente')}</p>
             )}
           </div>
         </div>
@@ -71,7 +71,7 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
             <div className={`space-y-1.5 overflow-hidden transition-all ${expanded ? '' : 'max-h-[3.5rem]'}`}>
               {benefits.map((b, i) => (
                 <div key={i} className="flex items-start gap-2 text-xs text-gray-500">
-                  <Sparkles size={10} className="text-indigo-300 mt-0.5 shrink-0" />
+                  <Sparkles size={10} className="text-neutral-300 mt-0.5 shrink-0" />
                   <span>{b}</span>
                 </div>
               ))}
@@ -82,8 +82,8 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
                 className="mt-1 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
               >
                 {expanded
-                  ? <><ChevronUp size={12} /> Show less</>
-                  : <><ChevronDown size={12} /> {benefits.length - 2} more benefits</>
+                  ? <><ChevronUp size={12} /> {t('payments.oferta.mostrar_menos')}</>
+                  : <><ChevronDown size={12} /> {t('payments.oferta.mais_beneficios', { count: benefits.length - 2 })}</>
                 }
               </button>
             )}
@@ -102,10 +102,10 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
         >
           <div className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-sm transition-colors cursor-pointer ${
             isSubscription
-              ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              ? 'bg-neutral-600 hover:bg-neutral-700 text-white'
               : 'bg-gray-900 hover:bg-gray-800 text-white'
           }`}>
-            {isSubscription ? 'Subscribe now' : 'Get access'}
+            {isSubscription ? t('payments.subscribe_now') : t('payments.oferta.obter_acesso')}
             <ArrowRight size={13} />
           </div>
         </Link>

@@ -1375,7 +1375,15 @@
     "benefits": "Beneficios:",
     "min_price": "Precio mínimo:",
     "choose_price": "Elige tu precio",
-    "stripe_denied": "La conexión con Stripe fue cancelada."
+    "stripe_denied": "La conexión con Stripe fue cancelada.",
+    "oferta": {
+      "recorrente": "recurrente",
+      "minimo": "mín.",
+      "mostrar_menos": "Mostrar menos",
+      "mais_beneficios_one": "{{count}} beneficio más",
+      "mais_beneficios_other": "{{count}} beneficios más",
+      "obter_acesso": "Obtener acceso"
+    }
   },
   "account": {
     "title": "Cuenta",

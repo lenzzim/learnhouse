@@ -1385,7 +1385,15 @@
     "benefits": "المزايا:",
     "min_price": "السعر الأدنى:",
     "choose_price": "اختر سعرك",
-    "stripe_denied": "تم إلغاء اتصال Stripe."
+    "stripe_denied": "تم إلغاء اتصال Stripe.",
+    "oferta": {
+      "recorrente": "متكرر",
+      "minimo": "الحد الأدنى",
+      "mostrar_menos": "عرض أقل",
+      "mais_beneficios_one": "{{count}} ميزة أخرى",
+      "mais_beneficios_other": "{{count}} مزايا أخرى",
+      "obter_acesso": "احصل على الوصول"
+    }
   },
   "account": {
     "title": "الحساب",

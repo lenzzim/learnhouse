@@ -1822,7 +1822,15 @@
     "subscription": "Subscription",
     "benefits": "Benefits:",
     "min_price": "Minimum Price:",
-    "choose_price": "Choose your price"
+    "choose_price": "Choose your price",
+    "oferta": {
+      "recorrente": "recurring",
+      "minimo": "min.",
+      "mostrar_menos": "Show less",
+      "mais_beneficios_one": "{{count}} more benefit",
+      "mais_beneficios_other": "{{count}} more benefits",
+      "obter_acesso": "Get access"
+    }
   },
   "account": {
     "title": "Account settings",
