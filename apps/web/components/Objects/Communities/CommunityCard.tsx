@@ -9,8 +9,9 @@ import { getCommunityThumbnailMediaDirectory } from '@services/media/media'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { MoreVertical, Users, Trash2, Edit, MessageCircle, ExternalLink, Lock } from 'lucide-react'
+import { MoreVertical, Trash2, Edit, MessageCircle, ExternalLink, Lock } from 'lucide-react'
 import Link from 'next/link'
+import { CapaAutomatica } from './CapaAutomatica'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -73,9 +74,7 @@ function CommunityCard(props: PropsType) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full w-full text-gray-300 gap-2">
-            <Users size={40} strokeWidth={1.5} />
-          </div>
+          <CapaAutomatica nome={props.community.name} />
         )}
       </Link>
 
