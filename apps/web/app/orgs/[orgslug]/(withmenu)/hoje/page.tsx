@@ -17,7 +17,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     tags: ['organizations'],
   })
   return {
-    title: `Hoje — ${org.name}`,
+    title: `Início — ${org.name}`,
     robots: {
       index: false,
       follow: false,

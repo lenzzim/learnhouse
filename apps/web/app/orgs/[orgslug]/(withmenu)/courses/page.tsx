@@ -24,13 +24,13 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     : null
   const imageUrl = ogImageUrl || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
   const canonical = await getServerCanonicalUrl(params.orgslug, '/courses')
-  const title = buildPageTitle('Courses', org.name, seoConfig)
+  const title = buildPageTitle('Aprender', org.name, seoConfig)
   const description = org.description || seoConfig.default_meta_description || ''
 
   return {
     title,
     description,
-    keywords: `${org.name}, ${org.description}, courses, learning, education, online learning, edu, online courses, ${org.name} courses`,
+    keywords: `${org.name}, ${org.description}, estudos bíblicos, discipulado, aprender, ${org.name}`,
     robots: {
       index: true,
       follow: true,

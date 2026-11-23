@@ -20,7 +20,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   const seoConfig = getOrgSeoConfig(org)
   const canonical = await getServerCanonicalUrl(params.orgslug, '/')
-  const title = buildPageTitle('Home', org.name, seoConfig)
+  const title = buildPageTitle('Início', org.name, seoConfig)
   const description = org.description || seoConfig.default_meta_description || ''
 
   // Prévia de link P&B gerada (item 3.4); o que não é público vira a genérica.

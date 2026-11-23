@@ -33,8 +33,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   const seoConfig = getOrgSeoConfig(org)
 
-  const title = buildPageTitle(community ? community.name : 'Community', org.name, seoConfig)
-  const description = community?.description || seoConfig.default_meta_description || `Community discussions from ${org.name}`
+  const title = buildPageTitle(community ? community.name : 'Comunidade', org.name, seoConfig)
+  const description = community?.description || seoConfig.default_meta_description || `Conversas da comunidade ${org.name}`
 
   const canonical = await getServerCanonicalUrl(params.orgslug, `/community/${params.communityuuid}`)
 

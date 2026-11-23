@@ -4,7 +4,7 @@ import ClientAdminLayout from './ClientAdminLayout'
 import PainelTemaClaro from '@components/Utils/PainelTemaClaro'
 
 export const metadata: Metadata = {
-  title: 'LearnHouse Dashboard',
+  title: 'Painel — Discipulei',
 }
 
 async function DashboardLayout(

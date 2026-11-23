@@ -36,8 +36,9 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   if (!courseResult) {
     return {
-      title: `Course — ${org?.name || 'Discipulei'}`,
-      description: 'View this course on LearnHouse',
+      title: `Aprender — ${org?.name || 'Discipulei'}`,
+      description: `Estudos da comunidade ${org?.name || 'Discipulei'} no Discipulei.`,
+      robots: { index: false, follow: false },
     }
   }
   const course_meta = courseResult
