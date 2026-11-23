@@ -6432,7 +6432,18 @@
     "verso_incluido": "(in v. {{n}})",
     "nota_citacao_licenciada": "Licensed version: the post stores only the reference and version; readers see the text live.",
     "fechar": "Close",
-    "nao_comparar": "Don't compare"
+    "nao_comparar": "Don't compare",
+    "recuo_entrar": "Sign in to read the {{sigla}}. Showing the {{recuo}}.",
+    "recuo_limite": "The {{sigla}} reached today's reading limit. Showing the {{recuo}}.",
+    "recuo_indisponivel": "The {{sigla}} is unavailable right now. Showing the {{recuo}}.",
+    "entre_para_nvi": "Sign in to read the NVI",
+    "inserir_passagem_completa": "Insert full passage",
+    "trocar_versao_nota": "Switch to {{sigla}} in the note",
+    "modo_citar": "How to cite",
+    "citacao_completa": "Full quote",
+    "citacao_completa_desc": "Block with the text and the reference",
+    "mencao": "Reference only",
+    "mencao_desc": "\"Jn 3:16 (NIV)\" in the text, clickable"
   },
   "nav": {
     "inicio": "Home",
@@ -7119,6 +7130,9 @@
         ]
       }
     },
-    "titulo_4": "Heading 4"
+    "titulo_4": "Heading 4",
+    "editar_nota": "Edit",
+    "concluir_edicao": "Done",
+    "inserir_na_nota": "Insert into note"
   }
 }

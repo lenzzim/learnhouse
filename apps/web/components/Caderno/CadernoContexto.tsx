@@ -44,6 +44,11 @@ interface Valor {
   /** Rola o editor até o n-ésimo heading (Sumário). */
   irParaTitulo: (indice: number) => void
   registrarIrParaTitulo: (fn: ((indice: number) => void) | null) => void
+  /** Há uma nota aberta para edição que aceita "Inserir na nota" (painel Bíblia). */
+  podeInserirNaNota: boolean
+  /** Insere um bloco (citação completa) no cursor da nota aberta. */
+  inserirNaNota: (bloco: NoTiptap) => boolean
+  registrarInsercao: (fn: ((bloco: NoTiptap) => boolean) | null) => void
   invalidar: () => void
 }
 
@@ -86,6 +91,8 @@ export function CadernoProvider({ orgslug, children }: { orgslug: string; childr
   const [direitaAberta, setDireitaAberta] = useState(false)
   const [notaAberta, setNotaAberta] = useState<NotaAberta | null>(null)
   const irRef = useRef<((i: number) => void) | null>(null)
+  const inserirRef = useRef<((bloco: NoTiptap) => boolean) | null>(null)
+  const [podeInserirNaNota, setPodeInserirNaNota] = useState(false)
 
   const invalidar = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: CHAVES_CADERNO.raiz })
@@ -151,9 +158,15 @@ export function CadernoProvider({ orgslug, children }: { orgslug: string; childr
       registrarIrParaTitulo: (fn) => {
         irRef.current = fn
       },
+      podeInserirNaNota,
+      inserirNaNota: (bloco) => inserirRef.current?.(bloco) ?? false,
+      registrarInsercao: (fn) => {
+        inserirRef.current = fn
+        setPodeInserirNaNota(!!fn)
+      },
       invalidar,
     }),
-    [orgslug, orgId, token, autenticado, statusSessao, passagem, versaoPedida, versoStrong, abaDireita, esquerdaAberta, direitaAberta, notaAberta, invalidar]
+    [orgslug, orgId, token, autenticado, statusSessao, passagem, versaoPedida, versoStrong, abaDireita, esquerdaAberta, direitaAberta, notaAberta, podeInserirNaNota, invalidar]
   )
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>

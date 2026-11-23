@@ -24,9 +24,14 @@ import {
   Warning,
   FileDashed,
   FloppyDisk,
+  PencilSimple,
+  Check,
 } from '@phosphor-icons/react'
 import { ReferenciasBiblicas } from '@components/Biblia/extensaoReferencias'
 import { ReferenciasNoTexto } from '@components/Biblia/ReferenciasNoTexto'
+import type { AcoesEdicao } from '@components/Biblia/PopoverVersiculo'
+import { citacaoNoLugar, inserirCitacao, mencaoDoLink, trocarVersaoDaMencao } from '@components/Biblia/citarNoEditor'
+import { blocoCitacao, textoDoBloco } from '@/lib/biblia/citacao'
 import { codigoReferencia, encontrarReferencias } from '@/lib/biblia/referencias'
 import {
   criarNota,
@@ -136,6 +141,11 @@ export function EditorNota({
   const [menu, setMenu] = useState(false)
   const [movendo, setMovendo] = useState(false)
   const lixeira = !!nota.deleted_at
+  // Item 1.6: nota publicada na comunidade abre em LEITURA (mesmo visual, sem
+  // barra); "Editar" liga a edição e "Concluir" volta. Nota não publicada e o
+  // TCD do dia (ainda não salvo, sem publicação) continuam abrindo editáveis.
+  const [lendo, setLendo] = useState(() => !!notaInicial.published_discussion_uuid)
+  const somenteLeitura = lixeira || lendo
   const existe = !!nota.note_uuid
   // TCD de outro dia não fala em "hoje" (placeholder e seletor de modelos).
   const tcdDeHoje = notaInicial.kind === 'tcd' && notaInicial.tcd_date === dataLocal()
@@ -548,7 +558,7 @@ export function EditorNota({
     // do contenteditable focado percorrendo o DOM do editor (custo que cresce
     // com a nota). Quem precisa do estado do editor usa useEditorState.
     shouldRerenderOnTransaction: false,
-    editable: !lixeira,
+    editable: !somenteLeitura,
     extensions: extensoes,
     content: docInicial as any,
     editorProps: propsEditor,
@@ -585,8 +595,8 @@ export function EditorNota({
   const notaVazia = useEditorState({ editor, selector: ({ editor: ed }) => ed?.isEmpty ?? true }) ?? true
 
   useEffect(() => {
-    editor?.setEditable(!lixeira)
-  }, [editor, lixeira])
+    editor?.setEditable(!somenteLeitura)
+  }, [editor, somenteLeitura])
 
   // Sumário/backlinks do painel direito; passagem padrão = 1ª referência.
   const publicarAberta = useCallback(() => {
@@ -614,6 +624,42 @@ export function EditorNota({
       ctxRef.current.setNotaAberta(null)
     }
   }, [editor, publicarAberta])
+
+  // Painel Bíblia (computador): "Inserir na nota" põe a citação no cursor.
+  useEffect(() => {
+    if (!editor || somenteLeitura) return
+    c.registrarInsercao((bloco) => inserirCitacao(editor, bloco as any))
+    return () => c.registrarInsercao(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, somenteLeitura])
+
+  // Pop-up de uma referência escrita na nota (item 2.3): "Inserir passagem
+  // completa" (a menção vira citação no lugar) e "Trocar versão". A linha de
+  // uma citação ("— João 3:16 (NVI)") já é citação: sem ações.
+  const edicaoReferencia = useCallback(
+    (ancora: HTMLAnchorElement): AcoesEdicao | undefined => {
+      const ed = vivo.current.editor
+      if (!ed || lixeira || !ed.isEditable || ancora.closest('blockquote')) return undefined
+      if (!mencaoDoLink(ed, ancora)) return undefined
+      return {
+        inserirCompleta: ({ versao, versos, titulo }) => {
+          const faixa = mencaoDoLink(ed, ancora)
+          if (!faixa) return
+          const licenciada = versao.fonte === 'licenciada'
+          citacaoNoLugar(
+            ed,
+            faixa,
+            blocoCitacao({ referencia: titulo, sigla: versao.sigla, licenciada, texto: licenciada ? undefined : textoDoBloco(versos) })
+          )
+        },
+        trocarVersao: (versao) => {
+          const faixa = mencaoDoLink(ed, ancora)
+          if (faixa) trocarVersaoDaMencao(ed, faixa, versao.sigla)
+        },
+      }
+    },
+    [lixeira]
+  )
 
   // Sumário → rolar até o heading.
   useEffect(() => {
@@ -787,6 +833,25 @@ export function EditorNota({
           {existe && <SeloVisibilidade visibilidade={nota.visibility} compacto onClick={lixeira ? undefined : () => setCompartilhar(true)} />}
         </div>
         <StatusSalvo status={status} oculto={!existe && status === 'salvo'} />
+        {existe && !lixeira && nota.published_discussion_uuid && (
+          <button
+            type="button"
+            onClick={async () => {
+              if (lendo) {
+                setLendo(false)
+                window.setTimeout(() => editor?.commands.focus('end'), 0)
+              } else {
+                if (vivo.current.pendente) await salvarAgora()
+                setLendo(true)
+              }
+            }}
+            aria-pressed={!lendo}
+            className={`${BOTAO_SECUNDARIO} ms-1 min-h-11 px-3 text-sm lg:min-h-9`}
+          >
+            {lendo ? <PencilSimple size={16} aria-hidden="true" /> : <Check size={16} aria-hidden="true" />}
+            <span>{lendo ? t('caderno.editar_nota') : t('caderno.concluir_edicao')}</span>
+          </button>
+        )}
         {existe && !lixeira && (
           <button
             type="button"
@@ -873,7 +938,7 @@ export function EditorNota({
       )}
 
       {/* Barra de formatação: duas linhas no celular, uma no computador */}
-      {!lixeira && editor && (
+      {!somenteLeitura && editor && (
         <BarraFormatacao
           editor={editor}
           sinalVersiculo={sinalVersiculo}
@@ -894,7 +959,7 @@ export function EditorNota({
             id="caderno-titulo"
             rows={1}
             value={titulo}
-            readOnly={lixeira}
+            readOnly={somenteLeitura}
             maxLength={300}
             placeholder={t('caderno.sem_titulo')}
             onChange={(e) => {
@@ -923,10 +988,10 @@ export function EditorNota({
             propriedades={propriedades}
             aoMudar={mudarPropriedades}
             usados={usadas.data ?? []}
-            somenteLeitura={lixeira}
+            somenteLeitura={somenteLeitura}
             sinalAdicionar={sinalPropriedade}
           />
-          {!lixeira && editor && notaVazia && !semModelo && (
+          {!somenteLeitura && editor && notaVazia && !semModelo && (
             <SeletorModelosVazio
               tcd={nota.kind === 'tcd'}
               tcdDeHoje={tcdDeHoje}
@@ -937,7 +1002,11 @@ export function EditorNota({
               }}
             />
           )}
-          <ReferenciasNoTexto className="mt-6" aoClicar={(codigo, versao) => c.abrirPassagem(codigo, 'biblia', versao)}>
+          <ReferenciasNoTexto
+            className="mt-6"
+            aoClicar={(codigo, versao) => c.abrirPassagem(codigo, 'biblia', versao)}
+            edicao={edicaoReferencia}
+          >
             <div onMouseDownCapture={aoPressionarNoCorpo} onClick={aoClicarNoCorpo}>
               <EditorContent editor={editor} />
             </div>

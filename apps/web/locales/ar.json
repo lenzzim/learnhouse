@@ -6432,7 +6432,18 @@
     "verso_incluido": "(in v. {{n}})",
     "nota_citacao_licenciada": "Licensed version: the post stores only the reference and version; readers see the text live.",
     "fechar": "Close",
-    "nao_comparar": "بدون مقارنة"
+    "nao_comparar": "بدون مقارنة",
+    "recuo_entrar": "سجّل الدخول لقراءة {{sigla}}. يُعرض الآن {{recuo}}.",
+    "recuo_limite": "بلغت {{sigla}} حدّ القراءة اليوم. يُعرض الآن {{recuo}}.",
+    "recuo_indisponivel": "{{sigla}} غير متاحة الآن. يُعرض الآن {{recuo}}.",
+    "entre_para_nvi": "سجّل الدخول لقراءة NVI",
+    "inserir_passagem_completa": "إدراج المقطع كاملاً",
+    "trocar_versao_nota": "التبديل إلى {{sigla}} في الملاحظة",
+    "modo_citar": "طريقة الاقتباس",
+    "citacao_completa": "اقتباس كامل",
+    "citacao_completa_desc": "كتلة بالنص والمرجع",
+    "mencao": "المرجع فقط",
+    "mencao_desc": "\"Jo 3:16 (NVI)\" داخل النص وقابل للنقر"
   },
   "mfa": {
     "policy": {
@@ -7134,6 +7145,9 @@
         ]
       }
     },
-    "titulo_4": "Heading 4"
+    "titulo_4": "Heading 4",
+    "editar_nota": "تحرير",
+    "concluir_edicao": "تم",
+    "inserir_na_nota": "إدراج في الملاحظة"
   }
 }

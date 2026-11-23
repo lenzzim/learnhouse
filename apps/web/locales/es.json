@@ -6437,7 +6437,18 @@
     "verso_incluido": "(en el v. {{n}})",
     "nota_citacao_licenciada": "Versión con licencia: la publicación guarda solo la referencia y la versión; quien lee ve el texto al momento.",
     "fechar": "Cerrar",
-    "nao_comparar": "No comparar"
+    "nao_comparar": "No comparar",
+    "recuo_entrar": "Inicie sesión para leer la {{sigla}}. Mostrando la {{recuo}}.",
+    "recuo_limite": "La {{sigla}} llegó al límite de lecturas de hoy. Mostrando la {{recuo}}.",
+    "recuo_indisponivel": "La {{sigla}} no está disponible ahora. Mostrando la {{recuo}}.",
+    "entre_para_nvi": "Inicie sesión para leer la NVI",
+    "inserir_passagem_completa": "Insertar pasaje completo",
+    "trocar_versao_nota": "Cambiar a la {{sigla}} en la nota",
+    "modo_citar": "Cómo citar",
+    "citacao_completa": "Cita completa",
+    "citacao_completa_desc": "Bloque con el texto y la referencia",
+    "mencao": "Solo la referencia",
+    "mencao_desc": "\"Jn 3:16 (NVI)\" en el texto, con enlace"
   },
   "nav": {
     "inicio": "Inicio",
@@ -7124,6 +7135,9 @@
         ]
       }
     },
-    "titulo_4": "Título 4"
+    "titulo_4": "Título 4",
+    "editar_nota": "Editar",
+    "concluir_edicao": "Listo",
+    "inserir_na_nota": "Insertar en la nota"
   }
 }

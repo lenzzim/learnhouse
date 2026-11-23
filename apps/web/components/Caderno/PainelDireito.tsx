@@ -15,9 +15,12 @@ import {
   lerCodigoReferencia,
 } from '@/lib/biblia/referencias'
 import { carregarOriginal, carregarVerbete, hrefLeitor, type Versiculo } from '@/lib/biblia/dados'
-import { VERSAO_PADRAO, ehLicenciada, versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
-import { getVerses, rotuloVerso, type Capitulo } from '@/lib/biblia/fontes'
+import { ehLicenciada, versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
+import { getVerses, getVersesComRecuo, rotuloVerso, type Capitulo, type Recuo } from '@/lib/biblia/fontes'
+import { blocoCitacao, textoDoBloco } from '@/lib/biblia/citacao'
 import { mensagemErroBiblia, useAcessoBiblia, useFums } from '@components/Biblia/useFonteBiblia'
+import { useBibliaIdioma, useNomesLivros } from '@components/Biblia/useBibliaIdioma'
+import { AvisoRecuo } from '@components/Biblia/AvisoRecuo'
 import {
   CREDITO_STEPBIBLE,
   URL_STEPBIBLE,
@@ -111,19 +114,27 @@ function CampoReferencia({ inicial, aoIr }: { inicial: string; aoIr: (codigo: st
 type Estado =
   | { tipo: 'carregando' }
   | { tipo: 'erro'; erro?: unknown }
-  | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo; comparar: Versiculo[]; capCmp: Capitulo | null }
+  | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo; comparar: Versiculo[]; capCmp: Capitulo | null; recuo?: Recuo }
+
+/** Mais que isto não vira citação de uma vez (como no painel "Inserir versículo"). */
+const MAX_VERSOS_CITACAO = 30
 
 function AbaBiblia() {
   const { t } = useTranslation()
   const c = useCaderno()
   const ref = lerCodigoReferencia(c.passagem)
-  const [versao, setVersao] = useState(VERSAO_PADRAO)
+  // Sem escolha guardada, a padrão: NVI para quem está logado (decisão N38).
+  // A versão escolhida no seletor (localStorage) continua mandando.
+  const { versaoPadrao, montado } = useBibliaIdioma()
+  const [escolhida, setVersao] = useState<string | null>(null)
+  const versao = escolhida ?? versaoPadrao
   const [comparar, setComparar] = useState('')
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
   const acesso = useAcessoBiblia()
+  const nomes = useNomesLivros(versao)
 
   useEffect(() => {
-    setVersao(versaoConhecida(lerPreferencia(CHAVE_VERSAO, VERSAO_PADRAO)) ?? VERSAO_PADRAO)
+    setVersao(versaoConhecida(lerPreferencia(CHAVE_VERSAO, '')))
     setComparar(versaoConhecida(lerPreferencia(CHAVE_COMPARAR, '')) ?? '')
   }, [])
 
@@ -136,31 +147,53 @@ function AbaBiblia() {
   const precisaSessao = ehLicenciada(versao) || (!!comparar && ehLicenciada(comparar))
   useEffect(() => {
     if (!ref) return
-    // licenciada: espera a sessão para mandar o token (senão o proxy responde 401)
-    if (precisaSessao && acesso.carregandoSessao) {
+    // licenciada: espera a sessão para mandar o token (senão o proxy responde 401);
+    // sem saber ainda se há sessão, a padrão (NVI ou BLIVRE) não é conhecida
+    if (!montado || (precisaSessao && acesso.carregandoSessao)) {
       setEstado({ tipo: 'carregando' })
       return
     }
     let vivo = true
     setEstado({ tipo: 'carregando' })
-    const principal = getVerses(versao, ref, acesso)
+    // licenciada que não pode ser lida agora: texto da aberta, com aviso
+    const principal = getVersesComRecuo(versao, ref, acesso)
     // a comparação falhar (limite, sem login) não derruba o texto principal
     const extra = comparar ? getVerses(comparar, ref, acesso).catch(() => null) : Promise.resolve(null)
     Promise.all([principal, extra])
       .then(([p, cmp]) =>
         vivo &&
-        setEstado({ tipo: 'pronto', versos: p.versos, capitulo: p.capitulo, comparar: cmp?.versos ?? [], capCmp: cmp?.capitulo ?? null })
+        setEstado({ tipo: 'pronto', versos: p.versos, capitulo: p.capitulo, comparar: cmp?.versos ?? [], capCmp: cmp?.capitulo ?? null, recuo: p.recuo })
       )
       .catch((erro) => vivo && setEstado({ tipo: 'erro', erro }))
     return () => {
       vivo = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [c.passagem, versao, comparar, acesso.token, acesso.carregandoSessao])
+  }, [c.passagem, versao, comparar, acesso.token, acesso.carregandoSessao, montado])
   useFums(estado.tipo === 'pronto' ? [estado.capitulo.fums, estado.capCmp?.fums] : [])
 
   const info = versaoPorId(versao)
+  const recuo = estado.tipo === 'pronto' ? estado.recuo : undefined
+  const infoTexto = (recuo && versaoPorId(recuo.para)) || info
   const infoCmp = comparar ? versaoPorId(comparar) : undefined
+
+  // "Inserir na nota" (item 2.3, computador): citação completa da passagem
+  // no cursor da nota aberta. Licenciada: só a referência (texto ao vivo).
+  const qtdVersos = estado.tipo === 'pronto' ? estado.versos.length : 0
+  const podeCitar = !!ref && ref.versoIni !== undefined && qtdVersos > 0 && qtdVersos <= MAX_VERSOS_CITACAO
+  const inserirNaNota = () => {
+    if (!ref || !info || estado.tipo !== 'pronto' || !podeCitar) return
+    const licenciada = info.fonte === 'licenciada'
+    // texto embutido só da aberta escolhida (no recuo, a licenciada vai só com a referência)
+    c.inserirNaNota(
+      blocoCitacao({
+        referencia: formatarReferencia(ref, false, nomes),
+        sigla: info.sigla,
+        licenciada,
+        texto: licenciada ? undefined : textoDoBloco(estado.versos),
+      }) as any
+    )
+  }
   const porNumero = useMemo(() => {
     const m = new Map<number, string>()
     if (estado.tipo === 'pronto') for (const v of estado.comparar) m.set(v.numero, v.texto)
@@ -219,6 +252,7 @@ function AbaBiblia() {
 
           {estado.tipo === 'carregando' && <p className="text-sm text-[var(--text-3)]">{t('biblia.carregando')}</p>}
           {estado.tipo === 'erro' && <p className="text-sm text-[var(--text-2)]">{mensagemErroBiblia(estado.erro, t, info?.sigla)}</p>}
+          <AvisoRecuo recuo={recuo} />
           {estado.tipo === 'pronto' && (
             <ol className="flex flex-col gap-2.5" lang={info?.idioma ?? 'pt'}>
               {estado.versos.map((v) => (
@@ -247,13 +281,30 @@ function AbaBiblia() {
           )}
           <div className="flex items-start justify-between gap-2 border-t border-[var(--line)] pt-2.5 text-xs text-[var(--text-3)]">
             <span className="min-w-0 break-words">
-              {credito(info, estado.tipo === 'pronto' ? estado.capitulo : null)}
+              {credito(infoTexto, estado.tipo === 'pronto' ? estado.capitulo : null)}
               {infoCmp ? ` | ${credito(infoCmp, estado.tipo === 'pronto' ? estado.capCmp : null)}` : ''}
             </span>
             <Link href={hrefLeitor(c.passagem as string, versao)} className="shrink-0 underline decoration-[var(--link-underline)] underline-offset-2 hover:text-[var(--text-2)]">
               {t('biblia.abrir_na_biblia')}
             </Link>
           </div>
+          {c.podeInserirNaNota && estado.tipo === 'pronto' && (
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={inserirNaNota}
+                disabled={!podeCitar}
+                className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[var(--line-strong)] px-3 text-sm text-[var(--text)] hover:bg-[var(--surface)] disabled:opacity-50 lg:min-h-9 ${FOCO}`}
+              >
+                {t('caderno.inserir_na_nota')}
+              </button>
+              {!podeCitar && (
+                <p className="text-xs text-[var(--text-3)]">
+                  {ref.versoIni === undefined ? t('biblia.informe_versiculo') : t('biblia.limite_versiculos', { max: MAX_VERSOS_CITACAO })}
+                </p>
+              )}
+            </div>
+          )}
         </>
       )}
     </div>

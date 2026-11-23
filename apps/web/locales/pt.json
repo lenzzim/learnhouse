@@ -6432,7 +6432,18 @@
     "verso_incluido": "(no v. {{n}})",
     "nota_citacao_licenciada": "Versão licenciada: o post guarda só a referência e a versão; o texto aparece na hora para quem lê.",
     "fechar": "Fechar",
-    "nao_comparar": "Não comparar"
+    "nao_comparar": "Não comparar",
+    "recuo_entrar": "Entre para ler na {{sigla}}. Mostrando a {{recuo}}.",
+    "recuo_limite": "A {{sigla}} chegou ao limite de leituras de hoje. Mostrando a {{recuo}}.",
+    "recuo_indisponivel": "A {{sigla}} está indisponível agora. Mostrando a {{recuo}}.",
+    "entre_para_nvi": "Entre para ler na NVI",
+    "inserir_passagem_completa": "Inserir passagem completa",
+    "trocar_versao_nota": "Trocar para a {{sigla}} na nota",
+    "modo_citar": "Como citar",
+    "citacao_completa": "Citação completa",
+    "citacao_completa_desc": "Bloco com o texto e a referência",
+    "mencao": "Só a referência",
+    "mencao_desc": "\"Jo 3:16 (NVI)\" no texto, clicável"
   },
   "nav": {
     "inicio": "Início",
@@ -7119,6 +7130,9 @@
         ]
       }
     },
-    "titulo_4": "Título 4"
+    "titulo_4": "Título 4",
+    "editar_nota": "Editar",
+    "concluir_edicao": "Concluir",
+    "inserir_na_nota": "Inserir na nota"
   }
 }

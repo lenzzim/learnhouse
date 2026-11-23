@@ -553,3 +553,48 @@ test('importar .md: ==marca==, <mark data-cor> e <span data-cor> (o que a export
   assert.ok(achar('==código==')?.marks.some((m) => m.type === 'code'))
   assert.ok(!JSON.stringify(doc).includes('CDX'))
 })
+
+/* ------------------------- inserir passagem a partir da menção (2.3) */
+
+const citar = await import('../../Biblia/citarNoEditor.ts')
+const { blocoCitacao } = await import('../../../lib/biblia/citacao.ts')
+
+function linkDe(ed, texto) {
+  return Array.from(ed.view.dom.querySelectorAll('a[data-biblia-ref]')).find((a) => a.textContent === texto)
+}
+
+test('menção sozinha no parágrafo vira citação completa no lugar', () => {
+  const ed = editorDecorado('<p>antes</p><p>Jo 3:16 (NVI)</p><p>depois</p>')
+  const faixa = citar.mencaoDoLink(ed, linkDe(ed, 'Jo 3:16'))
+  assert.equal(faixa.sigla, 'NVI')
+  assert.equal(ed.state.doc.textBetween(faixa.from, faixa.to), 'Jo 3:16 (NVI)')
+  citar.citacaoNoLugar(ed, faixa, blocoCitacao({ referencia: 'João 3:16', sigla: 'NVI', licenciada: true }))
+  const tipos = ed.getJSON().content.map((n) => n.type)
+  assert.deepEqual(tipos.slice(0, 3), ['paragraph', 'blockquote', 'paragraph'])
+  assert.equal(ed.state.doc.child(1).textContent, '— João 3:16 (NVI)')
+  assert.ok(!ed.state.doc.textContent.includes('Jo 3:16 (NVI)'))
+  ed.destroy()
+})
+
+test('menção numa frase: a frase fica e a citação entra logo depois', () => {
+  const ed = editorDecorado('<p>Como diz Jo 3:16, Deus amou.</p><p>fim</p>')
+  const faixa = citar.mencaoDoLink(ed, linkDe(ed, 'Jo 3:16'))
+  assert.equal(faixa.sigla, null)
+  citar.citacaoNoLugar(ed, faixa, blocoCitacao({ referencia: 'João 3:16', sigla: 'BLIVRE', licenciada: false, texto: 'Porque Deus amou o mundo' }))
+  const d = ed.state.doc
+  assert.equal(d.child(0).textContent, 'Como diz Jo 3:16, Deus amou.')
+  assert.equal(d.child(1).type.name, 'blockquote')
+  assert.equal(d.child(1).textContent, 'Porque Deus amou o mundo— João 3:16 (BLIVRE)')
+  ed.destroy()
+})
+
+test('trocar versão da menção: troca ou acrescenta a sigla', () => {
+  const ed = editorDecorado('<p>Veja Jo 3:16 (ARA) e Rm 8:28.</p>')
+  citar.trocarVersaoDaMencao(ed, citar.mencaoDoLink(ed, linkDe(ed, 'Jo 3:16')), 'NVI')
+  assert.equal(ed.state.doc.textContent, 'Veja Jo 3:16 (NVI) e Rm 8:28.')
+  citar.trocarVersaoDaMencao(ed, citar.mencaoDoLink(ed, linkDe(ed, 'Rm 8:28')), 'NVI')
+  assert.equal(ed.state.doc.textContent, 'Veja Jo 3:16 (NVI) e Rm 8:28 (NVI).')
+  // a decoração passa a abrir na versão citada
+  assert.equal(linkDe(ed, 'Rm 8:28').getAttribute('data-biblia-versao'), 'nvi')
+  ed.destroy()
+})
