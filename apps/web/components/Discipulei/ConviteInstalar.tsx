@@ -13,9 +13,18 @@
  *
  * - Chrome/Edge/Android: guarda o `beforeinstallprompt` e mostra um aviso
  *   discreto no rodapé com "Instalar" (chama prompt()) e "Agora não".
- * - iOS (não há `beforeinstallprompt`): o mesmo aviso, com a instrução de
- *   Compartilhar > Adicionar à Tela de Início.
- * - "Agora não" vale por 30 dias (localStorage, sempre em try/catch).
+ * - Sem o evento (iOS, Safari no Mac, Firefox, ou Chrome que ainda não
+ *   disparou): o mesmo aviso, com as instruções manuais da plataforma.
+ * - "Agora não" vale por 30 dias, guardado POR CONTA (chave com o id do
+ *   usuário, localStorage, sempre em try/catch). Instalou: não volta.
+ *
+ * Causa do bug de 23/11/2026 (conta nova não viu o convite): (1) a dispensa
+ * era por navegador, então quem já tinha tocado "Agora não" com outra conta
+ * não via mais nada por 30 dias; (2) não havia service worker, e o Chrome só
+ * dispara `beforeinstallprompt` com um service worker que trate `fetch`; sem
+ * o evento, fora do iOS, o componente não mostrava nada. Agora há um service
+ * worker mínimo (public/sw.js, sem cache nenhum) registrado junto com o
+ * manifesto, só para quem está logado.
  * - Nunca aparece com o app já aberto em modo standalone, nas telas de
  *   login/cadastro, no painel (/dash) nem com o player de podcast aberto.
  *
@@ -40,8 +49,13 @@ interface BeforeInstallPromptEvent extends Event {
 
 const MANIFESTO_ID = 'discipulei-manifesto'
 const MANIFESTO_HREF = '/app.webmanifest'
-const CHAVE_DISPENSA = 'discipulei_instalar_dispensado_em'
+const SERVICE_WORKER = '/sw.js'
+/** Por conta: `discipulei_instalar_dispensado_em:<id do usuário>`. */
+const CHAVE_DISPENSA = 'discipulei_instalar_dispensado_em:'
 const TRINTA_DIAS_MS = 30 * 24 * 60 * 60 * 1000
+const PARA_SEMPRE = Number.MAX_SAFE_INTEGER
+/** Quanto esperar o `beforeinstallprompt` antes de mostrar as instruções manuais. */
+const ESPERA_EVENTO_MS = 4000
 
 /** Segmentos de rota onde o convite nunca aparece. */
 const SEGMENTOS_BLOQUEADOS = new Set([
@@ -60,23 +74,37 @@ const SEGMENTOS_BLOQUEADOS = new Set([
 /** Rotas com barra de ações fixa no rodapé (só no mobile, < md). */
 const SEGMENTOS_COM_BARRA_INFERIOR = new Set(['account'])
 
-function dispensadoRecentemente(): boolean {
+function dispensadoRecentemente(conta: string): boolean {
   try {
-    const valor = window.localStorage.getItem(CHAVE_DISPENSA)
+    const valor = window.localStorage.getItem(CHAVE_DISPENSA + conta)
     if (!valor) return false
     const quando = Number(valor)
-    return Number.isFinite(quando) && Date.now() - quando < TRINTA_DIAS_MS
+    return Number.isFinite(quando) && (quando === PARA_SEMPRE || Date.now() - quando < TRINTA_DIAS_MS)
   } catch {
     return false
   }
 }
 
-function registrarDispensa() {
+function registrarDispensa(conta: string, quando: number = Date.now()) {
   try {
-    window.localStorage.setItem(CHAVE_DISPENSA, String(Date.now()))
+    window.localStorage.setItem(CHAVE_DISPENSA + conta, String(quando))
   } catch {
     // Modo privado ou armazenamento bloqueado: o aviso some só nesta visita.
   }
+}
+
+type Plataforma = 'ios' | 'safari-mac' | 'firefox-android' | 'firefox-desktop' | 'android' | 'desktop'
+
+/** Onde a pessoa está, para escolher a instrução manual certa. */
+function plataformaInstalacao(): Plataforma {
+  const ua = window.navigator.userAgent || ''
+  if (ehIos()) return 'ios'
+  const android = /Android/i.test(ua)
+  if (/Firefox\//i.test(ua)) return android ? 'firefox-android' : 'firefox-desktop'
+  if (android) return 'android'
+  const safari = /Safari\//.test(ua) && !/Chrome\/|Chromium\/|Edg\/|OPR\//.test(ua)
+  if (safari && /Macintosh/.test(ua)) return 'safari-mac'
+  return 'desktop'
 }
 
 function emModoStandalone(): boolean {
@@ -100,8 +128,10 @@ export default function ConviteInstalar() {
   const { state: podcast } = usePodcastPlayer()
   const autenticado = session?.status === 'authenticated'
 
+  const conta: string | null = autenticado ? String((session as any)?.data?.user?.id ?? '') || null : null
   const [eventoInstalar, setEventoInstalar] = useState<BeforeInstallPromptEvent | null>(null)
-  const [modoIos, setModoIos] = useState(false)
+  // Instrução manual (sem `beforeinstallprompt`): qual plataforma, ou null.
+  const [manual, setManual] = useState<Plataforma | null>(null)
   const [dispensado, setDispensado] = useState(true)
   const [telaPequena, setTelaPequena] = useState(false)
 
@@ -116,38 +146,54 @@ export default function ConviteInstalar() {
       link.href = MANIFESTO_HREF
       document.head.appendChild(link)
     }
+    // Service worker mínimo, sem cache (public/sw.js): requisito do Chrome
+    // para disparar o pedido de instalação.
+    if ('serviceWorker' in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register(SERVICE_WORKER, { scope: '/' }).catch(() => {})
+    }
     return () => {
       document.getElementById(MANIFESTO_ID)?.remove()
     }
   }, [autenticado])
 
-  // 2) Escuta o pedido de instalação (Chromium) e detecta o iOS.
+  // 2) Escuta o pedido de instalação (Chromium); sem ele, instruções manuais.
   useEffect(() => {
-    if (!autenticado) return
+    if (!conta) return
     // Dentro de iframe (embeds) ou já instalado: nada a oferecer.
     if (window.self !== window.top || emModoStandalone()) return
 
-    setDispensado(dispensadoRecentemente())
-    setModoIos(ehIos())
+    setDispensado(dispensadoRecentemente(conta))
+    const plataforma = plataformaInstalacao()
+    // iOS, Safari no Mac e Firefox nunca disparam o evento: instrução já.
+    // Chrome/Edge: espera um pouco pelo evento; se não vier, instrução manual.
+    const semEvento = plataforma === 'ios' || plataforma === 'safari-mac' || plataforma.startsWith('firefox')
+    let espera: number | null = null
+    if (semEvento) setManual(plataforma)
+    else espera = window.setTimeout(() => setManual(plataforma), ESPERA_EVENTO_MS)
 
     const aoPedirInstalacao = (e: Event) => {
       e.preventDefault() // sem a mini-barra automática do Chrome
+      if (espera) window.clearTimeout(espera)
+      setManual(null)
       setEventoInstalar(e as BeforeInstallPromptEvent)
     }
     const aoInstalar = () => {
       setEventoInstalar(null)
-      setModoIos(false)
+      setManual(null)
+      registrarDispensa(conta, PARA_SEMPRE)
+      setDispensado(true)
     }
 
     window.addEventListener('beforeinstallprompt', aoPedirInstalacao)
     window.addEventListener('appinstalled', aoInstalar)
     return () => {
+      if (espera) window.clearTimeout(espera)
       window.removeEventListener('beforeinstallprompt', aoPedirInstalacao)
       window.removeEventListener('appinstalled', aoInstalar)
       setEventoInstalar(null)
-      setModoIos(false)
+      setManual(null)
     }
-  }, [autenticado])
+  }, [conta])
 
   // 3) Largura < md: as barras fixas de comunidade/conta só existem aí.
   useEffect(() => {
@@ -160,9 +206,9 @@ export default function ConviteInstalar() {
   }, [])
 
   const dispensar = useCallback(() => {
-    registrarDispensa()
+    if (conta) registrarDispensa(conta)
     setDispensado(true)
-  }, [])
+  }, [conta])
 
   const instalar = useCallback(async () => {
     const evento = eventoInstalar
@@ -183,7 +229,7 @@ export default function ConviteInstalar() {
   const temBarraInferior = telaPequena && segmentos.some((s) => SEGMENTOS_COM_BARRA_INFERIOR.has(s))
   const podcastAberto = podcast.isVisible && !!podcast.currentEpisode
 
-  const podeMostrar = !!eventoInstalar || modoIos
+  const podeMostrar = !!eventoInstalar || !!manual
   if (!autenticado || dispensado || rotaBloqueada || podcastAberto || !podeMostrar) return null
 
   // Barra de ações mobile: ~76px de altura + margem; o aviso fica acima dela.
@@ -225,11 +271,19 @@ export default function ConviteInstalar() {
           <p className="mt-0.5 text-xs leading-snug" style={{ color: 'var(--text-2)' }}>
             {eventoInstalar ? (
               t('instalar.descricao')
-            ) : (
+            ) : manual === 'ios' ? (
               <>
                 <Share size={12} aria-hidden="true" className="me-1 inline-block align-[-1px]" />
                 {t('instalar.ios_instrucoes')}
               </>
+            ) : manual === 'safari-mac' ? (
+              t('instalar.safari_mac_instrucoes')
+            ) : manual === 'firefox-desktop' ? (
+              t('instalar.firefox_desktop_instrucoes')
+            ) : manual === 'firefox-android' || manual === 'android' ? (
+              t('instalar.android_instrucoes')
+            ) : (
+              t('instalar.desktop_instrucoes')
             )}
           </p>
         </div>
