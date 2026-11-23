@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 interface MiniInfoTooltipProps {
   icon?: React.ReactNode;
@@ -14,10 +15,11 @@ export default function MiniInfoTooltip({
   icon,
   message,
   onClose,
-  iconColor = 'text-teal-600',
+  iconColor = 'text-[var(--text-2)]',
   iconSize = 20,
   width = 'w-48'
 }: MiniInfoTooltipProps) {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -36,6 +38,7 @@ export default function MiniInfoTooltip({
       <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
       <button
         onClick={onClose}
+        aria-label={t('nav.fechar')}
         className="absolute top-1 end-1 text-gray-400 hover:text-gray-600"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

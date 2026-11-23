@@ -243,6 +243,7 @@ function Courses(props: CourseProps) {
                   <div className="relative">
                     <Users className="absolute start-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                     <select
+                      aria-label={t('courses.usergroup_filter.info_title')}
                       value={selectedUsergroupId}
                       onChange={(e) => handleUsergroupChange(e.target.value)}
                       className="ps-8 pe-8 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0 appearance-none cursor-pointer min-w-[160px]"
@@ -257,6 +258,8 @@ function Courses(props: CourseProps) {
                   </div>
                   <button
                     onClick={() => setShowUsergroupInfo(!showUsergroupInfo)}
+                    aria-label={t('courses.usergroup_filter.info_title')}
+                    aria-expanded={showUsergroupInfo}
                     className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-100"
                   >
                     <Info className="w-3.5 h-3.5" />
