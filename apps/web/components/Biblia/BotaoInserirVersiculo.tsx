@@ -59,10 +59,16 @@ type Previa =
 export function BotaoInserirVersiculo({
   editor,
   abrirSinal = 0,
+  rotuloVisivel,
+  classeBotao,
 }: {
   editor: Editor
   /** Caderno: muda (incrementa) para abrir o painel pelo comando "/versículo". */
   abrirSinal?: number
+  /** Texto curto ao lado do ícone (Caderno: "Bíblia"). */
+  rotuloVisivel?: string
+  /** Classes do botão (o Caderno usa os alvos de 44 px da barra dele). */
+  classeBotao?: string
 }) {
   const { t } = useTranslation()
   // padrão: a versão do idioma da interface (BLIVRE, WEB ou RV1909) até o
@@ -215,11 +221,14 @@ export function BotaoInserirVersiculo({
         aria-haspopup="dialog"
         aria-expanded={aberto}
         aria-controls={aberto ? idPainel : undefined}
-        className={`p-1.5 rounded transition-colors ${
-          aberto ? 'bg-gray-200 text-gray-900' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-        }`}
+        className={
+          classeBotao
+            ? `${classeBotao} ${aberto ? 'bg-[var(--surface)] text-[var(--text)]' : ''}`
+            : `p-1.5 rounded transition-colors ${aberto ? 'bg-gray-200 text-gray-900' : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'}`
+        }
       >
-        <BookOpen size={16} />
+        <BookOpen size={16} aria-hidden="true" />
+        {rotuloVisivel && <span>{rotuloVisivel}</span>}
       </button>
 
       {aberto && (emModal || fixo) && envolver(

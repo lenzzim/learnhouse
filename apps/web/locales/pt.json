@@ -6801,6 +6801,19 @@
       "privacidade_imagens": "Imagens enviadas são privadas. Só aparecem para quem tem o link privado da nota ou quando você publica na comunidade (aí vai uma cópia).",
       "exportar": "Exportar .md: as propriedades viram o cabeçalho YAML (frontmatter) e voltam ao importar.",
       "refaz": "refaz o que foi desfeito"
+    },
+    "desfazer": "Desfazer",
+    "refazer": "Refazer",
+    "barra_texto": "Texto",
+    "barra_inserir": "Inserir",
+    "biblia_curto": "Bíblia",
+    "sem_marca": "Sem marca-texto",
+    "sem_cor": "Cor normal",
+    "cores": {
+      "verde": "Verde",
+      "azul": "Azul",
+      "rosa": "Rosa",
+      "grafite": "Grafite"
     }
   },
   "caderno": {

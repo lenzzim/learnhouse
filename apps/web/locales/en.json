@@ -6801,6 +6801,19 @@
       "privacidade_imagens": "Uploaded images are private. They only show to people with the note’s private link or when you publish to the community (a copy goes along).",
       "exportar": "Export .md: properties become the YAML header (frontmatter) and come back when you import.",
       "refaz": "redoes what was undone"
+    },
+    "desfazer": "Undo",
+    "refazer": "Redo",
+    "barra_texto": "Text",
+    "barra_inserir": "Insert",
+    "biblia_curto": "Bible",
+    "sem_marca": "No highlight",
+    "sem_cor": "Default color",
+    "cores": {
+      "verde": "Green",
+      "azul": "Blue",
+      "rosa": "Pink",
+      "grafite": "Graphite"
     }
   },
   "caderno": {
