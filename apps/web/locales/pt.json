@@ -6632,11 +6632,11 @@
     },
     "plan_limit": {
       "titulo": "Este recurso não está disponível",
-      "descricao": "Este recurso não está ativo para a comunidade. Fale com a equipe se achar que deveria estar."
+      "descricao": "Este recurso não está ativo nesta comunidade. Se achar que deveria estar, fale com quem cuida da comunidade."
     },
     "permission": {
       "titulo": "Você não tem acesso a isto",
-      "descricao": "Sua conta não tem permissão para esta página ou ação. Se achar que deveria ter, fale com a equipe da comunidade."
+      "descricao": "Sua conta não tem permissão para esta página ou ação. Se achar que deveria ter, fale com quem cuida da comunidade."
     },
     "rate_limit": {
       "titulo": "Vamos com calma por um instante",
@@ -6656,7 +6656,7 @@
     },
     "org_config": {
       "titulo": "A comunidade ainda está sendo configurada",
-      "descricao": "A organização ainda não está pronta. A equipe precisa terminar a configuração."
+      "descricao": "A comunidade ainda não está pronta. Volte daqui a pouco."
     },
     "payment": {
       "titulo": "Não conseguimos concluir o pagamento",
