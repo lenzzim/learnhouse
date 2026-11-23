@@ -19,7 +19,7 @@
 import { getAPIUrl } from '@services/config/config'
 import { carregarLivro, type Versiculo } from './dados'
 import { intervaloVersos, livroPorId, type Referencia } from './referencias'
-import { VERSOES_LICENCIADAS, ehLicenciada, versaoPorId, type FonteVersao, type VersaoInfo } from './versoes'
+import { VERSOES_LICENCIADAS, ehLicenciada, versaoDeRecuo, versaoPorId, type FonteVersao, type VersaoInfo } from './versoes'
 
 export interface Capitulo {
   /** id da versão (blivre, ara...) */
@@ -196,7 +196,10 @@ export interface Trecho {
  * com `numero` = 25 (use capitulo.combinados para o rótulo "25-26").
  */
 export async function getVerses(versionId: string, ref: Referencia, opcoes?: OpcoesFonte): Promise<Trecho> {
-  const capitulo = await getChapter(versionId, ref.livroId, ref.capitulo, opcoes)
+  return versosDoCapitulo(await getChapter(versionId, ref.livroId, ref.capitulo, opcoes), ref)
+}
+
+function versosDoCapitulo(capitulo: Capitulo, ref: Referencia): Trecho {
   const intervalo = intervaloVersos(ref)
   if (!intervalo) return { versos: [], capitulo }
   const [ini, fim] = intervalo
@@ -207,6 +210,85 @@ export async function getVerses(versionId: string, ref: Referencia, opcoes?: Opc
     versos.push({ numero: v, texto: capitulo.versos[v - 1] })
   }
   return { versos, capitulo }
+}
+
+// ---------------------------------------------------------------------------
+// Recuo para a aberta (decisão N38): a NVI é a padrão de quem está logado, mas
+// se ela (ou outra licenciada) não puder ser lida — sem sessão, limite diário
+// da API, chave ausente, versão desligada no servidor — o texto vem da aberta
+// do mesmo idioma (BLIVRE), com aviso, em vez de quebrar a tela.
+// ---------------------------------------------------------------------------
+
+/** Códigos do proxy que levam ao recuo (outros erros continuam erro). */
+export const CODIGOS_RECUO = ['nao_autenticado', 'limite_api', 'limite_usuario', 'chave_ausente', 'versao_indisponivel'] as const
+
+export interface Recuo {
+  /** versão pedida (ex.: nvi) */
+  de: string
+  /** versão mostrada no lugar (ex.: blivre) */
+  para: string
+  motivo: (typeof CODIGOS_RECUO)[number]
+}
+
+/** Limite estourado: não insiste na licenciada por um tempo (poupa a cota diária). */
+const PAUSA_LIMITE_MS = 10 * 60 * 1000
+const limiteAte = new Map<string, number>()
+
+function motivoDoErro(e: unknown): Recuo['motivo'] | null {
+  return e instanceof ErroFonte && (CODIGOS_RECUO as readonly string[]).includes(e.codigo) ? (e.codigo as Recuo['motivo']) : null
+}
+
+/** Motivo para nem tentar a licenciada agora (catálogo do servidor ou limite recente). */
+async function motivoAntecipado(versao: VersaoInfo): Promise<Recuo['motivo'] | null> {
+  const pausa = limiteAte.get(versao.id)
+  if (pausa && pausa > Date.now()) return 'limite_api'
+  const estado = await carregarVersoesLicenciadas()
+  if (!estado.ativo) return 'chave_ausente'
+  if (!estado.disponiveis.includes(versao.id)) return 'versao_indisponivel'
+  return null
+}
+
+/**
+ * getChapter com recuo: se a versão é licenciada e não pode ser lida agora,
+ * devolve o capítulo da aberta do idioma com `recuo` preenchido. O texto da
+ * aberta pode ser mostrado e copiado; o da licenciada nunca é gravado.
+ */
+export async function getChapterComRecuo(
+  versionId: string,
+  book: string,
+  chapter: number,
+  opcoes?: OpcoesFonte
+): Promise<Capitulo & { recuo?: Recuo }> {
+  const versao = versaoPorId(versionId)
+  if (versao?.fonte !== 'licenciada') return getChapter(versionId, book, chapter, opcoes)
+  const recuar = async (motivo: Recuo['motivo']) => {
+    const para = versaoDeRecuo(versao.id)
+    const cap = await getChapter(para, book, chapter, opcoes)
+    return { ...cap, recuo: { de: versao.id, para, motivo } }
+  }
+  const antes = await motivoAntecipado(versao)
+  if (antes) return recuar(antes)
+  try {
+    return await getChapter(versionId, book, chapter, opcoes)
+  } catch (e) {
+    const motivo = motivoDoErro(e)
+    if (!motivo) throw e
+    if (motivo === 'limite_api' || motivo === 'limite_usuario') limiteAte.set(versao.id, Date.now() + PAUSA_LIMITE_MS)
+    return recuar(motivo)
+  }
+}
+
+/** getVerses com recuo (ver getChapterComRecuo). */
+export async function getVersesComRecuo(versionId: string, ref: Referencia, opcoes?: OpcoesFonte): Promise<Trecho & { recuo?: Recuo }> {
+  const capitulo = await getChapterComRecuo(versionId, ref.livroId, ref.capitulo, opcoes)
+  return { ...versosDoCapitulo(capitulo, ref), recuo: capitulo.recuo }
+}
+
+/** Só para testes: esquece as pausas por limite, o cache das licenciadas e o catálogo. */
+export function _reiniciarRecuo(): void {
+  limiteAte.clear()
+  cacheLicenciadas.clear()
+  catalogo = null
 }
 
 /** "16" ou "25-26" para o número exibido de um versículo. */

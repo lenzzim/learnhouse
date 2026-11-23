@@ -5,13 +5,15 @@
  * licenciado de forma permanente. Por isso o post guarda só a citação — um blockquote cujo texto é
  * "— João 3:16-18 (ARA)" — e, ao exibir, este widget (decoração do
  * ProseMirror, fora do documento salvo) busca o texto pelo proxy e o mostra
- * com o copyright, reportando o FUMS. Sem sessão, mostra o convite para entrar.
+ * com o copyright, reportando o FUMS. Sem sessão (visitante, link /n/), no
+ * limite diário ou com a versão desligada, mostra o texto da aberta do idioma
+ * (BLIVRE) com o aviso ("Entre para ler na NVI. Mostrando a BLIVRE.").
  *
  * DOM puro (sem React): o ProseMirror ignora mutações dentro de widgets.
  */
 import i18n from 'i18next'
 import { codigoReferencia, interpretarReferencia, lerCodigoReferencia } from '@/lib/biblia/referencias'
-import { ErroFonte, getVerses, rotuloVerso } from '@/lib/biblia/fontes'
+import { ErroFonte, getVersesComRecuo, rotuloVerso } from '@/lib/biblia/fontes'
 import { reportarFums } from '@/lib/biblia/fums'
 import { versaoPorId, versaoPorSigla } from '@/lib/biblia/versoes'
 
@@ -54,11 +56,11 @@ export function criarCitacaoViva({ codigo, versao }: CitacaoLicenciada): HTMLEle
   const info = versaoPorId(versao)
   if (!ref || !info) return raiz
 
-  getVerses(versao, ref)
-    .then(({ versos, capitulo }) => {
+  getVersesComRecuo(versao, ref)
+    .then(({ versos, capitulo, recuo }) => {
       raiz.replaceChildren()
       const p = el('p', ESTILO_TEXTO)
-      p.lang = info.idioma
+      p.lang = versaoPorId(capitulo.versao)?.idioma ?? info.idioma
       const numeros = versos.length > 1
       for (const v of versos) {
         if (numeros) {
@@ -68,6 +70,16 @@ export function criarCitacaoViva({ codigo, versao }: CitacaoLicenciada): HTMLEle
       }
       raiz.appendChild(p)
       if (capitulo.copyrightCurto) raiz.appendChild(el('p', ESTILO_NOTA, capitulo.copyrightCurto))
+      if (recuo) {
+        const para = versaoPorId(recuo.para)?.sigla ?? recuo.para.toUpperCase()
+        const chave =
+          recuo.motivo === 'nao_autenticado'
+            ? 'biblia.recuo_entrar'
+            : recuo.motivo === 'limite_api' || recuo.motivo === 'limite_usuario'
+              ? 'biblia.recuo_limite'
+              : 'biblia.recuo_indisponivel'
+        raiz.appendChild(el('p', ESTILO_NOTA, i18n.t(chave, { sigla: info.sigla, recuo: para })))
+      }
       reportarFums([capitulo.fums])
     })
     .catch((erro) => {
