@@ -12,8 +12,11 @@
  * - **Agendar estudo** clicado em qualquer lugar (`discipulei:agendar-estudo`):
  *   grava o marcador "já agendou" da conta.
  *
- * Fica como uma linha fixa acima da barra de abas, sem cobrir o convite de
- * instalar (que tem prioridade).
+ * Fica como uma linha fixa acima da barra de abas, no mesmo canto do convite
+ * de instalar. Os dois nunca aparecem juntos (useCantoInferior): quem chegou
+ * primeiro fica, o outro espera; se chegarem juntos, instalar vem antes. O
+ * momento só entra na fila se as regras deixarem convidar, para não segurar o
+ * canto sem mostrar nada.
  */
 
 import React, { useEffect, useRef, useState } from 'react'
@@ -24,9 +27,11 @@ import {
   EVENTO_AGENDOU,
   EVENTO_NOTA_PUBLICADA,
   EVENTO_TCD_SALVO,
+  podeConvidar,
   registrarAgendamento,
   type MomentoConvite,
 } from '@/lib/discipulei/convitesEstudo'
+import { useCantoInferior } from './useCantoInferior'
 
 const ESPERA_TCD_MS = 45_000
 
@@ -41,6 +46,15 @@ export default function ConvitesEstudoGlobais() {
   const timer = useRef<number | null>(null)
   const naPaginaTcd = pathname.includes('/caderno/tcd/')
 
+  // Só entra na fila (e segura o canto) se as regras deixam convidar agora;
+  // decidido uma vez, no evento, porque o próprio convite registra a exibição.
+  const userIdRef = useRef(userId)
+  userIdRef.current = userId
+  const definirMomento = (m: MomentoConvite) => {
+    const id = userIdRef.current
+    if (id && podeConvidar(id, m)) setMomento(m)
+  }
+
   useEffect(() => {
     if (!userId) return
     const aoAgendar = () => registrarAgendamento(userId)
@@ -50,11 +64,11 @@ export default function ConvitesEstudoGlobais() {
       timer.current = window.setTimeout(() => {
         if (tcdPendente.current) {
           tcdPendente.current = false
-          setMomento('tcd')
+          definirMomento('tcd')
         }
       }, ESPERA_TCD_MS)
     }
-    const aoPublicar = () => setMomento('primeira-nota')
+    const aoPublicar = () => definirMomento('primeira-nota')
     window.addEventListener(EVENTO_AGENDOU, aoAgendar)
     window.addEventListener(EVENTO_TCD_SALVO, aoSalvarTcd)
     window.addEventListener(EVENTO_NOTA_PUBLICADA, aoPublicar)
@@ -71,11 +85,13 @@ export default function ConvitesEstudoGlobais() {
     if (!naPaginaTcd && tcdPendente.current) {
       tcdPendente.current = false
       if (timer.current) window.clearTimeout(timer.current)
-      setMomento('tcd')
+      definirMomento('tcd')
     }
   }, [naPaginaTcd])
 
-  if (!userId || !momento) return null
+  const quer = !!userId && !!momento
+  const minhaVez = useCantoInferior('estudo', quer)
+  if (!quer || !minhaVez || !momento) return null
 
   return (
     <div

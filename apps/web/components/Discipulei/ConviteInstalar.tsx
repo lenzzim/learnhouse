@@ -28,6 +28,9 @@
  * - Nunca aparece com o app já aberto em modo standalone, nas telas de
  *   login/cadastro, no painel (/dash) nem com o player de podcast aberto.
  *
+ * - Divide o canto inferior com o convite de estudo (useCantoInferior): se um
+ *   está na tela, o outro espera ele sair.
+ *
  * Montado uma vez em app/orgs/[orgslug]/(withmenu)/layout.tsx, dentro do
  * SessionGate e do PodcastPlayerProvider (usePodcastPlayer exige o provider).
  */
@@ -39,6 +42,7 @@ import { useTranslation } from 'react-i18next'
 import { Share } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
+import { useCantoInferior } from './useCantoInferior'
 
 /** Evento não padronizado do Chromium; não existe nos tipos do DOM. */
 interface BeforeInstallPromptEvent extends Event {
@@ -230,7 +234,10 @@ export default function ConviteInstalar() {
   const podcastAberto = podcast.isVisible && !!podcast.currentEpisode
 
   const podeMostrar = !!eventoInstalar || !!manual
-  if (!autenticado || dispensado || rotaBloqueada || podcastAberto || !podeMostrar) return null
+  const quer = autenticado && !dispensado && !rotaBloqueada && !podcastAberto && podeMostrar
+  // Divide o canto com o convite de estudo: nunca aparecem juntos.
+  const minhaVez = useCantoInferior('instalar', quer)
+  if (!quer || !minhaVez) return null
 
   // Barra de ações mobile: ~76px de altura + margem; o aviso fica acima dela.
   // Fica sempre acima da barra de abas do shell (--altura-barra-inferior,
