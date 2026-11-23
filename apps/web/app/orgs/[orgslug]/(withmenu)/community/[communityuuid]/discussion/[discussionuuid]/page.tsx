@@ -62,9 +62,9 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     discussion = null
   }
 
-  const title = discussion ? `${discussion.title} — ${org.name}` : `Discussion — ${org.name}`
+  const title = discussion ? `${discussion.title} — ${org.name}` : `Conversa — ${org.name}`
   const contentText = discussion ? getContentDescription(discussion.content) : ''
-  const description = contentText ? contentText.substring(0, 160) : `Discussion from ${org.name}`
+  const description = contentText ? contentText.substring(0, 160) : `Uma conversa da comunidade ${org.name}.`
 
   // The community pages honour `noindex_communities`, but this page hardcoded
   // `index: true` — so turning the toggle on hid the community listing while
