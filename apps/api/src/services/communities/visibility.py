@@ -244,6 +244,10 @@ async def set_discussion_visibility(
 
     if just_published:
         await announce_publication(discussion, community, current_user)
+        # Menções da nota passam a valer quando ela fica pública (N39).
+        from src.services.communities.social import notify_mentions
+
+        await notify_mentions(request, db_session, discussion.author_id, discussion, discussion.content)
 
     return await _read_with_vote_status(discussion, viewer_id, db_session)
 

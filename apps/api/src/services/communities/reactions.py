@@ -19,6 +19,7 @@ from src.services.communities.visibility import (
     ensure_discussion_visible,
 )
 from src.services.communities.moderation import get_community_settings
+from src.db.communities.social import FAITH_REACTIONS
 
 
 async def get_reactions(
@@ -58,8 +59,11 @@ async def get_reactions(
     )
 
     # Get all reactions for this discussion
+    # "Amém" e "Orando" (N39) têm resumo próprio, com a contagem só para o
+    # autor (N22): ficam fora da lista de emojis.
     reactions_statement = select(DiscussionReaction).where(
-        DiscussionReaction.discussion_id == discussion.id
+        DiscussionReaction.discussion_id == discussion.id,
+        DiscussionReaction.emoji.notin_(FAITH_REACTIONS),  # type: ignore[union-attr]
     )
     reactions = (await db_session.execute(reactions_statement)).scalars().all()
 
