@@ -175,6 +175,10 @@ def hash_token(token: str) -> str:
 # ---------------------------------------------------------------------------
 
 
+CORES_CADERNO = ("verde", "azul", "rosa", "grafite")
+COR_MARCA_PADRAO = "verde"
+
+
 def _md_inline(nodes: List[dict]) -> str:
     out = []
     for n in nodes or []:
@@ -197,6 +201,19 @@ def _md_inline(nodes: List[dict]) -> str:
             text = f"*{text}*"
         if "strike" in marks:
             text = f"~~{text}~~"
+        # Marca-texto e cor do texto do Caderno: só os tons da paleta
+        # (apps/web/lib/caderno/cores.ts). ==texto== é o marca-texto do
+        # Obsidian (tom padrão, verde); outro tom e a cor usam HTML com data-cor.
+        if "highlight" in marks:
+            cor = (marks["highlight"].get("attrs") or {}).get("cor")
+            if cor in CORES_CADERNO and cor != COR_MARCA_PADRAO:
+                text = f'<mark data-cor="{cor}">{text}</mark>'
+            else:
+                text = f"=={text}=="
+        if "corTexto" in marks:
+            cor = (marks["corTexto"].get("attrs") or {}).get("cor")
+            if cor in CORES_CADERNO:
+                text = f'<span data-cor="{cor}">{text}</span>'
         if "link" in marks and (marks["link"].get("attrs") or {}).get("href"):
             text = f"[{text}]({marks['link']['attrs']['href']})"
         out.append(text)

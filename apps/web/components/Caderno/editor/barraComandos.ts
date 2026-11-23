@@ -14,7 +14,7 @@ import type { IdComando } from '@/lib/caderno/comandos'
 export const CHAVE_COMANDOS = new PluginKey('cadernoComandos')
 
 /** Comandos que precisam de diálogo/fluxo da tela (o "/" já foi apagado). */
-export const COMANDOS_COM_DIALOGO: IdComando[] = ['imagem', 'video', 'versiculo', 'modelo', 'propriedade', 'guia']
+export const COMANDOS_COM_DIALOGO: IdComando[] = ['imagem', 'video', 'versiculo', 'modelo', 'propriedade', 'guia', 'cor_texto']
 
 export interface ItemMenuComando {
   id: IdComando
@@ -51,12 +51,16 @@ export function executarComando(editor: Editor, id: IdComando, range: Range | nu
       return c.setHeading({ level: 2 }).run()
     case 'titulo3':
       return c.setHeading({ level: 3 }).run()
+    case 'titulo4':
+      return c.setHeading({ level: 4 }).run()
     case 'lista':
       return c.toggleBulletList().run()
     case 'lista_numerada':
       return c.toggleOrderedList().run()
     case 'tarefas':
       return c.toggleTaskList().run()
+    case 'marca_texto':
+      return c.toggleMarcaTexto().run()
     case 'citacao':
       return c.toggleBlockquote().run()
     case 'destaque':

@@ -6648,7 +6648,10 @@
       "data_hoje": "Fecha de hoy",
       "modelo": "Plantilla",
       "propriedade": "Propiedad",
-      "guia": "Guía de Markdown"
+      "guia": "Guía de Markdown",
+      "titulo4": "Título 4",
+      "marca_texto": "Resaltador",
+      "cor_texto": "Color del texto"
     },
     "cmd_desc": {
       "texto": "Párrafo simple",
@@ -6671,7 +6674,10 @@
       "data_hoje": "Escribe la fecha de hoy",
       "modelo": "Usar una plantilla lista o tuya",
       "propriedade": "Tipo, libro, tema…",
-      "guia": "Lo que puedes hacer en el Cuaderno"
+      "guia": "Lo que puedes hacer en el Cuaderno",
+      "titulo4": "Subdivisión discreta",
+      "marca_texto": "Fondo verde en el texto (== a cada lado)",
+      "cor_texto": "Verde, azul, rosa o grafito"
     },
     "imagem_descricao": "La imagen queda privada en tu nota.",
     "imagem_alt": "Descripción (opcional, para lectores de pantalla)",
@@ -6774,13 +6780,20 @@
         "k_sublinhado": "Subrayado",
         "k_riscado": "Tachado",
         "k_codigo": "Código",
-        "k_titulo2": "Título 2 (Ctrl/⌘ + Alt + 1, 2 o 3)",
+        "k_titulo2": "Título 2",
         "k_lista": "Lista",
         "k_numerada": "Lista numerada",
         "k_tarefas": "Lista de tareas",
         "k_citacao": "Cita",
         "k_quebra": "Salto de línea sin párrafo nuevo",
-        "k_desfazer": "Deshacer (Ctrl/⌘ + Shift + Z rehace)"
+        "k_desfazer": "Deshacer (también el botón ↶ en la barra)",
+        "titulo4": "Subtítulo discreto: #### y espacio.",
+        "marca": "Resaltador: dos signos de igual a cada lado.",
+        "cor": "Color del texto: seleccione y elija en la barra (o /color). En el .md queda <span data-cor=\"azul\">.",
+        "k_titulo3": "Título 3",
+        "k_titulo4": "Título 4 (Ctrl/⌘ + Alt + 1 a 4 para los demás)",
+        "k_marca": "Resaltador",
+        "k_refazer": "Rehacer (Ctrl + Y en Windows; también el botón ↷)"
       },
       "amostra_codigo": "Salmo 23",
       "abre_menu": "menú de comandos",
@@ -6790,7 +6803,8 @@
       "backlinks": "Backlinks: en el panel derecho, mira las notas que apuntan a la nota abierta con [[ ]].",
       "propriedades": "Propiedades: filtra la lista de notas por tipo y por libro. Las plantillas pueden llenar el tipo.",
       "privacidade_imagens": "Las imágenes subidas son privadas. Solo aparecen a quien tiene el enlace privado de la nota o cuando publicas en la comunidad (va una copia).",
-      "exportar": "Exportar .md: las propiedades se vuelven la cabecera YAML (frontmatter) y regresan al importar."
+      "exportar": "Exportar .md: las propiedades se vuelven la cabecera YAML (frontmatter) y regresan al importar.",
+      "refaz": "rehace lo deshecho"
     }
   },
   "caderno": {
@@ -7095,6 +7109,7 @@
           "Tres motivos de gratitud"
         ]
       }
-    }
+    },
+    "titulo_4": "Título 4"
   }
 }

@@ -1,5 +1,6 @@
 import { TableKit } from '@tiptap/extension-table'
 import { CadernoImagem, Destaque, TarefaItem, TarefaLista, VideoVimeo, VideoYoutube } from './nos'
+import { CorTexto, MarcaTexto } from './marcas'
 
 /**
  * Nós de conteúdo do Caderno além do StarterKit. Usados no editor da nota,
@@ -27,5 +28,7 @@ export function extensoesConteudoCaderno({
     VideoYoutube,
     VideoVimeo,
     TableKit.configure({ table: { resizable: false, HTMLAttributes: { class: 'caderno-tabela' } } }),
+    MarcaTexto,
+    CorTexto,
   ]
 }

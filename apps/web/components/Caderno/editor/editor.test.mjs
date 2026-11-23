@@ -27,6 +27,7 @@ const { Editor } = await import('@tiptap/core')
 const { default: StarterKit } = await import('@tiptap/starter-kit')
 const { TableKit } = await import('@tiptap/extension-table')
 const nos = await import('./nos.ts')
+const marcas = await import('./marcas.ts')
 const barra = await import('./barraComandos.ts')
 const { GUIA, ATALHOS_TECLADO } = await import('../../../lib/caderno/guia.ts')
 const { COMANDOS, filtrarComandos } = await import('../../../lib/caderno/comandos.ts')
@@ -34,8 +35,8 @@ const { markdownParaDocPublico } = await import('../../../lib/caderno/importar.t
 const { lerFrontmatter } = await import('../../../lib/caderno/propriedades.ts')
 
 const ROTULOS = {
-  texto: 'Texto', titulo1: 'Título 1', titulo2: 'Título 2', titulo3: 'Título 3', lista: 'Lista',
-  lista_numerada: 'Lista numerada', tarefas: 'Lista de tarefas', citacao: 'Citação', destaque: 'Destaque',
+  texto: 'Texto', titulo1: 'Título 1', titulo2: 'Título 2', titulo3: 'Título 3', titulo4: 'Título 4', lista: 'Lista',
+  marca_texto: 'Marca-texto', cor_texto: 'Cor do texto', lista_numerada: 'Lista numerada', tarefas: 'Lista de tarefas', citacao: 'Citação', destaque: 'Destaque',
   divisor: 'Divisor', codigo: 'Código', tabela: 'Tabela', imagem: 'Imagem', video: 'Vídeo', versiculo: 'Versículo',
   ligacao: 'Ligação', tag: 'Tag', data_hoje: 'Data de hoje', modelo: 'Modelo', propriedade: 'Propriedade',
   guia: 'Guia de Markdown',
@@ -47,7 +48,7 @@ function novoEditor({ carregar = null, editable = true, content = '' } = {}) {
     element: document.createElement('div'),
     editable,
     extensions: [
-      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      StarterKit.configure({ heading: { levels: [1, 2, 3, 4] } }),
       TableKit.configure({ table: { resizable: false } }),
       nos.CadernoImagem.configure({ carregar }),
       nos.TarefaLista,
@@ -55,6 +56,8 @@ function novoEditor({ carregar = null, editable = true, content = '' } = {}) {
       nos.Destaque,
       nos.VideoYoutube,
       nos.VideoVimeo,
+      marcas.MarcaTexto,
+      marcas.CorTexto,
       barra.criarBarraComandos(() => ({
         itens: (q) => filtrarComandos(COMANDOS, q, (c) => ROTULOS[c.id]).map((c) => ({ id: c.id, rotulo: ROTULOS[c.id] })),
         aoPedir: (id) => estado.pedidos.push(id),
@@ -125,7 +128,7 @@ for (const secao of GUIA) {
         assert.ok(estado.menu?.aberto, 'menu "/" devia abrir')
         const alvo = ex.digitar.slice(1)
         if (alvo) {
-          const esperado = { imagem: 'imagem', 'vídeo': 'video', tabela: 'tabela', propriedade: 'propriedade' }[alvo]
+          const esperado = { imagem: 'imagem', 'vídeo': 'video', tabela: 'tabela', propriedade: 'propriedade', cor: 'cor_texto' }[alvo]
           assert.equal(estado.menu.itens[0]?.id, esperado, JSON.stringify(estado.menu.itens))
         } else {
           assert.equal(estado.menu.itens.length, COMANDOS.length)
@@ -147,6 +150,17 @@ for (const ex of ATALHOS_TECLADO) {
       assert.ok(ed.state.doc.textContent.endsWith('mais'))
       ed.commands.keyboardShortcut('Mod-z')
       assert.equal(ed.state.doc.textContent, amostra)
+      return
+    }
+    if (v.tecla === 'Mod-Shift-z') {
+      ed.commands.focus('end')
+      digitar(ed, ' mais')
+      // direto no view (keyboardShortcut regrava os passos e confunde o histórico)
+      const tecla = (key, shiftKey) => ed.view.someProp('handleKeyDown', (f) => f(ed.view, new KeyboardEvent('keydown', { key, ctrlKey: true, shiftKey })))
+      tecla('z', false)
+      assert.equal(ed.state.doc.textContent, amostra)
+      tecla('z', true)
+      assert.ok(ed.state.doc.textContent.endsWith('mais'))
       return
     }
     if (v.tecla === 'Shift-Enter') {
@@ -491,4 +505,51 @@ test('decorações incrementais: apagar um caractere redecora só o bloco tocado
   const bloco = ed.state.doc.child(0).nodeSize
   assert.deepEqual(faixas[0], [0, bloco - 1])
   ed.destroy()
+})
+
+/* ------------------------------------ marca-texto e cor (item 2.4) */
+
+test('marca-texto e cor: comandos, paleta fechada e HTML seguro', () => {
+  const { ed } = novoEditor({ content: '<p>graça e paz</p>' })
+  ed.commands.setTextSelection({ from: 1, to: 6 })
+  ed.commands.toggleMarcaTexto('azul')
+  assert.ok(ed.isActive('highlight', { cor: 'azul' }))
+  ed.commands.toggleMarcaTexto('azul')
+  assert.ok(!ed.isActive('highlight'))
+  ed.commands.setCorTexto('rosa')
+  assert.ok(ed.isActive('corTexto', { cor: 'rosa' }))
+  ed.commands.setCorTexto('roxo')
+  assert.ok(!ed.isActive('corTexto'), 'cor fora da paleta tira a cor')
+  // conteúdo vindo de fora com cor inventada: nunca vira estilo nem atributo livre
+  ed.commands.setContent({
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [
+      { type: 'text', text: 'a', marks: [{ type: 'highlight', attrs: { cor: 'red" onclick="x' } }] },
+      { type: 'text', text: 'b', marks: [{ type: 'corTexto', attrs: { cor: 'javascript:1' } }] },
+    ] }],
+  })
+  const html = ed.getHTML()
+  assert.ok(/<mark[^>]*data-cor="verde"[^>]*>a<\/mark>/.test(html), html)
+  assert.ok(!/onclick|javascript|style=/.test(html), html)
+  // colar HTML com cor fora da paleta: a cor some
+  ed.commands.setContent('<p><span data-cor="dourado">c</span><span data-cor="azul">d</span><mark data-cor="ambar">e</mark></p>')
+  const json = JSON.stringify(ed.getJSON())
+  assert.ok(json.includes('"corTexto","attrs":{"cor":"azul"}'), json)
+  assert.ok(!json.includes('dourado') && !json.includes('ambar'), json)
+  ed.destroy()
+})
+
+test('importar .md: ==marca==, <mark data-cor> e <span data-cor> (o que a exportação gera)', async () => {
+  const md = '==graça== e <mark data-cor="azul">fé</mark> e <span data-cor="rosa">paz</span> e <span data-cor="verde"><mark data-cor="grafite">**amor**</mark></span> e <span data-cor="dourado">x</span> `==código==`'
+  const doc = await markdownParaDocPublico(md)
+  const textos = doc.content[0].content
+  const achar = (t) => textos.find((n) => n.text === t)
+  assert.deepEqual(achar('graça').marks, [{ type: 'highlight', attrs: { cor: 'verde' } }])
+  assert.deepEqual(achar('fé').marks, [{ type: 'highlight', attrs: { cor: 'azul' } }])
+  assert.deepEqual(achar('paz').marks, [{ type: 'corTexto', attrs: { cor: 'rosa' } }])
+  const amor = achar('amor').marks.map((m) => m.type).sort()
+  assert.deepEqual(amor, ['bold', 'corTexto', 'highlight'])
+  assert.ok(textos.some((n) => n.text?.includes('x') && !n.marks?.length))
+  assert.ok(achar('==código==')?.marks.some((m) => m.type === 'code'))
+  assert.ok(!JSON.stringify(doc).includes('CDX'))
 })

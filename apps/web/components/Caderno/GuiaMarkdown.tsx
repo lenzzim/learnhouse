@@ -17,6 +17,8 @@ function Resultado({ previa, amostra }: { previa: Previa; amostra?: string }) {
       return <h2 className="text-[1.2rem]">{a}</h2>
     case 'h3':
       return <h3 className="text-[1.05rem]">{a}</h3>
+    case 'h4':
+      return <h4>{a}</h4>
     case 'negrito':
       return <p><strong>{a}</strong></p>
     case 'italico':
@@ -27,6 +29,10 @@ function Resultado({ previa, amostra }: { previa: Previa; amostra?: string }) {
       return <p><u>{a}</u></p>
     case 'codigo':
       return <p><code>{a}</code></p>
+    case 'marca':
+      return <p><mark className="caderno-marca" data-cor="verde">{a}</mark></p>
+    case 'cor':
+      return <p><span className="caderno-cor" data-cor="azul">{a}</span></p>
     case 'lista':
       return <ul><li>{a}</li></ul>
     case 'numerada':
@@ -94,6 +100,8 @@ function Resultado({ previa, amostra }: { previa: Previa; amostra?: string }) {
       return <p>{t('caderno_editor.guia.amostra_quebra_1')}<br />{t('caderno_editor.guia.amostra_quebra_2')}</p>
     case 'desfazer':
       return <p className="font-sans text-xs text-[var(--text-2)]">{t('caderno_editor.guia.desfaz')}</p>
+    case 'refazer':
+      return <p className="font-sans text-xs text-[var(--text-2)]">{t('caderno_editor.guia.refaz')}</p>
     default:
       return null
   }

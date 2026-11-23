@@ -142,3 +142,27 @@ def test_markdown_export_editor_v2_nodes():
     )
     text = tiptap_to_text(doc)
     assert "Ler Jo 3" in text and "Deus é fiel" in text and "João" in text
+
+
+def test_markdown_export_marca_texto_e_cor():
+    """Marca-texto vira ==texto== (verde) ou <mark data-cor>; cor vira <span data-cor>; fora da paleta, texto puro."""
+    def t(text, *marks):
+        return {"type": "text", "text": text, "marks": list(marks)}
+
+    doc = _doc({"type": "paragraph", "content": [
+        t("graça", {"type": "highlight", "attrs": {"cor": "verde"}}),
+        {"type": "text", "text": " e "},
+        t("fé", {"type": "highlight", "attrs": {"cor": "azul"}}),
+        {"type": "text", "text": " e "},
+        t("paz", {"type": "corTexto", "attrs": {"cor": "rosa"}}),
+        {"type": "text", "text": " e "},
+        t("amor", {"type": "bold"}, {"type": "highlight", "attrs": {"cor": "grafite"}}, {"type": "corTexto", "attrs": {"cor": "verde"}}),
+        {"type": "text", "text": " e "},
+        t("x", {"type": "corTexto", "attrs": {"cor": "red\" onclick=\"y"}}),
+        t("z", {"type": "highlight", "attrs": {"cor": "dourado"}}),
+    ]})
+    md = tiptap_to_markdown(doc)
+    assert md == (
+        '==graça== e <mark data-cor="azul">fé</mark> e <span data-cor="rosa">paz</span> e '
+        '<span data-cor="verde"><mark data-cor="grafite">**amor**</mark></span> e x==z==\n'
+    )

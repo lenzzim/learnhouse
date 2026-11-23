@@ -54,8 +54,9 @@ function DiscussionContentEditor({ content }: { content: any }) {
       StarterKit.configure({
         // Disable link since we configure it separately below
         link: false,
+        // notas publicadas do Caderno usam de H1 a H4
         heading: {
-          levels: [2, 3],
+          levels: [1, 2, 3, 4],
         },
         bulletList: {
           HTMLAttributes: {
@@ -127,6 +128,14 @@ function DiscussionContentEditor({ content }: { content: any }) {
           font-weight: 600;
           margin-top: 0.75rem;
           margin-bottom: 0.5rem;
+          color: #111827;
+        }
+
+        .discussion-content-readonly .ProseMirror h4 {
+          font-size: 1rem;
+          font-weight: 600;
+          margin-top: 0.75rem;
+          margin-bottom: 0.4rem;
           color: #111827;
         }
 

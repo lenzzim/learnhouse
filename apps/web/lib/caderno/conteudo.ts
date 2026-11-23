@@ -186,7 +186,7 @@ export function titulosDoDoc(doc: NoTiptap | null | undefined): Titulo[] {
 export function modeloTcd(secoes: string[]): NoTiptap {
   const content: NoTiptap[] = []
   for (const s of secoes) {
-    content.push({ type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: s }] })
+    content.push({ type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: s }] })
     content.push({ type: 'paragraph' })
   }
   return { type: 'doc', content }
@@ -293,7 +293,7 @@ export const MODELOS_PRONTOS: ModeloPronto[] = [
   { id: 'gratidao', lista: 'ordenada' },
 ]
 
-/** Seções → documento: título h3 + parágrafo vazio por seção. Gratidão: h3 + lista de 3 itens. */
+/** Seções → documento: título h2 + parágrafo vazio por seção. Gratidão: h2 + lista de 3 itens. */
 export function docDoModelo(secoes: string[], lista?: 'ordenada'): NoTiptap {
   if (lista === 'ordenada') {
     const [titulo = '', ...itens] = secoes
@@ -301,7 +301,7 @@ export function docDoModelo(secoes: string[], lista?: 'ordenada'): NoTiptap {
     return {
       type: 'doc',
       content: [
-        { type: 'heading', attrs: { level: 3 }, content: titulo ? [{ type: 'text', text: titulo }] : [] },
+        { type: 'heading', attrs: { level: 2 }, content: titulo ? [{ type: 'text', text: titulo }] : [] },
         {
           type: 'orderedList',
           attrs: { start: 1 },
@@ -312,7 +312,7 @@ export function docDoModelo(secoes: string[], lista?: 'ordenada'): NoTiptap {
   }
   const content: NoTiptap[] = []
   for (const s of secoes) {
-    content.push({ type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: s }] })
+    content.push({ type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: s }] })
     content.push({ type: 'paragraph' })
   }
   return { type: 'doc', content: content.length ? content : [{ type: 'paragraph' }] }
