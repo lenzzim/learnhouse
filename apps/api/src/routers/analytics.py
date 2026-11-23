@@ -310,10 +310,15 @@ async def ingest_frontend_event(
     if isinstance(current_user, AnonymousUser):
         raise HTTPException(status_code=401, detail="Authentication required")
 
-    await _verify_org_membership(resolve_acting_user_id(current_user), body.org_id, db_session)
-
     if body.event_name not in ALLOWED_FRONTEND_EVENTS:
         raise HTTPException(status_code=400, detail="Invalid event name")
+
+    # Sem Tinybird configurado não há para onde mandar o evento: responde ok
+    # sem tocar no banco (o front já evita enviar nesse caso).
+    if get_learnhouse_config().tinybird_config is None:
+        return {"ok": True, "skipped": True}
+
+    await _verify_org_membership(resolve_acting_user_id(current_user), body.org_id, db_session)
 
     ip = request.client.host if request.client else ""
 

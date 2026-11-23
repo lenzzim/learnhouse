@@ -390,6 +390,39 @@ class TestAnalyticsRouter:
             )
         assert response.status_code == 200
 
+    async def test_ingest_frontend_event_sem_tinybird_nao_envia(self, client, app):
+        app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=1)
+        membership = AsyncMock()
+        track_mock = AsyncMock()
+        with patch(
+            "src.routers.analytics.get_learnhouse_config",
+            return_value=SimpleNamespace(tinybird_config=None),
+        ), patch("src.routers.analytics._verify_org_membership", membership), patch(
+            "src.routers.analytics.track", track_mock
+        ):
+            response = await client.post(
+                "/api/v1/analytics/events",
+                json={"event_name": "page_view", "org_id": 1},
+            )
+        assert response.status_code == 200
+        assert response.json() == {"ok": True, "skipped": True}
+        membership.assert_not_awaited()
+        track_mock.assert_not_awaited()
+
+        with patch(
+            "src.routers.analytics.get_learnhouse_config",
+            return_value=SimpleNamespace(tinybird_config=SimpleNamespace()),
+        ), patch("src.routers.analytics._verify_org_membership", membership), patch(
+            "src.routers.analytics.track", track_mock
+        ):
+            response = await client.post(
+                "/api/v1/analytics/events",
+                json={"event_name": "page_view", "org_id": 1},
+            )
+        assert response.status_code == 200
+        membership.assert_awaited_once()
+        track_mock.assert_awaited_once()
+
     async def test_dashboard_routes(self, client, db_session):
         with _analytics_guard_patches(), patch(
             "src.routers.analytics._enrich_with_metadata",
