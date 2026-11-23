@@ -627,13 +627,16 @@ test('editor de discussões preserva títulos H1–H4, marca-texto e cor de uma 
   })
   const json = ed.getJSON()
   assert.deepEqual(json.content.map((n) => n.attrs?.level ?? null), [1, 4, null])
-  const marcasTexto = json.content[2].content.flatMap((n) => n.marks ?? [])
+  const marcasTexto = JSON.parse(JSON.stringify(json.content[2].content.flatMap((n) => n.marks ?? [])))
   assert.deepEqual(marcasTexto, [
     { type: 'highlight', attrs: { cor: 'azul' } },
     { type: 'corTexto', attrs: { cor: 'rosa' } },
   ])
   // e a paleta continua fechada também aqui
   ed.commands.setContent({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'x', marks: [{ type: 'corTexto', attrs: { cor: 'red' } }] }] }] })
+  assert.ok(!ed.getHTML().includes('red'), 'cor fora da paleta não chega ao HTML')
+  ed.commands.setContent('<p><span data-cor="red">x</span> <mark data-cor="dourado">y</mark></p>')
   assert.ok(!JSON.stringify(ed.getJSON()).includes('red'))
+  assert.ok(JSON.stringify(ed.getJSON()).includes('"cor":"verde"'), 'marca-texto fora da paleta cai no verde')
   ed.destroy()
 })
