@@ -566,6 +566,11 @@ async def notify_mentions(
         logger.exception("Falha ao processar menções")
         try:
             await db.rollback()
+            # O rollback expira os objetos da sessão; quem chamou ainda vai
+            # ler a discussão/comentário (async não carrega sob demanda).
+            await db.refresh(discussion)
+            if comment is not None:
+                await db.refresh(comment)
         except Exception:
             pass
         return 0
