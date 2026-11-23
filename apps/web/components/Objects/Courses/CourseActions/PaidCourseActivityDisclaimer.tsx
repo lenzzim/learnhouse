@@ -28,11 +28,11 @@ function PaidCourseActivityDisclaimer({ course }: PaidCourseActivityProps) {
   return (
     <div className="space-y-4 max-w-lg mx-auto">
       {/* Notice banner */}
-      <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl">
-        <ShoppingBag className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 p-4 bg-neutral-50 rounded-xl">
+        <ShoppingBag className="w-5 h-5 text-neutral-600 shrink-0 mt-0.5" />
         <div>
-          <h3 className="text-amber-800 font-semibold text-sm">{t('payments.paid_content')}</h3>
-          <p className="text-amber-700 text-sm mt-0.5">{t('payments.paid_content_description')}</p>
+          <h3 className="text-neutral-800 font-semibold text-sm">{t('payments.paid_content')}</h3>
+          <p className="text-neutral-700 text-sm mt-0.5">{t('payments.paid_content_description')}</p>
         </div>
       </div>
 

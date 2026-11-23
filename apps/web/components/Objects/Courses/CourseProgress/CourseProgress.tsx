@@ -90,8 +90,8 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
                     <div className="flex items-center space-x-3 flex-1">
                       {isActivityDone(activity) ? (
                         <div className="relative">
-                          <Square size={18} className="stroke-[2] text-teal-600" />
-                          <Check size={18} className="stroke-[2.5] text-teal-600 absolute top-0 start-0" />
+                          <Square size={18} className="stroke-[2] text-neutral-600" />
+                          <Check size={18} className="stroke-[2.5] text-neutral-600 absolute top-0 start-0" />
                         </div>
                       ) : (
                         <Square size={18} className="stroke-[2] text-gray-300" />

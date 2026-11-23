@@ -990,7 +990,7 @@ function ActivityClient(props: ActivityClientProps) {
                                     {contributorStatus === 'ACTIVE' && activity.activity_type == 'TYPE_DYNAMIC' && (
                                       <Link
                                         href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}/activity/${activityid}/edit`}
-                                        className="bg-emerald-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
+                                        className="bg-neutral-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
                                       >
                                         <Edit2 size={17} />
                                         <span className="text-xs font-bold">{t('courses.contribute')}</span>
@@ -1304,7 +1304,7 @@ export function MarkStatus(props: {
               confirmationMessage={t('activities.unmark_activity_confirm')}
               dialogTitle={t('activities.unmark_activity_title')}
               dialogTrigger={
-                <div className="bg-teal-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
+                <div className="bg-neutral-600 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
                   <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
                   <div className="flex items-center space-x-2">
                     <svg 
@@ -1332,7 +1332,7 @@ export function MarkStatus(props: {
                 icon={infoIcon}
                 message={t('activities.unmark_tooltip')}
                 onClose={handleMarkedTooltipClose}
-                iconColor="text-teal-600"
+                iconColor="text-neutral-600"
                 iconSize={24}
                 width="w-64"
               />
@@ -1675,7 +1675,7 @@ function AssignmentTools(props: {
     // generic failure toast with no explanation of why.
     if (isAssignmentPastDue(props.assignment?.due_date)) {
       return (
-        <div className="bg-rose-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+        <div className="bg-neutral-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
           <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
           <div className="flex items-center space-x-2">
             <BookOpenCheck size={17} />
@@ -1692,7 +1692,7 @@ function AssignmentTools(props: {
     // the bar is what the learner is looking at.
     if (isSubmitting) {
       return (
-        <div className="bg-cyan-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+        <div className="bg-neutral-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
           <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
           <div className="flex items-center space-x-2">
             <Loader2 size={17} className="animate-spin" />
@@ -1722,7 +1722,7 @@ function AssignmentTools(props: {
             : t('assignments.submit_assignment_title')
         }
         dialogTrigger={
-          <div className="bg-cyan-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
+          <div className="bg-neutral-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out">
             <span className="text-[10px] font-bold mb-1 uppercase">
               {isRetryAttempt
                 ? t('assignments.attempt_count', { current: attemptNumber })
@@ -1758,7 +1758,7 @@ function AssignmentTools(props: {
 
       return (
         <div className="flex items-center gap-2">
-          <div className="bg-teal-700 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+          <div className="bg-neutral-700 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
             <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
             <div className="flex items-center space-x-2">
               <CheckCircle size={17} />
@@ -1781,7 +1781,7 @@ function AssignmentTools(props: {
                 <button
                   type="button"
                   disabled={isRetrying}
-                  className="h-full inline-flex items-center gap-1.5 px-3 py-2.5 rounded-md bg-white/90 hover:bg-white disabled:opacity-50 text-teal-800 text-xs font-bold nice-shadow transition-colors"
+                  className="h-full inline-flex items-center gap-1.5 px-3 py-2.5 rounded-md bg-white/90 hover:bg-white disabled:opacity-50 text-neutral-800 text-xs font-bold nice-shadow transition-colors"
                 >
                   <RotateCcw size={14} />
                   {t('assignments.retry_assignment')}
@@ -1796,7 +1796,7 @@ function AssignmentTools(props: {
     }
 
     return (
-      <div className="bg-amber-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
+      <div className="bg-neutral-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white transition delay-150 duration-300 ease-in-out">
         <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
         <div className="flex items-center space-x-2">
           <UserRoundPen size={17} />
@@ -1816,8 +1816,8 @@ function AssignmentTools(props: {
     const feedback = gradeData?.overall_feedback;
     const tasks = gradeData?.tasks as any[] | undefined;
     const isPassing = passed !== false;
-    const pillBg = isPassing ? 'bg-teal-600' : 'bg-rose-600';
-    const pillChip = isPassing ? 'bg-white text-teal-800' : 'bg-white text-rose-700';
+    const pillBg = isPassing ? 'bg-neutral-600' : 'bg-neutral-600';
+    const pillChip = isPassing ? 'bg-white text-neutral-800' : 'bg-white text-neutral-700';
 
     // Retry availability mirrors the backend's eligibility check: teacher
     // opted in (allow_retries) and attempt counter hasn't reached the cap
@@ -1898,35 +1898,35 @@ function AssignmentTools(props: {
               {/* Hero */}
               <div className={`relative px-6 pt-8 pb-7 overflow-hidden ${
                 isPassing
-                  ? 'bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50'
-                  : 'bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50'
+                  ? 'bg-gradient-to-br from-neutral-50 via-neutral-50 to-neutral-50'
+                  : 'bg-gradient-to-br from-neutral-50 via-neutral-50 to-neutral-50'
               }`}>
                 {/* Decorative blobs */}
                 <div className={`absolute -top-12 -end-12 w-44 h-44 rounded-full blur-3xl opacity-40 ${
-                  isPassing ? 'bg-emerald-300' : 'bg-rose-300'
+                  isPassing ? 'bg-neutral-300' : 'bg-neutral-300'
                 }`} />
                 <div className={`absolute -bottom-16 -start-12 w-44 h-44 rounded-full blur-3xl opacity-40 ${
-                  isPassing ? 'bg-cyan-300' : 'bg-amber-300'
+                  isPassing ? 'bg-neutral-300' : 'bg-neutral-300'
                 }`} />
 
                 <div className="relative flex flex-col items-center text-center space-y-3">
                   <div className={`relative w-[72px] h-[72px] rounded-full flex items-center justify-center nice-shadow bg-white`}>
                     {isPassing ? (
-                      <Trophy size={34} className="text-emerald-600" strokeWidth={2.2} />
+                      <Trophy size={34} className="text-neutral-600" strokeWidth={2.2} />
                     ) : (
-                      <XCircle size={36} className="text-rose-600" strokeWidth={2.2} />
+                      <XCircle size={36} className="text-neutral-600" strokeWidth={2.2} />
                     )}
                     {isPassing && (
                       <>
-                        <Sparkles size={16} className="absolute -top-1 -end-1 text-amber-500 drop-shadow" />
-                        <Sparkles size={12} className="absolute -bottom-1 -start-1 text-amber-400 drop-shadow" />
+                        <Sparkles size={16} className="absolute -top-1 -end-1 text-neutral-500 drop-shadow" />
+                        <Sparkles size={12} className="absolute -bottom-1 -start-1 text-neutral-400 drop-shadow" />
                       </>
                     )}
                   </div>
 
                   <div className="space-y-1.5">
                     <p className={`text-[10px] font-bold uppercase tracking-[0.18em] ${
-                      isPassing ? 'text-emerald-700' : 'text-rose-700'
+                      isPassing ? 'text-neutral-700' : 'text-neutral-700'
                     }`}>
                       {isPassing
                         ? t('dashboard.assignments.submissions.preview.passing')
@@ -1971,7 +1971,7 @@ function AssignmentTools(props: {
                             {tb.submitted && (
                               <div
                                 className={`absolute inset-y-0 start-0 transition-all ${
-                                  passedTask ? 'bg-emerald-100/70' : 'bg-rose-100/70'
+                                  passedTask ? 'bg-neutral-100/70' : 'bg-neutral-100/70'
                                 }`}
                                 style={{ width: `${pct}%` }}
                               />
@@ -1985,8 +1985,8 @@ function AssignmentTools(props: {
                                 !tb.submitted
                                   ? 'text-gray-400'
                                   : passedTask
-                                    ? 'text-emerald-700'
-                                    : 'text-rose-700'
+                                    ? 'text-neutral-700'
+                                    : 'text-neutral-700'
                               }`}>
                                 {tb.submitted ? tb.percentage_display : '—'}
                               </span>
@@ -2021,9 +2021,9 @@ function AssignmentTools(props: {
                 {allowRetries && (
                   <div className="pt-2">
                     {canRetry ? (
-                      <div className="rounded-xl border border-fuchsia-100 bg-gradient-to-br from-fuchsia-50 via-pink-50 to-rose-50 p-4">
+                      <div className="rounded-xl border border-neutral-100 bg-gradient-to-br from-neutral-50 via-neutral-50 to-neutral-50 p-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 rounded-full bg-white nice-shadow flex items-center justify-center text-fuchsia-600 shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-white nice-shadow flex items-center justify-center text-neutral-600 shrink-0">
                             <RotateCcw size={16} />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -2033,7 +2033,7 @@ function AssignmentTools(props: {
                             <p className="text-xs text-gray-600 mt-1 leading-snug">
                               {t('assignments.retry_assignment_confirm')}
                             </p>
-                            <p className="text-[11px] text-fuchsia-700 mt-2 font-semibold flex items-center gap-1.5">
+                            <p className="text-[11px] text-neutral-700 mt-2 font-semibold flex items-center gap-1.5">
                               {maxRetries === 0 ? (
                                 <>
                                   <InfinityIcon size={11} />

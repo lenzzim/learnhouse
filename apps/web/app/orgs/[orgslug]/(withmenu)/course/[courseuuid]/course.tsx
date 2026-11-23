@@ -549,7 +549,7 @@ const CourseClient = (props: any) => {
                               href={learning.link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-500 hover:underline text-sm"
+                              className="text-neutral-500 hover:underline text-sm"
                             >
                               <span className="sr-only">Link to {learningText}</span>
                               <ArrowRight size={14} />
@@ -597,7 +597,7 @@ const CourseClient = (props: any) => {
                             </span>
                             <h3 className="text-lg font-bold leading-tight truncate min-w-0 sm:text-base md:text-lg" style={{lineHeight: '1.2'}}>{chapter.name}</h3>
                             {chapter.is_locked && (
-                              <span className="ms-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-semibold">
+                              <span className="ms-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-600 text-[10px] font-semibold">
                                 <Lock size={10} />
                                 {t('course.locked', 'Locked')}
                               </span>
@@ -617,13 +617,13 @@ const CourseClient = (props: any) => {
                               <div className="flex space-x-3 items-center">
                                 <div className="flex items-center">
                                   {locked ? (
-                                    <div className="text-rose-400">
+                                    <div className="text-neutral-400">
                                       <Lock size={14} className="stroke-[2]" />
                                     </div>
                                   ) : isActivityDone(activity) ? (
                                     <div className="relative cursor-pointer">
-                                      <Square size={16} className="stroke-[2] text-teal-600" />
-                                      <Check size={16} className="stroke-[2.5] text-teal-600 absolute top-0 start-0" />
+                                      <Square size={16} className="stroke-[2] text-neutral-600" />
+                                      <Check size={16} className="stroke-[2.5] text-neutral-600 absolute top-0 start-0" />
                                     </div>
                                   ) : (
                                     <div className="text-neutral-300 cursor-pointer">
@@ -635,13 +635,13 @@ const CourseClient = (props: any) => {
                                   <div className="flex items-center space-x-2 w-full">
                                     <p className={`font-semibold transition-colors ${locked ? 'text-neutral-400' : 'text-neutral-600 group-hover:text-neutral-800'}`}>{activity.name}</p>
                                     {locked && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-semibold">
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-neutral-50 border border-neutral-200 text-neutral-600 text-[10px] font-semibold">
                                         <Lock size={10} />
                                         {t('course.locked', 'Locked')}
                                       </span>
                                     )}
                                     {!locked && isActivityCurrent(activity) && (
-                                      <div className="flex items-center space-x-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-xs font-semibold animate-pulse">
+                                      <div className="flex items-center space-x-1 text-neutral-600 bg-neutral-50 px-2 py-0.5 rounded-full text-xs font-semibold animate-pulse">
                                         <span>{t('activities.current')}</span>
                                       </div>
                                     )}

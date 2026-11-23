@@ -43,17 +43,17 @@ function getActivityTypeLabel(activityType: string, t: any, activitySubType?: st
 function getActivityTypeBadgeColor(activityType: string): string {
   switch (activityType) {
     case 'TYPE_VIDEO':
-      return 'bg-blue-100 text-blue-700'
+      return 'bg-neutral-100 text-neutral-700'
     case 'TYPE_DOCUMENT':
-      return 'bg-purple-100 text-purple-700'
+      return 'bg-neutral-100 text-neutral-700'
     case 'TYPE_DYNAMIC':
-      return 'bg-green-100 text-green-700'
+      return 'bg-neutral-100 text-neutral-700'
     case 'TYPE_ASSIGNMENT':
-      return 'bg-orange-100 text-orange-700'
+      return 'bg-neutral-100 text-neutral-700'
     case 'TYPE_SCORM':
-      return 'bg-indigo-100 text-indigo-700'
+      return 'bg-neutral-100 text-neutral-700'
     case 'TYPE_CUSTOM':
-      return 'bg-pink-100 text-pink-700'
+      return 'bg-neutral-100 text-neutral-700'
     default:
       return 'bg-gray-100 text-gray-700'
   }
@@ -167,7 +167,7 @@ const CertificationBadge = memo(({
     content={
       <div className="bg-white rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
         <div className="flex items-center gap-2">
-          <Trophy size={16} className="text-yellow-500" />
+          <Trophy size={16} className="text-neutral-500" />
           <span className="text-sm font-medium text-gray-900">
             {isCompleted ? t('courses.course_completed_exclamation') : t('courses.course_completion')}
           </span>
@@ -192,7 +192,7 @@ const CertificationBadge = memo(({
     >
       <div className={`w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] rounded-full flex items-center justify-center text-xs font-medium transition-all border-2 border-white ${
         isCompleted
-          ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+          ? 'bg-neutral-500 text-white hover:bg-neutral-600'
           : 'bg-gray-200 text-gray-400'
       }`}>
         <Trophy size={10} />
@@ -258,7 +258,7 @@ const MobileChapterSelector = memo(({
 
             return (
               <div key={chapter.id}>
-                <div className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${isCurrentChapter ? 'text-teal-600' : 'text-gray-400'}`}>
+                <div className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide ${isCurrentChapter ? 'text-neutral-600' : 'text-gray-400'}`}>
                   {t('courses.chapter')} {chapterIdx + 1} — {completedInChapter}/{chapter.activities.length}
                 </div>
                 {chapter.activities.map((activity: any) => {
@@ -279,11 +279,11 @@ const MobileChapterSelector = memo(({
                       }`}
                     >
                       <div className={`w-[6px] h-[6px] rounded-full shrink-0 ${
-                        isDone ? 'bg-teal-500' : isCurrent ? 'bg-gray-500 animate-pulse' : 'bg-zinc-200'
+                        isDone ? 'bg-neutral-500' : isCurrent ? 'bg-gray-500 animate-pulse' : 'bg-zinc-200'
                       }`} />
                       <ActivityTypeIcon activityType={activity.activity_type} activitySubType={activity.activity_sub_type} />
                       <span className="truncate">{activity.name}</span>
-                      {isDone && <Check size={12} className="text-teal-500 ms-auto shrink-0" />}
+                      {isDone && <Check size={12} className="text-neutral-500 ms-auto shrink-0" />}
                     </Link>
                   )
                 })}
@@ -313,7 +313,7 @@ function ActivityIndicators(props: Props) {
     useCourseCertification(props.course_uuid)
   const showCertificationBadge = certificationEnabled || certificationUnknown
 
-  const done_activity_style = 'bg-teal-500 hover:bg-teal-600'
+  const done_activity_style = 'bg-neutral-500 hover:bg-neutral-600'
   const black_activity_style = 'bg-zinc-200/80 hover:bg-zinc-300'
   const current_activity_style = 'bg-gray-500 animate-pulse hover:bg-gray-600'
 
@@ -462,7 +462,7 @@ function ActivityIndicators(props: Props) {
           </div>
           <div className="w-full bg-zinc-200/80 rounded-full h-[6px] overflow-hidden">
             <div
-              className="h-full bg-teal-500 rounded-full transition-all duration-300"
+              className="h-full bg-neutral-500 rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -531,7 +531,7 @@ function ActivityIndicators(props: Props) {
                     <Link href={chapterLinkHref} prefetch={false} className="relative z-10 shrink-0 flex items-center cursor-pointer focus:outline-none">
                       <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold transition-all border-2 border-white ${
                         isChapterComplete
-                          ? 'bg-teal-500 text-white'
+                          ? 'bg-neutral-500 text-white'
                           : 'bg-gray-200 text-gray-500'
                       }`}>
                         {chapterIndex + 1}
@@ -541,7 +541,7 @@ function ActivityIndicators(props: Props) {
                     <div className="relative z-10 shrink-0 flex items-center cursor-not-allowed">
                       <div className={`w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold transition-all border-2 border-white ${
                         isChapterComplete
-                          ? 'bg-teal-500 text-white'
+                          ? 'bg-neutral-500 text-white'
                           : 'bg-gray-200 text-gray-500'
                       }`}>
                         {chapterIndex + 1}

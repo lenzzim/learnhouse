@@ -91,7 +91,7 @@ export function CommunitySidebar({
               <div className="flex items-center gap-1.5 text-xs text-gray-500">
                 {community.public ? (
                   <>
-                    <Globe size={12} className="text-green-500" />
+                    <Globe size={12} className="text-[var(--text-3)]" />
                     <span>{t('communities.public')}</span>
                   </>
                 ) : (

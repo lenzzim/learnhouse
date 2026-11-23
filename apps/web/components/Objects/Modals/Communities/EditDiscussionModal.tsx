@@ -143,14 +143,14 @@ export function EditDiscussionForm({
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Edit count warning */}
           {isPrivate ? null : canEdit ? (
-            <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg text-blue-700 text-sm">
+            <div className="flex items-center gap-2 p-3 bg-[var(--surface)] border border-[var(--line)] rounded-lg text-[var(--text-2)] text-sm">
               <Info size={16} className="flex-shrink-0" />
               <span>
                 {t('communities.edit_discussion.edits_remaining', { count: remainingEdits })}
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-100 rounded-lg text-amber-700 text-sm">
+            <div className="flex items-center gap-2 p-3 bg-[var(--surface)] border border-[var(--line-strong)] rounded-lg text-[var(--text)] text-sm">
               <AlertCircle size={16} className="flex-shrink-0" />
               <span>
                 {t('communities.edit_discussion.no_edits_remaining', { count: MAX_EDITS })}

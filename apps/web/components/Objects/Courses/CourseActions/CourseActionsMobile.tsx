@@ -224,12 +224,12 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     return (
       <div className="bg-white/90 backdrop-blur-sm shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4 my-6 mx-2">
         <div className="flex flex-col space-y-3">
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="p-3 bg-[var(--surface)] border border-[var(--line-strong)] rounded-lg">
             <div className="flex items-center gap-2">
-              <UserPlus className="w-4 h-4 text-amber-800" />
-              <span className="text-amber-800 text-sm font-semibold">{t('courses.join_org_required')}</span>
+              <UserPlus className="w-4 h-4 text-[var(--text)]" />
+              <span className="text-[var(--text)] text-sm font-semibold">{t('courses.join_org_required')}</span>
             </div>
-            <p className="text-amber-700 text-xs mt-1">
+            <p className="text-[var(--text-2)] text-xs mt-1">
               {t('courses.join_org_required_description')}
             </p>
           </div>
@@ -274,16 +274,16 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
             <div className="space-y-3">
               {isStarted ? (
                 <>
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-green-800 text-sm font-semibold">{t('courses.you_own_this_course')}</span>
+                      <div className="w-2 h-2 bg-neutral-500 rounded-full animate-pulse" />
+                      <span className="text-neutral-800 text-sm font-semibold">{t('courses.you_own_this_course')}</span>
                     </div>
                   </div>
                   <button
                     onClick={handleCourseAction}
                     disabled={isActionLoading}
-                    className="w-full py-2 px-4 rounded-lg bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition-colors flex items-center justify-center gap-2 disabled:bg-red-400"
+                    className="w-full py-2 px-4 rounded-lg bg-neutral-500 text-white font-semibold text-sm hover:bg-neutral-600 transition-colors flex items-center justify-center gap-2 disabled:bg-neutral-400"
                   >
                     {isActionLoading ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -332,7 +332,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
             disabled={isActionLoading}
             className={`w-full py-2 px-4 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2 ${
               isStarted
-                ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
+                ? 'bg-neutral-500 text-white hover:bg-neutral-600 disabled:bg-neutral-400'
                 : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
             }`}
           >

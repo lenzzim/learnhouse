@@ -221,7 +221,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (contributorStatus === 'ACTIVE') {
       return (
-        <div className="w-full bg-green-50 text-green-700 border border-green-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
+        <div className="w-full bg-neutral-50 text-neutral-700 border border-neutral-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
           <UserPen className="w-5 h-5" />
           {t('courses.you_are_contributor')}
         </div>
@@ -230,7 +230,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
 
     if (contributorStatus === 'PENDING') {
       return (
-        <div className="w-full bg-amber-50 text-amber-700 border border-amber-200 py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
+        <div className="w-full bg-[var(--surface)] text-[var(--text-2)] border border-[var(--line-strong)] py-3 rounded-lg nice-shadow font-semibold flex items-center justify-center gap-2 mt-3">
           <ClockIcon className="w-5 h-5" />
           {t('courses.contributor_application_pending')}
         </div>
@@ -390,12 +390,12 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
     return (
       <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
         <div className="space-y-4">
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg nice-shadow">
+          <div className="p-4 bg-[var(--surface)] border border-[var(--line-strong)] rounded-lg nice-shadow">
             <div className="flex items-center gap-3">
-              <UserPlus className="w-5 h-5 text-amber-800" />
-              <h3 className="text-amber-800 font-semibold">{t('courses.join_org_required')}</h3>
+              <UserPlus className="w-5 h-5 text-[var(--text)]" />
+              <h3 className="text-[var(--text)] font-semibold">{t('courses.join_org_required')}</h3>
             </div>
-            <p className="text-amber-700 text-sm mt-1">
+            <p className="text-[var(--text-2)] text-sm mt-1">
               {t('courses.join_org_required_description')}
             </p>
           </div>
@@ -417,12 +417,12 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
       return (
         <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
           <div className="space-y-4">
-            <div className="p-4 bg-green-50 rounded-lg">
+            <div className="p-4 bg-neutral-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <h3 className="text-green-800 font-semibold">{t('courses.you_own_this_course')}</h3>
+                <div className="w-2 h-2 bg-neutral-500 rounded-full animate-pulse" />
+                <h3 className="text-neutral-800 font-semibold">{t('courses.you_own_this_course')}</h3>
               </div>
-              <p className="text-green-700 text-sm mt-1">
+              <p className="text-neutral-700 text-sm mt-1">
                 {t('courses.you_own_this_course_description')}
               </p>
             </div>
@@ -430,7 +430,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
               onClick={handleCourseAction}
               disabled={isActionLoading}
               aria-label={t('courses.leave_course')}
-              className="w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400"
+              className="w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer bg-neutral-500 text-white hover:bg-neutral-600 disabled:bg-neutral-400"
             >
               {isActionLoading
                 ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -472,7 +472,7 @@ function CoursesActions({ courseuuid, orgslug, course, trailData }: CourseAction
           aria-label={isStarted ? t('courses.leave_course') : t('courses.start_course')}
           className={`w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer ${
             isStarted
-              ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
+              ? 'bg-neutral-500 text-white hover:bg-neutral-600 disabled:bg-neutral-400'
               : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
           }`}
         >

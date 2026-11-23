@@ -202,7 +202,7 @@ export function CommunityThumbnailModal({
             {/* Upload status */}
             {isLoading && (
               <div className="flex justify-center">
-                <div className="font-medium text-sm text-green-800 bg-green-50 rounded-full px-4 py-2 flex items-center">
+                <div className="font-medium text-sm text-[var(--text)] bg-[var(--surface)] rounded-full px-4 py-2 flex items-center">
                   <ArrowBigUpDash size={16} className="me-2 animate-bounce" />
                   Uploading...
                 </div>
