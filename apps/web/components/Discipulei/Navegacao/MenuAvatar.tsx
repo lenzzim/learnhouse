@@ -88,9 +88,6 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium text-[var(--text)]">{nome}</span>
-              {usuario?.email && (
-                <span className="block truncate text-xs text-[var(--text-3)]">{usuario.email}</span>
-              )}
             </span>
             <CaretUpDown size={16} aria-hidden="true" className="shrink-0 text-[var(--text-3)]" />
           </button>
@@ -105,9 +102,6 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
       >
         <DropdownMenuLabel className="px-3 py-2">
           <span className="block truncate text-sm font-semibold text-[var(--text)]">{nome}</span>
-          {usuario?.email && (
-            <span className="block truncate text-xs font-normal text-[var(--text-3)]">{usuario.email}</span>
-          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-1 bg-[var(--line)]" />
         <DropdownMenuItem asChild className={ITEM}>
