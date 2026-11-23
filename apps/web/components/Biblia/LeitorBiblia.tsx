@@ -461,7 +461,6 @@ export default function LeitorBiblia() {
           <OutrasTraducoes referencia={refPassagem} flutuante />
         </div>
         {temLicenciada && <p className="-mt-1 text-xs text-[var(--text-3)]">{t('biblia.nota_licenciadas')}</p>}
-        <AvisoRecuo recuo={prontoA?.recuo ?? prontoB?.recuo} className="-mt-1" />
         <DicaEntrarNvi
           className="-mt-1"
           mostrar={montado && !logado && idioma === 'pt' && versaoA.id === versaoAberta && !vParam && !versaoSalva}
@@ -481,6 +480,9 @@ export default function LeitorBiblia() {
         className="min-h-[50vh] text-[1.1875rem] leading-[1.8]"
         style={{ fontFamily: FONTE_TEXTO }}
       >
+        {/* O aviso de recuo chega junto com o texto: fica dentro do artigo para
+            não empurrar a página quando aparece (layout shift). */}
+        <AvisoRecuo recuo={prontoA?.recuo ?? prontoB?.recuo} className="mb-3 font-sans" />
         {(!estadoTexto || estadoTexto.tipo === 'carregando') && (
           <p className="text-base text-[var(--text-3)]">{t('biblia.carregando')}</p>
         )}
@@ -501,6 +503,9 @@ export default function LeitorBiblia() {
         {estadoTexto?.tipo === 'pronto' && (versaoB ? textoComparado() : textoSimples())}
       </article>
 
+      {/* Navegação e créditos só depois do texto: se aparecessem durante o
+          carregamento, o texto chegando os empurraria para baixo (layout shift). */}
+      {estadoTexto && estadoTexto.tipo !== 'carregando' && (<>
       <nav className="mt-10 flex items-center justify-between gap-3" aria-label={t('biblia.titulo')}>
         {anterior ? (
           <Link href={montarHref(anterior)} className={botaoClasse} aria-label={`${t('biblia.anterior')}: ${formatarReferencia(anterior, false, nomes)}`}>
@@ -534,6 +539,7 @@ export default function LeitorBiblia() {
           </p>
         )}
       </footer>
+      </>)}
 
       {palavra && <PainelVerbete palavra={palavra} onFechar={fecharPalavra} />}
     </div>
