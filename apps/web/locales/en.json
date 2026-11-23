@@ -742,7 +742,9 @@
       "info_description": "Filter courses by user group to see only courses assigned to a specific group. Useful for families or teams sharing the same organization."
     },
     "sign_in_to_see_courses": "Log in to see your courses",
-    "sign_in_to_see_courses_description": "Courses in this academy may only be visible once you are signed in."
+    "sign_in_to_see_courses_description": "Courses in this academy may only be visible once you are signed in.",
+    "autor": "Author",
+    "autores": "Authors"
   },
   "communities": {
     "title": "Communities",
@@ -1788,7 +1790,8 @@
       "communities": "Communities",
       "discussions": "Discussions",
       "playgrounds": "Playgrounds",
-      "podcasts": "Podcasts"
+      "podcasts": "Podcasts",
+      "folders": "Folders"
     },
     "course": "Course",
     "user": "Member"

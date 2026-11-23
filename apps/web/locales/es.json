@@ -742,7 +742,9 @@
     "no_image_in_clipboard": "No se encontró ninguna imagen en el portapapeles",
     "clipboard_read_error": "No se pudo leer el portapapeles",
     "sign_in_to_see_courses": "Inicia sesión para ver tus cursos",
-    "sign_in_to_see_courses_description": "Los cursos de esta academia podrían estar visibles solo después de iniciar sesión."
+    "sign_in_to_see_courses_description": "Los cursos de esta academia podrían estar visibles solo después de iniciar sesión.",
+    "autor": "Autor",
+    "autores": "Autores"
   },
   "communities": {
     "title": "Comunidades",
@@ -1343,7 +1345,8 @@
       "communities": "Comunidades",
       "discussions": "Discusiones",
       "playgrounds": "Playgrounds",
-      "podcasts": "Podcasts"
+      "podcasts": "Podcasts",
+      "folders": "Carpetas"
     }
   },
   "ai": {

@@ -742,7 +742,9 @@
     "no_image_in_clipboard": "Nenhuma imagem encontrada na área de transferência",
     "clipboard_read_error": "Não foi possível ler a área de transferência",
     "sign_in_to_see_courses": "Entre para ver seus cursos",
-    "sign_in_to_see_courses_description": "Os cursos desta academia podem ficar visíveis apenas após o login."
+    "sign_in_to_see_courses_description": "Os cursos desta academia podem ficar visíveis apenas após o login.",
+    "autor": "Autor",
+    "autores": "Autores"
   },
   "communities": {
     "title": "Comunidades",
@@ -1343,7 +1345,8 @@
       "communities": "Comunidades",
       "discussions": "Discussões",
       "playgrounds": "Playgrounds",
-      "podcasts": "Podcasts"
+      "podcasts": "Podcasts",
+      "folders": "Pastas"
     }
   },
   "ai": {

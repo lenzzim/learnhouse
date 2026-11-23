@@ -61,6 +61,7 @@ interface CourseActionsMobileProps {
 
 // Component for displaying multiple authors
 const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
+  const { t } = useTranslation()
   if (!authors.length) return null
   const displayedAvatars = authors.slice(0, 3)
   const remainingCount = Math.max(0, authors.length - 3)
@@ -108,7 +109,7 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
       
       <div className="flex flex-col">
         <span className="text-xs text-neutral-400 font-medium">
-          {authors.length > 1 ? 'Authors' : 'Author'}
+          {authors.length > 1 ? t('courses.autores', { defaultValue: 'Autores' }) : t('courses.autor', { defaultValue: 'Autor' })}
         </span>
         {authors.length === 1 ? (
           <span className="text-sm font-semibold text-neutral-800">

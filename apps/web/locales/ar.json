@@ -752,7 +752,9 @@
     "no_image_in_clipboard": "لم يتم العثور على صورة في الحافظة",
     "clipboard_read_error": "تعذرت القراءة من الحافظة",
     "sign_in_to_see_courses": "سجّل الدخول لرؤية دوراتك",
-    "sign_in_to_see_courses_description": "قد لا تظهر الدورات في هذه الأكاديمية إلا بعد تسجيل الدخول."
+    "sign_in_to_see_courses_description": "قد لا تظهر الدورات في هذه الأكاديمية إلا بعد تسجيل الدخول.",
+    "autor": "المؤلف",
+    "autores": "المؤلفون"
   },
   "communities": {
     "notebook": {
@@ -1353,7 +1355,8 @@
       "communities": "مجتمعات",
       "discussions": "مناقشات",
       "playgrounds": "ساحات التجربة",
-      "podcasts": "بودكاست"
+      "podcasts": "بودكاست",
+      "folders": "المجلدات"
     }
   },
   "ai": {
