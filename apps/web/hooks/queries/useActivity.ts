@@ -14,5 +14,6 @@ export function useActivity(activityUuid: string) {
     queryFn: () => getActivityWithAuthHeader(activityUuid, {}, accessToken),
     enabled: !!activityUuid,
     staleTime: 60_000,
+    retry: (falhas: number, erro: any) => ![401, 403, 404].includes(erro?.status) && falhas < 1,
   })
 }

@@ -1,4 +1,5 @@
 'use client'
+import SemAcesso from '@components/Discipulei/Aprender/SemAcesso'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { BookOpenCheck, CheckCircle, ChevronLeft, ChevronRight, MessageSquare, UserRoundPen, Edit2, Loader2, Maximize2, Minimize2, Trophy, Sparkles, XCircle, Lock, RotateCcw, Infinity as InfinityIcon } from 'lucide-react'
@@ -244,8 +245,8 @@ function ActivityClient(props: ActivityClientProps) {
   const orgslug = props.orgslug
   const org = useOrg() as any
 
-  const { data: course, isLoading: courseLoading } = useCourseMeta(courseuuid)
-  const { data: activity, isLoading: activityLoading } = useActivity(activityid)
+  const { data: course, isLoading: courseLoading, error: courseQueryError } = useCourseMeta(courseuuid)
+  const { data: activity, isLoading: activityLoading, error: activityQueryError } = useActivity(activityid)
   const session = useLHSession() as any;
   const pathname = usePathname()
   const access_token = session?.data?.tokens?.access_token;
@@ -446,6 +447,42 @@ function ActivityClient(props: ActivityClientProps) {
   }
     , [activity, pathname, isFocusMode])
 
+  // Curso ou aula que não carregam (403, 404, rede) trocam o esqueleto por um
+  // estado claro, em vez de deixar a pessoa olhando o carregamento para sempre.
+  const erroCurso: any = courseQueryError
+  // getActivityWithAuthHeader devolve o corpo do erro em vez de lançar: sem
+  // activity_uuid é uma resposta de erro ({ detail }).
+  const aulaFalhou =
+    activityid !== 'end' && !activityLoading && (!!activityQueryError || (!!activity && !activity.activity_uuid && !activity.is_locked))
+  if ((!courseLoading && !course) || erroCurso || (course && aulaFalhou)) {
+    const logado = session?.status === 'authenticated'
+    const status = erroCurso?.status
+    const semAcesso = erroCurso ? status === 401 || status === 403 : aulaFalhou && !!activity?.detail
+    return (
+      <GeneralWrapperStyled>
+        <SemAcesso
+          tipo={semAcesso ? 'acesso' : 'erro'}
+          titulo={semAcesso ? t('acesso.aula_titulo') : t('acesso.aula_nao_abriu')}
+          texto={
+            semAcesso
+              ? logado
+                ? t('acesso.aula_texto')
+                : t('acesso.aula_texto_anonimo')
+              : t('acesso.aula_texto_erro')
+          }
+          acoes={[
+            ...(!logado && semAcesso
+              ? [{ label: t('acesso.entrar'), href: getUriWithOrg(orgslug, '/login'), principal: true }]
+              : []),
+            course
+              ? { label: t('acesso.voltar_curso'), href: getUriWithOrg(orgslug, '') + `/course/${courseuuid}`, principal: logado || !semAcesso }
+              : { label: t('acesso.voltar_aprender'), href: getUriWithOrg(orgslug, '/courses'), principal: logado || !semAcesso },
+          ]}
+        />
+      </GeneralWrapperStyled>
+    )
+  }
+
   if (courseLoading || !course) {
     return (
       <GeneralWrapperStyled>
@@ -502,9 +539,9 @@ function ActivityClient(props: ActivityClientProps) {
     const isAuthenticated = session?.status === 'authenticated'
     return (
       <GeneralWrapperStyled>
-        <div className="max-w-2xl mx-auto my-16 bg-white rounded-2xl border border-gray-200/80 shadow-sm p-8 text-center">
-          <div className="mx-auto w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center mb-4">
-            <Lock className="text-rose-500" size={24} />
+        <div className="max-w-2xl mx-auto my-16 bg-[var(--panel)] rounded-2xl border border-[var(--line)] p-8 text-center">
+          <div className="mx-auto w-14 h-14 rounded-full bg-[var(--surface)] flex items-center justify-center mb-4">
+            <Lock className="text-[var(--text-2)]" size={24} />
           </div>
           <h1 className="text-xl font-semibold text-gray-900 mb-2">
             {t('course.locked_title', 'This activity is locked')}

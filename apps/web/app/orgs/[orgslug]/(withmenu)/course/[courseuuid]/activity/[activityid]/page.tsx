@@ -23,18 +23,28 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       revalidate: 120,
       tags: ['organizations'],
     }),
-    getCourseMetadata(params.courseuuid, { revalidate: 120, tags: ['courses'] }, access_token || null, { slim: true }),
+    getCourseMetadata(params.courseuuid, { revalidate: 120, tags: ['courses'] }, access_token || null, { slim: true }).catch(() => null),
     getActivityWithAuthHeader(
       params.activityid,
       { revalidate: 120, tags: ['activities'] },
       access_token || null
-    ),
+    ).catch(() => null),
   ])
+
+  // Sem acesso (ou não encontrado): metadados genéricos, sem vazar nada e
+  // sem derrubar a página no error boundary.
+  if (!course_meta || (params.activityid !== 'end' && !activity?.activity_uuid)) {
+    return {
+      title: `Aprender — ${org?.name || 'Discipulei'}`,
+      description: `Estudos da comunidade ${org?.name || 'Discipulei'} no Discipulei.`,
+      robots: { index: false, follow: false },
+    }
+  }
 
   // Check if this is the course end page
   const isCourseEnd = params.activityid === 'end';
   const seoConfig = getOrgSeoConfig(org)
-  const rawTitle = isCourseEnd ? `Congratulations — ${course_meta.name} Course` : `${activity.name} — ${course_meta.name} Course`
+  const rawTitle = isCourseEnd ? `Parabéns — ${course_meta.name}` : `${activity.name} — ${course_meta.name}`
   const pageTitle = seoConfig.default_meta_title_suffix ? `${rawTitle}${seoConfig.default_meta_title_suffix}` : rawTitle
 
   const orgOgImageUrl = seoConfig.default_og_image

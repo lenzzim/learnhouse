@@ -1,4 +1,5 @@
 'use client'
+import SemAcesso from '@components/Discipulei/Aprender/SemAcesso'
 import Link from 'next/link'
 import React, { useEffect, useState, Suspense } from 'react'
 import { getUriWithOrg } from '@services/config/config'
@@ -51,6 +52,7 @@ const CourseClient = (props: any) => {
     enabled: !!courseuuid && !serverError,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
+    retry: (falhas: number, erro: any) => ![401, 403, 404].includes(erro?.status) && falhas < 1,
   });
 
   const course = initialCourse || clientCourseData;
@@ -167,21 +169,27 @@ const CourseClient = (props: any) => {
 
   // Show error if course fetch failed
   if (!course && activeError) {
+    const logado = session?.status === 'authenticated'
+    const semAcesso = activeError?.status === 403 || activeError?.status === 401
     return (
       <GeneralWrapperStyled>
-        <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">
-            {t('course.accessDenied', 'Unable to access this course')}
-          </h2>
-          <p className="text-gray-500 mb-4">
-            {activeError?.status === 403
-              ? t('course.noPermission', 'You do not have permission to view this course.')
-              : t('course.loadError', 'This course could not be found or there was an error loading it.')}
-          </p>
-          <Link href={getUriWithOrg(orgslug, '/courses')} className="text-blue-600 hover:underline">
-            {t('course.backToCourses', 'Back to Courses')}
-          </Link>
-        </div>
+        <SemAcesso
+          tipo={semAcesso ? 'acesso' : 'erro'}
+          titulo={semAcesso ? t('acesso.curso_titulo') : t('acesso.curso_nao_encontrado')}
+          texto={
+            semAcesso
+              ? logado
+                ? t('acesso.curso_texto')
+                : t('acesso.curso_texto_anonimo')
+              : t('acesso.curso_texto_erro')
+          }
+          acoes={[
+            ...(!logado && semAcesso
+              ? [{ label: t('acesso.entrar'), href: getUriWithOrg(orgslug, '/login'), principal: true }]
+              : []),
+            { label: t('acesso.voltar_aprender'), href: getUriWithOrg(orgslug, '/courses'), principal: logado || !semAcesso },
+          ]}
+        />
       </GeneralWrapperStyled>
     )
   }

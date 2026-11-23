@@ -26,5 +26,6 @@ export function useCourseMeta(courseUuid: string) {
     queryFn: () => getCourseMetadata(courseUuid, {}, accessToken, { slim: true }),
     enabled: !!courseUuid,
     staleTime: 60_000,
+    retry: (falhas: number, erro: any) => ![401, 403, 404].includes(erro?.status) && falhas < 1,
   })
 }

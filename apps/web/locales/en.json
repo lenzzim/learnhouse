@@ -7295,5 +7295,20 @@
       "desmarcar": "Unmark helpful answer",
       "erro": "Couldn't mark the answer."
     }
+  },
+  "acesso": {
+    "curso_titulo": "You do not have access to this course",
+    "curso_texto": "This course belongs to a community or group you have not joined yet. Join the community to study with us.",
+    "curso_texto_anonimo": "Sign in to see this course.",
+    "curso_nao_encontrado": "We could not find this course",
+    "curso_texto_erro": "It may have been removed, the link may be incomplete, or the connection failed.",
+    "aula_titulo": "You do not have access to this lesson",
+    "aula_texto": "This lesson is part of a course you have not joined yet.",
+    "aula_texto_anonimo": "Sign in to see this lesson.",
+    "aula_nao_abriu": "We could not open this lesson",
+    "aula_texto_erro": "It may have been removed, the link may be incomplete, or the connection failed.",
+    "entrar": "Sign in",
+    "voltar_aprender": "Back to Learn",
+    "voltar_curso": "Back to course"
   }
 }

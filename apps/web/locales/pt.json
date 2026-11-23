@@ -7295,5 +7295,20 @@
       "desmarcar": "Desmarcar resposta útil",
       "erro": "Não foi possível marcar a resposta."
     }
+  },
+  "acesso": {
+    "curso_titulo": "Você não tem acesso a este curso",
+    "curso_texto": "Este curso é de uma comunidade ou grupo de que você ainda não participa. Entre na comunidade para estudar com a gente.",
+    "curso_texto_anonimo": "Entre na sua conta para ver este curso.",
+    "curso_nao_encontrado": "Não encontramos este curso",
+    "curso_texto_erro": "Ele pode ter sido removido, o link pode estar incompleto ou a conexão falhou.",
+    "aula_titulo": "Você não tem acesso a esta aula",
+    "aula_texto": "Esta aula faz parte de um curso de que você ainda não participa.",
+    "aula_texto_anonimo": "Entre na sua conta para ver esta aula.",
+    "aula_nao_abriu": "Não conseguimos abrir esta aula",
+    "aula_texto_erro": "Ela pode ter sido removida, o link pode estar incompleto ou a conexão falhou.",
+    "entrar": "Entrar",
+    "voltar_aprender": "Voltar ao Aprender",
+    "voltar_curso": "Voltar ao curso"
   }
 }
