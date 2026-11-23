@@ -185,7 +185,7 @@ function Courses(props: CourseProps) {
       <GeneralWrapperStyled>
         <div className="flex flex-col space-y-2 mb-2">
           <div className="flex items-center justify-between">
-            <TypeOfContentTitle title={t('courses.courses')} type="cou" />
+            <TypeOfContentTitle title={t('nav.aprender')} type="cou" />
             <AuthenticatedClientElement
               checkMethod="roles"
               action="create"

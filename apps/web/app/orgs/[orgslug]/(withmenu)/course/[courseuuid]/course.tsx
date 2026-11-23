@@ -350,7 +350,7 @@ const CourseClient = (props: any) => {
           <GeneralWrapperStyled>
             <div className="pb-4">
               <Breadcrumbs items={[
-                { label: t('courses.courses'), href: getUriWithOrg(orgslug, '/courses'), icon: <BookCopy size={14} /> },
+                { label: t('nav.aprender'), href: getUriWithOrg(orgslug, '/courses'), icon: <BookCopy size={14} /> },
                 { label: course.name }
               ]} />
             </div>

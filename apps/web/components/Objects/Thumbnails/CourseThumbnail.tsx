@@ -275,7 +275,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             prefetch={false}
             href={courseLink}
             onClick={handleCardOpen}
-            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors"
           >
             {t('courses.start_learning')}
           </Link>

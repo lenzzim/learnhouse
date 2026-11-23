@@ -103,7 +103,7 @@ const CourseInfo = memo(({ course, org }: { course: any, org: any }) => {
         alt=""
       />
       <div className="flex flex-col -space-y-0.5 min-w-0 hidden sm:block">
-        <p className="text-sm font-medium text-gray-500">{t('courses.courses')}</p>
+        <p className="text-sm font-medium text-gray-500">{t('nav.aprender')}</p>
         <h1 className="font-semibold text-gray-900 text-base truncate">
           {course.name}
         </h1>

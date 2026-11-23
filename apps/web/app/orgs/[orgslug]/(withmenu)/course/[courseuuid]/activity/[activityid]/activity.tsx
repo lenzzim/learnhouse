@@ -834,7 +834,7 @@ function ActivityClient(props: ActivityClientProps) {
                   <div className="space-y-4 pt-0 relative">
                     <div className="pt-2 pb-3 sm:pb-6">
                       <Breadcrumbs items={[
-                        { label: t('courses.courses'), href: getUriWithOrg(orgslug, '/courses'), icon: <BookCopy size={14} /> },
+                        { label: t('nav.aprender'), href: getUriWithOrg(orgslug, '/courses'), icon: <BookCopy size={14} /> },
                         { label: course.name, href: getUriWithOrg(orgslug, `/course/${courseuuid}`) },
                         { label: displayName }
                       ]} />
