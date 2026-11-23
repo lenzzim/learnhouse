@@ -6,7 +6,7 @@ import {
 } from '@services/ai/ai'
 import { AlertTriangle, BadgeInfo, NotebookTabs, Maximize2, Minimize2, PanelRightOpen, PanelRightClose, PanelTop } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
-import { FlaskConical, MessageCircle, X } from 'lucide-react'
+import { FlaskConical, MessageCircle, Sparkles, X } from 'lucide-react'
 import Image from 'next/image'
 import learnhouseAI_icon from 'public/learnhouse_ai_simple.png'
 import learnhouseAI_logo_black from 'public/learnhouse_ai_black_logo.png'
@@ -54,21 +54,9 @@ function AIActivityAsk(props: AIActivityAskProps) {
           <ActivityChatMessageBox activity={props.activity} />
           <div
             onClick={handleOpenAI}
-            style={{
-              background:
-                'conic-gradient(from 32deg at 53.75% 50%, rgb(35, 40, 93) 4deg, rgba(20, 0, 52, 0.95) 59deg, rgba(164, 45, 238, 0.88) 281deg)',
-            }}
-            className="rounded-full px-5 drop-shadow-md flex  items-center space-x-1.5 p-2.5 text-sm text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out hover:scale-105"
+            className="rounded-full px-5 flex items-center gap-1.5 p-2.5 text-sm bg-[var(--cta-bg)] text-[var(--cta-fg)] hover:bg-[var(--cta-bg-hover)] hover:cursor-pointer transition-colors"
           >
-            {' '}
-            <i>
-              <Image
-                className="outline outline-1 outline-neutral-200/20 rounded-md"
-                width={20}
-                src={learnhouseAI_icon}
-                alt=""
-              />
-            </i>{' '}
+            <Sparkles size={16} aria-hidden="true" />
             <i className="not-italic text-xs font-bold">{t('ai.ask_ai')}</i>
           </div>
         </div>
