@@ -200,7 +200,7 @@ export default function Agenda({ orgslug }: { orgslug: string }) {
                 <section key={dia} aria-labelledby={`dia-${dia}`}>
                   <h2
                     id={`dia-${dia}`}
-                    className="mb-2 text-sm font-semibold capitalize text-[var(--text)]"
+                    className="mb-2 text-sm font-semibold first-letter:uppercase text-[var(--text)]"
                     suppressHydrationWarning
                   >
                     {rotuloDia(dia, hoje, locale, (k) => t(k))}

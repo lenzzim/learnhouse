@@ -131,7 +131,7 @@ export function Calendario({
           >
             <CaretLeft size={18} aria-hidden="true" className="rtl:-scale-x-100" />
           </button>
-          <h2 className="text-lg capitalize text-[var(--text)]" style={SERIF} aria-live="polite">
+          <h2 className="text-lg first-letter:uppercase text-[var(--text)]" style={SERIF} aria-live="polite">
             {nomeDoMes(inicioDoMes(foco), locale)}
           </h2>
           <button
@@ -206,7 +206,7 @@ export function Calendario({
       </section>
 
       <section aria-labelledby="dia-escolhido" aria-live="polite">
-        <h2 id="dia-escolhido" className="mb-2 text-base font-semibold capitalize text-[var(--text)]">
+        <h2 id="dia-escolhido" className="mb-2 text-base font-semibold first-letter:uppercase text-[var(--text)]">
           {rotuloDia(chaveFoco, hoje, locale, t)}
         </h2>
         {q.isLoading ? (
