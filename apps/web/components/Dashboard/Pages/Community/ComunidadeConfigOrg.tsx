@@ -178,8 +178,15 @@ export default function ComunidadeConfigOrg({ orgId }: { orgId: number }) {
               className={CAMPO}
             />
             <p className={`${AJUDA} break-all`}>
-              {t('admin_comunidade.link_padrao', { url: config.data?.default_whatsapp_men_url ?? '' })}
+              {config.data?.default_whatsapp_men_url
+                ? t('admin_comunidade.link_padrao', { url: config.data.default_whatsapp_men_url })
+                : t('admin_comunidade.link_sem_padrao')}
             </p>
+            {config.data?.whatsapp_men_missing && (
+              <p role="status" className="mt-1 rounded-md bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
+                {t('admin_comunidade.aviso_sem_link')}
+              </p>
+            )}
           </div>
           <div>
             <label htmlFor="cfg-link-mulheres" className={ROTULO}>
@@ -195,8 +202,15 @@ export default function ComunidadeConfigOrg({ orgId }: { orgId: number }) {
               className={CAMPO}
             />
             <p className={`${AJUDA} break-all`}>
-              {t('admin_comunidade.link_padrao', { url: config.data?.default_whatsapp_women_url ?? '' })}
+              {config.data?.default_whatsapp_women_url
+                ? t('admin_comunidade.link_padrao', { url: config.data.default_whatsapp_women_url })
+                : t('admin_comunidade.link_sem_padrao')}
             </p>
+            {config.data?.whatsapp_women_missing && (
+              <p role="status" className="mt-1 rounded-md bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
+                {t('admin_comunidade.aviso_sem_link')}
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-2">

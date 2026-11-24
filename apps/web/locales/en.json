@@ -7350,7 +7350,8 @@
     "concluir_edicao": "Done",
     "inserir_na_nota": "Insert into note",
     "n_notas_zero": "No notes",
-    "compartilhar_nota_titulo": "Share the note “{{titulo}}”"
+    "compartilhar_nota_titulo": "Share the note “{{titulo}}”",
+    "erro_publicar_restrito": "You can't post in this space: only the authors group posts here. Pick another space."
   },
   "social": {
     "autor": {
@@ -7556,7 +7557,8 @@
     "conta_homens": "Men",
     "conta_mulheres": "Women",
     "conta_nenhum": "Prefer not to say",
-    "conta_salvo": "Choice saved."
+    "conta_salvo": "Choice saved.",
+    "em_breve": "The group link will show up here soon."
   },
   "salvos": {
     "titulo": "Saved",
@@ -7595,7 +7597,9 @@
     "sem_grupo_configurado": "Set the user group above to see the suggestion",
     "anterior": "Previous",
     "proxima": "Next",
-    "abrir_grupos": "Open user groups"
+    "abrir_grupos": "Open user groups",
+    "link_sem_padrao": "Empty = no link (members see \"Soon\").",
+    "aviso_sem_link": "This group has no link: anyone who picks it sees \"The group link will show up here soon\". Paste the WhatsApp invite here."
   },
   "compartilhar": {
     "acoes": "Post actions",

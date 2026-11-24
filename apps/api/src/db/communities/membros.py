@@ -23,21 +23,21 @@ from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String, Uniq
 from sqlmodel import Field, SQLModel
 
 
-# Grupos de WhatsApp (N42). Os links já vêm sem rastreio.
+# Grupos de WhatsApp (N42). Espaço privativo: o link só sai pela API
+# autenticada, para membro da org, e só o do grupo que a pessoa escolheu.
+# Nenhum link fica no código (o repositório é público): vem do painel do
+# admin ou do env DISCIPULEI_WHATSAPP_HOMENS / _MULHERES, sem valor padrão.
 WHATSAPP_MULHERES = "mulheres"
 WHATSAPP_HOMENS = "homens"
 WHATSAPP_GROUPS = (WHATSAPP_MULHERES, WHATSAPP_HOMENS)
 
-DEFAULT_WHATSAPP_MULHERES_URL = "https://chat.whatsapp.com/FPUibUgq4735upzPXl4SXr"
-DEFAULT_WHATSAPP_HOMENS_URL = "https://chat.whatsapp.com/DSRhYTYm0jh6wJlqXOXSdz"
 WHATSAPP_URL_PREFIX = "https://chat.whatsapp.com/"
 
 
 def default_whatsapp_url(group: str) -> str:
-    """Link padrão do grupo: env ``DISCIPULEI_WHATSAPP_<GRUPO>`` ou o valor fixo."""
-    if group == WHATSAPP_MULHERES:
-        return (os.environ.get("DISCIPULEI_WHATSAPP_MULHERES") or DEFAULT_WHATSAPP_MULHERES_URL).strip()
-    return (os.environ.get("DISCIPULEI_WHATSAPP_HOMENS") or DEFAULT_WHATSAPP_HOMENS_URL).strip()
+    """Link de reserva do grupo: env ``DISCIPULEI_WHATSAPP_<GRUPO>`` ou vazio."""
+    nome = "DISCIPULEI_WHATSAPP_MULHERES" if group == WHATSAPP_MULHERES else "DISCIPULEI_WHATSAPP_HOMENS"
+    return (os.environ.get(nome) or "").strip()
 
 
 # Chaves das regras de cada espaço dentro de ``moderation_settings``.
@@ -66,7 +66,7 @@ class CommunityOrgSettings(SQLModel, table=True):
         default=None,
         sa_column=Column(Integer, ForeignKey("usergroup.id", ondelete="SET NULL"), nullable=True),
     )
-    # Vazio = usa o padrão (env ou o link fixo).
+    # Vazio = usa o env (DISCIPULEI_WHATSAPP_*); sem env, o grupo fica sem link.
     whatsapp_men_url: str = Field(
         default="", sa_column=Column(String(300), nullable=False, default="", server_default="")
     )
@@ -119,17 +119,19 @@ class SavedDiscussion(SQLModel, table=True):
 # ---------------------------------------------------------------------------
 
 
-class WhatsappLinks(SQLModel):
-    mulheres: str
-    homens: str
+class WhatsappConfigured(SQLModel):
+    """Só se cada grupo tem link (nunca o link em si)."""
+    mulheres: bool = False
+    homens: bool = False
 
 
 class MyWhatsappRead(SQLModel):
     group: Optional[str] = None
     prompted: bool = False
-    # Link do grupo escolhido (None sem escolha).
+    # Link só do grupo escolhido (None sem escolha ou sem link configurado).
     url: Optional[str] = None
-    links: WhatsappLinks
+    # O grupo escolhido tem link? False = "Em breve o link aparece aqui".
+    configured: bool = False
 
 
 class MyWhatsappUpdate(SQLModel):
@@ -142,7 +144,7 @@ class CommunityConfigRead(SQLModel):
     """O que qualquer membro precisa saber para montar a interface."""
     is_author: bool = False
     can_manage_events: bool = False
-    whatsapp: WhatsappLinks
+    whatsapp: WhatsappConfigured
 
 
 class UserGroupRef(SQLModel):
@@ -156,9 +158,13 @@ class OrgSettingsRead(SQLModel):
     women_usergroup: Optional[UserGroupRef] = None
     whatsapp_men_url: str = ""
     whatsapp_women_url: str = ""
-    # Padrões efetivos (env ou fixos), para o admin ver o que vale sem override.
+    # Reserva do env (DISCIPULEI_WHATSAPP_*), para o admin ver o que vale sem
+    # link no painel. Vazio = nenhum.
     default_whatsapp_men_url: str = ""
     default_whatsapp_women_url: str = ""
+    # Grupo sem link nenhum (nem painel nem env): o painel mostra um aviso.
+    whatsapp_men_missing: bool = True
+    whatsapp_women_missing: bool = True
 
 
 class OrgSettingsUpdate(SQLModel):

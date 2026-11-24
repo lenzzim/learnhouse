@@ -43,7 +43,7 @@ from src.db.communities.membros import (
     SavedDiscussion,
     SharedPostRead,
     UserGroupRef,
-    WhatsappLinks,
+    WhatsappConfigured,
     default_whatsapp_url,
 )
 from src.db.user_organizations import UserOrganization
@@ -108,10 +108,19 @@ async def get_org_settings_row(db: AsyncSession, org_id: int) -> Optional[Commun
     )).scalars().first()
 
 
-def whatsapp_links(row: Optional[CommunityOrgSettings]) -> WhatsappLinks:
-    return WhatsappLinks(
-        mulheres=(row.whatsapp_women_url if row and row.whatsapp_women_url else default_whatsapp_url(WHATSAPP_MULHERES)),
-        homens=(row.whatsapp_men_url if row and row.whatsapp_men_url else default_whatsapp_url(WHATSAPP_HOMENS)),
+def whatsapp_url(row: Optional[CommunityOrgSettings], group: Optional[str]) -> str:
+    """Link efetivo de um grupo: o do painel, senão o do env, senão vazio."""
+    if group == WHATSAPP_MULHERES:
+        return (row.whatsapp_women_url if row and row.whatsapp_women_url else default_whatsapp_url(WHATSAPP_MULHERES))
+    if group == WHATSAPP_HOMENS:
+        return (row.whatsapp_men_url if row and row.whatsapp_men_url else default_whatsapp_url(WHATSAPP_HOMENS))
+    return ""
+
+
+def whatsapp_configured(row: Optional[CommunityOrgSettings]) -> WhatsappConfigured:
+    return WhatsappConfigured(
+        mulheres=bool(whatsapp_url(row, WHATSAPP_MULHERES)),
+        homens=bool(whatsapp_url(row, WHATSAPP_HOMENS)),
     )
 
 
@@ -145,7 +154,7 @@ async def get_config(db: AsyncSession, current_user: CurrentUser, org_id: int) -
     row = await get_org_settings_row(db, org_id)
     author = await is_author(db, viewer_id, org_id, row)
     manage = author or await _is_admin(db, viewer_id, org_id)
-    return CommunityConfigRead(is_author=author, can_manage_events=manage, whatsapp=whatsapp_links(row))
+    return CommunityConfigRead(is_author=author, can_manage_events=manage, whatsapp=whatsapp_configured(row))
 
 
 async def _group_ref(db: AsyncSession, group_id: Optional[int]) -> Optional[UserGroupRef]:
@@ -164,6 +173,8 @@ async def _org_settings_read(db: AsyncSession, row: Optional[CommunityOrgSetting
         whatsapp_women_url=(row.whatsapp_women_url if row else "") or "",
         default_whatsapp_men_url=default_whatsapp_url(WHATSAPP_HOMENS),
         default_whatsapp_women_url=default_whatsapp_url(WHATSAPP_MULHERES),
+        whatsapp_men_missing=not whatsapp_url(row, WHATSAPP_HOMENS),
+        whatsapp_women_missing=not whatsapp_url(row, WHATSAPP_MULHERES),
     )
 
 
@@ -231,20 +242,18 @@ async def _pref(db: AsyncSession, user_id: int, org_id: int) -> Optional[Communi
     )).scalars().first()
 
 
-def _my_whatsapp(pref: Optional[CommunityMemberPref], links: WhatsappLinks) -> MyWhatsappRead:
+def _my_whatsapp(pref: Optional[CommunityMemberPref], row: Optional[CommunityOrgSettings]) -> MyWhatsappRead:
     group = pref.whatsapp_group if pref and pref.whatsapp_group in WHATSAPP_GROUPS else None
-    url = None
-    if group == WHATSAPP_MULHERES:
-        url = links.mulheres
-    elif group == WHATSAPP_HOMENS:
-        url = links.homens
-    return MyWhatsappRead(group=group, prompted=bool(pref and pref.whatsapp_prompted), url=url, links=links)
+    # Só o link do grupo escolhido; sem escolha ("Não informar"), nenhum.
+    url = whatsapp_url(row, group) or None if group else None
+    return MyWhatsappRead(
+        group=group, prompted=bool(pref and pref.whatsapp_prompted), url=url, configured=bool(url)
+    )
 
 
 async def get_my_whatsapp(db: AsyncSession, current_user: CurrentUser, org_id: int) -> MyWhatsappRead:
     viewer_id = await _require_member(db, current_user, org_id)
-    links = whatsapp_links(await get_org_settings_row(db, org_id))
-    return _my_whatsapp(await _pref(db, viewer_id, org_id), links)
+    return _my_whatsapp(await _pref(db, viewer_id, org_id), await get_org_settings_row(db, org_id))
 
 
 async def update_my_whatsapp(
@@ -280,8 +289,7 @@ async def update_my_whatsapp(
         db.add(existing)
         await db.commit()
         pref = existing
-    links = whatsapp_links(await get_org_settings_row(db, org_id))
-    return _my_whatsapp(pref, links)
+    return _my_whatsapp(pref, await get_org_settings_row(db, org_id))
 
 
 async def list_members_whatsapp(

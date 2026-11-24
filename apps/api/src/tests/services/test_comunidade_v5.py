@@ -258,25 +258,72 @@ async def test_put_de_moderacao_preserva_regras_v5_e_valida_grupo(db, mundo):
 # ---------------------------------------------------------------------------
 
 
+# Valores fictícios: nenhum link real fica no repositório (público).
+LINK_H = "https://chat.whatsapp.com/FicticioHomens"
+LINK_M = "https://chat.whatsapp.com/FicticioMulheres"
+
+
+async def _links_no_painel(db, m, org):
+    await membros.update_org_settings(db, m["admin"], org.id, OrgSettingsUpdate(
+        whatsapp_men_url=LINK_H, whatsapp_women_url=LINK_M))
+
+
 async def test_whatsapp_passo_unico_e_escolha(db, mundo):
     m, org = mundo, mundo["org"]
+    await _links_no_painel(db, m, org)
     w = await membros.get_my_whatsapp(db, m["membro"], org.id)
     assert w.prompted is False and w.group is None and w.url is None
-    assert w.links.mulheres.startswith("https://chat.whatsapp.com/")
+    assert "links" not in w.model_dump()
 
+    # "Não informar"/"Agora não": nenhum link sai até a pessoa escolher.
     w = await membros.update_my_whatsapp(db, m["membro"], org.id, MyWhatsappUpdate(dismissed=True))
-    assert w.prompted is True and w.group is None
+    assert w.prompted is True and w.group is None and w.url is None
+    assert LINK_H not in str(w.model_dump()) and LINK_M not in str(w.model_dump())
 
     w = await membros.update_my_whatsapp(db, m["membro"], org.id, MyWhatsappUpdate(group="mulheres"))
-    assert w.group == "mulheres"
-    assert w.url == "https://chat.whatsapp.com/FPUibUgq4735upzPXl4SXr"
+    assert w.group == "mulheres" and w.configured is True
+    assert w.url == LINK_M and LINK_H not in str(w.model_dump())
 
     w = await membros.update_my_whatsapp(db, m["membro"], org.id, MyWhatsappUpdate(group="homens"))
-    assert w.url == "https://chat.whatsapp.com/DSRhYTYm0jh6wJlqXOXSdz"
+    assert w.url == LINK_H and LINK_M not in str(w.model_dump())
 
     with pytest.raises(HTTPException) as exc:
         await membros.update_my_whatsapp(db, m["membro"], org.id, MyWhatsappUpdate(group="outro"))
     assert exc.value.status_code == 422
+
+
+async def test_whatsapp_sem_link_configurado_nao_tem_padrao(db, mundo, monkeypatch):
+    m, org = mundo, mundo["org"]
+    monkeypatch.delenv("DISCIPULEI_WHATSAPP_HOMENS", raising=False)
+    monkeypatch.delenv("DISCIPULEI_WHATSAPP_MULHERES", raising=False)
+    w = await membros.update_my_whatsapp(db, m["membro"], org.id, MyWhatsappUpdate(group="homens"))
+    assert w.group == "homens" and w.url is None and w.configured is False
+    c = await membros.get_config(db, m["membro"], org.id)
+    assert c.whatsapp.homens is False and c.whatsapp.mulheres is False
+    s = await membros.get_org_settings(db, m["admin"], org.id)
+    assert s.whatsapp_men_missing is True and s.whatsapp_women_missing is True
+    assert s.default_whatsapp_men_url == "" and s.default_whatsapp_women_url == ""
+
+
+async def test_whatsapp_link_so_para_membro_logado(db, mundo):
+    from src.db.users import APITokenUser
+
+    m, org = mundo, mundo["org"]
+    await _links_no_painel(db, m, org)
+    token = APITokenUser(id=1, org_id=org.id, rights={"communities": {"action_read": True}})
+    for quem, code in ((m["anon"], 401), (m["estranho"], 403), (token, 401)):
+        for chamada in (
+            membros.get_my_whatsapp(db, quem, org.id),
+            membros.get_config(db, quem, org.id),
+            membros.update_my_whatsapp(db, quem, org.id, MyWhatsappUpdate(group="homens")),
+            membros.get_org_settings(db, quem, org.id),
+        ):
+            with pytest.raises(HTTPException) as exc:
+                await chamada
+            assert exc.value.status_code == code
+    # A config de qualquer membro diz só se há link, nunca o link.
+    c = await membros.get_config(db, m["membro"], org.id)
+    assert c.whatsapp.homens is True and "chat.whatsapp.com" not in str(c.model_dump())
 
 
 async def test_whatsapp_genero_so_para_admin_e_sem_adicionar_a_grupo(db, mundo):
@@ -310,7 +357,11 @@ async def test_whatsapp_genero_so_para_admin_e_sem_adicionar_a_grupo(db, mundo):
 async def test_links_do_whatsapp_configuraveis_e_validados(db, mundo, monkeypatch):
     m, org = mundo, mundo["org"]
     monkeypatch.setenv("DISCIPULEI_WHATSAPP_HOMENS", "https://chat.whatsapp.com/EnvHomens")
-    assert (await membros.get_config(db, m["membro"], org.id)).whatsapp.homens == "https://chat.whatsapp.com/EnvHomens"
+    assert (await membros.get_config(db, m["membro"], org.id)).whatsapp.homens is True
+    w = await membros.update_my_whatsapp(db, m["membro"], org.id, MyWhatsappUpdate(group="homens"))
+    assert w.url == "https://chat.whatsapp.com/EnvHomens"
+    s0 = await membros.get_org_settings(db, m["admin"], org.id)
+    assert s0.whatsapp_men_missing is False and s0.whatsapp_women_missing is True
 
     with pytest.raises(HTTPException) as exc:
         await membros.update_org_settings(db, m["admin"], org.id, OrgSettingsUpdate(whatsapp_men_url="https://evil.example"))

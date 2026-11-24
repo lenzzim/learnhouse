@@ -7350,7 +7350,8 @@
     "concluir_edicao": "Concluir",
     "inserir_na_nota": "Inserir na nota",
     "n_notas_zero": "Nenhuma nota",
-    "compartilhar_nota_titulo": "Compartilhar a nota “{{titulo}}”"
+    "compartilhar_nota_titulo": "Compartilhar a nota “{{titulo}}”",
+    "erro_publicar_restrito": "Você não pode publicar neste espaço: só o grupo de autores publica aqui. Escolha outro espaço."
   },
   "social": {
     "autor": {
@@ -7556,7 +7557,8 @@
     "conta_homens": "Homens",
     "conta_mulheres": "Mulheres",
     "conta_nenhum": "Não informar",
-    "conta_salvo": "Escolha salva."
+    "conta_salvo": "Escolha salva.",
+    "em_breve": "Em breve o link do grupo aparece aqui."
   },
   "salvos": {
     "titulo": "Salvos",
@@ -7595,7 +7597,9 @@
     "sem_grupo_configurado": "Configure o grupo de usuários acima para ver a sugestão",
     "anterior": "Anterior",
     "proxima": "Próxima",
-    "abrir_grupos": "Abrir grupos de usuários"
+    "abrir_grupos": "Abrir grupos de usuários",
+    "link_sem_padrao": "Vazio = sem link (o membro vê \"Em breve\").",
+    "aviso_sem_link": "Este grupo está sem link: quem escolher vê \"Em breve o link do grupo aparece aqui\". Cole o convite do WhatsApp aqui."
   },
   "compartilhar": {
     "acoes": "Ações do post",

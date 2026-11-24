@@ -61,6 +61,8 @@ export default function PassoWhatsapp() {
   const [pronto, setPronto] = useState(false)
   // Escolha feita agora: mostra o botão do grupo antes de fechar.
   const [escolhido, setEscolhido] = useState<GrupoWhatsapp | null>(null)
+  // Link que veio na resposta da escolha (só o do grupo escolhido).
+  const [urlEscolhida, setUrlEscolhida] = useState<string | null>(null)
 
   useEffect(() => {
     const espera = window.setTimeout(() => setPronto(true), ATRASO_MS)
@@ -103,7 +105,10 @@ export default function PassoWhatsapp() {
 
   const aoEscolher = async (g: GrupoWhatsapp) => {
     const r = await escolher({ group: g })
-    if (r) setEscolhido(g)
+    if (r) {
+      setEscolhido(g)
+      setUrlEscolhida(r.url)
+    }
   }
 
   // Ao fechar pelo X/Esc/fora: igual a "Agora não".
@@ -112,7 +117,8 @@ export default function PassoWhatsapp() {
   }
 
   const grupo = escolhido ?? (manual ? (dados?.group ?? null) : null)
-  const url = grupo ? (grupo === 'homens' ? dados?.links.homens : dados?.links.mulheres) : null
+  // A API só devolve o link do grupo escolhido (nunca os dois).
+  const url = escolhido ? urlEscolhida : grupo ? (dados?.url ?? null) : null
 
   return (
     <FolhaInferior
@@ -122,7 +128,7 @@ export default function PassoWhatsapp() {
       descricao={t('whatsapp.descricao')}
     >
       <div className="flex flex-col gap-4 px-5 pb-2 pt-4">
-        {grupo && url ? (
+        {grupo ? (
           <>
             <BotaoGrupo url={url} grupo={grupo} />
             {manual && (

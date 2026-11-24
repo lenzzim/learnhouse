@@ -103,8 +103,16 @@ export function BotoesEscolha({
 }
 
 /** Botão do grupo certo (nova aba, sem referer) + a linha da aprovação. */
-export function BotaoGrupo({ url, grupo }: { url: string; grupo: GrupoWhatsapp }) {
+export function BotaoGrupo({ url, grupo }: { url: string | null; grupo: GrupoWhatsapp }) {
   const { t } = useTranslation()
+  // Sem link configurado pelo admin: avisa, sem link nenhum de reserva.
+  if (!url) {
+    return (
+      <p role="status" className="rounded-lg bg-[var(--surface)] px-4 py-3 text-sm text-[var(--text-2)]">
+        {t('whatsapp.em_breve')}
+      </p>
+    )
+  }
   return (
     <div>
       <a

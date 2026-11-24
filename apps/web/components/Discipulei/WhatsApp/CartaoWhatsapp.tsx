@@ -33,7 +33,7 @@ export function CartaoWhatsapp() {
       <div className="mt-3">
         {carregando || !dados ? (
           <div className="h-[4.5rem] animate-pulse rounded-lg bg-[var(--surface)]" aria-hidden="true" />
-        ) : dados.group && dados.url ? (
+        ) : dados.group ? (
           <BotaoGrupo url={dados.url} grupo={dados.group} />
         ) : (
           <>

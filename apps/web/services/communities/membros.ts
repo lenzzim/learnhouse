@@ -11,24 +11,29 @@ import type { PostDoFeed } from '@services/communities/social'
 
 export type GrupoWhatsapp = 'homens' | 'mulheres'
 
-export interface LinksWhatsapp {
-  mulheres: string
-  homens: string
+/** Só se cada grupo tem link; o link em si nunca vem aqui. */
+export interface WhatsappConfigurado {
+  mulheres: boolean
+  homens: boolean
 }
 
 export interface MeuWhatsapp {
   group: GrupoWhatsapp | null
   /** O passo único já foi mostrado (escolheu ou "Agora não"). */
   prompted: boolean
-  /** Link do grupo escolhido (null sem escolha). */
+  /**
+   * Link só do grupo escolhido (null sem escolha ou sem link configurado).
+   * Espaço privativo: a API só devolve para membro logado da org.
+   */
   url: string | null
-  links: LinksWhatsapp
+  /** O grupo escolhido tem link? false = "Em breve o link aparece aqui". */
+  configured: boolean
 }
 
 export interface ConfigComunidade {
   is_author: boolean
   can_manage_events: boolean
-  whatsapp: LinksWhatsapp
+  whatsapp: WhatsappConfigurado
 }
 
 export interface RefGrupo {
@@ -44,6 +49,9 @@ export interface ConfigOrgAdmin {
   whatsapp_women_url: string
   default_whatsapp_men_url: string
   default_whatsapp_women_url: string
+  /** Grupo sem link nenhum (nem painel nem env): mostrar aviso ao admin. */
+  whatsapp_men_missing: boolean
+  whatsapp_women_missing: boolean
 }
 
 export interface ConfigOrgAdminUpdate {

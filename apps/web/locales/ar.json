@@ -7369,7 +7369,8 @@
     "concluir_edicao": "تم",
     "inserir_na_nota": "إدراج في الملاحظة",
     "n_notas_zero": "لا توجد ملاحظات",
-    "compartilhar_nota_titulo": "مشاركة الملاحظة “{{titulo}}”"
+    "compartilhar_nota_titulo": "مشاركة الملاحظة “{{titulo}}”",
+    "erro_publicar_restrito": "لا يمكنك النشر في هذه المساحة: مجموعة الكُتّاب فقط تنشر هنا. اختر مساحة أخرى."
   },
   "social": {
     "autor": {
@@ -7575,7 +7576,8 @@
     "conta_homens": "رجال",
     "conta_mulheres": "نساء",
     "conta_nenhum": "أفضّل عدم الإفصاح",
-    "conta_salvo": "تم حفظ الاختيار."
+    "conta_salvo": "تم حفظ الاختيار.",
+    "em_breve": "سيظهر رابط المجموعة هنا قريبًا."
   },
   "salvos": {
     "titulo": "المحفوظات",
@@ -7614,7 +7616,9 @@
     "sem_grupo_configurado": "اضبط مجموعة المستخدمين أعلاه لرؤية الاقتراح",
     "anterior": "السابق",
     "proxima": "التالي",
-    "abrir_grupos": "فتح مجموعات المستخدمين"
+    "abrir_grupos": "فتح مجموعات المستخدمين",
+    "link_sem_padrao": "فارغ = بلا رابط (يرى العضو \"قريبًا\").",
+    "aviso_sem_link": "هذه المجموعة بلا رابط: من يختارها يرى \"سيظهر رابط المجموعة هنا قريبًا\". الصق دعوة واتساب هنا."
   },
   "compartilhar": {
     "acoes": "إجراءات المنشور",
