@@ -242,6 +242,11 @@ async def set_discussion_visibility(
     await db_session.commit()
     await db_session.refresh(discussion)
 
+    # Busca por passagem: publicar indexa, despublicar tira do índice.
+    from src.services.search.passagens import indexar_discussao_seguro
+
+    await indexar_discussao_seguro(db_session, discussion)
+
     if just_published:
         await announce_publication(discussion, community, current_user)
         # Menções da nota passam a valer quando ela fica pública (N39).

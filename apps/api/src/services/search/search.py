@@ -127,6 +127,36 @@ async def _paginate_and_count_rows(
     return list(rows), int(total)
 
 
+def check_api_token_search_scope(org: Organization, current_user) -> None:
+    """Tokens de API só buscam na própria org e com o direito ``search.read``.
+
+    Compartilhado pela busca geral, pela busca por passagem e pela da Bíblia.
+    """
+    from fastapi import HTTPException, status
+
+    if isinstance(current_user, APITokenUser):
+        if org.id != current_user.org_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="API token cannot search in organizations outside its scope",
+            )
+        if current_user.rights:
+            rights = current_user.rights
+            if isinstance(rights, dict):
+                search_rights = rights.get("search", {})
+                has_permission = search_rights.get("action_read", False)
+            else:
+                search_rights = getattr(rights, "search", None)
+                has_permission = bool(
+                    search_rights and getattr(search_rights, "action_read", False)
+                )
+            if not has_permission:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="API token does not have search permission",
+                )
+
+
 async def search_across_org(
     request: Request,
     current_user: PublicUser | AnonymousUser | APITokenUser,
@@ -154,7 +184,6 @@ async def search_across_org(
     - Pattern matching goes through SQLAlchemy `ilike` — fully parameterized.
     - Limit is capped at 50 per page.
     """
-    from fastapi import HTTPException, status
 
     limit = min(limit, 50)
 
@@ -166,27 +195,7 @@ async def search_across_org(
     if not org:
         return _empty_result()
 
-    if isinstance(current_user, APITokenUser):
-        if org.id != current_user.org_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="API token cannot search in organizations outside its scope",
-            )
-        if current_user.rights:
-            rights = current_user.rights
-            if isinstance(rights, dict):
-                search_rights = rights.get("search", {})
-                has_permission = search_rights.get("action_read", False)
-            else:
-                search_rights = getattr(rights, "search", None)
-                has_permission = bool(
-                    search_rights and getattr(search_rights, "action_read", False)
-                )
-            if not has_permission:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="API token does not have search permission",
-                )
+    check_api_token_search_scope(org, current_user)
 
     is_anon = isinstance(current_user, AnonymousUser)
     user_is_member = (
