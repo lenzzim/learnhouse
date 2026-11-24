@@ -199,7 +199,7 @@ const CommunityEditModeration: React.FC = () => {
       if (dispatch) {
         dispatch({
           type: 'setCommunity',
-          payload: { ...community, moderation_words: words, moderation_settings: settings },
+          payload: { ...community, moderation_words: words, moderation_settings: { ...(community.moderation_settings || {}), ...settings } },
         })
       }
       toast.success(t('dashboard.courses.communities.moderation.toasts.save_success'), { id: loadingToast })

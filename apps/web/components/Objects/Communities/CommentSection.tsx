@@ -42,7 +42,8 @@ export function CommentSection({
   const accessToken = session?.data?.tokens?.access_token
   const isAuthenticated = session?.status === 'authenticated'
   const { isUserPartOfTheOrg } = useOrgMembership()
-  const { canManageCommunity } = useCommunityRights(communityUuid || '')
+  // canComment do espaço (v5): o admin pode desligar comentários (N45).
+  const { canManageCommunity, canComment: espacoAceitaComentarios } = useCommunityRights(communityUuid || '')
   const { track } = useLHAnalytics('learner')
   const canComment = isAuthenticated && isUserPartOfTheOrg
 
@@ -66,19 +67,20 @@ export function CommentSection({
   const currentUserId = session?.data?.user?.id
   const ehPergunta = (discussion?.label || '') === LABEL_PERGUNTA && !isPrivate
   const podeMarcarUtil = ehPergunta && !!discussion && (currentUserId === discussion.author_id || canManageCommunity)
-  const aceitoId = discussion?.accepted_comment_id ?? null
+  // Só o uuid do comentário vem da API (o id numérico é interno).
+  const aceitoUuid = discussion?.accepted_comment_uuid ?? null
   const ordenados = useMemo(() => {
-    if (!ehPergunta || !aceitoId) return comments
-    const aceito = comments.find((c) => c.id === aceitoId)
-    return aceito ? [aceito, ...comments.filter((c) => c.id !== aceitoId)] : comments
-  }, [comments, ehPergunta, aceitoId])
+    if (!ehPergunta || !aceitoUuid) return comments
+    const aceito = comments.find((c) => c.comment_uuid === aceitoUuid)
+    return aceito ? [aceito, ...comments.filter((c) => c.comment_uuid !== aceitoUuid)] : comments
+  }, [comments, ehPergunta, aceitoUuid])
 
   const alternarUtil = async (comment: DiscussionCommentWithAuthor) => {
     if (!discussion) return
-    const novo = aceitoId === comment.id ? null : comment
+    const novo = aceitoUuid === comment.comment_uuid ? null : comment
     try {
       const r = await marcarRespostaUtil(discussion.discussion_uuid, novo ? novo.comment_uuid : null, accessToken)
-      onDiscussionUpdated?.({ ...discussion, accepted_comment_id: r.accepted_comment_id })
+      onDiscussionUpdated?.({ ...discussion, accepted_comment_uuid: r.accepted_comment_uuid })
     } catch (err: any) {
       toast.error((typeof err?.detail === 'string' && err.detail) || t('social.resposta_util.erro'))
     }
@@ -184,7 +186,7 @@ export function CommentSection({
               discussionUuid={discussionUuid}
               communityUuid={communityUuid}
               reacoesAtivas={!isPrivate}
-              respostaUtil={ehPergunta && comment.id === aceitoId}
+              respostaUtil={ehPergunta && comment.comment_uuid === aceitoUuid}
               aoAlternarUtil={podeMarcarUtil ? () => alternarUtil(comment) : undefined}
             />
           ))}
@@ -202,6 +204,11 @@ export function CommentSection({
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-md">
             <Lock size={14} className="text-gray-500" />
             <p className="text-sm text-gray-700">{t('communities.comments.locked')}</p>
+          </div>
+        ) : canComment && !espacoAceitaComentarios ? (
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-md">
+            <Lock size={14} className="text-gray-500" />
+            <p className="text-sm text-gray-600">{t('social.comentarios_desligados')}</p>
           </div>
         ) : canComment ? (
           <div>

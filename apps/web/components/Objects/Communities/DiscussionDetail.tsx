@@ -15,6 +15,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { DiscussionWithAuthor, DiscussionAuthor, deleteDiscussion, getLabelInfo, isPrivateDiscussion } from '@services/communities/discussions'
 import { EditDiscussionForm } from '@components/Objects/Modals/Communities/EditDiscussionModal'
 import { BotoesReacaoFe } from './ReacoesFe'
+import { AcoesPost } from './AcoesPost'
 import { getLabelIcon } from './labelIcons'
 import { PrivateBadge, PublishDiscussionButton, useChangeVisibility } from './DiscussionVisibilityControls'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
@@ -241,8 +242,9 @@ export function DiscussionDetail({
           <p className="text-gray-500 italic">{t('communities.discussion_detail.no_details')}</p>
         )}
         {!editando && !isPrivate && (
-          <div className="mt-5">
+          <div className="mt-5 flex flex-col gap-3">
             <BotoesReacaoFe discussionUuid={discussion.discussion_uuid} />
+            <AcoesPost discussionUuid={discussion.discussion_uuid} titulo={discussion.title} orgslug={orgslug} />
           </div>
         )}
       </div>
