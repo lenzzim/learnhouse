@@ -236,6 +236,10 @@ async def set_discussion_visibility(
         await validate_discussion_content(
             discussion.title, discussion.content or "", community.id, db_session
         )
+        # Blog só para autores (N45): publicar segue a regra do espaço.
+        from src.services.communities.publicacao import ensure_can_post
+
+        await ensure_can_post(db_session, viewer_id, community)
 
     just_published = apply_visibility(discussion, visibility)
     db_session.add(discussion)
