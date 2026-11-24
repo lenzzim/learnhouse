@@ -4,12 +4,12 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { getUriWithOrg } from '@services/config/config'
-import { deleteCommunity, Community } from '@services/communities/communities'
+import { deleteCommunity, Community, fixadoEm } from '@services/communities/communities'
 import { getCommunityThumbnailMediaDirectory } from '@services/media/media'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { MoreVertical, Trash2, Edit, MessageCircle, ExternalLink, Lock } from 'lucide-react'
+import { MoreVertical, Trash2, Edit, MessageCircle, ExternalLink, Lock, Pin } from 'lucide-react'
 import Link from 'next/link'
 import { CapaAutomatica } from './CapaAutomatica'
 import { useRouter } from 'next/navigation'
@@ -75,6 +75,16 @@ function CommunityCard(props: PropsType) {
           />
         ) : (
           <CapaAutomatica nome={props.community.name} />
+        )}
+        {fixadoEm(props.community) && (
+          <span
+            role="img"
+            aria-label={t('communities.fixado', 'Fixado')}
+            title={t('communities.fixado', 'Fixado')}
+            className="absolute top-2 start-2 z-10 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-gray-900 shadow-md"
+          >
+            <Pin size={14} aria-hidden="true" />
+          </span>
         )}
       </Link>
 

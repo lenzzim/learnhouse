@@ -31,7 +31,11 @@ from src.db.usergroups import UserGroup
 from src.db.users import AnonymousUser, PublicUser, User
 from src.services.communities import batepapos, membros, social
 from src.services.communities.comments import create_comment
-from src.services.communities.communities import get_community_user_rights, update_community
+from src.services.communities.communities import (
+    get_communities_by_org,
+    get_community_user_rights,
+    update_community,
+)
 from src.services.communities.discussions import (
     create_discussion,
     get_discussion,
@@ -251,6 +255,84 @@ async def test_put_de_moderacao_preserva_regras_v5_e_valida_grupo(db, mundo):
     with pytest.raises(HTTPException):
         await update_community(_req(), C_GERAL, CommunityUpdate(
             moderation_settings={"post_policy": "group"}), m["admin"], db)
+
+
+# ---------------------------------------------------------------------------
+# Espaços fixados no topo da lista (pinned_at)
+# ---------------------------------------------------------------------------
+
+
+async def _fixar(db, m, uuid, valor, quem=None):
+    await update_community(_req(), uuid, CommunityUpdate(moderation_settings={"pinned_at": valor}),
+                           quem or m["admin"], db)
+
+
+async def _lista(db, m, quem, page=1, limit=50):
+    r = await get_communities_by_org(_req(), m["org"].id, quem, db, page=page, limit=limit)
+    return [c.community_uuid for c in r]
+
+
+async def test_fixados_primeiro_na_ordem_em_que_foram_fixados(db, mundo):
+    m = mundo
+    # Sem fixados: do mais novo ao mais antigo (mesma data, desempata pelo id).
+    assert await _lista(db, m, m["admin"]) == [C_FECHADA, C_DESAFIO, C_MULHERES, C_ORACAO, C_GERAL, C_BLOG]
+
+    await _fixar(db, m, C_GERAL, "2026-11-20T10:00:00Z")
+    await _fixar(db, m, C_BLOG, "2026-11-20T09:00:00-03:00")  # 12:00 UTC: fixado depois
+    assert await _lista(db, m, m["admin"]) == [C_GERAL, C_BLOG, C_FECHADA, C_DESAFIO, C_MULHERES, C_ORACAO]
+
+    # Visitante e membro veem a mesma regra, só nos espaços que podem ver.
+    assert await _lista(db, m, m["anon"]) == [C_GERAL, C_BLOG, C_ORACAO]
+    assert (await _lista(db, m, m["membro"]))[:2] == [C_GERAL, C_BLOG]
+
+    # Gravado em UTC, largura fixa (a ordem do texto é a ordem do tempo).
+    blog = (await db.execute(select(Community).where(Community.community_uuid == C_BLOG))).scalars().first()
+    assert blog.moderation_settings["pinned_at"] == "2026-11-20T12:00:00.000000+00:00"
+    assert blog.moderation_settings["post_policy"] == "group"
+
+
+async def test_fixados_respeitam_a_paginacao(db, mundo):
+    m = mundo
+    await _fixar(db, m, C_ORACAO, "2026-11-20T10:00:00Z")
+    await _fixar(db, m, C_BLOG, "2026-11-21T10:00:00Z")
+    paginas = [await _lista(db, m, m["admin"], page=p, limit=2) for p in (1, 2, 3, 4)]
+    assert paginas[0] == [C_ORACAO, C_BLOG]
+    assert paginas[1] == [C_FECHADA, C_DESAFIO]
+    assert paginas[2] == [C_MULHERES, C_GERAL]
+    assert paginas[3] == []
+    todos = [u for p in paginas for u in p]
+    assert len(todos) == len(set(todos)) == 6
+
+
+async def test_desafixar_manter_data_e_validar(db, mundo):
+    m = mundo
+    await _fixar(db, m, C_BLOG, "2026-11-20T10:00:00Z")
+    # ``true`` mantém a data original (não pula para o fim dos fixados).
+    await _fixar(db, m, C_BLOG, True)
+    blog = (await db.execute(select(Community).where(Community.community_uuid == C_BLOG))).scalars().first()
+    assert blog.moderation_settings["pinned_at"] == "2026-11-20T10:00:00.000000+00:00"
+
+    # O PUT do painel de moderação (sem a chave) não desafixa.
+    await update_community(_req(), C_BLOG, CommunityUpdate(moderation_settings={"block_links": True}),
+                           m["admin"], db)
+    assert (await _lista(db, m, m["admin"]))[0] == C_BLOG
+
+    with pytest.raises(HTTPException) as exc:
+        await _fixar(db, m, C_GERAL, "amanhã")
+    assert exc.value.status_code == 422
+
+    await _fixar(db, m, C_BLOG, None)
+    assert (await _lista(db, m, m["admin"]))[-1] == C_BLOG
+
+
+async def test_so_admin_fixa_espaco(db, mundo):
+    m = mundo
+    for quem in (m["membro"], m["autora"]):
+        with pytest.raises(HTTPException) as exc:
+            await _fixar(db, m, C_GERAL, "2026-11-20T10:00:00Z", quem=quem)
+        assert exc.value.status_code == 403
+    geral = (await db.execute(select(Community).where(Community.community_uuid == C_GERAL))).scalars().first()
+    assert not (geral.moderation_settings or {}).get("pinned_at")
 
 
 # ---------------------------------------------------------------------------

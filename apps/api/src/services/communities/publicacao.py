@@ -11,6 +11,9 @@ regras de moderação:
 - ``comments_disabled``: desliga comentários de quem não é admin/mantenedor.
 - ``not_shareable``: o espaço nunca gera link público (ex.: "Pedidos de
   oração"). Marcado por configuração, nunca pelo nome do espaço.
+- ``pinned_at``: quando o espaço foi fixado no topo da lista de espaços (ISO
+  8601 em UTC) ou ``null``. Fixados vêm primeiro, na ordem em que foram
+  fixados; ex.: "Tempos com Deus" e "Blog do Discipulei".
 
 E o **compartilhamento** de um post (N44): só posts públicos de espaços
 públicos, que não são desafio (``course_id``), não são fechados por grupo de
@@ -21,9 +24,11 @@ desligou o compartilhamento.
 
 from __future__ import annotations
 
-from typing import Optional
+from datetime import datetime, timezone
+from typing import Any, Optional
 
 from fastapi import HTTPException
+from sqlalchemy import case
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -36,7 +41,7 @@ from src.db.usergroups import UserGroup
 
 
 # Chaves das regras do espaço guardadas em ``moderation_settings``.
-SPACE_SETTING_KEYS = ("post_policy", "post_usergroup_uuid", "comments_disabled", "not_shareable")
+SPACE_SETTING_KEYS = ("post_policy", "post_usergroup_uuid", "comments_disabled", "not_shareable", "pinned_at")
 
 # Pedidos de oração nunca saem da comunidade, em nenhum espaço.
 NEVER_SHARE_LABELS = frozenset({"oracao"})
@@ -62,6 +67,47 @@ def comments_disabled(community: Community) -> bool:
 
 def not_shareable(community: Community) -> bool:
     return bool(_settings(community).get("not_shareable"))
+
+
+def pinned_at(community: Community) -> Optional[str]:
+    value = _settings(community).get("pinned_at")
+    return str(value) if value else None
+
+
+def _iso_utc(moment: datetime) -> str:
+    # Largura fixa (sempre com microssegundos e "+00:00") para que a ordem
+    # alfabética do texto no banco seja a ordem cronológica.
+    return moment.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")
+
+
+def normalize_pinned_at(value: Any, previous: Any = None) -> Optional[str]:
+    """``null``/``false`` desafixa; ``true`` fixa agora (ou mantém a data já
+    gravada); texto ISO 8601 é normalizado para UTC."""
+    if value is None or value is False or value == "":
+        return None
+    if value is True:
+        if previous:
+            return normalize_pinned_at(previous)
+        return _iso_utc(datetime.now(timezone.utc))
+    if isinstance(value, str):
+        try:
+            moment = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+        except ValueError:
+            raise HTTPException(status_code=422, detail="pinned_at must be an ISO 8601 timestamp or null")
+        if moment.tzinfo is None:
+            moment = moment.replace(tzinfo=timezone.utc)
+        return _iso_utc(moment)
+    raise HTTPException(status_code=422, detail="pinned_at must be an ISO 8601 timestamp or null")
+
+
+def pinned_first_order() -> tuple:
+    """``ORDER BY`` que põe os espaços fixados primeiro (``pinned_at`` asc).
+
+    Vai antes da ordenação normal da listagem, então a paginação continua
+    estável: os fixados ocupam o começo da página 1 e não se repetem.
+    """
+    pinned = Community.moderation_settings["pinned_at"].as_string()  # type: ignore[index]
+    return (case((pinned.is_(None), 1), else_=0), pinned.asc())
 
 
 async def _is_org_admin(db: AsyncSession, user_id: int, org_id: int) -> bool:
@@ -128,7 +174,7 @@ async def ensure_can_comment(db: AsyncSession, user_id: int, community: Communit
         )
 
 
-def validate_space_settings(settings: Optional[dict]) -> Optional[dict]:
+def validate_space_settings(settings: Optional[dict], previous: Any = None) -> Optional[dict]:
     """Normaliza as chaves v5 que chegam pelo PUT da comunidade."""
     if settings is None:
         return None
@@ -139,6 +185,8 @@ def validate_space_settings(settings: Optional[dict]) -> Optional[dict]:
     for key in ("comments_disabled", "not_shareable"):
         if key in out and out[key] is not None:
             out[key] = bool(out[key])
+    if "pinned_at" in out:
+        out["pinned_at"] = normalize_pinned_at(out["pinned_at"], previous)
     if out.get("post_policy") == POST_POLICY_GROUP and not out.get("post_usergroup_uuid"):
         raise HTTPException(status_code=422, detail="Choose the user group that can publish in this space")
     return out

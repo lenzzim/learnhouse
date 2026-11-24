@@ -95,6 +95,8 @@ export interface RegrasEspaco {
   comments_disabled?: boolean
   /** Nunca gera link público (ex.: "Pedidos de oração"). */
   not_shareable?: boolean
+  /** Fixado no topo da lista de espaços desde (ISO 8601); null = não fixado. */
+  pinned_at?: string | null
 }
 
 const base = () => `${getAPIUrl()}social`

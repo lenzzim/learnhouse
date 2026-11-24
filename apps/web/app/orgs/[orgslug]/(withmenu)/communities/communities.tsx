@@ -9,10 +9,10 @@ import CommunityCard from '@components/Objects/Communities/CommunityCard'
 import { CreateCommunityModal } from '@components/Objects/Modals/Communities/CreateCommunityModal'
 import { EditCommunityModal } from '@components/Objects/Modals/Communities/EditCommunityModal'
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder'
-import { Users, Plus, Search, LayoutGrid, List, Globe, Lock, ChevronRight, NotebookPen } from 'lucide-react'
+import { Users, Plus, Search, LayoutGrid, List, Globe, Lock, ChevronRight, NotebookPen, Pin } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
-import { Community } from '@services/communities/communities'
+import { Community, fixadoEm, ordenarComFixados } from '@services/communities/communities'
 import { getUriWithOrg } from '@services/config/config'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
@@ -63,11 +63,10 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
           c.name.toLowerCase().includes(termo) ||
           (c.description || '').toLowerCase().includes(termo))
       : communities
-    const ordenadas = [...filtradas]
-    ordenadas.sort((a, b) => ordem === 'nome'
+    // Fixados sempre primeiro, em qualquer ordenação escolhida.
+    return ordenarComFixados(filtradas, (a, b) => ordem === 'nome'
       ? a.name.localeCompare(b.name)
       : new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime())
-    return ordenadas
   }, [communities, busca, ordem])
 
   const botaoNova = (
@@ -179,6 +178,16 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
                     <span className="block text-xs text-gray-500 truncate">{community.description}</span>
                   )}
                 </span>
+                {fixadoEm(community) && (
+                  <span
+                    role="img"
+                    aria-label={t('communities.fixado', 'Fixado')}
+                    title={t('communities.fixado', 'Fixado')}
+                    className="shrink-0 text-gray-500"
+                  >
+                    <Pin size={14} aria-hidden="true" />
+                  </span>
+                )}
                 <ChevronRight size={16} className="shrink-0 text-gray-300" />
               </Link>
             ))}

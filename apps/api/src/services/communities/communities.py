@@ -117,6 +117,11 @@ async def get_communities_by_org(
 
     SECURITY: Maximum limit enforced to prevent data dumping.
     """
+    from src.services.communities.publicacao import pinned_first_order
+
+    # Espaços fixados (``pinned_at``) vêm primeiro em todas as variantes, na
+    # ordem em que foram fixados; depois os demais, do mais novo ao mais antigo.
+
     # SECURITY: Enforce maximum limit
     limit = min(limit, 50)
     page = max(page, 1)
@@ -134,14 +139,14 @@ async def get_communities_by_org(
             Community.public == True,
             Community.course_id.is_(None),  # type: ignore[union-attr]
         )
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
+        query = query.order_by(*pinned_first_order(), Community.creation_date.desc(), Community.id.desc()).offset(offset).limit(limit)  # type: ignore
         communities = (await db_session.execute(query)).scalars().all()
         return [CommunityRead.model_validate(c.model_dump()) for c in communities]
 
     # Superadmins bypass admin check — they can see all communities
     if await is_user_superadmin(acting_user_id, db_session):
         query = select(Community).where(Community.org_id == org_id)
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
+        query = query.order_by(*pinned_first_order(), Community.creation_date.desc(), Community.id.desc()).offset(offset).limit(limit)  # type: ignore
         communities = (await db_session.execute(query)).scalars().all()
         return [CommunityRead.model_validate(c.model_dump()) for c in communities]
 
@@ -170,7 +175,7 @@ async def get_communities_by_org(
     if is_admin_or_maintainer:
         # Admins see all communities
         query = select(Community).where(Community.org_id == org_id)
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
+        query = query.order_by(*pinned_first_order(), Community.creation_date.desc(), Community.id.desc()).offset(offset).limit(limit)  # type: ignore
         communities = (await db_session.execute(query)).scalars().all()
         return [CommunityRead.model_validate(c.model_dump()) for c in communities]
 
@@ -184,7 +189,7 @@ async def get_communities_by_org(
         select(Community)
         .where(Community.org_id == org_id)
         .where(community_read_clause_for_user(acting_user_id, org_id, is_member))
-        .order_by(Community.creation_date.desc())
+        .order_by(*pinned_first_order(), Community.creation_date.desc(), Community.id.desc())
         .offset(offset)
         .limit(limit)
     )
@@ -268,13 +273,13 @@ async def update_community(
         )
 
         incoming = dict(community_object.moderation_settings)
-        # As regras v5 (quem publica, comentários, não compartilhável) moram no
+        # As regras v5 (quem publica, comentários, não compartilhável, fixado) moram no
         # mesmo JSON; um PUT só de moderação não pode apagá-las.
         previous = community.moderation_settings or {}
         for key in SPACE_SETTING_KEYS:
             if key not in incoming and key in previous:
                 incoming[key] = previous[key]
-        incoming = validate_space_settings(incoming)
+        incoming = validate_space_settings(incoming, previous.get("pinned_at"))
         await validate_space_usergroup(db_session, community.org_id, incoming)
         community.moderation_settings = incoming
 

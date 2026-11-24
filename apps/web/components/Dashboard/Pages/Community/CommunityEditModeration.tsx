@@ -36,7 +36,7 @@ import { Switch } from '@components/ui/switch'
 
 // Só as chaves de moderação; as regras v5 do espaço ficam na aba Regras.
 type Settings = Required<
-  Omit<CommunityModerationSettings, 'post_policy' | 'post_usergroup_uuid' | 'comments_disabled' | 'not_shareable'>
+  Omit<CommunityModerationSettings, 'post_policy' | 'post_usergroup_uuid' | 'comments_disabled' | 'not_shareable' | 'pinned_at'>
 >
 
 const DEFAULT_SETTINGS: Settings = {

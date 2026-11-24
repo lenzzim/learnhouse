@@ -22,6 +22,8 @@ export interface CommunityModerationSettings {
   post_usergroup_uuid?: string | null
   comments_disabled?: boolean
   not_shareable?: boolean
+  /** Fixado no topo da lista de espaços desde (ISO 8601, UTC); null = não fixado. */
+  pinned_at?: string | null
 }
 
 export interface Community {
@@ -80,6 +82,8 @@ export interface CommunityRights {
     course_uuid?: string | null
   }
 }
+
+export { fixadoEm, ordenarComFixados } from '@/lib/communities/fixados'
 
 export async function getCommunities(
   org_id: number,

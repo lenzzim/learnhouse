@@ -10,6 +10,9 @@
  * - Não compartilhável: posts deste espaço nunca geram link público (use em
  *   "Pedidos de oração"). Espaços restritos, desafios e áreas fechadas por
  *   grupo já nunca são compartilháveis.
+ * - Fixar no topo da lista de espaços (`pinned_at`): fixados vêm primeiro na
+ *   grade /communities, na barra lateral e no "Publicar na comunidade", na
+ *   ordem em que foram fixados.
  *
  * Grava no `moderation_settings` da comunidade (o PUT que já existe), mandando
  * o objeto completo para não perder as regras de moderação.
@@ -19,7 +22,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Loader2, PenLine, MessageSquare, Share2 } from 'lucide-react'
+import { Loader2, PenLine, MessageSquare, Share2, Pin } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCommunity, useCommunityDispatch } from '@components/Contexts/CommunityContext'
@@ -34,6 +37,7 @@ import { Switch } from '@components/ui/switch'
 
 type Regras = Required<Pick<RegrasEspaco, 'post_policy' | 'comments_disabled' | 'not_shareable'>> & {
   post_usergroup_uuid: string
+  fixado: boolean
 }
 
 function lerRegras(stored: Record<string, any> | null | undefined): Regras {
@@ -42,6 +46,7 @@ function lerRegras(stored: Record<string, any> | null | undefined): Regras {
     post_usergroup_uuid: stored?.post_usergroup_uuid || '',
     comments_disabled: !!stored?.comments_disabled,
     not_shareable: !!stored?.not_shareable,
+    fixado: typeof stored?.pinned_at === 'string' && !!stored.pinned_at,
   }
 }
 
@@ -79,7 +84,8 @@ export default function CommunityEditRegras() {
     regras.post_policy !== original.post_policy ||
     regras.post_usergroup_uuid !== original.post_usergroup_uuid ||
     regras.comments_disabled !== original.comments_disabled ||
-    regras.not_shareable !== original.not_shareable
+    regras.not_shareable !== original.not_shareable ||
+    regras.fixado !== original.fixado
   const faltaGrupo = regras.post_policy === 'group' && !regras.post_usergroup_uuid
 
   const salvar = async () => {
@@ -88,12 +94,15 @@ export default function CommunityEditRegras() {
       return
     }
     setSalvando(true)
+    const atuais = (community.moderation_settings as Record<string, any>) || {}
     const novo = {
-      ...((community.moderation_settings as Record<string, any>) || {}),
+      ...atuais,
       post_policy: regras.post_policy,
       post_usergroup_uuid: regras.post_policy === 'group' ? regras.post_usergroup_uuid : null,
       comments_disabled: regras.comments_disabled,
       not_shareable: regras.not_shareable,
+      // Mantém a data de quando foi fixado (a ordem entre os fixados).
+      pinned_at: regras.fixado ? (atuais.pinned_at || new Date().toISOString()) : null,
     }
     try {
       await updateCommunity(community.community_uuid, { moderation_settings: novo } as any, accessToken)
@@ -189,6 +198,24 @@ export default function CommunityEditRegras() {
             id="regras-compartilhavel"
             checked={regras.not_shareable}
             onCheckedChange={(v: boolean) => setRegras((r) => ({ ...r, not_shareable: v }))}
+          />
+        </div>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <Pin size={18} className="mt-0.5 text-gray-500" aria-hidden="true" />
+            <div>
+              <Label htmlFor="regras-fixado" className="text-sm font-medium text-gray-900">
+                {t(`${P}.fixado_rotulo`)}
+              </Label>
+              <p className="text-sm text-gray-500">{t(`${P}.fixado_descricao`)}</p>
+            </div>
+          </div>
+          {/* Área de toque de 44 px no celular sem mudar o tamanho do interruptor. */}
+          <Switch
+            id="regras-fixado"
+            checked={regras.fixado}
+            onCheckedChange={(v: boolean) => setRegras((r) => ({ ...r, fixado: v }))}
+            className="relative mt-1 after:absolute after:-inset-3 after:content-[''] md:after:-inset-1"
           />
         </div>
       </section>
