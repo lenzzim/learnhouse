@@ -32,14 +32,15 @@ export function SeloVisibilidade({
     </>
   )
   if (onClick) {
+    // compacto: o selo continua pequeno, mas o alvo de toque tem 44 px no celular
     return (
       <button
         type="button"
         onClick={onClick}
         title={t(`caderno.visibilidade_${visibilidade}_dica`)}
-        className={`${classe} transition-colors hover:border-[var(--line-strong)] hover:bg-[var(--surface)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--text)]`}
+        className={`group inline-flex shrink-0 items-center rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--text)] ${compacto ? 'min-h-11 lg:min-h-0' : ''}`}
       >
-        {conteudo}
+        <span className={`${classe} transition-colors group-hover:border-[var(--line-strong)] group-hover:bg-[var(--surface)]`}>{conteudo}</span>
       </button>
     )
   }

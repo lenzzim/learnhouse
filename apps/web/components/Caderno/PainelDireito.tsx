@@ -101,9 +101,9 @@ function CampoReferencia({ inicial, aoIr }: { inicial: string; aoIr: (codigo: st
         placeholder={t('caderno.referencia_placeholder')}
         aria-invalid={erro}
         aria-describedby={erro ? 'painel-ref-erro' : undefined}
-        className={`${CAMPO} h-9`}
+        className={`${CAMPO} h-11 lg:h-9`}
       />
-      <button type="submit" aria-label={t('caderno.ir')} className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--line)] text-[var(--text-2)] hover:border-[var(--line-strong)] hover:text-[var(--text)] ${FOCO}`}>
+      <button type="submit" aria-label={t('caderno.ir')} className={`inline-flex h-11 w-11 lg:h-9 lg:w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--line)] text-[var(--text-2)] hover:border-[var(--line-strong)] hover:text-[var(--text)] ${FOCO}`}>
         <ArrowRight size={16} aria-hidden="true" className="rtl:-scale-x-100" />
       </button>
       {erro && <span id="painel-ref-erro" className="sr-only">{t('biblia.referencia_invalida')}</span>}
@@ -200,7 +200,8 @@ function AbaBiblia() {
     return m
   }, [estado])
 
-  const seletorClasse = `${CAMPO} h-9 px-2 text-xs`
+  // 44 px de alvo no celular (auditoria v4)
+  const seletorClasse = `${CAMPO} h-11 px-2 text-xs lg:h-9`
 
   return (
     <div className="flex flex-col gap-3 p-4">

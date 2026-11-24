@@ -7252,7 +7252,8 @@
     "editar_nota": "Editar",
     "concluir_edicao": "Listo",
     "inserir_na_nota": "Insertar en la nota",
-    "n_notas_zero": "Ninguna nota"
+    "n_notas_zero": "Ninguna nota",
+    "compartilhar_nota_titulo": "Compartir la nota “{{titulo}}”"
   },
   "social": {
     "autor": {

@@ -20,3 +20,8 @@ export const ICONE_PEQUENO =
 export const CAMPO =
   'w-full rounded-lg border border-[var(--line)] bg-[var(--page)] px-3 text-sm text-[var(--text)] ' +
   'placeholder:text-[var(--text-3)] focus:border-[var(--line-strong)] ' + FOCO
+
+/** Ícone do cabeçalho da nota: 44 px no toque, 32 px no computador. */
+export const ICONE_CABECALHO =
+  'inline-flex h-11 w-11 lg:h-8 lg:w-8 shrink-0 items-center justify-center rounded-md text-[var(--text-3)] ' +
+  'hover:bg-[var(--surface)] hover:text-[var(--text)] transition-colors ' + FOCO

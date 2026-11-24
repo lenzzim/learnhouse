@@ -73,7 +73,7 @@ import { DialogoCompartilhar } from './DialogoCompartilhar'
 import { SeloVisibilidade } from './SeloVisibilidade'
 import { opcoesColecoes, useColecoes } from './ArvoreColecoes'
 import { hrefCaderno } from './PainelEsquerdo'
-import { BOTAO_SECUNDARIO, CAMPO, FOCO, ICONE_PEQUENO, SERIF } from './estilos'
+import { BOTAO_SECUNDARIO, CAMPO, FOCO, ICONE_CABECALHO, SERIF } from './estilos'
 
 /** Comandos do menu "/" que fazem sentido onde está o cursor (recuo só numa lista). */
 function comandosAplicaveis(editor: Editor | null) {
@@ -816,7 +816,7 @@ export function EditorNota({
       <div className="flex min-h-12 items-center gap-1 border-b border-[var(--line)] px-2 sm:px-3">
         <button
           type="button"
-          className={`${ICONE_PEQUENO} lg:hidden`}
+          className={`${ICONE_CABECALHO} lg:hidden`}
           onClick={() => c.setEsquerdaAberta(true)}
           aria-label={t('caderno.abrir_navegacao')}
         >
@@ -826,7 +826,7 @@ export function EditorNota({
           <span className="hidden lg:block min-[1440px]:hidden">
             <button
               type="button"
-              className={ICONE_PEQUENO}
+              className={ICONE_CABECALHO}
               onClick={() => c.setDireitaAberta(false)}
               aria-label={t('caderno.mostrar_navegacao')}
             >
@@ -867,7 +867,7 @@ export function EditorNota({
           <button
             type="button"
             onClick={() => setCompartilhar(true)}
-            className={`${BOTAO_SECUNDARIO} ms-1 min-h-9 px-3 text-sm`}
+            className={`${BOTAO_SECUNDARIO} ms-1 min-h-11 px-3 text-sm lg:min-h-9`}
           >
             <ShareNetwork size={16} aria-hidden="true" />
             <span className="hidden sm:inline">{t('caderno.compartilhar')}</span>
@@ -877,7 +877,7 @@ export function EditorNota({
         <div className="relative" data-menu-nota>
           <button
             type="button"
-            className={ICONE_PEQUENO}
+            className={ICONE_CABECALHO}
             aria-haspopup="menu"
             aria-expanded={menu}
             aria-label={t('caderno.mais_acoes')}
@@ -909,7 +909,7 @@ export function EditorNota({
         )}
         <button
           type="button"
-          className={`${ICONE_PEQUENO} ${c.direitaAberta ? 'bg-[var(--surface)] text-[var(--text)]' : ''}`}
+          className={`${ICONE_CABECALHO} ${c.direitaAberta ? 'bg-[var(--surface)] text-[var(--text)]' : ''}`}
           onClick={() => c.setDireitaAberta(!c.direitaAberta)}
           aria-pressed={c.direitaAberta}
           aria-label={t('caderno.painel_estudo')}

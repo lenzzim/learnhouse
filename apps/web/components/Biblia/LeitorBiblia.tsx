@@ -84,8 +84,9 @@ function useCarregar<T>(chave: string | null, carregar: () => Promise<T>, tentat
   return estado
 }
 
+// 44 px de alvo no celular (auditoria v4), 40 px no computador
 const campoClasse =
-  'h-10 rounded-lg border border-[var(--line-strong)] bg-[var(--panel)] px-3 text-sm text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]'
+  'h-11 lg:h-10 rounded-lg border border-[var(--line-strong)] bg-[var(--panel)] px-3 text-sm text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]'
 const botaoClasse =
   'inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--text-2)] transition-colors hover:border-[var(--line-strong)] hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]'
 const chipClasse =

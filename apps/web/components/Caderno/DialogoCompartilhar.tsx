@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -49,6 +49,19 @@ export function DialogoCompartilhar({
   const [comunidade, setComunidade] = useState('')
   const [confirmou, setConfirmou] = useState(false)
   const [publicada, setPublicada] = useState<{ discussion_uuid: string; community_uuid: string } | null>(null)
+
+  // Título acessível próprio (auditoria v4): o diálogo passa a ser nomeado
+  // pelo título desta tela (aria-labelledby), com o nome da nota.
+  const idTitulo = useId()
+  const ancoraRef = useRef<HTMLHeadingElement | null>(null)
+  useEffect(() => {
+    if (!aberto) return
+    const quadro = window.requestAnimationFrame(() => {
+      const dialogo = ancoraRef.current?.closest('[role="dialog"]')
+      if (dialogo) dialogo.setAttribute('aria-labelledby', idTitulo)
+    })
+    return () => window.cancelAnimationFrame(quadro)
+  }, [aberto, idTitulo])
 
   const links = useQuery({
     queryKey: CHAVES_CADERNO.links(nota.note_uuid),
@@ -126,6 +139,9 @@ export function DialogoCompartilhar({
       descricao={t('caderno.compartilhar_descricao')}
       larguraDesktop="md"
     >
+      <h2 id={idTitulo} ref={ancoraRef} className="sr-only">
+        {t('caderno.compartilhar_nota_titulo', { titulo: nota.title || t('caderno.sem_titulo') })}
+      </h2>
       <section aria-labelledby="comp-link" className="flex flex-col gap-3">
         <h3 id="comp-link" className="flex items-center gap-2 text-base font-semibold text-[var(--text)]">
           <LinkSimple size={18} aria-hidden="true" />

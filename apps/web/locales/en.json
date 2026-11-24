@@ -7247,7 +7247,8 @@
     "editar_nota": "Edit",
     "concluir_edicao": "Done",
     "inserir_na_nota": "Insert into note",
-    "n_notas_zero": "No notes"
+    "n_notas_zero": "No notes",
+    "compartilhar_nota_titulo": "Share the note “{{titulo}}”"
   },
   "social": {
     "autor": {
