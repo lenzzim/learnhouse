@@ -561,7 +561,7 @@ function SearchPage() {
         <h2 id="secao-passagem" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3 flex items-center gap-2">
           <BookOpen size={13} aria-hidden="true" />
           {t('busca.tipos.passagem')}
-          <span className="text-[var(--text-3)] font-normal normal-case tracking-normal">({totalPassagem})</span>
+          <span className="text-[var(--text-2)] font-normal normal-case tracking-normal">({totalPassagem})</span>
         </h2>
         <ListaPassagem resultado={porPassagem} hrefDiscussao={hrefDiscussao} limite={limite} />
         {limite && totalPassagem > limite ? (
@@ -596,7 +596,7 @@ function SearchPage() {
         <h2 id="secao-biblia" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3 flex items-center gap-2">
           <BookOpen size={13} aria-hidden="true" />
           {t('busca.tipos.biblia')}
-          <span className="text-[var(--text-3)] font-normal normal-case tracking-normal">({biblia.total})</span>
+          <span className="text-[var(--text-2)] font-normal normal-case tracking-normal">({biblia.total})</span>
         </h2>
         <ListaVersiculos resultado={biblia} hrefVersiculo={(v) => hrefLeitor(v.codigo)} limite={limite} />
         <div className="mt-2 flex flex-wrap items-center gap-x-4">
@@ -736,7 +736,7 @@ function SearchPage() {
                     <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3 flex items-center gap-2">
                       <section.icon size={13} />
                       {t(`search.types.${section.key}`)}
-                      <span className="text-[var(--text-3)] font-normal normal-case tracking-normal">
+                      <span className="text-[var(--text-2)] font-normal normal-case tracking-normal">
                         ({section.total(results)})
                       </span>
                     </h2>
@@ -819,7 +819,7 @@ function TabButton({
     >
       <Icon size={14} />
       {label}
-      <span className={active ? 'opacity-70' : 'text-[var(--text-3)]'}>{count}</span>
+      <span className={active ? 'opacity-70' : 'text-[var(--text-2)]'}>{count}</span>
     </button>
   )
 }
