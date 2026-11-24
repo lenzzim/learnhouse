@@ -6,7 +6,9 @@ import { useTranslation } from 'react-i18next'
 import {
   ArrowUpRight,
   BellSimple,
+  BookmarkSimple,
   CalendarCheck,
+  ChatsCircle,
   CaretUpDown,
   Globe,
   GraduationCap,
@@ -14,6 +16,7 @@ import {
   SquaresFour,
   UserCircle,
   UsersThree,
+  WhatsappLogo,
 } from '@phosphor-icons/react'
 import {
   DropdownMenu,
@@ -34,6 +37,11 @@ import { useDadosNav } from './useDadosNav'
 import { useIdiomaDiscipulei } from '../useIdioma'
 import { FOCO } from './estilos'
 import { ROTA_NOTIFICACOES, ROTA_PESSOAS, useNaoLidas } from '../Social/comum'
+import { abrirPassoWhatsapp, useMeuWhatsapp } from '../WhatsApp/comum'
+
+/** Rotas da v5: salvos (N44) e agenda de bate-papos (N45). */
+const ROTA_SALVOS = '/salvos'
+const ROTA_BATEPAPOS = '/batepapos'
 
 const ITEM =
   'flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 text-sm text-[var(--text)] ' +
@@ -50,6 +58,7 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
   const idioma = useIdiomaDiscipulei()
   const { usuario, ehAdmin } = useDadosNav()
   const naoLidas = useNaoLidas()
+  const whatsapp = useMeuWhatsapp()
   // Ponto discreto no avatar quando há menção nova (N39).
   const ponto = naoLidas > 0 && (
     <span
@@ -127,6 +136,34 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
             {t('social.pessoas.titulo')}
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild className={ITEM}>
+          <Link href={ROTA_SALVOS}>
+            <BookmarkSimple size={18} aria-hidden="true" />
+            {t('salvos.titulo')}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className={ITEM}>
+          <Link href={ROTA_BATEPAPOS}>
+            <ChatsCircle size={18} aria-hidden="true" />
+            {t('nav.batepapos')}
+          </Link>
+        </DropdownMenuItem>
+        {whatsapp.habilitado &&
+          (whatsapp.dados?.url ? (
+            <DropdownMenuItem asChild className={ITEM}>
+              <a href={whatsapp.dados.url} target="_blank" rel="noopener noreferrer">
+                <WhatsappLogo size={18} aria-hidden="true" />
+                <span className="flex-1">{t('whatsapp.cartao_titulo')}</span>
+                <ArrowUpRight size={14} aria-hidden="true" className="text-[var(--text-3)] rtl:-scale-x-100" />
+                <span className="sr-only">({t('whatsapp.nova_aba')})</span>
+              </a>
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem className={ITEM} onSelect={() => abrirPassoWhatsapp()}>
+              <WhatsappLogo size={18} aria-hidden="true" />
+              {t('whatsapp.cartao_titulo')}
+            </DropdownMenuItem>
+          ))}
         {variante === 'compacta' && (
           <DropdownMenuItem asChild className={ITEM}>
             <Link href={ROTA_APRENDER}>
