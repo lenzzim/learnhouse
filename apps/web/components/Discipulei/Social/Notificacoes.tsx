@@ -1,8 +1,9 @@
 'use client'
 
 /**
- * Lista simples de notificações no app (decisão N39): por enquanto, menções
- * @nome em posts e comentários. O servidor só devolve o que a pessoa ainda
+ * Lista simples de notificações no app (decisão N39): menções @nome em
+ * posts e comentários e, na v5 (N45), lembretes de bate-papo (1 dia antes,
+ * 15 minutos antes e "Começou!"). O servidor só devolve o que a pessoa ainda
  * pode ler; abrir a página marca tudo como lido.
  */
 
@@ -10,16 +11,34 @@ import React, { useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { BellSimple } from '@phosphor-icons/react'
+import { BellSimple, ChatsCircle } from '@phosphor-icons/react'
 import { useDadosNav } from '@components/Discipulei/Navegacao/useDadosNav'
 import { FOCO, SERIF, caminhoDiscussao } from '@components/Discipulei/Navegacao/estilos'
 import { getUriWithOrg } from '@services/config/config'
 import { listarNotificacoes, marcarLidas, nomeDaPessoa, type Notificacao } from '@services/communities/social'
 import { parseApiDate } from '@/lib/datas'
 import { AvatarPessoa, CHAVE_NAO_LIDAS, PAINEL } from './comum'
+import { formatarHora, formatarQuando, localeDe, rotaBatePapo } from '@components/Discipulei/Batepapos/comum'
+
+/** Texto do lembrete de bate-papo, com data/hora no fuso do navegador. */
+function textoLembrete(n: Notificacao, t: any, locale: string): string {
+  const titulo = n.event_title || ''
+  const quando = n.event_starts_at || ''
+  if (n.kind === 'event_live') return t('batepapos.notificacao.comecou', { titulo })
+  if (n.kind === 'event_15m') return t('batepapos.notificacao.em_15', { titulo })
+  // "Amanhã" só quando é mesmo o dia seguinte; senão, a data por extenso.
+  const ini = quando ? new Date(quando) : null
+  const amanha = new Date()
+  amanha.setDate(amanha.getDate() + 1)
+  if (ini && ini.toDateString() === amanha.toDateString()) {
+    return t('batepapos.notificacao.amanha', { titulo, hora: formatarHora(quando, locale) })
+  }
+  return t('batepapos.notificacao.lembrete', { titulo, quando: quando ? formatarQuando(quando, locale) : '' })
+}
 
 export default function PaginaNotificacoes({ orgslug }: { orgslug: string }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = localeDe(i18n.language)
   const { autenticado, orgId, token, status } = useDadosNav()
   const queryClient = useQueryClient()
 
@@ -62,6 +81,37 @@ export default function PaginaNotificacoes({ orgslug }: { orgslug: string }) {
         ) : (
           <ul className={`${PAINEL} divide-y divide-[var(--line)] overflow-hidden`}>
             {lista.data!.map((n) => {
+              if (n.event_uuid) {
+                const classe = `flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-[var(--surface)] ${FOCO} focus-visible:outline-offset-[-2px] ${
+                  n.read ? '' : 'bg-[var(--surface)]'
+                }`
+                return (
+                  <li key={n.notification_uuid}>
+                    <Link href={getUriWithOrg(orgslug, rotaBatePapo(n.event_uuid))} className={classe}>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--line-strong)] text-[var(--text-2)]">
+                        <ChatsCircle size={18} weight={n.kind === 'event_live' ? 'fill' : 'regular'} aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={`block text-sm leading-snug text-[var(--text)] ${n.kind === 'event_live' ? 'font-semibold' : ''}`}
+                          dir="auto"
+                        >
+                          {textoLembrete(n, t, locale)}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-[var(--text-3)]">
+                          {parseApiDate(n.creation_date).fromNow()}
+                          {!n.read && (
+                            <>
+                              <span aria-hidden="true"> · </span>
+                              <span className="font-semibold text-[var(--text)]">{t('social.notificacoes.nova')}</span>
+                            </>
+                          )}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                )
+              }
               const quem = n.actor ? nomeDaPessoa(n.actor) : t('common.unknown')
               const destino = getUriWithOrg(orgslug, caminhoDiscussao(n.community_uuid, n.discussion_uuid))
               return (
