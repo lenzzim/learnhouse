@@ -61,6 +61,8 @@ import { criarBarraComandos, type OpcoesBarraComandos } from './editor/barraComa
 import { BarraFormatacao } from './editor/BarraFormatacao'
 import { renderizadorMenuComandos } from './editor/MenuComandos'
 import { extensoesConteudoCaderno } from './editor/extensoesConteudo'
+import { podeRecuar, RecuoListas } from './editor/recuo'
+import { consumirCitacaoPendente } from '@/lib/caderno/citacaoPendente'
 import { criarCarregadorAnexos } from './editor/carregadorAnexos'
 import { DialogoImagem, DialogoVideo } from './DialogosMidia'
 import { BlocoPropriedades } from './Propriedades'
@@ -72,7 +74,16 @@ import { DialogoCompartilhar } from './DialogoCompartilhar'
 import { SeloVisibilidade } from './SeloVisibilidade'
 import { opcoesColecoes, useColecoes } from './ArvoreColecoes'
 import { hrefCaderno } from './PainelEsquerdo'
-import { BOTAO_SECUNDARIO, CAMPO, FOCO, ICONE_PEQUENO, SERIF } from './estilos'
+import { BOTAO_SECUNDARIO, CAMPO, FOCO, ICONE_CABECALHO, SERIF } from './estilos'
+
+/** Comandos do menu "/" que fazem sentido onde está o cursor (recuo só numa lista). */
+function comandosAplicaveis(editor: Editor | null) {
+  return COMANDOS.filter((cmd) => {
+    if (cmd.id === 'recuo_mais') return !!editor && podeRecuar(editor, 1)
+    if (cmd.id === 'recuo_menos') return !!editor && podeRecuar(editor, -1)
+    return true
+  })
+}
 
 type Status = 'salvo' | 'salvando' | 'pendente' | 'offline' | 'erro'
 
@@ -447,7 +458,7 @@ export function EditorNota({
   const opcoesComandos = useCallback(
     (): OpcoesBarraComandos => ({
       itens: (consulta) =>
-        filtrarComandos(COMANDOS, consulta, (cmd) => t(`caderno_editor.cmd.${cmd.id}`)).map((cmd) => ({
+        filtrarComandos(comandosAplicaveis(vivo.current.editor), consulta, (cmd) => t(`caderno_editor.cmd.${cmd.id}`)).map((cmd) => ({
           id: cmd.id,
           rotulo: t(`caderno_editor.cmd.${cmd.id}`),
           descricao: t(`caderno_editor.cmd_desc.${cmd.id}`),
@@ -509,6 +520,7 @@ export function EditorNota({
       LigacoesETags,
       criarSugestoes(() => fontesRef.current()),
       criarBarraComandos(() => comandosRef.current()),
+      RecuoListas,
     ],
     [] // eslint-disable-line react-hooks/exhaustive-deps
   )
@@ -632,6 +644,35 @@ export function EditorNota({
     return () => c.registrarInsercao(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, somenteLeitura])
+
+  // "Anotar" do leitor bíblico: a nota nova ou o TCD de hoje abre com as
+  // citações da seleção no fim. Conta como edição da pessoa (salva normalmente;
+  // o TCD ainda não salvo é criado no primeiro salvamento).
+  useEffect(() => {
+    if (!editor || somenteLeitura) return
+    let armazenamento: Storage | null = null
+    try {
+      armazenamento = window.sessionStorage
+    } catch {
+      return
+    }
+    const pendente = consumirCitacaoPendente(armazenamento, {
+      kind: notaInicial.kind,
+      tcd_date: notaInicial.tcd_date,
+      vazia: editor.isEmpty,
+    })
+    if (!pendente) return
+    interagiu.current = true
+    setSemModelo(true)
+    const vazio = editor.isEmpty
+    const fim = editor.state.doc.content.size
+    editor
+      .chain()
+      .insertContentAt(vazio ? { from: 0, to: fim } : fim, [...pendente.blocos, { type: 'paragraph' }] as any)
+      .focus('end')
+      .run()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor])
 
   // Pop-up de uma referência escrita na nota (item 2.3): "Inserir passagem
   // completa" (a menção vira citação no lugar) e "Trocar versão". A linha de
@@ -805,7 +846,7 @@ export function EditorNota({
       <div className="flex min-h-12 items-center gap-1 border-b border-[var(--line)] px-2 sm:px-3">
         <button
           type="button"
-          className={`${ICONE_PEQUENO} lg:hidden`}
+          className={`${ICONE_CABECALHO} lg:hidden`}
           onClick={() => c.setEsquerdaAberta(true)}
           aria-label={t('caderno.abrir_navegacao')}
         >
@@ -815,7 +856,7 @@ export function EditorNota({
           <span className="hidden lg:block min-[1440px]:hidden">
             <button
               type="button"
-              className={ICONE_PEQUENO}
+              className={ICONE_CABECALHO}
               onClick={() => c.setDireitaAberta(false)}
               aria-label={t('caderno.mostrar_navegacao')}
             >
@@ -856,7 +897,7 @@ export function EditorNota({
           <button
             type="button"
             onClick={() => setCompartilhar(true)}
-            className={`${BOTAO_SECUNDARIO} ms-1 min-h-9 px-3 text-sm`}
+            className={`${BOTAO_SECUNDARIO} ms-1 min-h-11 px-3 text-sm lg:min-h-9`}
           >
             <ShareNetwork size={16} aria-hidden="true" />
             <span className="hidden sm:inline">{t('caderno.compartilhar')}</span>
@@ -866,7 +907,7 @@ export function EditorNota({
         <div className="relative" data-menu-nota>
           <button
             type="button"
-            className={ICONE_PEQUENO}
+            className={ICONE_CABECALHO}
             aria-haspopup="menu"
             aria-expanded={menu}
             aria-label={t('caderno.mais_acoes')}
@@ -898,7 +939,7 @@ export function EditorNota({
         )}
         <button
           type="button"
-          className={`${ICONE_PEQUENO} ${c.direitaAberta ? 'bg-[var(--surface)] text-[var(--text)]' : ''}`}
+          className={`${ICONE_CABECALHO} ${c.direitaAberta ? 'bg-[var(--surface)] text-[var(--text)]' : ''}`}
           onClick={() => c.setDireitaAberta(!c.direitaAberta)}
           aria-pressed={c.direitaAberta}
           aria-label={t('caderno.painel_estudo')}

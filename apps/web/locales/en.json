@@ -6543,7 +6543,47 @@
     "citacao_completa": "Full quote",
     "citacao_completa_desc": "Block with the text and the reference",
     "mencao": "Reference only",
-    "mencao_desc": "\"Jn 3:16 (NIV)\" in the text, clickable"
+    "mencao_desc": "\"Jn 3:16 (NIV)\" in the text, clickable",
+    "limite_versiculos_aberta": "To embed the text, quote up to {{max}} verses at a time or the whole chapter (e.g. “Ps 23”). “Reference only” has no limit.",
+    "capitulo_inteiro_n": "Whole chapter ({{n}} verses).",
+    "textos_biblicos": "Bible texts:",
+    "ver_creditos_completos": "see full credits",
+    "creditos_rotulo": "Bible translation credits",
+    "dominio_publico_curto": "public domain",
+    "acoes_selecao": "Actions for {{ref}}",
+    "n_selecionados": "{{count}} selected",
+    "n_selecionados_one": "{{count}} selected",
+    "n_selecionados_other": "{{count}} selected",
+    "limpar_selecao": "Clear selection",
+    "destacar": "Highlight",
+    "destacar_cor": "Highlight in {{cor}}",
+    "destaque_cor": "{{cor}} highlight",
+    "remover_destaque": "Remove highlight",
+    "entrar_para_destacar": "Sign in to highlight and save favorites",
+    "copiar": "Copy",
+    "compartilhar": "Share",
+    "anotar": "Take a note",
+    "anotar_nova_nota": "New note",
+    "anotar_tcd_hoje": "Add to today's quiet time",
+    "entrar_para_anotar": "Sign in to take notes in the Notebook",
+    "favorito": "Favorite",
+    "desmarcar_favorito": "Remove from favorites",
+    "comparar": "Compare",
+    "meus_destaques": "My highlights",
+    "meus_destaques_desc": "Highlighted and favorite verses, in every version.",
+    "meus_destaques_vazio": "Nothing here yet. Tap a verse in the reader to highlight it or save it as a favorite.",
+    "filtrar": "Filter",
+    "filtro_todos": "All",
+    "filtro_highlight": "Highlights",
+    "filtro_favorite": "Favorites",
+    "carregar_mais": "Load more",
+    "dica_selecionar": "Tap a verse to select, highlight, copy or take a note.",
+    "limite_copia": "In the {{sigla}}, copy up to {{max}} verses at a time.",
+    "copiado": "Copied, with the reference and link.",
+    "link_copiado": "Passage link copied.",
+    "erro_copiar": "Could not copy.",
+    "erro_salvar_marca": "Could not save. Try again.",
+    "erro_anotar": "Could not send the passage to the Notebook."
   },
   "nav": {
     "inicio": "Home",
@@ -6758,7 +6798,9 @@
       "guia": "Markdown guide",
       "titulo4": "Heading 4",
       "marca_texto": "Highlight",
-      "cor_texto": "Text color"
+      "cor_texto": "Text color",
+      "recuo_mais": "Increase indent",
+      "recuo_menos": "Decrease indent"
     },
     "cmd_desc": {
       "texto": "Plain paragraph",
@@ -6784,7 +6826,9 @@
       "guia": "What you can do in the Notebook",
       "titulo4": "Subtle subsection",
       "marca_texto": "Green background (== on each side)",
-      "cor_texto": "Green, blue, pink or graphite"
+      "cor_texto": "Green, blue, pink or graphite",
+      "recuo_mais": "Nest the item under the previous one (Tab)",
+      "recuo_menos": "Move the item up one level (Shift + Tab)"
     },
     "imagem_descricao": "The image stays private in your note.",
     "imagem_alt": "Description (optional, for screen readers)",
@@ -6900,7 +6944,9 @@
         "k_titulo3": "Heading 3",
         "k_titulo4": "Heading 4 (Ctrl/⌘ + Alt + 1 to 4 for the others)",
         "k_marca": "Highlight",
-        "k_refazer": "Redo (Ctrl + Y on Windows; also the ↷ button)"
+        "k_refazer": "Redo (Ctrl + Y on Windows; also the ↷ button)",
+        "k_recuo_mais": "Increase indent in a list (bulleted, numbered or tasks). Also with the toolbar button.",
+        "k_recuo_menos": "Decrease the item's indent. Outside a list, Tab still moves focus."
       },
       "amostra_codigo": "Psalm 23",
       "abre_menu": "command menu",
@@ -6911,7 +6957,8 @@
       "propriedades": "Properties: filter the note list by type and by book. Templates can fill in the type.",
       "privacidade_imagens": "Uploaded images are private. They only show to people with the note’s private link or when you publish to the community (a copy goes along).",
       "exportar": "Export .md: properties become the YAML header (frontmatter) and come back when you import.",
-      "refaz": "redoes what was undone"
+      "refaz": "redoes what was undone",
+      "amostra_recuo_pai": "prayer"
     },
     "desfazer": "Undo",
     "refazer": "Redo",
@@ -7234,7 +7281,8 @@
     "editar_nota": "Edit",
     "concluir_edicao": "Done",
     "inserir_na_nota": "Insert into note",
-    "n_notas_zero": "No notes"
+    "n_notas_zero": "No notes",
+    "compartilhar_nota_titulo": "Share the note “{{titulo}}”"
   },
   "social": {
     "autor": {

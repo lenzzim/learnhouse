@@ -673,6 +673,11 @@ html:not([dir='rtl']) .caderno-area :is(h1, h2, h3).caderno-secao {
   scrollbar-width: thin;
   scrollbar-color: var(--line-strong) transparent;
 }
+/* Linhas da barra de formatação no celular: rolam de lado pelo toque, sem
+   barra visível (a regra acima vence o [scrollbar-width:none] do Tailwind,
+   que fica numa camada; esta tem mais especificidade e nenhuma camada). */
+.caderno-area .caderno-barra-rolavel { scrollbar-width: none; }
+.caderno-area .caderno-barra-rolavel::-webkit-scrollbar { display: none; }
 
 /* Texto da nota: Newsreader, medida de leitura, ritmo de diário. */
 .caderno-prosa {

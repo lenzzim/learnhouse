@@ -9,6 +9,7 @@ from src.routers import demo as demo_router_module
 from src.routers import instance
 from src.routers import plans
 from src.routers import biblia as biblia_router_module
+from src.routers import bible_marks as bible_marks_router_module
 from src.routers import usergroups
 from src.routers import dev, trail, users, auth, orgs, roles, search
 from src.routers import mfa as mfa_router_module
@@ -403,6 +404,10 @@ v1_router.include_router(
 
 # Plan limits (public, no auth — used by frontend pricing pages)
 v1_router.include_router(plans.router, prefix="/plans", tags=["plans"])
+
+# Discipulei: destaques e favoritos do leitor (da própria pessoa, só sessão).
+# Antes do proxy da Bíblia para /biblia/marcas não cair nas rotas de versão.
+v1_router.include_router(bible_marks_router_module.router, prefix="/biblia/marcas", tags=["biblia"])
 
 # Discipulei: versões licenciadas da Bíblia (proxy da API.Bible com cache).
 # /versoes é público; o texto exige sessão (dependência por rota).

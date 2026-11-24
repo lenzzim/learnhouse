@@ -6543,7 +6543,47 @@
     "citacao_completa": "اقتباس كامل",
     "citacao_completa_desc": "كتلة بالنص والمرجع",
     "mencao": "المرجع فقط",
-    "mencao_desc": "\"Jo 3:16 (NVI)\" داخل النص وقابل للنقر"
+    "mencao_desc": "\"Jo 3:16 (NVI)\" داخل النص وقابل للنقر",
+    "limite_versiculos_aberta": "لتضمين النص، اقتبس حتى {{max}} آية في كل مرة أو الأصحاح كاملًا (مثل “مز 23”). «المرجع فقط» بلا حد.",
+    "capitulo_inteiro_n": "الأصحاح كاملًا ({{n}} آية).",
+    "textos_biblicos": "النصوص الكتابية:",
+    "ver_creditos_completos": "عرض الحقوق كاملة",
+    "creditos_rotulo": "حقوق ترجمات الكتاب المقدس",
+    "dominio_publico_curto": "ملكية عامة",
+    "acoes_selecao": "إجراءات لـ {{ref}}",
+    "n_selecionados": "{{count}} آيات محددة",
+    "n_selecionados_one": "آية واحدة محددة",
+    "n_selecionados_other": "{{count}} آيات محددة",
+    "limpar_selecao": "مسح التحديد",
+    "destacar": "تمييز",
+    "destacar_cor": "تمييز باللون {{cor}}",
+    "destaque_cor": "تمييز {{cor}}",
+    "remover_destaque": "إزالة التمييز",
+    "entrar_para_destacar": "سجّل الدخول للتمييز وحفظ المفضلة",
+    "copiar": "نسخ",
+    "compartilhar": "مشاركة",
+    "anotar": "تدوين",
+    "anotar_nova_nota": "ملاحظة جديدة",
+    "anotar_tcd_hoje": "أضف إلى وقت اليوم مع الله",
+    "entrar_para_anotar": "سجّل الدخول للتدوين في الدفتر",
+    "favorito": "مفضلة",
+    "desmarcar_favorito": "إزالة من المفضلة",
+    "comparar": "مقارنة",
+    "meus_destaques": "تمييزاتي",
+    "meus_destaques_desc": "الآيات المميزة والمفضلة في كل الترجمات.",
+    "meus_destaques_vazio": "لا شيء هنا بعد. اضغط على آية في القارئ لتمييزها أو حفظها في المفضلة.",
+    "filtrar": "تصفية",
+    "filtro_todos": "الكل",
+    "filtro_highlight": "التمييزات",
+    "filtro_favorite": "المفضلة",
+    "carregar_mais": "تحميل المزيد",
+    "dica_selecionar": "اضغط على آية لتحديدها أو تمييزها أو نسخها أو تدوينها.",
+    "limite_copia": "في {{sigla}} انسخ حتى {{max}} آية في كل مرة.",
+    "copiado": "تم النسخ مع المرجع والرابط.",
+    "link_copiado": "تم نسخ رابط المقطع.",
+    "erro_copiar": "تعذّر النسخ.",
+    "erro_salvar_marca": "تعذّر الحفظ. حاول مرة أخرى.",
+    "erro_anotar": "تعذّر إرسال المقطع إلى الدفتر."
   },
   "mfa": {
     "policy": {
@@ -6773,7 +6813,9 @@
       "guia": "دليل Markdown",
       "titulo4": "عنوان 4",
       "marca_texto": "تظليل",
-      "cor_texto": "لون النص"
+      "cor_texto": "لون النص",
+      "recuo_mais": "زيادة المسافة البادئة",
+      "recuo_menos": "إنقاص المسافة البادئة"
     },
     "cmd_desc": {
       "texto": "فقرة عادية",
@@ -6799,7 +6841,9 @@
       "guia": "ما يمكنك فعله في الدفتر",
       "titulo4": "قسم فرعي هادئ",
       "marca_texto": "خلفية خضراء للنص (== على كل جانب)",
-      "cor_texto": "أخضر أو أزرق أو وردي أو رمادي داكن"
+      "cor_texto": "أخضر أو أزرق أو وردي أو رمادي داكن",
+      "recuo_mais": "يجعل العنصر تحت العنصر السابق (Tab)",
+      "recuo_menos": "يعيد العنصر مستوى واحدًا (Shift + Tab)"
     },
     "imagem_descricao": "تبقى الصورة خاصة في ملاحظتك.",
     "imagem_alt": "وصف (اختياري، لقارئات الشاشة)",
@@ -6915,7 +6959,9 @@
         "k_titulo3": "عنوان 3",
         "k_titulo4": "عنوان 4 (Ctrl/⌘ + Alt + 1 إلى 4 للبقية)",
         "k_marca": "تظليل",
-        "k_refazer": "إعادة (Ctrl + Y في ويندوز؛ أو زر ↷)"
+        "k_refazer": "إعادة (Ctrl + Y في ويندوز؛ أو زر ↷)",
+        "k_recuo_mais": "زيادة المسافة البادئة في قائمة (نقطية أو مرقمة أو مهام). أو بزر الشريط.",
+        "k_recuo_menos": "إنقاص المسافة البادئة للعنصر. خارج القائمة يظل Tab ينقل التركيز."
       },
       "amostra_codigo": "المزمور 23",
       "abre_menu": "قائمة الأوامر",
@@ -6926,7 +6972,8 @@
       "propriedades": "الخصائص: صفِّ قائمة الملاحظات حسب النوع والسفر. يمكن للقوالب أن تملأ النوع.",
       "privacidade_imagens": "الصور المرفوعة خاصة. لا تظهر إلا لمن لديه الرابط الخاص للملاحظة أو عند النشر في المجتمع (تُرسل نسخة).",
       "exportar": "تصدير .md: تصبح الخصائص ترويسة YAML (frontmatter) وتعود عند الاستيراد.",
-      "refaz": "يعيد ما تم التراجع عنه"
+      "refaz": "يعيد ما تم التراجع عنه",
+      "amostra_recuo_pai": "صلاة"
     },
     "desfazer": "تراجع",
     "refazer": "إعادة",
@@ -7249,7 +7296,8 @@
     "editar_nota": "تحرير",
     "concluir_edicao": "تم",
     "inserir_na_nota": "إدراج في الملاحظة",
-    "n_notas_zero": "لا توجد ملاحظات"
+    "n_notas_zero": "لا توجد ملاحظات",
+    "compartilhar_nota_titulo": "مشاركة الملاحظة “{{titulo}}”"
   },
   "social": {
     "autor": {

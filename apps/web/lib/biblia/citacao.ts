@@ -13,6 +13,8 @@
  * Módulo puro (sem React nem editor): os nós saem no formato JSON do TipTap.
  */
 import type { Versiculo } from './dados'
+import { interpretarReferencia, type Referencia } from './referencias'
+import { versaoPorSigla, type VersaoInfo } from './versoes'
 
 export type ModoCitacao = 'completa' | 'mencao'
 export const MODOS_CITACAO: ModoCitacao[] = ['completa', 'mencao']
@@ -82,4 +84,45 @@ export function fimDaMencao(texto: string, fim: number): { fim: number; sigla: s
 /** Valor guardado (localStorage) → modo válido; padrão: citação completa. */
 export function modoValido(valor: unknown): ModoCitacao {
   return valor === 'mencao' ? 'mencao' : 'completa'
+}
+
+/**
+ * Limite de versículos para EMBUTIR texto de versão aberta numa citação de
+ * intervalo ("Jo 3:1-40"). Uma referência só de capítulo ("1 Pe 1", "Sl 119")
+ * cita o capítulo inteiro, sem limite. Licenciadas gravam só a referência
+ * (o texto aparece ao vivo), então o limite não se aplica a elas, nem à menção.
+ */
+export const MAX_VERSOS_EMBUTIR = 30
+
+export interface AvaliacaoCitacao {
+  /** referência sem versículo: o capítulo inteiro */
+  capituloInteiro: boolean
+  /** versículos do intervalo (0 no capítulo inteiro: depende da versão) */
+  quantidade: number
+  /** citação completa de aberta acima do limite: não pode embutir */
+  excedeLimite: boolean
+}
+
+/** Decide se a citação pode ser inserida como pedida (item 1 do caderno v5). */
+export function avaliarCitacao(ref: Referencia, opcoes: { modo: ModoCitacao; licenciada: boolean }): AvaliacaoCitacao {
+  const capituloInteiro = ref.versoIni === undefined
+  const quantidade = capituloInteiro ? 0 : (ref.versoFim ?? (ref.versoIni as number)) - (ref.versoIni as number) + 1
+  const excedeLimite = !capituloInteiro && opcoes.modo === 'completa' && !opcoes.licenciada && quantidade > MAX_VERSOS_EMBUTIR
+  return { capituloInteiro, quantidade, excedeLimite }
+}
+
+const RE_LINHA_CITACAO = /^\s*[—–-]\s*(.+?)\s*\(([A-Za-z0-9]{2,8})\)\s*$/
+
+/**
+ * "— João 3:16-18 (ARA)" ou "— 1 Pedro 1 (NVI)" (a última linha de uma
+ * citação) -> referência e versão; senão null. Só o capítulo também vale.
+ */
+export function lerLinhaCitacao(texto: string): { ref: Referencia; versao: VersaoInfo } | null {
+  const m = RE_LINHA_CITACAO.exec(texto)
+  if (!m) return null
+  const versao = versaoPorSigla(m[2])
+  if (!versao) return null
+  const ref = interpretarReferencia(m[1])
+  if (!ref) return null
+  return { ref, versao }
 }

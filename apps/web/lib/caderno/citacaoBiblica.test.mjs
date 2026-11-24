@@ -92,3 +92,43 @@ test('recuo: erro que não é de licença continua erro', async () => {
   simularServidor({ capitulo: { status: 500, codigo: 'erro' } })
   await assert.rejects(fontes.getVersesComRecuo('nvi', REF), (e) => e.codigo === 'erro')
 })
+
+test('só o capítulo: cita o capítulo inteiro, e o limite vale só para embutir intervalo de aberta', async () => {
+  const { avaliarCitacao, MAX_VERSOS_EMBUTIR, lerLinhaCitacao } = await import('../biblia/citacao.ts')
+  const { interpretarReferencia } = await import('../biblia/referencias.ts')
+  const cap = interpretarReferencia('1Pedro 1')
+  assert.deepEqual(cap, { livroId: '1PE', capitulo: 1 })
+  for (const modo of ['completa', 'mencao']) {
+    for (const licenciada of [false, true]) {
+      const a = avaliarCitacao(cap, { modo, licenciada })
+      assert.equal(a.capituloInteiro, true)
+      assert.equal(a.excedeLimite, false, `${modo}/${licenciada}`)
+    }
+  }
+  const salmo = interpretarReferencia('Sl 119:1-40')
+  assert.equal(avaliarCitacao(salmo, { modo: 'completa', licenciada: false }).excedeLimite, true)
+  assert.equal(avaliarCitacao(salmo, { modo: 'completa', licenciada: true }).excedeLimite, false)
+  assert.equal(avaliarCitacao(salmo, { modo: 'mencao', licenciada: false }).excedeLimite, false)
+  assert.equal(avaliarCitacao(interpretarReferencia(`Sl 119:1-${MAX_VERSOS_EMBUTIR}`), { modo: 'completa', licenciada: false }).excedeLimite, false)
+  // a linha da citação licenciada de um capítulo é reconhecida (a citação viva mostra o capítulo)
+  const lida = lerLinhaCitacao('— 1 Pedro 1 (NVI)')
+  assert.equal(lida.versao.id, 'nvi')
+  assert.deepEqual(lida.ref, { livroId: '1PE', capitulo: 1 })
+  assert.equal(lerLinhaCitacao('— João 3:16-18 (ARA)').ref.versoFim, 18)
+  assert.equal(lerLinhaCitacao('— João 3:16 (XYZ)'), null)
+  assert.equal(lerLinhaCitacao('texto qualquer'), null)
+})
+
+test('getVerses: só o capítulo traz todos os versículos', async () => {
+  const fontes = await import('../biblia/fontes.ts')
+  const capitulo = Array.from({ length: 25 }, (_, i) => `texto ${i + 1}`)
+  const original = globalThis.fetch
+  globalThis.fetch = async () => ({ ok: true, json: async () => ({ id: '1PE', nome: '1 Pedro', abrev: '1Pe', capitulos: [capitulo] }) })
+  try {
+    const { versos } = await fontes.getVerses('blivre', { livroId: '1PE', capitulo: 1 })
+    assert.equal(versos.length, 25)
+    assert.equal(versos[24].numero, 25)
+  } finally {
+    globalThis.fetch = original
+  }
+})

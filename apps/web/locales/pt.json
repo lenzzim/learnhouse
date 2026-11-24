@@ -6543,7 +6543,47 @@
     "citacao_completa": "Citação completa",
     "citacao_completa_desc": "Bloco com o texto e a referência",
     "mencao": "Só a referência",
-    "mencao_desc": "\"Jo 3:16 (NVI)\" no texto, clicável"
+    "mencao_desc": "\"Jo 3:16 (NVI)\" no texto, clicável",
+    "limite_versiculos_aberta": "Para embutir o texto, cite até {{max}} versículos por vez ou o capítulo inteiro (ex.: “Sl 23”). “Só a referência” não tem limite.",
+    "capitulo_inteiro_n": "Capítulo inteiro ({{n}} versículos).",
+    "textos_biblicos": "Textos bíblicos:",
+    "ver_creditos_completos": "ver créditos completos",
+    "creditos_rotulo": "Créditos das traduções da Bíblia",
+    "dominio_publico_curto": "domínio público",
+    "acoes_selecao": "Ações para {{ref}}",
+    "n_selecionados": "{{count}} selecionados",
+    "n_selecionados_one": "{{count}} selecionado",
+    "n_selecionados_other": "{{count}} selecionados",
+    "limpar_selecao": "Limpar seleção",
+    "destacar": "Destacar",
+    "destacar_cor": "Destacar em {{cor}}",
+    "destaque_cor": "destaque {{cor}}",
+    "remover_destaque": "Remover destaque",
+    "entrar_para_destacar": "Entre para destacar e marcar favoritos",
+    "copiar": "Copiar",
+    "compartilhar": "Compartilhar",
+    "anotar": "Anotar",
+    "anotar_nova_nota": "Nova nota",
+    "anotar_tcd_hoje": "Adicionar ao TCD de hoje",
+    "entrar_para_anotar": "Entre para anotar no Caderno",
+    "favorito": "Favorito",
+    "desmarcar_favorito": "Tirar dos favoritos",
+    "comparar": "Comparar",
+    "meus_destaques": "Meus destaques",
+    "meus_destaques_desc": "Versículos destacados e favoritos, em todas as versões.",
+    "meus_destaques_vazio": "Nada por aqui ainda. Toque num versículo no leitor para destacar ou marcar como favorito.",
+    "filtrar": "Filtrar",
+    "filtro_todos": "Todos",
+    "filtro_highlight": "Destaques",
+    "filtro_favorite": "Favoritos",
+    "carregar_mais": "Carregar mais",
+    "dica_selecionar": "Toque num versículo para selecionar, destacar, copiar ou anotar.",
+    "limite_copia": "Na {{sigla}}, copie até {{max}} versículos por vez.",
+    "copiado": "Copiado, com a referência e o link.",
+    "link_copiado": "Link da passagem copiado.",
+    "erro_copiar": "Não foi possível copiar.",
+    "erro_salvar_marca": "Não foi possível salvar. Tente de novo.",
+    "erro_anotar": "Não foi possível levar a passagem ao Caderno."
   },
   "nav": {
     "inicio": "Início",
@@ -6758,7 +6798,9 @@
       "guia": "Guia de Markdown",
       "titulo4": "Título 4",
       "marca_texto": "Marca-texto",
-      "cor_texto": "Cor do texto"
+      "cor_texto": "Cor do texto",
+      "recuo_mais": "Aumentar recuo",
+      "recuo_menos": "Diminuir recuo"
     },
     "cmd_desc": {
       "texto": "Parágrafo simples",
@@ -6784,7 +6826,9 @@
       "guia": "O que dá para fazer no Caderno",
       "titulo4": "Subdivisão discreta",
       "marca_texto": "Fundo verde no texto (== de cada lado)",
-      "cor_texto": "Verde, azul, rosa ou grafite"
+      "cor_texto": "Verde, azul, rosa ou grafite",
+      "recuo_mais": "Põe o item dentro do anterior (Tab)",
+      "recuo_menos": "Volta o item um nível (Shift + Tab)"
     },
     "imagem_descricao": "A imagem fica privada na sua nota.",
     "imagem_alt": "Descrição (opcional, para leitores de tela)",
@@ -6900,7 +6944,9 @@
         "k_titulo3": "Título 3",
         "k_titulo4": "Título 4 (Ctrl/⌘ + Alt + 1 a 4 para os outros)",
         "k_marca": "Marca-texto",
-        "k_refazer": "Refazer (Ctrl + Y no Windows; também o botão ↷)"
+        "k_refazer": "Refazer (Ctrl + Y no Windows; também o botão ↷)",
+        "k_recuo_mais": "Aumentar recuo numa lista (marcadores, numerada ou tarefas). Também pelo botão na barra.",
+        "k_recuo_menos": "Diminuir recuo do item. Fora de uma lista, o Tab continua mudando o foco."
       },
       "amostra_codigo": "Salmo 23",
       "abre_menu": "menu de comandos",
@@ -6911,7 +6957,8 @@
       "propriedades": "Propriedades: filtre a lista de notas por tipo e por livro. Modelos podem preencher o tipo.",
       "privacidade_imagens": "Imagens enviadas são privadas. Só aparecem para quem tem o link privado da nota ou quando você publica na comunidade (aí vai uma cópia).",
       "exportar": "Exportar .md: as propriedades viram o cabeçalho YAML (frontmatter) e voltam ao importar.",
-      "refaz": "refaz o que foi desfeito"
+      "refaz": "refaz o que foi desfeito",
+      "amostra_recuo_pai": "oração"
     },
     "desfazer": "Desfazer",
     "refazer": "Refazer",
@@ -7234,7 +7281,8 @@
     "editar_nota": "Editar",
     "concluir_edicao": "Concluir",
     "inserir_na_nota": "Inserir na nota",
-    "n_notas_zero": "Nenhuma nota"
+    "n_notas_zero": "Nenhuma nota",
+    "compartilhar_nota_titulo": "Compartilhar a nota “{{titulo}}”"
   },
   "social": {
     "autor": {

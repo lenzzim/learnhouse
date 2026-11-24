@@ -29,6 +29,7 @@ const { TableKit } = await import('@tiptap/extension-table')
 const nos = await import('./nos.ts')
 const marcas = await import('./marcas.ts')
 const barra = await import('./barraComandos.ts')
+const recuo = await import('./recuo.ts')
 const { GUIA, ATALHOS_TECLADO } = await import('../../../lib/caderno/guia.ts')
 const { COMANDOS, filtrarComandos } = await import('../../../lib/caderno/comandos.ts')
 const { markdownParaDocPublico } = await import('../../../lib/caderno/importar.ts')
@@ -39,7 +40,7 @@ const ROTULOS = {
   marca_texto: 'Marca-texto', cor_texto: 'Cor do texto', lista_numerada: 'Lista numerada', tarefas: 'Lista de tarefas', citacao: 'Citação', destaque: 'Destaque',
   divisor: 'Divisor', codigo: 'Código', tabela: 'Tabela', imagem: 'Imagem', video: 'Vídeo', versiculo: 'Versículo',
   ligacao: 'Ligação', tag: 'Tag', data_hoje: 'Data de hoje', modelo: 'Modelo', propriedade: 'Propriedade',
-  guia: 'Guia de Markdown',
+  guia: 'Guia de Markdown', recuo_mais: 'Aumentar recuo', recuo_menos: 'Diminuir recuo',
 }
 
 function novoEditor({ carregar = null, editable = true, content = '' } = {}) {
@@ -58,6 +59,7 @@ function novoEditor({ carregar = null, editable = true, content = '' } = {}) {
       nos.VideoVimeo,
       marcas.MarcaTexto,
       marcas.CorTexto,
+      recuo.RecuoListas,
       barra.criarBarraComandos(() => ({
         itens: (q) => filtrarComandos(COMANDOS, q, (c) => ROTULOS[c.id]).map((c) => ({ id: c.id, rotulo: ROTULOS[c.id] })),
         aoPedir: (id) => estado.pedidos.push(id),
@@ -85,6 +87,20 @@ function digitar(ed, texto) {
 }
 
 const espera = () => new Promise((r) => setTimeout(r, 5))
+
+/** Tecla pelo caminho real do teclado (handleKeyDown); devolve se alguém tratou. */
+function teclar(ed, key, shiftKey = false) {
+  return !!ed.view.someProp('handleKeyDown', (f) => f(ed.view, new KeyboardEvent('keydown', { key, shiftKey })))
+}
+
+/** Cursor no fim do (primeiro) texto igual a `texto`. */
+function irPara(ed, texto) {
+  let pos = null
+  ed.state.doc.descendants((n, p) => {
+    if (pos === null && n.isText && n.text === texto) pos = p + n.nodeSize
+  })
+  ed.commands.setTextSelection(pos)
+}
 
 function acharNo(doc, tipo, attrs) {
   let achado = null
@@ -161,6 +177,19 @@ for (const ex of ATALHOS_TECLADO) {
       assert.equal(ed.state.doc.textContent, amostra)
       tecla('z', true)
       assert.ok(ed.state.doc.textContent.endsWith('mais'))
+      return
+    }
+    if (v.tecla === 'Tab' || v.tecla === 'Shift-Tab') {
+      ed.commands.setContent('<ul><li><p>oração</p></li><li><p>graça</p></li></ul>')
+      irPara(ed, 'graça')
+      teclar(ed, 'Tab')
+      const aninhada = () => ed.state.doc.firstChild.firstChild.childCount === 2
+      assert.ok(aninhada(), JSON.stringify(ed.getJSON()))
+      if (v.tecla === 'Shift-Tab') {
+        teclar(ed, 'Tab', true)
+        assert.equal(ed.state.doc.firstChild.childCount, 2, JSON.stringify(ed.getJSON()))
+      }
+      ed.destroy()
       return
     }
     if (v.tecla === 'Shift-Enter') {
@@ -639,4 +668,94 @@ test('editor de discussões preserva títulos H1–H4, marca-texto e cor de uma 
   assert.ok(!JSON.stringify(ed.getJSON()).includes('red'))
   assert.ok(JSON.stringify(ed.getJSON()).includes('"cor":"verde"'), 'marca-texto fora da paleta cai no verde')
   ed.destroy()
+})
+
+/* ------------------------------------------------------- recuo */
+
+
+for (const [nome, html, item] of [
+  ['marcadores', '<ul><li><p>a</p></li><li><p>b</p></li></ul>', 'listItem'],
+  ['numerada', '<ol><li><p>a</p></li><li><p>b</p></li></ol>', 'listItem'],
+  ['tarefas', '<ul data-type="taskList"><li data-type="taskItem" data-checked="false"><div><p>a</p></div></li><li data-type="taskItem" data-checked="true"><div><p>b</p></div></li></ul>', 'taskItem'],
+]) {
+  test(`recuo: ${nome} — botões ligam e desligam, Tab e Shift+Tab aninham e voltam`, () => {
+    const { ed } = novoEditor({ content: html })
+    // no primeiro item não dá para recuar, mas o Tab é consumido (não sai do editor)
+    irPara(ed, 'a')
+    assert.equal(recuo.itemDeLista(ed)?.tipo, item)
+    assert.equal(recuo.podeRecuar(ed, 1), false)
+    assert.equal(recuo.podeRecuar(ed, -1), false)
+    assert.equal(teclar(ed, 'Tab'), true)
+    // no segundo, aumenta; depois de aninhado, diminui
+    irPara(ed, 'b')
+    assert.equal(recuo.podeRecuar(ed, 1), true)
+    assert.equal(recuo.podeRecuar(ed, -1), false, 'no primeiro nível não tira o item da lista')
+    assert.equal(teclar(ed, 'Tab'), true)
+    assert.equal(ed.state.doc.firstChild.childCount, 1, JSON.stringify(ed.getJSON()))
+    assert.equal(recuo.itemDeLista(ed).nivel, 2)
+    assert.equal(recuo.podeRecuar(ed, -1), true)
+    assert.equal(teclar(ed, 'Tab', true), true)
+    assert.equal(ed.state.doc.firstChild.childCount, 2)
+    // pelos botões (mesma função da barra)
+    assert.equal(recuo.recuar(ed, 1), true)
+    assert.equal(ed.state.doc.firstChild.childCount, 1)
+    assert.equal(recuo.recuar(ed, -1), true)
+    assert.equal(ed.state.doc.firstChild.childCount, 2)
+    if (item === 'taskItem') assert.equal(ed.state.doc.firstChild.child(1).attrs.checked, true, 'a tarefa feita continua feita')
+    ed.destroy()
+  })
+}
+
+test('recuo: fora de lista o Tab não é roubado e os botões ficam desligados', () => {
+  const { ed } = novoEditor({ content: '<p>texto</p>' })
+  irPara(ed, 'texto')
+  assert.equal(recuo.itemDeLista(ed), null)
+  assert.equal(recuo.podeRecuar(ed, 1), false)
+  assert.equal(recuo.podeRecuar(ed, -1), false)
+  assert.equal(teclar(ed, 'Tab'), false)
+  assert.equal(teclar(ed, 'Tab', true), false)
+  ed.destroy()
+})
+
+test('recuo: dentro de tabela numa lista, o Tab é da tabela', () => {
+  const { ed } = novoEditor({ content: '<p>x</p>' })
+  ed.commands.setContent('<ul><li><p>a</p></li></ul>')
+  irPara(ed, 'a')
+  ed.commands.insertTable({ rows: 2, cols: 2, withHeaderRow: false })
+  assert.equal(recuo.itemDeLista(ed), null)
+  ed.destroy()
+})
+
+test('recuo: menu "/" aplica o recuo no lugar do "/consulta"', async () => {
+  const { ed, estado } = novoEditor({ content: '<ul><li><p>a</p></li><li><p>b</p></li></ul>' })
+  irPara(ed, 'b')
+  digitar(ed, ' /aumentar')
+  await espera()
+  assert.equal(estado.menu.itens[0].id, 'recuo_mais')
+  estado.menu.command(estado.menu.itens[0])
+  assert.equal(ed.state.doc.firstChild.childCount, 1, JSON.stringify(ed.getJSON()))
+  assert.ok(!ed.state.doc.textContent.includes('/'))
+  ed.destroy()
+})
+
+/* ------------------------------------------- créditos (decisão N43) */
+
+test('créditos: lê do DOM só o texto bíblico exibido (citação viva e aberta embutida)', async () => {
+  const { lerTextosExibidos, montarCreditos } = await import('../../../lib/biblia/creditos.ts')
+  const raiz = document.createElement('div')
+  raiz.innerHTML = `
+    <blockquote><div class="biblia-citacao-viva" data-credito-versao="nvi" data-credito-completo="NVI DA API"><p>texto</p></div><p>— João 3:16 (NVI)</p></blockquote>
+    <blockquote><div class="biblia-citacao-viva"><p>Carregando…</p></div><p>— Sl 23 (ARA)</p></blockquote>
+    <blockquote><p>¹ No princípio… ² A terra…</p><p>— Gênesis 1:1-2 (BLIVRE)</p></blockquote>
+    <blockquote><p>— Gênesis 1:3 (BLIVRE)</p></blockquote>
+    <blockquote><p>Uma citação qualquer</p><p>— Agostinho</p></blockquote>
+    <p>Menção: Jo 3:16 (ARC)</p>`
+  const textos = lerTextosExibidos(raiz)
+  assert.deepEqual(textos, [{ versao: 'nvi', completo: 'NVI DA API' }, { versao: 'blivre' }])
+  const linhas = montarCreditos(textos)
+  assert.deepEqual(linhas.map((l) => l.curto), ['NVI © Biblica, Inc.', 'BLIVRE (CC BY 4.0 BR)'])
+  // sem texto bíblico exibido: sem rodapé
+  const vazio = document.createElement('div')
+  vazio.innerHTML = '<p>Jo 3:16 (NVI)</p><blockquote><p>— Sl 23 (NVI)</p></blockquote>'
+  assert.equal(montarCreditos(lerTextosExibidos(vazio)).length, 0)
 })

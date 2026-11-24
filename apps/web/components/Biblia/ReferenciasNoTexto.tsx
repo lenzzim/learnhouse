@@ -8,6 +8,7 @@ import { useAcessoBiblia } from './useFonteBiblia'
 import { PopoverVersiculo, type AcoesEdicao } from './PopoverVersiculo'
 import { useIdiomaDiscipulei } from '@components/Discipulei/useIdioma'
 import { CLASSE_REF } from './extensaoReferencias'
+import { RodapeCreditos, useCreditosExibidos } from './RodapeCreditos'
 
 /**
  * Referências bíblicas em posts e comentários.
@@ -18,6 +19,8 @@ import { CLASSE_REF } from './extensaoReferencias'
  *   o foco ao link; clique (desktop) ou segundo toque leva ao leitor.
  * - Os links vêm de <TextoComReferencias> (texto puro, ex.: comentários) ou da
  *   extensão TipTap ReferenciasBiblicas (decorações, ex.: discussões).
+ * - No fim do conteúdo, o rodapé único de créditos das traduções exibidas
+ *   (decisão N43; ver RodapeCreditos.tsx), em vez de um crédito por citação.
  * Nada disso altera o conteúdo salvo.
  */
 
@@ -70,9 +73,12 @@ export function ReferenciasNoTexto({
   className,
   aoClicar,
   edicao,
+  creditos = true,
 }: {
   children: React.ReactNode
   className?: string
+  /** Rodapé de créditos das traduções exibidas no fim (padrão: sim). */
+  creditos?: boolean
   /**
    * Se definido, o clique na referência chama isto em vez de abrir o leitor (ex.: painel do Caderno).
    * `versao` é a versão citada logo depois da referência no texto ("Jo 3:16 NVI"), se houver.
@@ -246,10 +252,12 @@ export function ReferenciasNoTexto({
   }
 
   useEffect(() => limparTimer, [limparTimer])
+  const linhasCredito = useCreditosExibidos(raizRef, creditos)
 
   return (
     <div ref={raizRef} className={className}>
       {children}
+      {creditos && <RodapeCreditos linhas={linhasCredito} />}
       {aberto && (
         <div onBlur={onFocusOutPopover} onFocus={limparTimer}>
           <PopoverVersiculo

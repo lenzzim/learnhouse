@@ -6548,7 +6548,47 @@
     "citacao_completa": "Cita completa",
     "citacao_completa_desc": "Bloque con el texto y la referencia",
     "mencao": "Solo la referencia",
-    "mencao_desc": "\"Jn 3:16 (NVI)\" en el texto, con enlace"
+    "mencao_desc": "\"Jn 3:16 (NVI)\" en el texto, con enlace",
+    "limite_versiculos_aberta": "Para incrustar el texto, cita hasta {{max}} versículos a la vez o el capítulo entero (ej.: “Sal 23”). “Solo la referencia” no tiene límite.",
+    "capitulo_inteiro_n": "Capítulo entero ({{n}} versículos).",
+    "textos_biblicos": "Textos bíblicos:",
+    "ver_creditos_completos": "ver créditos completos",
+    "creditos_rotulo": "Créditos de las traducciones de la Biblia",
+    "dominio_publico_curto": "dominio público",
+    "acoes_selecao": "Acciones para {{ref}}",
+    "n_selecionados": "{{count}} seleccionados",
+    "n_selecionados_one": "{{count}} seleccionado",
+    "n_selecionados_other": "{{count}} seleccionados",
+    "limpar_selecao": "Borrar selección",
+    "destacar": "Resaltar",
+    "destacar_cor": "Resaltar en {{cor}}",
+    "destaque_cor": "resaltado {{cor}}",
+    "remover_destaque": "Quitar resaltado",
+    "entrar_para_destacar": "Inicia sesión para resaltar y guardar favoritos",
+    "copiar": "Copiar",
+    "compartilhar": "Compartir",
+    "anotar": "Anotar",
+    "anotar_nova_nota": "Nueva nota",
+    "anotar_tcd_hoje": "Añadir al Tiempo con Dios de hoy",
+    "entrar_para_anotar": "Inicia sesión para anotar en el Cuaderno",
+    "favorito": "Favorito",
+    "desmarcar_favorito": "Quitar de favoritos",
+    "comparar": "Comparar",
+    "meus_destaques": "Mis resaltados",
+    "meus_destaques_desc": "Versículos resaltados y favoritos, en todas las versiones.",
+    "meus_destaques_vazio": "Nada por aquí todavía. Toca un versículo en el lector para resaltarlo o guardarlo como favorito.",
+    "filtrar": "Filtrar",
+    "filtro_todos": "Todos",
+    "filtro_highlight": "Resaltados",
+    "filtro_favorite": "Favoritos",
+    "carregar_mais": "Cargar más",
+    "dica_selecionar": "Toca un versículo para seleccionar, resaltar, copiar o anotar.",
+    "limite_copia": "En la {{sigla}}, copia hasta {{max}} versículos a la vez.",
+    "copiado": "Copiado, con la referencia y el enlace.",
+    "link_copiado": "Enlace del pasaje copiado.",
+    "erro_copiar": "No se pudo copiar.",
+    "erro_salvar_marca": "No se pudo guardar. Inténtalo de nuevo.",
+    "erro_anotar": "No se pudo llevar el pasaje al Cuaderno."
   },
   "nav": {
     "inicio": "Inicio",
@@ -6763,7 +6803,9 @@
       "guia": "Guía de Markdown",
       "titulo4": "Título 4",
       "marca_texto": "Resaltador",
-      "cor_texto": "Color del texto"
+      "cor_texto": "Color del texto",
+      "recuo_mais": "Aumentar sangría",
+      "recuo_menos": "Reducir sangría"
     },
     "cmd_desc": {
       "texto": "Párrafo simple",
@@ -6789,7 +6831,9 @@
       "guia": "Lo que puedes hacer en el Cuaderno",
       "titulo4": "Subdivisión discreta",
       "marca_texto": "Fondo verde en el texto (== a cada lado)",
-      "cor_texto": "Verde, azul, rosa o grafito"
+      "cor_texto": "Verde, azul, rosa o grafito",
+      "recuo_mais": "Pone el elemento dentro del anterior (Tab)",
+      "recuo_menos": "Sube el elemento un nivel (Mayús + Tab)"
     },
     "imagem_descricao": "La imagen queda privada en tu nota.",
     "imagem_alt": "Descripción (opcional, para lectores de pantalla)",
@@ -6905,7 +6949,9 @@
         "k_titulo3": "Título 3",
         "k_titulo4": "Título 4 (Ctrl/⌘ + Alt + 1 a 4 para los demás)",
         "k_marca": "Resaltador",
-        "k_refazer": "Rehacer (Ctrl + Y en Windows; también el botón ↷)"
+        "k_refazer": "Rehacer (Ctrl + Y en Windows; también el botón ↷)",
+        "k_recuo_mais": "Aumentar sangría en una lista (viñetas, numerada o tareas). También con el botón de la barra.",
+        "k_recuo_menos": "Reducir la sangría del elemento. Fuera de una lista, Tab sigue moviendo el foco."
       },
       "amostra_codigo": "Salmo 23",
       "abre_menu": "menú de comandos",
@@ -6916,7 +6962,8 @@
       "propriedades": "Propiedades: filtra la lista de notas por tipo y por libro. Las plantillas pueden llenar el tipo.",
       "privacidade_imagens": "Las imágenes subidas son privadas. Solo aparecen a quien tiene el enlace privado de la nota o cuando publicas en la comunidad (va una copia).",
       "exportar": "Exportar .md: las propiedades se vuelven la cabecera YAML (frontmatter) y regresan al importar.",
-      "refaz": "rehace lo deshecho"
+      "refaz": "rehace lo deshecho",
+      "amostra_recuo_pai": "oración"
     },
     "desfazer": "Deshacer",
     "refazer": "Rehacer",
@@ -7239,7 +7286,8 @@
     "editar_nota": "Editar",
     "concluir_edicao": "Listo",
     "inserir_na_nota": "Insertar en la nota",
-    "n_notas_zero": "Ninguna nota"
+    "n_notas_zero": "Ninguna nota",
+    "compartilhar_nota_titulo": "Compartir la nota “{{titulo}}”"
   },
   "social": {
     "autor": {

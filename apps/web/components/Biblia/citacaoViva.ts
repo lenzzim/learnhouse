@@ -4,35 +4,32 @@
  * Os termos da API.Bible e da YouVersion não permitem guardar o texto
  * licenciado de forma permanente. Por isso o post guarda só a citação — um blockquote cujo texto é
  * "— João 3:16-18 (ARA)" — e, ao exibir, este widget (decoração do
- * ProseMirror, fora do documento salvo) busca o texto pelo proxy e o mostra
- * com o copyright, reportando o FUMS. Sem sessão (visitante, link /n/), no
+ * ProseMirror, fora do documento salvo) busca o texto pelo proxy e o mostra,
+ * reportando o FUMS. O copyright vai para o rodapé único da nota ou do post
+ * (decisão N43, RodapeCreditos.tsx), pelos atributos data-credito-*. Sem sessão (visitante, link /n/), no
  * limite diário ou com a versão desligada, mostra o texto da aberta do idioma
  * (BLIVRE) com o aviso ("Entre para ler na NVI. Mostrando a BLIVRE.").
  *
  * DOM puro (sem React): o ProseMirror ignora mutações dentro de widgets.
  */
 import i18n from 'i18next'
-import { codigoReferencia, interpretarReferencia, lerCodigoReferencia } from '@/lib/biblia/referencias'
+import { codigoReferencia, lerCodigoReferencia } from '@/lib/biblia/referencias'
+import { lerLinhaCitacao } from '@/lib/biblia/citacao'
 import { ErroFonte, getVersesComRecuo, rotuloVerso } from '@/lib/biblia/fontes'
 import { reportarFums } from '@/lib/biblia/fums'
-import { versaoPorId, versaoPorSigla } from '@/lib/biblia/versoes'
+import { versaoPorId } from '@/lib/biblia/versoes'
 
 export interface CitacaoLicenciada {
   codigo: string
   versao: string
 }
 
-const RE_CITACAO = /^\s*[—–-]\s*(.+?)\s*\(([A-Za-z0-9]{2,8})\)\s*$/
-
 /** "— João 3:16-18 (ARA)" (texto inteiro do blockquote) -> citação licenciada; senão null. */
 export function lerCitacaoLicenciada(texto: string): CitacaoLicenciada | null {
-  const m = RE_CITACAO.exec(texto)
-  if (!m) return null
-  const versao = versaoPorSigla(m[2])
-  if (versao?.fonte !== 'licenciada') return null
-  const ref = interpretarReferencia(m[1])
-  if (!ref || ref.versoIni === undefined) return null
-  return { codigo: codigoReferencia(ref), versao: versao.id }
+  // só o capítulo ("— 1 Pedro 1 (NVI)") também vale: mostra o capítulo inteiro
+  const lida = lerLinhaCitacao(texto)
+  if (!lida || lida.versao.fonte !== 'licenciada') return null
+  return { codigo: codigoReferencia(lida.ref), versao: lida.versao.id }
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, estilo: string, texto?: string): HTMLElementTagNameMap[K] {
@@ -69,7 +66,9 @@ export function criarCitacaoViva({ codigo, versao }: CitacaoLicenciada): HTMLEle
         p.appendChild(document.createTextNode(`${v.texto} `))
       }
       raiz.appendChild(p)
-      if (capitulo.copyrightCurto) raiz.appendChild(el('p', ESTILO_NOTA, capitulo.copyrightCurto))
+      // crédito: no rodapé único da nota/post (decisão N43), não em cada citação
+      raiz.dataset.creditoVersao = capitulo.versao
+      if (capitulo.copyright) raiz.dataset.creditoCompleto = capitulo.copyright
       if (recuo) {
         const para = versaoPorId(recuo.para)?.sigla ?? recuo.para.toUpperCase()
         const chave =

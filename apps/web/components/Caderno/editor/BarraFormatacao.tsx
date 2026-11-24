@@ -21,11 +21,14 @@ import {
   TextHFour,
   TextHThree,
   TextHTwo,
+  TextIndent,
   TextItalic,
+  TextOutdent,
 } from '@phosphor-icons/react'
 import { BotaoInserirVersiculo } from '@components/Biblia/BotaoInserirVersiculo'
 import { corValida, type Cor } from '@/lib/caderno/cores'
 import { abrirMenuComandos } from './barraComandos'
+import { podeRecuar, recuar } from './recuo'
 import { MenuCores } from './MenuCores'
 import { FOCO } from '../estilos'
 
@@ -37,7 +40,10 @@ import { FOCO } from '../estilos'
  *   citação; rola de lado se não couber) e **Inserir** (Bíblia, ligação,
  *   tag, "/", imagem, tabela). Alvos de 44 px; a Bíblia tem rótulo e fica
  *   longe da # (o toque errado entre as duas era o problema relatado).
- * - Computador: uma linha só, grupos separados por divisores.
+ * - Computador: uma linha, grupos separados por divisores; se a coluna da
+ *   nota ficar estreita (painel de estudo aberto a 1280 px), a barra quebra
+ *   em duas linhas em vez de rolar de lado (a barra de rolagem fina aparecia
+ *   no tema escuro, auditoria v4).
  *
  * O estado dos botões vem de useEditorState: a barra só re-renderiza quando
  * algo que ela mostra muda (não a cada tecla, como antes, quando o editor
@@ -108,6 +114,8 @@ export function BarraFormatacao({
       lista: ed.isActive('bulletList'),
       numerada: ed.isActive('orderedList'),
       tarefas: ed.isActive('taskList'),
+      recuoMais: podeRecuar(ed, 1),
+      recuoMenos: podeRecuar(ed, -1),
       citacao: ed.isActive('blockquote'),
       tabela: ed.isActive('table'),
     }),
@@ -122,13 +130,13 @@ export function BarraFormatacao({
     <div
       role="toolbar"
       aria-label={t('caderno.formatacao')}
-      className="flex flex-col border-b border-[var(--line)] lg:flex-row lg:items-center lg:gap-0.5 lg:overflow-x-auto lg:px-3 lg:py-1 lg:[scrollbar-width:none]"
+      className="flex flex-col border-b border-[var(--line)] lg:flex-row lg:flex-wrap lg:items-center lg:gap-0.5 lg:px-3 lg:py-1"
     >
       {/* Linha Texto */}
       <div
         role="group"
         aria-label={t('caderno_editor.barra_texto')}
-        className="flex items-center gap-0.5 overflow-x-auto px-2 py-0.5 [scrollbar-width:none] lg:contents"
+        className="caderno-barra-rolavel flex items-center gap-0.5 overflow-x-auto px-2 py-0.5 lg:contents"
       >
         <Botao rotulo={t('caderno_editor.desfazer')} desativado={!s.desfazer} onClick={() => c().undo().run()}>
           <ArrowUUpLeft size={icone} aria-hidden="true" />
@@ -180,6 +188,13 @@ export function BarraFormatacao({
         <Botao rotulo={t('caderno_editor.cmd.tarefas')} ativo={s.tarefas} onClick={() => c().toggleTaskList().run()}>
           <CheckSquare size={icone} aria-hidden="true" />
         </Botao>
+        {/* Recuo de listas (marcadores, numeradas e tarefas); desativado fora delas. Tab e Shift+Tab também. */}
+        <Botao rotulo={t('caderno_editor.cmd.recuo_menos')} desativado={!s.recuoMenos} onClick={() => recuar(editor, -1)}>
+          <TextOutdent size={icone} aria-hidden="true" className="rtl:-scale-x-100" />
+        </Botao>
+        <Botao rotulo={t('caderno_editor.cmd.recuo_mais')} desativado={!s.recuoMais} onClick={() => recuar(editor, 1)}>
+          <TextIndent size={icone} aria-hidden="true" className="rtl:-scale-x-100" />
+        </Botao>
         <Botao rotulo={t('caderno.citacao')} ativo={s.citacao} onClick={() => c().toggleBlockquote().run()}>
           <Quotes size={icone} aria-hidden="true" />
         </Botao>
@@ -191,7 +206,7 @@ export function BarraFormatacao({
       <div
         role="group"
         aria-label={t('caderno_editor.barra_inserir')}
-        className="flex items-center gap-0.5 overflow-x-auto border-t border-[var(--line-2)] px-2 py-0.5 [scrollbar-width:none] lg:contents"
+        className="caderno-barra-rolavel flex items-center gap-0.5 overflow-x-auto border-t border-[var(--line-2)] px-2 py-0.5 lg:contents"
       >
         <div className="caderno-inserir-versiculo shrink-0 me-3 lg:me-0">
           <BotaoInserirVersiculo
