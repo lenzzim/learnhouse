@@ -674,10 +674,30 @@ def indexar_referencias_discussoes():
     print(f"Discussões lidas: {lidas}; referências gravadas: {gravadas}")
 
 
+def _candidatas_biblia_dados() -> list:
+    """Onde os JSON das versões abertas costumam estar (repo e imagem Docker)."""
+    aqui = os.path.dirname(os.path.abspath(__file__))
+    return [c for c in [
+        os.environ.get("BIBLIA_DADOS", ""),
+        # repo (apps/api -> apps/web) e imagem (/app/api -> /app/web/public)
+        os.path.join(aqui, "..", "web", "public", "biblia-dados"),
+        "/app/web/public/biblia-dados",
+        # build standalone do Next, se alguém copiar o public para dentro dele
+        os.path.join(aqui, "..", "web", ".next", "standalone", "public", "biblia-dados"),
+    ] if c]
+
+
+def _achar_biblia_dados() -> str:
+    for c in _candidatas_biblia_dados():
+        if os.path.isfile(os.path.join(c, "catalogo.json")) or os.path.isdir(os.path.join(c, "blivre")):
+            return c
+    return ""
+
+
 @cli.command(name="indexar-biblia")
 def indexar_biblia(
     dados: Annotated[
-        str, typer.Option(help="Pasta biblia-dados (padrão: ../web/public/biblia-dados)")
+        str, typer.Option(help="Pasta biblia-dados (padrão: acha sozinho; BIBLIA_DADOS, ../web/public/biblia-dados ou /app/web/public/biblia-dados)")
     ] = "",
     versoes: Annotated[
         str, typer.Option(help="Versões abertas separadas por vírgula (padrão: todas)")
@@ -692,12 +712,11 @@ def indexar_biblia(
     """
     from src.services.biblia.busca import VERSOES_ABERTAS, indexar_versao
 
-    pasta = dados or os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "..", "web", "public", "biblia-dados"
-    )
-    if not os.path.isdir(pasta):
-        print(f"Pasta não encontrada: {pasta}")
+    pasta = dados or _achar_biblia_dados()
+    if not pasta or not os.path.isdir(pasta):
+        print(f"Pasta não encontrada: {pasta or ', '.join(_candidatas_biblia_dados())}")
         raise typer.Exit(code=1)
+    print(f"Lendo os JSON de: {os.path.normpath(pasta)}")
     lista = [v.strip().lower() for v in versoes.split(",") if v.strip()] or list(VERSOES_ABERTAS)
     for v in lista:
         if v not in VERSOES_ABERTAS:

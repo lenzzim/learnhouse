@@ -26,6 +26,15 @@ if [ -x /app/api/.venv/bin/alembic ]; then
     if [ -n "$ATUAL" ]; then
         echo "Migrações: banco em $ATUAL, aplicando até a head..."
         (cd /app/api && .venv/bin/alembic upgrade head) || echo "AVISO: migração automática falhou; veja o log acima."
+        # Busca por passagem: quando a versão do banco mudou (ex.: chegada da
+        # v5), refaz o índice de referências das discussões públicas. É
+        # idempotente e leve (só lê título e texto); tem limite de tempo e
+        # nunca impede a subida. A Bíblia (indexar-biblia) é pesada e fica manual.
+        NOVA=$(cd /app/api && .venv/bin/alembic current 2>/dev/null | grep -Eo '^[0-9a-f]{12}' | head -1)
+        if [ -n "$NOVA" ] && [ "$NOVA" != "$ATUAL" ]; then
+            echo "Busca: banco mudou de $ATUAL para $NOVA, indexando referências das discussões..."
+            (cd /app/api && timeout 180 .venv/bin/python cli.py indexar-referencias-discussoes)                 || echo "AVISO: indexação das referências falhou; rode cli.py indexar-referencias-discussoes à mão."
+        fi
     else
         echo "AVISO: banco sem versão do Alembic; migração automática pulada."
     fi
