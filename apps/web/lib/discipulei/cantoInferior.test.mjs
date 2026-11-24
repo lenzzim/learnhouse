@@ -46,3 +46,14 @@ test('nunca há dois donos e os ouvintes são avisados a cada troca', () => {
   soltarCanto('instalar')
   assert.deepEqual(trocas, ['estudo', 'instalar', null])
 })
+
+test('seleção de versículos toma o canto do convite e devolve depois', () => {
+  pedirCanto('instalar')
+  assert.equal(donoDoCanto(), 'instalar')
+  assert.equal(pedirCanto('selecao'), true)
+  assert.equal(donoDoCanto(), 'selecao')
+  soltarCanto('selecao')
+  assert.equal(donoDoCanto(), 'instalar')
+  soltarCanto('instalar')
+  assert.equal(donoDoCanto(), null)
+})

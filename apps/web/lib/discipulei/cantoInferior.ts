@@ -7,9 +7,16 @@
  *
  * Se os dois pedirem ao mesmo tempo, o convite de instalar vem primeiro.
  * Módulo puro (sem React) para ser testado no Node.
+ *
+ * A barra de seleção de versículos do leitor (`selecao`) usa o mesmo espaço e
+ * é uma ação da pessoa: ela toma o canto na hora (os convites somem) e, quando
+ * a seleção acaba, a vez volta para quem estava esperando.
  */
 
-export type DonoCanto = 'whatsapp' | 'instalar' | 'estudo'
+export type DonoCanto = 'whatsapp' | 'instalar' | 'estudo' | 'selecao'
+
+/** Donos que tomam o canto mesmo com outro aviso já visível. */
+const PREEMPTA: readonly DonoCanto[] = ['selecao']
 
 // O passo do grupo do WhatsApp (N42) é o da primeira entrada: vem antes.
 const PRIORIDADE: readonly DonoCanto[] = ['whatsapp', 'instalar', 'estudo']
@@ -20,7 +27,9 @@ const ouvintes = new Set<() => void>()
 
 function recalcular() {
   const antes = atual
-  if (!(atual && querem.has(atual))) {
+  const urgente = PREEMPTA.find((d) => querem.has(d))
+  if (urgente) atual = urgente
+  else if (!(atual && querem.has(atual))) {
     atual = PRIORIDADE.find((d) => querem.has(d)) ?? null
   }
   if (antes !== atual) ouvintes.forEach((f) => f())

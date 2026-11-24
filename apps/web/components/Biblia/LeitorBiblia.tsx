@@ -46,6 +46,7 @@ import { MeusDestaques } from './MeusDestaques'
 import { useMarcas } from './useMarcas'
 import { CHAVE_ULTIMO_CAPITULO } from '@/lib/discipulei/nav'
 import { CampoBuscaBiblia } from '@components/Busca/CampoBuscaBiblia'
+import { useCantoInferior } from '@components/Discipulei/useCantoInferior'
 
 /**
  * Leitor da Bíblia. Esquema de URL único em todo o app:
@@ -257,6 +258,9 @@ export default function LeitorBiblia() {
 
   // ---- seleção de versículos, destaques e favoritos (P0 do plano do leitor)
   const [selecao, setSelecao] = useState<number[]>([])
+  // A barra de seleção ocupa o canto inferior: os convites (instalar, estudo)
+  // saem enquanto há versículos selecionados e voltam depois.
+  useCantoInferior('selecao', selecao.length > 0)
   const [ancora, setAncora] = useState<number | null>(null)
   const [foco, setFoco] = useState<number | null>(null)
   const [listaAberta, setListaAberta] = useState(false)
