@@ -661,6 +661,52 @@ def purge_notes_trash(
     print(f"Notas apagadas da lixeira: {purged}")
 
 
+@cli.command(name="indexar-referencias-discussoes")
+def indexar_referencias_discussoes():
+    """Backfill do índice de passagens citadas nas discussões (busca por passagem).
+
+    Idempotente: refaz as referências de cada discussão pública (notas
+    privadas ficam fora). Nenhum conteúdo é impresso.
+    """
+    from src.services.search.passagens import reindexar_todas
+
+    lidas, gravadas = asyncio.run(_with_session(reindexar_todas))
+    print(f"Discussões lidas: {lidas}; referências gravadas: {gravadas}")
+
+
+@cli.command(name="indexar-biblia")
+def indexar_biblia(
+    dados: Annotated[
+        str, typer.Option(help="Pasta biblia-dados (padrão: ../web/public/biblia-dados)")
+    ] = "",
+    versoes: Annotated[
+        str, typer.Option(help="Versões abertas separadas por vírgula (padrão: todas)")
+    ] = "",
+):
+    """Carrega os versículos das versões ABERTAS no banco, para a busca por palavras.
+
+    Lê <dados>/<versao>/<USFM>.json (os mesmos JSON do leitor). Idempotente:
+    cada versão é apagada e recarregada; no PostgreSQL também gera o tsvector
+    (dicionário do idioma + unaccent) e o índice GIN. Texto licenciado nunca
+    entra aqui.
+    """
+    from src.services.biblia.busca import VERSOES_ABERTAS, indexar_versao
+
+    pasta = dados or os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "web", "public", "biblia-dados"
+    )
+    if not os.path.isdir(pasta):
+        print(f"Pasta não encontrada: {pasta}")
+        raise typer.Exit(code=1)
+    lista = [v.strip().lower() for v in versoes.split(",") if v.strip()] or list(VERSOES_ABERTAS)
+    for v in lista:
+        if v not in VERSOES_ABERTAS:
+            print(f"Ignorada (não é versão aberta): {v}")
+            continue
+        n = asyncio.run(_with_session(lambda db, v=v: indexar_versao(db, pasta, v)))
+        print(f"{v}: {n} versículos")
+
+
 @cli.command()
 def main():
     cli()
