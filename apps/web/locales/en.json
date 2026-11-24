@@ -6543,7 +6543,9 @@
     "citacao_completa": "Full quote",
     "citacao_completa_desc": "Block with the text and the reference",
     "mencao": "Reference only",
-    "mencao_desc": "\"Jn 3:16 (NIV)\" in the text, clickable"
+    "mencao_desc": "\"Jn 3:16 (NIV)\" in the text, clickable",
+    "limite_versiculos_aberta": "To embed the text, quote up to {{max}} verses at a time or the whole chapter (e.g. “Ps 23”). “Reference only” has no limit.",
+    "capitulo_inteiro_n": "Whole chapter ({{n}} verses)."
   },
   "nav": {
     "inicio": "Home",

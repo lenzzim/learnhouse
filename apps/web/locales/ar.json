@@ -6543,7 +6543,9 @@
     "citacao_completa": "اقتباس كامل",
     "citacao_completa_desc": "كتلة بالنص والمرجع",
     "mencao": "المرجع فقط",
-    "mencao_desc": "\"Jo 3:16 (NVI)\" داخل النص وقابل للنقر"
+    "mencao_desc": "\"Jo 3:16 (NVI)\" داخل النص وقابل للنقر",
+    "limite_versiculos_aberta": "لتضمين النص، اقتبس حتى {{max}} آية في كل مرة أو الأصحاح كاملًا (مثل “مز 23”). «المرجع فقط» بلا حد.",
+    "capitulo_inteiro_n": "الأصحاح كاملًا ({{n}} آية)."
   },
   "mfa": {
     "policy": {

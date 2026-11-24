@@ -17,7 +17,7 @@ import {
 import { carregarOriginal, carregarVerbete, hrefLeitor, type Versiculo } from '@/lib/biblia/dados'
 import { ehLicenciada, versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
 import { getVerses, getVersesComRecuo, rotuloVerso, type Capitulo, type Recuo } from '@/lib/biblia/fontes'
-import { blocoCitacao, textoDoBloco } from '@/lib/biblia/citacao'
+import { avaliarCitacao, blocoCitacao, MAX_VERSOS_EMBUTIR, textoDoBloco } from '@/lib/biblia/citacao'
 import { mensagemErroBiblia, useAcessoBiblia, useFums } from '@components/Biblia/useFonteBiblia'
 import { useBibliaIdioma, useNomesLivros } from '@components/Biblia/useBibliaIdioma'
 import { AvisoRecuo } from '@components/Biblia/AvisoRecuo'
@@ -116,9 +116,6 @@ type Estado =
   | { tipo: 'erro'; erro?: unknown }
   | { tipo: 'pronto'; versos: Versiculo[]; capitulo: Capitulo; comparar: Versiculo[]; capCmp: Capitulo | null; recuo?: Recuo }
 
-/** Mais que isto não vira citação de uma vez (como no painel "Inserir versículo"). */
-const MAX_VERSOS_CITACAO = 30
-
 function AbaBiblia() {
   const { t } = useTranslation()
   const c = useCaderno()
@@ -179,8 +176,11 @@ function AbaBiblia() {
 
   // "Inserir na nota" (item 2.3, computador): citação completa da passagem
   // no cursor da nota aberta. Licenciada: só a referência (texto ao vivo).
+  // Só o capítulo cita o capítulo inteiro; o limite vale só para embutir o
+  // texto de um intervalo de versão aberta (como no "Inserir versículo").
   const qtdVersos = estado.tipo === 'pronto' ? estado.versos.length : 0
-  const podeCitar = !!ref && ref.versoIni !== undefined && qtdVersos > 0 && qtdVersos <= MAX_VERSOS_CITACAO
+  const excede = !!ref && !!info && avaliarCitacao(ref, { modo: 'completa', licenciada: info.fonte === 'licenciada' }).excedeLimite
+  const podeCitar = !!ref && qtdVersos > 0 && !excede
   const inserirNaNota = () => {
     if (!ref || !info || estado.tipo !== 'pronto' || !podeCitar) return
     const licenciada = info.fonte === 'licenciada'
@@ -298,10 +298,8 @@ function AbaBiblia() {
               >
                 {t('caderno.inserir_na_nota')}
               </button>
-              {!podeCitar && (
-                <p className="text-xs text-[var(--text-3)]">
-                  {ref.versoIni === undefined ? t('biblia.informe_versiculo') : t('biblia.limite_versiculos', { max: MAX_VERSOS_CITACAO })}
-                </p>
+              {excede && (
+                <p className="text-xs text-[var(--text-3)]">{t('biblia.limite_versiculos_aberta', { max: MAX_VERSOS_EMBUTIR })}</p>
               )}
             </div>
           )}

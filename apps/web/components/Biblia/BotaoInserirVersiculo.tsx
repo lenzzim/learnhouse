@@ -8,7 +8,7 @@ import { formatarReferencia, interpretarReferencia } from '@/lib/biblia/referenc
 import { type Versiculo } from '@/lib/biblia/dados'
 import { VERSAO_PADRAO, versaoPorId } from '@/lib/biblia/versoes'
 import { getVersesComRecuo, rotuloVerso, type Capitulo, type Recuo } from '@/lib/biblia/fontes'
-import { blocoCitacao, modoValido, textoDoBloco, textoMencao, type ModoCitacao } from '@/lib/biblia/citacao'
+import { avaliarCitacao, blocoCitacao, MAX_VERSOS_EMBUTIR, modoValido, textoDoBloco, textoMencao, type ModoCitacao } from '@/lib/biblia/citacao'
 import { inserirCitacao, inserirMencao } from './citarNoEditor'
 import { AvisoRecuo } from './AvisoRecuo'
 import { SeletorVersao } from './SeletorVersao'
@@ -23,6 +23,9 @@ import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
  *   gravam SÓ a linha "— João 3:16-18 (NVI)" e quem lê vê o texto ao vivo
  *   (citacaoViva.ts), com o crédito. O texto licenciado nunca é gravado.
  * - Só a referência (menção): "Jo 3:16-18 (NVI)" no meio do texto, clicável.
+ * Só o capítulo ("1 Pe 1", "Sl 23") cita o capítulo inteiro. O limite de
+ * MAX_VERSOS_EMBUTIR vale só para embutir o texto de um intervalo de versão
+ * aberta (licenciada e menção gravam só a referência).
  * O modo e a versão escolhidos ficam lembrados (localStorage). Sem escolha,
  * a versão é a padrão: NVI para quem está logado (decisão N38).
  * Posição do painel:
@@ -33,7 +36,6 @@ import { useBibliaIdioma, useNomesLivros } from './useBibliaIdioma'
  *   celular. A altura respeita o teclado aberto (visualViewport).
  */
 
-const MAX_VERSOS = 30
 const LARGURA = 352
 const CHAVE_MODO = 'discipulei_citar_modo'
 const CHAVE_VERSAO = 'discipulei_citar_versao'
@@ -121,16 +123,17 @@ export function BotaoInserirVersiculo({
   const idEntrada = useId()
 
   const ref = useMemo(() => interpretarReferencia(entrada, idioma), [entrada, idioma])
-  const quantidade = ref && ref.versoIni !== undefined ? (ref.versoFim ?? ref.versoIni) - ref.versoIni + 1 : 0
+  const avaliacao = ref ? avaliarCitacao(ref, { modo, licenciada }) : null
   let aviso: string | null = null
   if (entrada.trim() && !ref) aviso = t('biblia.referencia_invalida')
-  else if (ref && ref.versoIni === undefined) aviso = t('biblia.informe_versiculo')
-  else if (quantidade > MAX_VERSOS) aviso = t('biblia.limite_versiculos', { max: MAX_VERSOS })
-  const valida = !!ref && !aviso
+  else if (avaliacao?.excedeLimite) aviso = t('biblia.limite_versiculos_aberta', { max: MAX_VERSOS_EMBUTIR })
+  // a prévia não depende do modo nem do limite: só da referência
+  const refValida = !!ref
+  const valida = refValida && !aviso
 
   // prévia do texto (com o cache do loader, repetir a busca é barato)
   useEffect(() => {
-    if (!valida || !ref) {
+    if (!refValida || !ref) {
       setPrevia({ tipo: 'vazio' })
       return
     }
@@ -144,7 +147,7 @@ export function BotaoInserirVersiculo({
     }
     // a referência é derivada de `entrada`
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entrada, valida, versao, acesso.logado])
+  }, [entrada, refValida, versao, acesso.logado])
   useFums(previa.tipo === 'pronto' ? [previa.capitulo.fums] : [])
 
   // mantém o painel dentro da viewport (a barra pode estar perto da borda)
@@ -341,6 +344,9 @@ export function BotaoInserirVersiculo({
                   <p className="mt-1 font-sans text-[0.7rem] text-[var(--text-3)]">{previa.capitulo.copyrightCurto}</p>
                 )}
               </blockquote>
+            )}
+            {!aviso && previa.tipo === 'pronto' && avaliacao?.capituloInteiro && (
+              <p className="mt-2 text-xs text-[var(--text-3)]">{t('biblia.capitulo_inteiro_n', { n: previa.versos.length })}</p>
             )}
             {!aviso && previa.tipo === 'pronto' && <AvisoRecuo recuo={previa.recuo} className="mt-2" />}
             {!aviso && licenciada && modo === 'completa' && previa.tipo === 'pronto' && (

@@ -6543,7 +6543,9 @@
     "citacao_completa": "Citação completa",
     "citacao_completa_desc": "Bloco com o texto e a referência",
     "mencao": "Só a referência",
-    "mencao_desc": "\"Jo 3:16 (NVI)\" no texto, clicável"
+    "mencao_desc": "\"Jo 3:16 (NVI)\" no texto, clicável",
+    "limite_versiculos_aberta": "Para embutir o texto, cite até {{max}} versículos por vez ou o capítulo inteiro (ex.: “Sl 23”). “Só a referência” não tem limite.",
+    "capitulo_inteiro_n": "Capítulo inteiro ({{n}} versículos)."
   },
   "nav": {
     "inicio": "Início",

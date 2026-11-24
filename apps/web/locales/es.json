@@ -6548,7 +6548,9 @@
     "citacao_completa": "Cita completa",
     "citacao_completa_desc": "Bloque con el texto y la referencia",
     "mencao": "Solo la referencia",
-    "mencao_desc": "\"Jn 3:16 (NVI)\" en el texto, con enlace"
+    "mencao_desc": "\"Jn 3:16 (NVI)\" en el texto, con enlace",
+    "limite_versiculos_aberta": "Para incrustar el texto, cita hasta {{max}} versículos a la vez o el capítulo entero (ej.: “Sal 23”). “Solo la referencia” no tiene límite.",
+    "capitulo_inteiro_n": "Capítulo entero ({{n}} versículos)."
   },
   "nav": {
     "inicio": "Inicio",

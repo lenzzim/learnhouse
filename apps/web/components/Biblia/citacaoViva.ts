@@ -12,27 +12,23 @@
  * DOM puro (sem React): o ProseMirror ignora mutações dentro de widgets.
  */
 import i18n from 'i18next'
-import { codigoReferencia, interpretarReferencia, lerCodigoReferencia } from '@/lib/biblia/referencias'
+import { codigoReferencia, lerCodigoReferencia } from '@/lib/biblia/referencias'
+import { lerLinhaCitacao } from '@/lib/biblia/citacao'
 import { ErroFonte, getVersesComRecuo, rotuloVerso } from '@/lib/biblia/fontes'
 import { reportarFums } from '@/lib/biblia/fums'
-import { versaoPorId, versaoPorSigla } from '@/lib/biblia/versoes'
+import { versaoPorId } from '@/lib/biblia/versoes'
 
 export interface CitacaoLicenciada {
   codigo: string
   versao: string
 }
 
-const RE_CITACAO = /^\s*[—–-]\s*(.+?)\s*\(([A-Za-z0-9]{2,8})\)\s*$/
-
 /** "— João 3:16-18 (ARA)" (texto inteiro do blockquote) -> citação licenciada; senão null. */
 export function lerCitacaoLicenciada(texto: string): CitacaoLicenciada | null {
-  const m = RE_CITACAO.exec(texto)
-  if (!m) return null
-  const versao = versaoPorSigla(m[2])
-  if (versao?.fonte !== 'licenciada') return null
-  const ref = interpretarReferencia(m[1])
-  if (!ref || ref.versoIni === undefined) return null
-  return { codigo: codigoReferencia(ref), versao: versao.id }
+  // só o capítulo ("— 1 Pedro 1 (NVI)") também vale: mostra o capítulo inteiro
+  const lida = lerLinhaCitacao(texto)
+  if (!lida || lida.versao.fonte !== 'licenciada') return null
+  return { codigo: codigoReferencia(lida.ref), versao: lida.versao.id }
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, estilo: string, texto?: string): HTMLElementTagNameMap[K] {
