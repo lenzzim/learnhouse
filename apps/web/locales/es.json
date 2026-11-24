@@ -1319,6 +1319,51 @@
       "tipo_specialization": "Especialización"
     }
   },
+  "busca": {
+    "tipos": {
+      "passagem": "Por pasaje",
+      "biblia": "Biblia"
+    },
+    "regra": {
+      "livro": "Publicaciones que citan cualquier pasaje de {{passagem}}.",
+      "capitulo": "Publicaciones que citan {{passagem}} o versículos de ese capítulo.",
+      "versiculo": "Publicaciones cuyas citas incluyen {{passagem}}.",
+      "intervalo": "Publicaciones que citan exactamente {{passagem}}."
+    },
+    "chip_passagem": "Pasaje: {{passagem}}",
+    "abrir_na_biblia": "Abrir en la Biblia",
+    "cita": "Cita {{citacoes}}",
+    "passagem_vazia": "Ninguna publicación cita {{passagem}} todavía.",
+    "biblia_vazia": "No se encontraron versículos para \"{{query}}\".",
+    "ver_todos_posts": "Ver todas las publicaciones de este pasaje",
+    "ver_todos_versiculos": "Ver todos los versículos",
+    "busca_avancada_biblia": "Buscar en la Biblia con filtros",
+    "ir_para": "Ir a {{passagem}}",
+    "texto_de": "texto de la {{versao}}",
+    "so_referencia": "Ábrelo para leer este pasaje.",
+    "paginacao": "Paginación",
+    "buscar_na_biblia": "Buscar en la Biblia",
+    "biblia_placeholder": "Palabras, \"frase exacta\" o referencia (Jn 3:16)",
+    "biblia_placeholder_curto": "Buscar en la Biblia",
+    "biblia_dica": "Usa comillas para una frase exacta, -palabra para excluir y pala* para variaciones. Las tildes son opcionales.",
+    "buscar": "Buscar",
+    "versao": "Versión",
+    "versoes_abertas": "Versiones abiertas",
+    "testamento": "Testamento",
+    "toda_biblia": "Toda la Biblia",
+    "livro": "Libro",
+    "todos_livros": "Todos los libros",
+    "ordem": "Orden",
+    "relevancia": "Relevancia",
+    "ordem_biblica": "Orden bíblico",
+    "buscando": "Buscando…",
+    "erro": "No se pudo buscar ahora. Inténtalo de nuevo en unos instantes.",
+    "n_versiculos_one": "{{count}} versículo",
+    "n_versiculos_other": "{{count}} versículos",
+    "recuo_youversion": "La búsqueda en la {{versao}} muestra el texto de la {{texto}}; al abrirlo, el pasaje aparece en la {{versao}}.",
+    "recuo_aberta": "La búsqueda en la {{versao}} no está disponible ahora; resultados de la {{texto}}. Al abrirlo, el pasaje aparece en la {{versao}}.",
+    "pagina_de": "Página {{pagina}} de {{total}}"
+  },
   "search": {
     "search_placeholder": "Buscar cursos, usuarios, colecciones...",
     "no_results_found": "No se encontraron resultados",

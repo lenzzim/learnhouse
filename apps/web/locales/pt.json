@@ -1319,6 +1319,51 @@
       "tipo_specialization": "Especialização"
     }
   },
+  "busca": {
+    "tipos": {
+      "passagem": "Por passagem",
+      "biblia": "Bíblia"
+    },
+    "regra": {
+      "livro": "Posts que citam qualquer passagem de {{passagem}}.",
+      "capitulo": "Posts que citam {{passagem}} ou versículos desse capítulo.",
+      "versiculo": "Posts cujas citações incluem {{passagem}}.",
+      "intervalo": "Posts que citam exatamente {{passagem}}."
+    },
+    "chip_passagem": "Passagem: {{passagem}}",
+    "abrir_na_biblia": "Abrir na Bíblia",
+    "cita": "Cita {{citacoes}}",
+    "passagem_vazia": "Nenhum post cita {{passagem}} por enquanto.",
+    "biblia_vazia": "Nenhum versículo encontrado para \"{{query}}\".",
+    "ver_todos_posts": "Ver todos os posts desta passagem",
+    "ver_todos_versiculos": "Ver todos os versículos",
+    "busca_avancada_biblia": "Buscar com filtros na Bíblia",
+    "ir_para": "Ir para {{passagem}}",
+    "texto_de": "texto da {{versao}}",
+    "so_referencia": "Abra para ler esta passagem.",
+    "paginacao": "Paginação",
+    "buscar_na_biblia": "Buscar na Bíblia",
+    "biblia_placeholder": "Palavras, \"frase exata\" ou referência (Jo 3:16)",
+    "biblia_placeholder_curto": "Buscar na Bíblia",
+    "biblia_dica": "Use aspas para frase exata, -palavra para excluir e pala* para variações. Acentos são opcionais.",
+    "buscar": "Buscar",
+    "versao": "Versão",
+    "versoes_abertas": "Versões abertas",
+    "testamento": "Testamento",
+    "toda_biblia": "Toda a Bíblia",
+    "livro": "Livro",
+    "todos_livros": "Todos os livros",
+    "ordem": "Ordem",
+    "relevancia": "Relevância",
+    "ordem_biblica": "Ordem bíblica",
+    "buscando": "Buscando…",
+    "erro": "Não foi possível buscar agora. Tente de novo em instantes.",
+    "n_versiculos_one": "{{count}} versículo",
+    "n_versiculos_other": "{{count}} versículos",
+    "recuo_youversion": "A busca na {{versao}} mostra o texto da {{texto}}; ao abrir, a passagem aparece na {{versao}}.",
+    "recuo_aberta": "A busca na {{versao}} não está disponível agora; resultados da {{texto}}. Ao abrir, a passagem aparece na {{versao}}.",
+    "pagina_de": "Página {{pagina}} de {{total}}"
+  },
   "search": {
     "search_placeholder": "Buscar cursos, usuários, coleções...",
     "no_results_found": "Nenhum resultado encontrado",

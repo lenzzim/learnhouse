@@ -1766,6 +1766,51 @@
       "tipo_specialization": "Specialization"
     }
   },
+  "busca": {
+    "tipos": {
+      "passagem": "By passage",
+      "biblia": "Bible"
+    },
+    "regra": {
+      "livro": "Posts that cite any passage of {{passagem}}.",
+      "capitulo": "Posts that cite {{passagem}} or verses in that chapter.",
+      "versiculo": "Posts whose citations include {{passagem}}.",
+      "intervalo": "Posts that cite exactly {{passagem}}."
+    },
+    "chip_passagem": "Passage: {{passagem}}",
+    "abrir_na_biblia": "Open in the Bible",
+    "cita": "Cites {{citacoes}}",
+    "passagem_vazia": "No posts cite {{passagem}} yet.",
+    "biblia_vazia": "No verses found for \"{{query}}\".",
+    "ver_todos_posts": "See all posts for this passage",
+    "ver_todos_versiculos": "See all verses",
+    "busca_avancada_biblia": "Search the Bible with filters",
+    "ir_para": "Go to {{passagem}}",
+    "texto_de": "{{versao}} text",
+    "so_referencia": "Open to read this passage.",
+    "paginacao": "Pagination",
+    "buscar_na_biblia": "Search the Bible",
+    "biblia_placeholder": "Words, \"exact phrase\" or reference (John 3:16)",
+    "biblia_placeholder_curto": "Search the Bible",
+    "biblia_dica": "Use quotes for an exact phrase, -word to exclude and wor* for variations. Accents are optional.",
+    "buscar": "Search",
+    "versao": "Version",
+    "versoes_abertas": "Open versions",
+    "testamento": "Testament",
+    "toda_biblia": "Whole Bible",
+    "livro": "Book",
+    "todos_livros": "All books",
+    "ordem": "Order",
+    "relevancia": "Relevance",
+    "ordem_biblica": "Biblical order",
+    "buscando": "Searching…",
+    "erro": "Search is unavailable right now. Please try again shortly.",
+    "n_versiculos_one": "{{count}} verse",
+    "n_versiculos_other": "{{count}} verses",
+    "recuo_youversion": "Searching {{versao}} shows the {{texto}} text; when opened, the passage appears in {{versao}}.",
+    "recuo_aberta": "Search in {{versao}} is unavailable right now; showing {{texto}} results. When opened, the passage appears in {{versao}}.",
+    "pagina_de": "Page {{pagina}} of {{total}}"
+  },
   "search": {
     "search_placeholder": "Search courses, users, folders...",
     "no_results_found": "No results found",
