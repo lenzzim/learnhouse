@@ -66,6 +66,16 @@ class CommunityOrgSettings(SQLModel, table=True):
         default=None,
         sa_column=Column(Integer, ForeignKey("usergroup.id", ondelete="SET NULL"), nullable=True),
     )
+    # Agenda: grupo de organizadores de eventos (ex.: "Discípulos"). Enquanto
+    # ``organizers_configured`` for False, vale o grupo chamado "Discípulos"
+    # (se existir); depois que o admin salva, vale só o que ele escolheu.
+    organizers_usergroup_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("usergroup.id", ondelete="SET NULL"), nullable=True),
+    )
+    organizers_configured: bool = Field(
+        default=False, sa_column=Column(Boolean, nullable=False, default=False, server_default="false")
+    )
     # Vazio = usa o env (DISCIPULEI_WHATSAPP_*); sem env, o grupo fica sem link.
     whatsapp_men_url: str = Field(
         default="", sa_column=Column(String(300), nullable=False, default="", server_default="")

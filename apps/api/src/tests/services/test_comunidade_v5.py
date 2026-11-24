@@ -446,6 +446,10 @@ async def test_batepapo_link_oculto_para_visitante(db, mundo):
         _nome, ics = await batepapos.event_ics(db, quem, ev.event_uuid)
         assert "meet.google.com" not in ics
 
+    # Agenda: o link só depois do "Vou" (antes valia para qualquer membro).
+    membro = await batepapos.get_event(db, m["membro"], ev.event_uuid)
+    assert membro.meeting_url is None and membro.details_locked is True
+    await batepapos.set_rsvp(db, m["membro"], ev.event_uuid, "vou")
     membro = await batepapos.get_event(db, m["membro"], ev.event_uuid)
     assert membro.meeting_url == "https://meet.google.com/abc-defg-hij"
 
@@ -454,6 +458,7 @@ async def test_batepapo_ics(db, mundo):
     m, org = mundo, mundo["org"]
     ev = await batepapos.create_event(_req(), db, m["admin"], org.id,
                                       _evento(starts_at="2030-01-10T20:00:00", title="Bate-papo; Romanos, 8"))
+    await batepapos.set_rsvp(db, m["membro"], ev.event_uuid, "vou")
     nome, ics = await batepapos.event_ics(db, m["membro"], ev.event_uuid)
     assert nome.endswith(".ics")
     assert ics.startswith("BEGIN:VCALENDAR\r\n")
@@ -569,9 +574,9 @@ async def test_batepapo_lembrete_aparece_nas_notificacoes(db, mundo):
     await social.mark_notifications_read(db, m["membro"], org.id)
     assert await social.unread_count(_req(), db, m["membro"], org.id) == 0
 
-    # Mudar o horário descarta os lembretes antigos.
+    # Mudar o horário descarta os lembretes antigos e deixa um aviso de mudança.
     await batepapos.update_event(db, m["admin"], ev.event_uuid, EventUpdate(starts_at=_em(3 * 24 * 60)))
-    assert await social.list_notifications(_req(), db, m["membro"], org.id) == []
+    assert [n.kind for n in await social.list_notifications(_req(), db, m["membro"], org.id)] == ["event_changed"]
 
 
 async def test_batepapo_divulgacao_vira_post_no_espaco(db, mundo):
@@ -579,7 +584,7 @@ async def test_batepapo_divulgacao_vira_post_no_espaco(db, mundo):
     ev = await batepapos.create_event(_req(), db, m["autora"], org.id, _evento(announce_community_uuid=C_BLOG))
     assert ev.announcement_community_uuid == C_BLOG
     post = await get_discussion(_req(), ev.announcement_discussion_uuid, m["membro"], db)
-    assert post.title.startswith("Bate-papo:")
+    assert post.title.startswith("Agenda:")
     assert "meet.google.com" not in (post.content or "")
     # Autor não publica em espaço que não é dele: nada é criado.
     antes = len(await batepapos.list_events(db, m["admin"], org.id))

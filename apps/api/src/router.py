@@ -259,11 +259,19 @@ v1_router.include_router(
     tags=["social"],
     dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
 )
-# Bate-papo Online (Bible Talk, N45).
+# Agenda de eventos (antes Bate-papo Online, N45). ``/batepapos`` continua
+# servindo as mesmas rotas para clientes antigos (PWA em cache).
+v1_router.include_router(
+    batepapos_router_module.router,
+    prefix="/agenda",
+    tags=["agenda"],
+    dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
+)
 v1_router.include_router(
     batepapos_router_module.router,
     prefix="/batepapos",
-    tags=["batepapos"],
+    tags=["agenda"],
+    include_in_schema=False,
     dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
 )
 # Caderno Bíblico: sem gate de plano. Cada rota exige sessão de pessoa (exceto
