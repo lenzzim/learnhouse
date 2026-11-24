@@ -2,13 +2,14 @@
 
 import React, { useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { Check, Copy, Globe, LinkSimple, Warning } from '@phosphor-icons/react'
 import { FolhaInferior } from '@components/Discipulei/Navegacao/FolhaInferior'
 import { useDadosNav } from '@components/Discipulei/Navegacao/useDadosNav'
 import { caminhoDiscussao } from '@components/Discipulei/Navegacao/estilos'
 import { getUriWithOrg } from '@services/config/config'
+import { getCommunityRights } from '@services/communities/communities'
 import {
   criarLink,
   listarLinks,
@@ -41,7 +42,24 @@ export function DialogoCompartilhar({
 }) {
   const { t } = useTranslation()
   const c = useCaderno()
-  const { comunidades } = useDadosNav()
+  const { comunidades: todasComunidades } = useDadosNav()
+  // Blog só para autores (N45): espaços com "quem pode publicar" = grupo só
+  // entram na lista se a pessoa pode publicar lá (o servidor diz, pelos rights).
+  const restritas = todasComunidades.filter((x) => x.moderation_settings?.post_policy === 'group')
+  const direitos = useQueries({
+    queries: restritas.map((x) => ({
+      queryKey: ['discipulei', 'caderno', 'pode-publicar', x.community_uuid, !!c.token],
+      queryFn: () => getCommunityRights(x.community_uuid, c.token),
+      enabled: aberto && !!c.token,
+      staleTime: 5 * 60_000,
+    })),
+  })
+  const podeEm = new Map(
+    restritas.map((x, i) => [x.community_uuid, direitos[i]?.data?.permissions?.create_discussion === true]),
+  )
+  const comunidades = todasComunidades.filter(
+    (x) => x.moderation_settings?.post_policy !== 'group' || podeEm.get(x.community_uuid),
+  )
   const [escopo, setEscopo] = useState<EscopoLink>('anyone_with_link')
   const [novoLink, setNovoLink] = useState<string | null>(null)
   const [copiado, setCopiado] = useState(false)
@@ -115,7 +133,13 @@ export function DialogoCompartilhar({
       aoAtualizar()
       toast.success(t('caderno.publicada'))
     } catch (e: any) {
-      toast.error(typeof e?.message === 'string' && e.status !== 500 ? e.message : t('caderno.erro_publicar'))
+      if (e?.status === 403 && e?.detail?.code === 'COMMUNITY_POST_RESTRICTED') {
+        toast.error(t('caderno.erro_publicar_restrito'))
+        setComunidade('')
+        setConfirmou(false)
+      } else {
+        toast.error(typeof e?.message === 'string' && e.status !== 500 ? e.message : t('caderno.erro_publicar'))
+      }
     } finally {
       setOcupado(false)
     }
