@@ -37,6 +37,10 @@ function Resultado({ previa, amostra }: { previa: Previa; amostra?: string }) {
       return <ul><li>{a}</li></ul>
     case 'numerada':
       return <ol><li>{a}</li></ol>
+    case 'recuo_mais':
+      return <ul><li>{t('caderno_editor.guia.amostra_recuo_pai')}<ul><li>{a}</li></ul></li></ul>
+    case 'recuo_menos':
+      return <ul><li>{t('caderno_editor.guia.amostra_recuo_pai')}</li><li>{a}</li></ul>
     case 'tarefa':
     case 'tarefa_feita':
       return (

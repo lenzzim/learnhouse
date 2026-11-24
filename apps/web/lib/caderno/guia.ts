@@ -28,6 +28,7 @@ export type Previa =
   | 'citacao' | 'destaque' | 'divisor' | 'bloco_codigo'
   | 'ligacao' | 'tag' | 'referencia' | 'referencia_versao'
   | 'imagem' | 'video' | 'tabela' | 'propriedades' | 'menu' | 'quebra' | 'desfazer' | 'refazer'
+  | 'recuo_mais' | 'recuo_menos'
 
 export interface ExemploGuia {
   id: string
@@ -128,6 +129,8 @@ export const ATALHOS_TECLADO: ExemploGuia[] = [
   { id: 'k_lista', digitar: 'Mod-Shift-8', amostra: 'oração', previa: 'lista', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-8', no: 'bulletList' } },
   { id: 'k_numerada', digitar: 'Mod-Shift-7', amostra: 'ler', previa: 'numerada', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-7', no: 'orderedList' } },
   { id: 'k_tarefas', digitar: 'Mod-Shift-9', amostra: 'ler Rute', previa: 'tarefa', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-9', no: 'taskList' } },
+  { id: 'k_recuo_mais', digitar: 'Tab', amostra: 'graça', previa: 'recuo_mais', verificar: { tipo: 'atalho', tecla: 'Tab' } },
+  { id: 'k_recuo_menos', digitar: 'Shift-Tab', amostra: 'graça', previa: 'recuo_menos', verificar: { tipo: 'atalho', tecla: 'Shift-Tab' } },
   { id: 'k_citacao', digitar: 'Mod-Shift-b', amostra: 'Deus é amor', previa: 'citacao', verificar: { tipo: 'atalho', tecla: 'Mod-Shift-b', no: 'blockquote' } },
   { id: 'k_quebra', digitar: 'Shift-Enter', previa: 'quebra', verificar: { tipo: 'atalho', tecla: 'Shift-Enter', no: 'hardBreak' } },
   { id: 'k_desfazer', digitar: 'Mod-z', previa: 'desfazer', verificar: { tipo: 'atalho', tecla: 'Mod-z' } },

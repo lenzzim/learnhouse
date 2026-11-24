@@ -17,6 +17,8 @@ export type IdComando =
   | 'lista'
   | 'lista_numerada'
   | 'tarefas'
+  | 'recuo_mais'
+  | 'recuo_menos'
   | 'marca_texto'
   | 'cor_texto'
   | 'citacao'
@@ -52,6 +54,8 @@ export const COMANDOS: Comando[] = [
   { id: 'lista', grupo: 'basico', atalho: '-', palavras: ['lista', 'marcadores', 'bullet', 'list', 'topicos', 'vinetas'] },
   { id: 'lista_numerada', grupo: 'basico', atalho: '1.', palavras: ['lista', 'numerada', 'numbered', 'ordered', 'ordenada', 'numeros'] },
   { id: 'tarefas', grupo: 'basico', atalho: '[ ]', palavras: ['tarefa', 'tarefas', 'checkbox', 'todo', 'task', 'checklist', 'caixa', 'tareas', 'pendente'] },
+  { id: 'recuo_mais', grupo: 'basico', atalho: 'Tab', palavras: ['recuo', 'recuar', 'aumentar', 'indent', 'sangria', 'aninhar', 'subitem', 'tab'] },
+  { id: 'recuo_menos', grupo: 'basico', atalho: '⇧Tab', palavras: ['recuo', 'diminuir', 'outdent', 'desrecuar', 'sangria', 'reducir'] },
   { id: 'marca_texto', grupo: 'basico', atalho: '==', palavras: ['marca', 'marca-texto', 'marcatexto', 'destacar', 'grifar', 'highlight', 'resaltar', 'realce', 'fundo'] },
   { id: 'cor_texto', grupo: 'basico', palavras: ['cor', 'colorir', 'color', 'colour', 'texto', 'pintar', 'verde', 'azul', 'rosa', 'grafite'] },
   { id: 'citacao', grupo: 'blocos', atalho: '>', palavras: ['citacao', 'quote', 'blockquote', 'cita', 'citar'] },

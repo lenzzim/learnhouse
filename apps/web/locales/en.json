@@ -6760,7 +6760,9 @@
       "guia": "Markdown guide",
       "titulo4": "Heading 4",
       "marca_texto": "Highlight",
-      "cor_texto": "Text color"
+      "cor_texto": "Text color",
+      "recuo_mais": "Increase indent",
+      "recuo_menos": "Decrease indent"
     },
     "cmd_desc": {
       "texto": "Plain paragraph",
@@ -6786,7 +6788,9 @@
       "guia": "What you can do in the Notebook",
       "titulo4": "Subtle subsection",
       "marca_texto": "Green background (== on each side)",
-      "cor_texto": "Green, blue, pink or graphite"
+      "cor_texto": "Green, blue, pink or graphite",
+      "recuo_mais": "Nest the item under the previous one (Tab)",
+      "recuo_menos": "Move the item up one level (Shift + Tab)"
     },
     "imagem_descricao": "The image stays private in your note.",
     "imagem_alt": "Description (optional, for screen readers)",
@@ -6902,7 +6906,9 @@
         "k_titulo3": "Heading 3",
         "k_titulo4": "Heading 4 (Ctrl/⌘ + Alt + 1 to 4 for the others)",
         "k_marca": "Highlight",
-        "k_refazer": "Redo (Ctrl + Y on Windows; also the ↷ button)"
+        "k_refazer": "Redo (Ctrl + Y on Windows; also the ↷ button)",
+        "k_recuo_mais": "Increase indent in a list (bulleted, numbered or tasks). Also with the toolbar button.",
+        "k_recuo_menos": "Decrease the item's indent. Outside a list, Tab still moves focus."
       },
       "amostra_codigo": "Psalm 23",
       "abre_menu": "command menu",
@@ -6913,7 +6919,8 @@
       "propriedades": "Properties: filter the note list by type and by book. Templates can fill in the type.",
       "privacidade_imagens": "Uploaded images are private. They only show to people with the note’s private link or when you publish to the community (a copy goes along).",
       "exportar": "Export .md: properties become the YAML header (frontmatter) and come back when you import.",
-      "refaz": "redoes what was undone"
+      "refaz": "redoes what was undone",
+      "amostra_recuo_pai": "prayer"
     },
     "desfazer": "Undo",
     "refazer": "Redo",

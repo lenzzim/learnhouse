@@ -61,6 +61,7 @@ import { criarBarraComandos, type OpcoesBarraComandos } from './editor/barraComa
 import { BarraFormatacao } from './editor/BarraFormatacao'
 import { renderizadorMenuComandos } from './editor/MenuComandos'
 import { extensoesConteudoCaderno } from './editor/extensoesConteudo'
+import { podeRecuar, RecuoListas } from './editor/recuo'
 import { criarCarregadorAnexos } from './editor/carregadorAnexos'
 import { DialogoImagem, DialogoVideo } from './DialogosMidia'
 import { BlocoPropriedades } from './Propriedades'
@@ -73,6 +74,15 @@ import { SeloVisibilidade } from './SeloVisibilidade'
 import { opcoesColecoes, useColecoes } from './ArvoreColecoes'
 import { hrefCaderno } from './PainelEsquerdo'
 import { BOTAO_SECUNDARIO, CAMPO, FOCO, ICONE_PEQUENO, SERIF } from './estilos'
+
+/** Comandos do menu "/" que fazem sentido onde está o cursor (recuo só numa lista). */
+function comandosAplicaveis(editor: Editor | null) {
+  return COMANDOS.filter((cmd) => {
+    if (cmd.id === 'recuo_mais') return !!editor && podeRecuar(editor, 1)
+    if (cmd.id === 'recuo_menos') return !!editor && podeRecuar(editor, -1)
+    return true
+  })
+}
 
 type Status = 'salvo' | 'salvando' | 'pendente' | 'offline' | 'erro'
 
@@ -447,7 +457,7 @@ export function EditorNota({
   const opcoesComandos = useCallback(
     (): OpcoesBarraComandos => ({
       itens: (consulta) =>
-        filtrarComandos(COMANDOS, consulta, (cmd) => t(`caderno_editor.cmd.${cmd.id}`)).map((cmd) => ({
+        filtrarComandos(comandosAplicaveis(vivo.current.editor), consulta, (cmd) => t(`caderno_editor.cmd.${cmd.id}`)).map((cmd) => ({
           id: cmd.id,
           rotulo: t(`caderno_editor.cmd.${cmd.id}`),
           descricao: t(`caderno_editor.cmd_desc.${cmd.id}`),
@@ -509,6 +519,7 @@ export function EditorNota({
       LigacoesETags,
       criarSugestoes(() => fontesRef.current()),
       criarBarraComandos(() => comandosRef.current()),
+      RecuoListas,
     ],
     [] // eslint-disable-line react-hooks/exhaustive-deps
   )

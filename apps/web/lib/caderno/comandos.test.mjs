@@ -30,6 +30,8 @@ const ROTULOS = {
   modelo: 'Modelo',
   propriedade: 'Propriedade',
   guia: 'Guia de Markdown',
+  recuo_mais: 'Aumentar recuo',
+  recuo_menos: 'Diminuir recuo',
 }
 const rotulo = (c) => ROTULOS[c.id]
 const ids = (q) => filtrarComandos(COMANDOS, q, rotulo).map((c) => c.id)

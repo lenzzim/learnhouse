@@ -21,11 +21,14 @@ import {
   TextHFour,
   TextHThree,
   TextHTwo,
+  TextIndent,
   TextItalic,
+  TextOutdent,
 } from '@phosphor-icons/react'
 import { BotaoInserirVersiculo } from '@components/Biblia/BotaoInserirVersiculo'
 import { corValida, type Cor } from '@/lib/caderno/cores'
 import { abrirMenuComandos } from './barraComandos'
+import { podeRecuar, recuar } from './recuo'
 import { MenuCores } from './MenuCores'
 import { FOCO } from '../estilos'
 
@@ -108,6 +111,8 @@ export function BarraFormatacao({
       lista: ed.isActive('bulletList'),
       numerada: ed.isActive('orderedList'),
       tarefas: ed.isActive('taskList'),
+      recuoMais: podeRecuar(ed, 1),
+      recuoMenos: podeRecuar(ed, -1),
       citacao: ed.isActive('blockquote'),
       tabela: ed.isActive('table'),
     }),
@@ -179,6 +184,13 @@ export function BarraFormatacao({
         </Botao>
         <Botao rotulo={t('caderno_editor.cmd.tarefas')} ativo={s.tarefas} onClick={() => c().toggleTaskList().run()}>
           <CheckSquare size={icone} aria-hidden="true" />
+        </Botao>
+        {/* Recuo de listas (marcadores, numeradas e tarefas); desativado fora delas. Tab e Shift+Tab também. */}
+        <Botao rotulo={t('caderno_editor.cmd.recuo_menos')} desativado={!s.recuoMenos} onClick={() => recuar(editor, -1)}>
+          <TextOutdent size={icone} aria-hidden="true" className="rtl:-scale-x-100" />
+        </Botao>
+        <Botao rotulo={t('caderno_editor.cmd.recuo_mais')} desativado={!s.recuoMais} onClick={() => recuar(editor, 1)}>
+          <TextIndent size={icone} aria-hidden="true" className="rtl:-scale-x-100" />
         </Botao>
         <Botao rotulo={t('caderno.citacao')} ativo={s.citacao} onClick={() => c().toggleBlockquote().run()}>
           <Quotes size={icone} aria-hidden="true" />

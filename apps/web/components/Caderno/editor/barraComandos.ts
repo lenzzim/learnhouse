@@ -10,6 +10,7 @@ import { Extension, type Editor, type Range } from '@tiptap/core'
 import { PluginKey } from '@tiptap/pm/state'
 import Suggestion, { exitSuggestion, type SuggestionOptions } from '@tiptap/suggestion'
 import type { IdComando } from '@/lib/caderno/comandos'
+import { recuar } from './recuo'
 
 export const CHAVE_COMANDOS = new PluginKey('cadernoComandos')
 
@@ -59,6 +60,10 @@ export function executarComando(editor: Editor, id: IdComando, range: Range | nu
       return c.toggleOrderedList().run()
     case 'tarefas':
       return c.toggleTaskList().run()
+    case 'recuo_mais':
+    case 'recuo_menos':
+      c.run()
+      return recuar(editor, id === 'recuo_mais' ? 1 : -1)
     case 'marca_texto':
       return c.toggleMarcaTexto().run()
     case 'citacao':
