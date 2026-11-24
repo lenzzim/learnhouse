@@ -141,19 +141,19 @@ async def is_author(db: AsyncSession, user_id: int, org_id: int, row: Optional[C
 
 
 async def can_manage_events(db: AsyncSession, user_id: int, org_id: int) -> bool:
-    """Admins, mantenedores e o grupo de autores criam e editam bate-papos."""
-    if not user_id:
-        return False
-    if await _is_admin(db, user_id, org_id):
-        return True
-    return await is_author(db, user_id, org_id)
+    """Quem cria eventos na Agenda: admins, mantenedores, grupo de autores
+    (Equipe) e grupo de organizadores (Discípulos). Editar um evento é só de
+    quem o criou, admins e Equipe (ver ``batepapos.py``)."""
+    from src.services.communities.agenda import can_create_events
+
+    return await can_create_events(db, user_id, org_id)
 
 
 async def get_config(db: AsyncSession, current_user: CurrentUser, org_id: int) -> CommunityConfigRead:
     viewer_id = await _require_member(db, current_user, org_id)
     row = await get_org_settings_row(db, org_id)
     author = await is_author(db, viewer_id, org_id, row)
-    manage = author or await _is_admin(db, viewer_id, org_id)
+    manage = author or await can_manage_events(db, viewer_id, org_id)
     return CommunityConfigRead(is_author=author, can_manage_events=manage, whatsapp=whatsapp_configured(row))
 
 

@@ -9,7 +9,12 @@ sentido com o envio de e-mail do LearnHouse configurado (Resend ou SMTP).
 Cada lembrete é criado uma única vez (índice único por pessoa, encontro e
 tipo), então várias réplicas acordando juntas não mandam e-mail repetido: só
 quem cria a notificação envia. Sai e-mail para "falta 1 dia" e "começa em 15
-minutos"; o "Começou!" fica só no app.
+minutos"; o "Começou!" fica só no app. O aviso de cancelamento sai na hora em
+que o evento é cancelado (``send_cancellation``), com a mesma flag.
+
+Opt-out por pessoa: ``community_agenda_pref.email_reminders`` (padrão ligado;
+a pessoa desliga em "Minha agenda", na página da Agenda). O e-mail nunca leva
+endereço nem link da reunião: só título, data e o caminho da agenda.
 """
 
 from __future__ import annotations
@@ -42,6 +47,7 @@ async def run_tick() -> int:
         CommunityEventRsvp,
     )
     from src.db.users import User
+    from src.services.communities.agenda import email_opted_out
     from src.services.communities.batepapos import fmt_utc, generate_due_reminders, parse_utc, utcnow
 
     now = utcnow()
@@ -54,6 +60,7 @@ async def run_tick() -> int:
                 CommunityEventRsvp.status.in_(RSVP_STATUSES),  # type: ignore[attr-defined]
                 CommunityEvent.starts_at >= fmt_utc(now - timedelta(minutes=DURATION_MAX)),
                 CommunityEvent.starts_at <= fmt_utc(now + timedelta(days=1)),
+                CommunityEvent.status != "cancelled",
             )
             .distinct()
         )).scalars().all()
@@ -67,7 +74,7 @@ async def run_tick() -> int:
                 continue
             for n in to_mail:
                 ev = (await db.execute(select(CommunityEvent).where(CommunityEvent.id == n.event_id))).scalars().first()
-                if not ev:
+                if not ev or await email_opted_out(db, uid, ev.org_id):
                     continue
                 try:
                     _send(user.email, ev, n.kind == NOTIFICATION_EVENT_15M, parse_utc)
@@ -87,11 +94,31 @@ def _send(to: str, ev, soon: bool, parse_utc) -> None:
     titulo = html.escape(ev.title)
     assunto = f"Começa em 15 minutos: {ev.title}" if soon else f"Amanhã: {ev.title}"
     corpo = (
-        f"<p>Lembrete do bate-papo <strong>{titulo}</strong>.</p>"
+        f"<p>Lembrete do evento <strong>{titulo}</strong>.</p>"
         f"<p>{html.escape(quando)} ({html.escape(ev.timezone or '')}).</p>"
-        "<p>O link para entrar está na agenda do app.</p>"
+        "<p>Endereço e link estão na Agenda do app (só para quem confirmou).</p>"
+        "<p style=\"color:#666;font-size:12px\">Para não receber estes e-mails, desligue"
+        " \"Lembretes por e-mail\" em Agenda &gt; Minha agenda.</p>"
     )
     send_email(to=to, subject=assunto, body=corpo)
+
+
+def send_cancellation(to: str, ev) -> None:
+    """Aviso de cancelamento (síncrono; quem chama roda numa thread)."""
+    from zoneinfo import ZoneInfo
+
+    from src.services.communities.batepapos import parse_utc
+    from src.services.email.utils import send_email
+
+    start = parse_utc(ev.starts_at).astimezone(ZoneInfo(ev.timezone or "America/Sao_Paulo"))
+    quando = start.strftime("%d/%m/%Y às %H:%M")
+    corpo = (
+        f"<p>O evento <strong>{html.escape(ev.title)}</strong>, marcado para"
+        f" {html.escape(quando)}, foi <strong>cancelado</strong>.</p>"
+        "<p style=\"color:#666;font-size:12px\">Para não receber estes e-mails, desligue"
+        " \"Lembretes por e-mail\" em Agenda &gt; Minha agenda.</p>"
+    )
+    send_email(to=to, subject=f"Cancelado: {ev.title}", body=corpo)
 
 
 async def _loop() -> None:

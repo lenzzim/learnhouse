@@ -7,8 +7,8 @@ import {
   ArrowUpRight,
   BellSimple,
   BookmarkSimple,
+  CalendarBlank,
   CalendarCheck,
-  ChatsCircle,
   CaretUpDown,
   Globe,
   GraduationCap,
@@ -39,9 +39,9 @@ import { FOCO } from './estilos'
 import { ROTA_NOTIFICACOES, ROTA_PESSOAS, useNaoLidas } from '../Social/comum'
 import { abrirPassoWhatsapp, useMeuWhatsapp } from '../WhatsApp/comum'
 
-/** Rotas da v5: salvos (N44) e agenda de bate-papos (N45). */
+/** Rotas da v5: salvos (N44) e Agenda (antes bate-papos, N45). */
 const ROTA_SALVOS = '/salvos'
-const ROTA_BATEPAPOS = '/batepapos'
+const ROTA_BATEPAPOS = '/agenda'
 
 const ITEM =
   'flex min-h-11 cursor-pointer items-center gap-3 rounded-md px-3 text-sm text-[var(--text)] ' +
@@ -144,8 +144,8 @@ export function MenuAvatar({ variante }: { variante: 'completa' | 'compacta' }) 
         </DropdownMenuItem>
         <DropdownMenuItem asChild className={ITEM}>
           <Link href={ROTA_BATEPAPOS}>
-            <ChatsCircle size={18} aria-hidden="true" />
-            {t('nav.batepapos')}
+            <CalendarBlank size={18} aria-hidden="true" />
+            {t('agenda.nav')}
           </Link>
         </DropdownMenuItem>
         {whatsapp.habilitado &&

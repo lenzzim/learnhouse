@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { CalendarCheck, CaretRight, ChatsCircle, GraduationCap, Hash, Lock, MagnifyingGlass, Plus, Users } from '@phosphor-icons/react'
+import { CalendarBlank, CalendarCheck, CaretRight, GraduationCap, Hash, Lock, MagnifyingGlass, Plus, Users } from '@phosphor-icons/react'
 import { getUriWithOrg } from '@services/config/config'
 import { useIdiomaDiscipulei } from '../useIdioma'
 import {
@@ -85,8 +85,8 @@ export function BarraLateral({
   const ativa = abaAtiva(pathname)
   const comunidadeAberta = comunidadeDaRota(pathname)
   const aprenderAtivo = rotaAprender(pathname)
-  // Bate-papo Online (N45): agenda de encontros, item discreto perto de Aprender.
-  const batepaposAtivo = (pathname ?? '').split('/').includes('batepapos')
+  // Agenda (antes Bate-papos, N45): eventos online e presenciais, perto de Aprender.
+  const batepaposAtivo = (pathname ?? '').split('/').some((p) => p === 'agenda' || p === 'batepapos')
 
   const classeItem = (id: AbaId) =>
     `${ITEM_BASE} ${
@@ -251,10 +251,11 @@ export function BarraLateral({
               </Link>
             </li>
           )}
-          {autenticado && (
+          {/* Agenda é aberta: aparece também para visitantes. */}
+          {(
             <li>
               <Link
-                href={getUriWithOrg(orgslug, '/batepapos')}
+                href={getUriWithOrg(orgslug, '/agenda')}
                 aria-current={batepaposAtivo ? 'page' : undefined}
                 className={`${ITEM_BASE} ${
                   batepaposAtivo
@@ -262,8 +263,8 @@ export function BarraLateral({
                     : 'font-medium text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
                 }`}
               >
-                <ChatsCircle size={20} weight={batepaposAtivo ? 'fill' : 'regular'} aria-hidden="true" />
-                <span>{t('batepapos.nav')}</span>
+                <CalendarBlank size={20} weight={batepaposAtivo ? 'fill' : 'regular'} aria-hidden="true" />
+                <span>{t('agenda.nav')}</span>
               </Link>
             </li>
           )}
