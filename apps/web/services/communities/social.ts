@@ -7,8 +7,9 @@ import { getAPIUrl } from '@services/config/config'
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests'
 import type { DiscussionWithAuthor } from '@services/communities/discussions'
 
-export type ReacaoFe = 'amem' | 'orando'
-export const REACOES_FE: ReacaoFe[] = ['amem', 'orando']
+/** Reações de fé. "Obrigado" e "Me tocou" entraram na v5 (N44). */
+export type ReacaoFe = 'amem' | 'orando' | 'obrigado' | 'tocou'
+export const REACOES_FE: ReacaoFe[] = ['amem', 'orando', 'obrigado', 'tocou']
 
 export interface MeuPerfil {
   visible: boolean
@@ -39,9 +40,12 @@ export interface CandidatoMencao {
   avatar_image: string | null
 }
 
+/** Menção ou lembrete de bate-papo (v5: 1 dia, 15 min e "Começou!"). */
+export type TipoNotificacao = 'mention' | 'event_1d' | 'event_15m' | 'event_live'
+
 export interface Notificacao {
   notification_uuid: string
-  kind: 'mention'
+  kind: TipoNotificacao
   creation_date: string
   read: boolean
   actor: CandidatoMencao | null
@@ -49,6 +53,9 @@ export interface Notificacao {
   discussion_title: string
   community_uuid: string
   comment_uuid: string | null
+  event_uuid?: string | null
+  event_title?: string | null
+  event_starts_at?: string | null
 }
 
 export interface EstadoReacao {
@@ -57,9 +64,21 @@ export interface EstadoReacao {
   count: number | null
 }
 
+/** Compartilhar fora da comunidade (N44). */
+export interface EstadoCompartilhar {
+  /** O espaço e o post permitem (sem contar a escolha do autor). */
+  eligible: boolean
+  disabled_by_author: boolean
+  /** Só o autor liga/desliga. */
+  can_toggle: boolean
+}
+
 export interface ReacoesFe {
   discussion: Record<ReacaoFe, EstadoReacao>
   comments: Record<string, Record<ReacaoFe, EstadoReacao>>
+  /** v5: salvo por mim e estado do compartilhamento. */
+  saved?: boolean
+  share?: EstadoCompartilhar
 }
 
 export type PostDoFeed = DiscussionWithAuthor & { community_uuid: string; community_name: string }
@@ -179,7 +198,7 @@ export function alternarReacaoComentario(commentUuid: string, tipo: ReacaoFe, to
 // Resposta útil --------------------------------------------------------------
 
 export function marcarRespostaUtil(discussionUuid: string, commentUuid: string | null, token?: string) {
-  return chamar<{ accepted_comment_id: number | null }>(
+  return chamar<{ accepted_comment_uuid: string | null }>(
     `${base()}/discussions/${encodeURIComponent(discussionUuid)}/resposta-util`,
     'PUT',
     { comment_uuid: commentUuid },

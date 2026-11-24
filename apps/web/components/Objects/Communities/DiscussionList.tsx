@@ -131,6 +131,19 @@ export function DiscussionList({
 
   const fetchCommentCounts = async (discussionList: DiscussionWithAuthor[]) => {
     if (!discussionList.length) return
+    // A lista já traz comment_count (contagem em lote no servidor); só pede
+    // uma a uma o que veio de uma API antiga, sem o campo.
+    const doServidor: Record<string, number> = {}
+    const faltando = discussionList.filter((d) => {
+      if (typeof d.comment_count === 'number') {
+        doServidor[d.discussion_uuid] = d.comment_count
+        return false
+      }
+      return true
+    })
+    if (Object.keys(doServidor).length) setCommentCounts((prev) => ({ ...prev, ...doServidor }))
+    discussionList = faltando
+    if (!discussionList.length) return
     try {
       const counts = await Promise.all(
         discussionList.map(async (d) => {

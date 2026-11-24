@@ -14,6 +14,8 @@ export interface CommunityRights {
     update: boolean
     delete: boolean
     create_discussion: boolean
+    /** v5: comentários podem ser desligados pelo admin (ausente = abertos). */
+    comment?: boolean
   }
   ownership: {
     is_admin: boolean
@@ -42,6 +44,7 @@ export function useCommunityRights(communityuuid: string) {
     isAdmin: rights?.ownership?.is_admin ?? false,
     isMaintainer: rights?.ownership?.is_maintainer_role ?? false,
     canCreateDiscussion: rights?.permissions?.create_discussion ?? false,
+    canComment: rights?.permissions?.comment ?? true,
     canManageCommunity: (rights?.ownership?.is_admin || rights?.ownership?.is_maintainer_role) ?? false,
   }
 }

@@ -85,8 +85,12 @@ export interface Discussion {
   is_locked: boolean
   // Opcional para tolerar respostas de uma API antiga (ausente = pública).
   visibility?: DiscussionVisibility
-  /** Resposta útil (só em perguntas): id do comentário marcado. */
-  accepted_comment_id?: number | null
+  /** Resposta útil (só em perguntas): uuid do comentário marcado. */
+  accepted_comment_uuid?: string | null
+  /** O autor desligou o compartilhamento (N44). */
+  share_disabled?: boolean
+  /** Contagem de comentários (vem na lista do espaço, sem N+1). */
+  comment_count?: number | null
   creation_date: string
   update_date: string
 }
