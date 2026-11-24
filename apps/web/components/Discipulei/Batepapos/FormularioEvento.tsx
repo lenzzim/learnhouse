@@ -1,8 +1,11 @@
 'use client'
 
 /**
- * Criar ou editar um bate-papo (só admins e grupo de autores; o servidor
- * confere). A data e a hora são as do fuso escolhido; o servidor converte.
+ * Criar, editar ou duplicar um evento da Agenda (o servidor confere quem
+ * pode). A data e a hora são as do fuso escolhido; o servidor converte.
+ *
+ * Online: link da reunião (privado). Presencial: região, cidade e bairro
+ * (públicos) e endereço exato (privado: só quem confirma "Vou" vê).
  */
 
 import React, { useEffect, useMemo, useState } from 'react'
@@ -11,12 +14,15 @@ import toast from 'react-hot-toast'
 import { useDadosNav } from '@components/Discipulei/Navegacao/useDadosNav'
 import { BOTAO_PRIMARIO, BOTAO_SECUNDARIO, FOCO } from '@components/Discipulei/Navegacao/estilos'
 import {
+  TIPOS_EVENTO,
   criarBatePapo,
   editarBatePapo,
   type BatePapo,
+  type ModoEvento,
   type NovoBatePapo,
+  type TipoEvento,
 } from '@services/communities/batepapos'
-import { fusoDoNavegador } from './comum'
+import { fusoDoNavegador, useRegioes } from './comum'
 
 const FUSOS_COMUNS = [
   'America/Sao_Paulo',
@@ -61,27 +67,38 @@ function paraInputLocal(iso: string, timeZone: string): string {
 
 export function FormularioEvento({
   inicial,
+  duplicar = false,
   aoSalvar,
   aoCancelar,
 }: {
   inicial?: BatePapo | null
+  /** Usa `inicial` como modelo para um evento novo (data em branco). */
+  duplicar?: boolean
   aoSalvar: (ev: BatePapo) => void
   aoCancelar: () => void
 }) {
   const { t } = useTranslation()
   const { orgId, token, comunidades } = useDadosNav()
-  const editando = !!inicial
+  const editando = !!inicial && !duplicar
+  const regioes = useRegioes(orgId)
 
   const [titulo, setTitulo] = useState(inicial?.title ?? '')
   const [tema, setTema] = useState(inicial?.theme ?? '')
   const [descricao, setDescricao] = useState(inicial?.description ?? '')
   const [fuso, setFuso] = useState(inicial?.timezone ?? 'America/Sao_Paulo')
-  const [quando, setQuando] = useState(inicial ? paraInputLocal(inicial.starts_at, inicial.timezone) : '')
+  const [quando, setQuando] = useState(editando && inicial ? paraInputLocal(inicial.starts_at, inicial.timezone) : '')
   const [duracao, setDuracao] = useState<number>(inicial?.duration_minutes ?? 60)
   const [link, setLink] = useState(inicial?.meeting_url ?? '')
   const [conduz, setConduz] = useState(inicial?.host_name ?? '')
   const [passagens, setPassagens] = useState(inicial?.passages ?? '')
   const [divulgar, setDivulgar] = useState('')
+  const [tipo, setTipo] = useState<TipoEvento>(inicial?.kind ?? 'bible_talk')
+  const [modo, setModo] = useState<ModoEvento>(inicial?.mode ?? 'online')
+  const [regiao, setRegiao] = useState(inicial?.region && !inicial.region.is_online ? inicial.region.region_uuid : '')
+  const [cidade, setCidade] = useState(inicial?.city ?? '')
+  const [bairro, setBairro] = useState(inicial?.neighborhood ?? '')
+  const [endereco, setEndereco] = useState(inicial?.address ?? '')
+  const [vagas, setVagas] = useState(inicial?.capacity ? String(inicial.capacity) : '')
   const [enviando, setEnviando] = useState(false)
   const [fusoNavegador, setFusoNavegador] = useState<string | null>(null)
   useEffect(() => setFusoNavegador(fusoDoNavegador()), [])
@@ -99,6 +116,10 @@ export function FormularioEvento({
       toast.error(t('batepapos.form.obrigatorios'))
       return
     }
+    if (modo === 'in_person' && !regiao) {
+      toast.error(t('agenda.form.regiao_obrigatoria'))
+      return
+    }
     setEnviando(true)
     const dados: NovoBatePapo = {
       title: titulo.trim(),
@@ -107,15 +128,22 @@ export function FormularioEvento({
       starts_at: quando,
       timezone: fuso,
       duration_minutes: duracao,
-      meeting_url: link.trim(),
       host_name: conduz.trim(),
       passages: passagens.trim(),
+      kind: tipo,
+      mode: modo,
+      region_uuid: modo === 'in_person' ? regiao : null,
+      city: modo === 'in_person' ? cidade.trim() : '',
+      neighborhood: modo === 'in_person' ? bairro.trim() : '',
+      address: modo === 'in_person' ? endereco.trim() : '',
+      meeting_url: modo === 'online' ? link.trim() : '',
+      capacity: vagas ? Math.max(0, Number(vagas) || 0) : 0,
     }
     try {
       const salvo = editando
         ? await editarBatePapo(inicial!.event_uuid, dados, token)
         : await criarBatePapo(orgId, { ...dados, announce_community_uuid: divulgar || null }, token)
-      toast.success(editando ? t('batepapos.form.salvo') : t('batepapos.form.criado'))
+      toast.success(editando ? t('batepapos.form.salvo') : t('agenda.form.criado'))
       aoSalvar(salvo)
     } catch (err: any) {
       const detalhe = typeof err?.detail === 'string' ? err.detail : ''
@@ -134,6 +162,43 @@ export function FormularioEvento({
         {t('batepapos.form.titulo')}
         <input className={CAMPO} value={titulo} onChange={(e) => setTitulo(e.target.value)} maxLength={160} required />
       </label>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className={rotulo}>
+          {t('agenda.form.tipo')}
+          <select className={CAMPO} value={tipo} onChange={(e) => setTipo(e.target.value as TipoEvento)}>
+            {TIPOS_EVENTO.map((k) => (
+              <option key={k} value={k}>
+                {t(`agenda.tipo.${k}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <fieldset>
+          <legend className={rotulo}>{t('agenda.form.modo')}</legend>
+          <div className="mt-1 grid grid-cols-2 gap-2">
+            {(['online', 'in_person'] as ModoEvento[]).map((m) => (
+              <label
+                key={m}
+                className={`flex min-h-11 cursor-pointer items-center justify-center rounded-lg border px-3 text-sm ${
+                  modo === m
+                    ? 'border-[var(--text)] font-semibold text-[var(--text)]'
+                    : 'border-[var(--line-strong)] text-[var(--text-2)]'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="modo"
+                  value={m}
+                  checked={modo === m}
+                  onChange={() => setModo(m)}
+                  className="sr-only"
+                />
+                {m === 'online' ? t('agenda.online') : t('agenda.presencial')}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </div>
       <label className={rotulo}>
         {t('batepapos.form.tema')}
         <input className={CAMPO} value={tema} onChange={(e) => setTema(e.target.value)} maxLength={160} />
@@ -186,6 +251,54 @@ export function FormularioEvento({
           <input className={CAMPO} value={conduz} onChange={(e) => setConduz(e.target.value)} maxLength={120} />
         </label>
       </div>
+      {modo === 'in_person' && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className={rotulo}>
+              {t('agenda.form.regiao')}
+              <select className={CAMPO} value={regiao} onChange={(e) => setRegiao(e.target.value)} required>
+                <option value="">{t('agenda.form.escolha')}</option>
+                {(regioes.data ?? [])
+                  .filter((r) => !r.is_online)
+                  .map((r) => (
+                    <option key={r.region_uuid} value={r.region_uuid}>
+                      {r.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label className={rotulo}>
+              {t('agenda.form.cidade')}
+              <input className={CAMPO} value={cidade} onChange={(e) => setCidade(e.target.value)} maxLength={120} />
+            </label>
+          </div>
+          <label className={rotulo}>
+            {t('agenda.form.bairro')}
+            <input className={CAMPO} value={bairro} onChange={(e) => setBairro(e.target.value)} maxLength={120} />
+            <span className={dica}>{t('agenda.form.bairro_dica')}</span>
+          </label>
+          <label className={rotulo}>
+            {t('agenda.form.endereco')}
+            <input className={CAMPO} value={endereco} onChange={(e) => setEndereco(e.target.value)} maxLength={300} />
+            <span className={dica}>{t('agenda.form.endereco_dica')}</span>
+          </label>
+        </>
+      )}
+      <label className={rotulo}>
+        {t('agenda.form.vagas')}
+        <input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={10000}
+          className={CAMPO}
+          value={vagas}
+          onChange={(e) => setVagas(e.target.value)}
+          placeholder={t('agenda.form.vagas_vazio')}
+        />
+        <span className={dica}>{t('agenda.form.vagas_dica')}</span>
+      </label>
+      {modo === 'online' && (
       <label className={rotulo}>
         {t('batepapos.form.link')}
         <input
@@ -197,8 +310,9 @@ export function FormularioEvento({
           onChange={(e) => setLink(e.target.value)}
           maxLength={500}
         />
-        <span className={dica}>{t('batepapos.form.link_dica')}</span>
+        <span className={dica}>{t('agenda.form.link_dica')}</span>
       </label>
+      )}
       <label className={rotulo}>
         {t('batepapos.form.passagens')}
         <input
@@ -228,7 +342,7 @@ export function FormularioEvento({
           {t('batepapos.form.cancelar')}
         </button>
         <button type="submit" disabled={enviando} className={`${BOTAO_PRIMARIO} min-h-11 px-5 text-sm disabled:opacity-60`}>
-          {editando ? t('batepapos.form.salvar') : t('batepapos.form.criar')}
+          {editando ? t('batepapos.form.salvar') : t('agenda.form.criar')}
         </button>
       </div>
     </form>

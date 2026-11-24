@@ -13,6 +13,7 @@ import CommunityCard from '@components/Objects/Communities/CommunityCard'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import ComunidadeConfigOrg from '@components/Dashboard/Pages/Community/ComunidadeConfigOrg'
+import AgendaConfigOrg from '@components/Dashboard/Pages/Community/AgendaConfigOrg'
 
 interface CommunitiesDashClientProps {
   org_id: number
@@ -62,6 +63,8 @@ const CommunitiesDashClient = ({
 
       {/* Discipulei v5: grupo de autores, grupos Homens/Mulheres e WhatsApp. */}
       <ComunidadeConfigOrg orgId={org_id} />
+      {/* Agenda: grupo de organizadores e regiões. */}
+      <AgendaConfigOrg orgId={org_id} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {communities.map((community) => (

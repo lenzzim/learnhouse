@@ -24,6 +24,8 @@ import { formatarHora, formatarQuando, localeDe, rotaBatePapo } from '@component
 function textoLembrete(n: Notificacao, t: any, locale: string): string {
   const titulo = n.event_title || ''
   const quando = n.event_starts_at || ''
+  if (n.kind === 'event_cancelled') return t('agenda.notificacao.cancelado', { titulo })
+  if (n.kind === 'event_changed') return t('agenda.notificacao.mudou', { titulo })
   if (n.kind === 'event_live') return t('batepapos.notificacao.comecou', { titulo })
   if (n.kind === 'event_15m') return t('batepapos.notificacao.em_15', { titulo })
   // "Amanhã" só quando é mesmo o dia seguinte; senão, a data por extenso.

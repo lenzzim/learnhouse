@@ -41,7 +41,13 @@ export interface CandidatoMencao {
 }
 
 /** Menção ou lembrete de bate-papo (v5: 1 dia, 15 min e "Começou!"). */
-export type TipoNotificacao = 'mention' | 'event_1d' | 'event_15m' | 'event_live'
+export type TipoNotificacao =
+  | 'mention'
+  | 'event_1d'
+  | 'event_15m'
+  | 'event_live'
+  | 'event_cancelled'
+  | 'event_changed'
 
 export interface Notificacao {
   notification_uuid: string
