@@ -13,11 +13,21 @@ import {
   Mic,
   ChevronLeft,
   ChevronRight,
+  BookOpen,
 } from 'lucide-react'
 import { Cube } from '@phosphor-icons/react'
 import { useTranslation } from 'react-i18next'
 
-import { searchOrgContent } from '@services/search/search'
+import { searchOrgContent, searchPassage, searchBible } from '@services/search/search'
+import { interpretarConsulta, rotuloPassagem, codigoLeitor } from '@/lib/biblia/consulta'
+import {
+  ChipPassagem,
+  ListaPassagem,
+  ListaVersiculos,
+  type BibliaResultadoApi,
+  type PassagemDiscussaoApi,
+  type PassagemResultadoApi,
+} from '@components/Busca/ResultadosBiblicos'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import {
@@ -224,7 +234,7 @@ const sections: SectionDescriptor<any>[] = [
                 rounded="rounded-full"
                 backgroundColor="bg-gray-100"
               />
-              <span className="text-xs text-black/50">
+              <span className="text-xs text-[var(--text-2)]">
                 {course.authors[0].user.first_name} {course.authors[0].user.last_name}
               </span>
             </div>
@@ -344,7 +354,7 @@ const sections: SectionDescriptor<any>[] = [
     renderCard: (user: ApiUser, ctx) => (
       <Link
         href={getUriWithOrg(ctx.orgSlug, `/user/${user.username}`)}
-        className="flex items-center gap-4 p-3 bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors"
+        className="flex items-center gap-4 p-3 bg-[var(--panel)] rounded-lg border border-[var(--line)] hover:border-[var(--line-strong)] transition-colors"
       >
         <UserAvatar
           width={40}
@@ -356,10 +366,10 @@ const sections: SectionDescriptor<any>[] = [
           backgroundColor="bg-gray-100"
         />
         <div className="min-w-0">
-          <h3 className="text-sm font-medium text-black/80 truncate">
+          <h3 className="text-sm font-medium text-[var(--text)] truncate">
             {user.first_name} {user.last_name}
           </h3>
-          <p className="text-xs text-black/50 truncate">@{user.username}</p>
+          <p className="text-xs text-[var(--text-2)] truncate">@{user.username}</p>
         </div>
       </Link>
     ),
@@ -372,6 +382,8 @@ const sections: SectionDescriptor<any>[] = [
 
 const PER_PAGE = 9
 
+type ExtraTab = 'passagem' | 'biblia'
+
 function SearchPage() {
   const { t } = useTranslation()
   const router = useRouter()
@@ -382,11 +394,16 @@ function SearchPage() {
 
   const urlQuery = searchParams.get('q') ?? ''
   const urlPage = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)
-  const urlType = (searchParams.get('type') as TabKey) || 'all'
+  const urlType = (searchParams.get('type') as TabKey | ExtraTab) || 'all'
+  const accessToken = session?.data?.tokens?.access_token
 
   const [inputValue, setInputValue] = useState(urlQuery)
   const [results, setResults] = useState<SearchResults>(EMPTY_RESULTS)
   const [isLoading, setIsLoading] = useState(false)
+  // Busca por passagem: só quando a consulta é uma referência ("1Pe 1", "Salmos")
+  const passagem = useMemo(() => interpretarConsulta(urlQuery), [urlQuery])
+  const [porPassagem, setPorPassagem] = useState<PassagemResultadoApi | null>(null)
+  const [biblia, setBiblia] = useState<BibliaResultadoApi | null>(null)
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setInputValue(urlQuery), [urlQuery])
@@ -414,6 +431,8 @@ function SearchPage() {
     updateParams({ q: trimmed, page: 1 })
   }
 
+  const extraTab = urlType === 'passagem' || urlType === 'biblia'
+
   useEffect(() => {
     if (!urlQuery.trim() || !org?.slug) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -426,14 +445,14 @@ function SearchPage() {
     searchOrgContent(
       org.slug,
       urlQuery,
-      urlPage,
+      extraTab ? 1 : urlPage,
       PER_PAGE,
       null,
-      session?.data?.tokens?.access_token,
+      accessToken,
     )
       .then((response) => {
         if (cancelled) return
-        const data = response?.data ?? {}
+        const data = response?.success ? response.data ?? {} : {}
         setResults({
           ...EMPTY_RESULTS,
           ...data,
@@ -450,7 +469,53 @@ function SearchPage() {
     return () => {
       cancelled = true
     }
-  }, [urlQuery, urlPage, org?.slug, session?.data?.tokens?.access_token])
+  }, [urlQuery, urlPage, extraTab, org?.slug, accessToken])
+
+  useEffect(() => {
+    if (!passagem || !org?.slug) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPorPassagem(null)
+      return
+    }
+    let cancelled = false
+    searchPassage(org.slug, urlQuery, urlType === 'passagem' ? urlPage : 1, PER_PAGE, accessToken)
+      .then((r) => {
+        if (!cancelled) setPorPassagem(r?.success ? r.data : null)
+      })
+      .catch(() => {
+        if (!cancelled) setPorPassagem(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [passagem, urlQuery, urlType, urlPage, org?.slug, accessToken])
+
+  useEffect(() => {
+    if (urlQuery.trim().length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBiblia(null)
+      return
+    }
+    let cancelled = false
+    // Na busca geral, sempre a BLIVRE (aberta, no banco): não gasta a cota das
+    // licenciadas. O clique abre o leitor na versão da pessoa.
+    searchBible(
+      { query: urlQuery, versao: 'blivre', page: urlType === 'biblia' ? urlPage : 1, limit: PER_PAGE },
+      accessToken,
+    )
+      .then((r) => {
+        if (!cancelled) setBiblia(r?.success ? r.data : null)
+      })
+      .catch(() => {
+        if (!cancelled) setBiblia(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [urlQuery, urlType, urlPage, accessToken])
+
+  const totalPassagem = porPassagem?.total ?? 0
+  const totalBiblia = biblia?.referencia ? 1 : biblia?.total ?? 0
 
   const totalResults = useMemo(
     () => sections.reduce((sum, s) => sum + s.total(results), 0),
@@ -458,15 +523,20 @@ function SearchPage() {
   )
 
   const activeSections = useMemo(() => {
+    if (extraTab) return []
     const shown = urlType === 'all'
       ? sections
       : sections.filter((s) => s.key === urlType)
     return shown.filter((s) => s.items(results).length > 0)
-  }, [urlType, results])
+  }, [urlType, extraTab, results])
 
-  const activeTotal = urlType === 'all'
-    ? totalResults
-    : sections.find((s) => s.key === urlType)?.total(results) ?? 0
+  const activeTotal = urlType === 'passagem'
+    ? totalPassagem
+    : urlType === 'biblia'
+      ? biblia?.total ?? 0
+      : urlType === 'all'
+        ? totalResults
+        : sections.find((s) => s.key === urlType)?.total(results) ?? 0
 
   const totalPages = Math.max(1, Math.ceil(activeTotal / PER_PAGE))
   const renderContext: RenderContext = {
@@ -474,48 +544,133 @@ function SearchPage() {
     orgUuid: org?.org_uuid ?? '',
   }
 
+  const hrefDiscussao = (d: PassagemDiscussaoApi) => {
+    const c = d.community_uuid.replace('community_', '')
+    const id = d.discussion_uuid.replace('discussion_', '')
+    return getUriWithOrg(renderContext.orgSlug, c ? `/community/${c}/discussion/${id}` : `/discussion/${id}`)
+  }
+  const hrefLeitor = (codigo: string) => getUriWithOrg(renderContext.orgSlug, `/biblia?ref=${encodeURIComponent(codigo)}`)
+  const rotulo = passagem ? rotuloPassagem(passagem) : ''
+  const regraPassagem = passagem ? t(`busca.regra.${passagem.tipo}`, { passagem: rotulo }) : ''
+
+  const nadaEncontrado = totalResults === 0 && totalPassagem === 0 && totalBiblia === 0
+
+  const secaoPassagem = (limite?: number) =>
+    porPassagem && porPassagem.discussions.length > 0 ? (
+      <section aria-labelledby="secao-passagem">
+        <h2 id="secao-passagem" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3 flex items-center gap-2">
+          <BookOpen size={13} aria-hidden="true" />
+          {t('busca.tipos.passagem')}
+          <span className="text-[var(--text-3)] font-normal normal-case tracking-normal">({totalPassagem})</span>
+        </h2>
+        <ListaPassagem resultado={porPassagem} hrefDiscussao={hrefDiscussao} limite={limite} />
+        {limite && totalPassagem > limite ? (
+          <BotaoVerTodos label={t('busca.ver_todos_posts')} onClick={() => updateParams({ type: 'passagem', page: 1 })} />
+        ) : null}
+      </section>
+    ) : null
+
+  const secaoBiblia = (limite?: number) => {
+    if (!biblia) return null
+    if (biblia.referencia) {
+      const ref = interpretarConsulta(urlQuery)
+      return (
+        <section aria-labelledby="secao-biblia">
+          <h2 id="secao-biblia" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3 flex items-center gap-2">
+            <BookOpen size={13} aria-hidden="true" />
+            {t('busca.tipos.biblia')}
+          </h2>
+          <Link
+            href={hrefLeitor(biblia.referencia)}
+            className="flex min-h-11 items-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--panel)] px-4 py-3 text-sm font-medium text-[var(--text)] hover:border-[var(--line-strong)]"
+          >
+            <BookOpen size={16} aria-hidden="true" />
+            {t('busca.ir_para', { passagem: ref ? rotuloPassagem(ref) : biblia.referencia })}
+          </Link>
+        </section>
+      )
+    }
+    if (!biblia.versiculos.length) return null
+    return (
+      <section aria-labelledby="secao-biblia">
+        <h2 id="secao-biblia" className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3 flex items-center gap-2">
+          <BookOpen size={13} aria-hidden="true" />
+          {t('busca.tipos.biblia')}
+          <span className="text-[var(--text-3)] font-normal normal-case tracking-normal">({biblia.total})</span>
+        </h2>
+        <ListaVersiculos resultado={biblia} hrefVersiculo={(v) => hrefLeitor(v.codigo)} limite={limite} />
+        <div className="mt-2 flex flex-wrap items-center gap-x-4">
+          {limite && biblia.total > limite ? (
+            <BotaoVerTodos label={t('busca.ver_todos_versiculos')} onClick={() => updateParams({ type: 'biblia', page: 1 })} />
+          ) : null}
+          <Link
+            href={getUriWithOrg(renderContext.orgSlug, `/biblia/buscar?q=${encodeURIComponent(urlQuery)}`)}
+            className="inline-flex min-h-11 items-center text-xs text-[var(--text-2)] underline decoration-[var(--link-underline)] underline-offset-4 hover:text-[var(--text)]"
+          >
+            {t('busca.busca_avancada_biblia')}
+          </Link>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen text-[var(--text)]">
       <div className="container mx-auto px-4 pt-10 pb-4 max-w-5xl">
-        <h1 className="text-2xl font-semibold text-black/80 mb-1">
+        <h1 className="text-2xl font-semibold text-[var(--text)] mb-1">
           {t('common.search')}
         </h1>
-        <p className="text-sm text-black/50 mb-6">{t('search.start_subtitle')}</p>
+        <p className="text-sm text-[var(--text-2)] mb-6">{t('search.start_subtitle')}</p>
 
-        <form onSubmit={handleSubmit} className="relative group">
+        <form onSubmit={handleSubmit} className="relative group" role="search">
           <input
-            type="text"
+            type="search"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             aria-label={t('search.search_placeholder')}
             placeholder={t('search.search_placeholder')}
-            className="w-full h-12 ps-12 pe-24 rounded-xl bg-white nice-shadow
-                       focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1
-                       text-sm placeholder:text-black/40 transition-all"
+            className="w-full h-12 ps-12 pe-24 rounded-xl bg-[var(--panel)] text-[var(--text)] nice-shadow
+                       focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-1 focus:ring-offset-[var(--page)]
+                       text-base sm:text-sm placeholder:text-[var(--text-3)] transition-all"
           />
           <div className="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
             <SearchIcon
-              className="text-black/40 group-focus-within:text-black/70 transition-colors"
+              className="text-[var(--text-3)] group-focus-within:text-[var(--text)] transition-colors"
               size={18}
             />
           </div>
           <button
             type="submit"
-            className="absolute inset-y-2 end-2 px-4 rounded-lg bg-black text-white text-xs font-semibold hover:bg-black/85 transition-colors"
+            className="absolute inset-y-1 end-1 min-w-11 px-4 rounded-lg bg-black text-white text-xs font-semibold hover:bg-black/85 transition-colors"
           >
             {t('common.search')}
           </button>
         </form>
 
+        {urlQuery && passagem && (
+          <div className="mt-4">
+            <ChipPassagem rotulo={rotulo} hrefLeitor={hrefLeitor(codigoLeitor(passagem))} regra={regraPassagem} />
+          </div>
+        )}
+
         {urlQuery && (
-          <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+          <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1" role="tablist" aria-label={t('search.filter_heading')}>
             <TabButton
               label={t('search.types.all')}
               icon={SearchIcon}
-              count={totalResults}
+              count={totalResults + totalPassagem}
               active={urlType === 'all'}
               onClick={() => updateParams({ type: '', page: 1 })}
             />
+            {passagem && (
+              <TabButton
+                label={t('busca.tipos.passagem')}
+                icon={BookOpen}
+                count={totalPassagem}
+                active={urlType === 'passagem'}
+                onClick={() => updateParams({ type: 'passagem', page: 1 })}
+              />
+            )}
             {sections.map((s) => (
               <TabButton
                 key={s.key}
@@ -526,6 +681,13 @@ function SearchPage() {
                 onClick={() => updateParams({ type: s.key, page: 1 })}
               />
             ))}
+            <TabButton
+              label={t('busca.tipos.biblia')}
+              icon={BookOpen}
+              count={totalBiblia}
+              active={urlType === 'biblia'}
+              onClick={() => updateParams({ type: 'biblia', page: 1 })}
+            />
           </div>
         )}
       </div>
@@ -535,16 +697,35 @@ function SearchPage() {
           <StartState label={t('search.start_heading')} />
         ) : isLoading ? (
           <LoadingGrid />
-        ) : totalResults === 0 ? (
+        ) : urlType === 'passagem' ? (
+          totalPassagem === 0 ? (
+            <EmptyState query={urlQuery} t={t} descricao={t('busca.passagem_vazia', { passagem: rotulo })} />
+          ) : (
+            <>
+              <p className="text-xs text-[var(--text-2)] mb-5" aria-live="polite">
+                {t('search.found_results', { count: activeTotal, query: rotulo })}
+              </p>
+              {secaoPassagem()}
+            </>
+          )
+        ) : urlType === 'biblia' ? (
+          totalBiblia === 0 ? (
+            <EmptyState query={urlQuery} t={t} descricao={t('busca.biblia_vazia', { query: urlQuery })} />
+          ) : (
+            secaoBiblia()
+          )
+        ) : nadaEncontrado ? (
           <EmptyState query={urlQuery} t={t} />
         ) : (
           <>
-            <p className="text-xs text-black/50 mb-5">
+            <p className="text-xs text-[var(--text-2)] mb-5" aria-live="polite">
               {t('search.found_results', { count: activeTotal, query: urlQuery })}
             </p>
 
             <div className="space-y-8">
-              {activeSections.length === 0 && (
+              {urlType === 'all' && secaoPassagem(4)}
+
+              {activeSections.length === 0 && urlType !== 'all' && (
                 <EmptyState query={urlQuery} t={t} />
               )}
 
@@ -552,10 +733,10 @@ function SearchPage() {
                 const items = section.items(results)
                 return (
                   <section key={section.key}>
-                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-black/50 mb-3 flex items-center gap-2">
+                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-2)] mb-3 flex items-center gap-2">
                       <section.icon size={13} />
                       {t(`search.types.${section.key}`)}
-                      <span className="text-black/30 font-normal normal-case tracking-normal">
+                      <span className="text-[var(--text-3)] font-normal normal-case tracking-normal">
                         ({section.total(results)})
                       </span>
                     </h2>
@@ -578,20 +759,34 @@ function SearchPage() {
                   </section>
                 )
               })}
-            </div>
 
-            {totalPages > 1 && (
-              <Pagination
-                page={urlPage}
-                totalPages={totalPages}
-                onChange={(p) => updateParams({ page: p })}
-                t={t}
-              />
-            )}
+              {urlType === 'all' && secaoBiblia(3)}
+            </div>
           </>
+        )}
+
+        {urlQuery.trim() && !isLoading && totalPages > 1 && (urlType !== 'all' || totalResults > 0) && (
+          <Pagination
+            page={urlPage}
+            totalPages={totalPages}
+            onChange={(p) => updateParams({ page: p })}
+            t={t}
+          />
         )}
       </div>
     </div>
+  )
+}
+
+function BotaoVerTodos({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-[var(--text)] underline decoration-[var(--link-underline)] underline-offset-4"
+    >
+      {label}
+    </button>
   )
 }
 
@@ -612,16 +807,19 @@ function TabButton({
 }) {
   return (
     <button
+      type="button"
+      role="tab"
+      aria-selected={active}
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+      className={`flex min-h-11 items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
         active
           ? 'bg-black text-white'
-          : 'bg-black/5 text-black/70 hover:bg-black/10'
+          : 'bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--line-strong)]'
       }`}
     >
       <Icon size={14} />
       {label}
-      <span className={active ? 'text-white/70' : 'text-black/40'}>{count}</span>
+      <span className={active ? 'opacity-70' : 'text-[var(--text-3)]'}>{count}</span>
     </button>
   )
 }
@@ -644,9 +842,9 @@ function ResourceCard({
   return (
     <Link
       href={href}
-      className="bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors overflow-hidden group flex flex-col"
+      className="bg-[var(--panel)] rounded-lg border border-[var(--line)] hover:border-[var(--line-strong)] transition-colors overflow-hidden group flex flex-col"
     >
-      <div className="relative aspect-video bg-black/5 flex items-center justify-center">
+      <div className="relative aspect-video bg-[var(--surface)] flex items-center justify-center">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -654,13 +852,13 @@ function ResourceCard({
             className="w-full h-full object-cover"
           />
         ) : (
-          <FallbackIcon size={28} className="text-black/30" />
+          <FallbackIcon size={28} className="text-[var(--text-3)]" />
         )}
       </div>
       <div className="p-3 flex-1 flex flex-col">
-        <h3 className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
+        <h3 className="text-sm font-medium text-[var(--text)] line-clamp-1">{title}</h3>
         {subtitle && (
-          <p className="text-xs text-black/50 line-clamp-2 mt-1">{subtitle}</p>
+          <p className="text-xs text-[var(--text-2)] line-clamp-2 mt-1">{subtitle}</p>
         )}
         {footer}
       </div>
@@ -684,15 +882,15 @@ function InlineCard({
   return (
     <Link
       href={href}
-      className="flex items-start gap-3 p-3 bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors"
+      className="flex items-start gap-3 p-3 bg-[var(--panel)] rounded-lg border border-[var(--line)] hover:border-[var(--line-strong)] transition-colors"
     >
-      <div className="w-9 h-9 bg-black/5 rounded-md flex items-center justify-center flex-shrink-0 text-base">
-        {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-black/50" />}
+      <div className="w-9 h-9 bg-[var(--surface)] rounded-md flex items-center justify-center flex-shrink-0 text-base">
+        {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-[var(--text-2)]" />}
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
+        <h3 className="text-sm font-medium text-[var(--text)] line-clamp-1">{title}</h3>
         {subtitle && (
-          <p className="text-xs text-black/50 line-clamp-2 mt-0.5">{subtitle}</p>
+          <p className="text-xs text-[var(--text-2)] line-clamp-2 mt-0.5">{subtitle}</p>
         )}
       </div>
     </Link>
@@ -705,28 +903,28 @@ function LoadingGrid() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="bg-white rounded-lg border border-black/5 p-3 animate-pulse"
+          className="bg-[var(--panel)] rounded-lg border border-[var(--line)] p-3 animate-pulse"
         >
-          <div className="w-full aspect-video bg-black/5 rounded mb-3" />
-          <div className="w-3/4 h-3 bg-black/5 rounded mb-1.5" />
-          <div className="w-1/2 h-3 bg-black/5 rounded" />
+          <div className="w-full aspect-video bg-[var(--surface)] rounded mb-3" />
+          <div className="w-3/4 h-3 bg-[var(--surface)] rounded mb-1.5" />
+          <div className="w-1/2 h-3 bg-[var(--surface)] rounded" />
         </div>
       ))}
     </div>
   )
 }
 
-function EmptyState({ query, t }: { query: string; t: (_k: string, _o?: any) => string }) {
+function EmptyState({ query, t, descricao }: { query: string; t: (_k: string, _o?: any) => string; descricao?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-4 p-4 bg-black/5 rounded-full">
-        <SearchIcon className="w-8 h-8 text-black/40" />
+      <div className="mb-4 p-4 bg-[var(--surface)] rounded-full">
+        <SearchIcon className="w-8 h-8 text-[var(--text-3)]" />
       </div>
-      <h3 className="text-lg font-medium text-black/80 mb-2">
+      <h3 className="text-lg font-medium text-[var(--text)] mb-2">
         {t('search.no_results_found')}
       </h3>
-      <p className="text-sm text-black/50 max-w-md">
-        {t('search.no_results_description', { query })}
+      <p className="text-sm text-[var(--text-2)] max-w-md">
+        {descricao ?? t('search.no_results_description', { query })}
       </p>
     </div>
   )
@@ -735,10 +933,10 @@ function EmptyState({ query, t }: { query: string; t: (_k: string, _o?: any) => 
 function StartState({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-4 p-4 bg-black/5 rounded-full">
-        <SearchIcon className="w-8 h-8 text-black/40" />
+      <div className="mb-4 p-4 bg-[var(--surface)] rounded-full">
+        <SearchIcon className="w-8 h-8 text-[var(--text-3)]" />
       </div>
-      <h3 className="text-lg font-medium text-black/70">{label}</h3>
+      <h3 className="text-lg font-medium text-[var(--text)]">{label}</h3>
     </div>
   )
 }
@@ -761,13 +959,13 @@ function Pagination({
   const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i)
 
   const baseBtn =
-    'flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors'
+    'flex min-h-11 min-w-11 items-center justify-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors'
   return (
-    <nav className="flex justify-center items-center gap-1.5 mt-8">
+    <nav className="flex justify-center items-center gap-1 mt-8" aria-label={t('busca.paginacao')}>
       <button
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
-        className={`${baseBtn} text-black/60 hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`${baseBtn} text-[var(--text-2)] hover:bg-[var(--surface)] disabled:opacity-40 disabled:cursor-not-allowed`}
         aria-label={t('search.previous')}
       >
         <ChevronLeft size={14} />
@@ -778,10 +976,10 @@ function Pagination({
           <button
             key={p}
             onClick={() => onChange(p)}
-            className={`w-8 h-8 rounded-md text-xs font-medium transition-colors ${
+            className={`min-w-11 h-11 rounded-md text-xs font-medium transition-colors ${
               p === page
                 ? 'bg-black text-white'
-                : 'text-black/60 hover:bg-black/5'
+                : 'text-[var(--text-2)] hover:bg-[var(--surface)]'
             }`}
             aria-current={p === page ? 'page' : undefined}
           >
@@ -792,7 +990,7 @@ function Pagination({
       <button
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
-        className={`${baseBtn} text-black/60 hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`${baseBtn} text-[var(--text-2)] hover:bg-[var(--surface)] disabled:opacity-40 disabled:cursor-not-allowed`}
         aria-label={t('search.next')}
       >
         <span className="hidden sm:inline">{t('search.next')}</span>
