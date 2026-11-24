@@ -33,6 +33,7 @@ from src.services.communities import batepapos, membros, social
 from src.services.communities.comments import create_comment
 from src.services.communities.communities import (
     get_communities_by_org,
+    get_community,
     get_community_user_rights,
     update_community,
 )
@@ -333,6 +334,62 @@ async def test_so_admin_fixa_espaco(db, mundo):
         assert exc.value.status_code == 403
     geral = (await db.execute(select(Community).where(Community.community_uuid == C_GERAL))).scalars().first()
     assert not (geral.moderation_settings or {}).get("pinned_at")
+
+
+# ---------------------------------------------------------------------------
+# Etiqueta de público derivada do acesso real (audience)
+# ---------------------------------------------------------------------------
+
+
+async def _audiencias(db, m, quem):
+    r = await get_communities_by_org(_req(), m["org"].id, quem, db, page=1, limit=50)
+    return {c.community_uuid: (c.audience.kind, c.audience.groups) for c in r}
+
+
+async def test_audiencia_aberto_membros_e_grupo(db, mundo):
+    m = mundo
+    a = await _audiencias(db, m, m["admin"])
+    assert a[C_GERAL] == ("open", [])
+    assert a[C_BLOG] == ("open", [])
+    assert a[C_FECHADA] == ("members", [])
+    assert a[C_MULHERES] == ("group", ["Mulheres"])
+
+    # Quem é do grupo recebe a etiqueta do grupo, na lista e no GET do espaço.
+    assert (await _audiencias(db, m, m["maria"]))[C_MULHERES] == ("group", ["Mulheres"])
+    espaco = await get_community(_req(), C_MULHERES, m["maria"], db)
+    assert espaco.audience.kind == "group" and espaco.audience.groups == ["Mulheres"]
+    assert (await get_community(_req(), C_FECHADA, m["membro"], db)).audience.kind == "members"
+    assert (await get_community(_req(), C_GERAL, m["anon"], db)).audience.kind == "open"
+
+
+async def test_audiencia_varios_grupos_e_publico_nao_expoe_grupo(db, mundo):
+    m = mundo
+    db.add(UserGroupResource(usergroup_id=m["homens_g"].id, resource_uuid=C_MULHERES, org_id=m["org"].id,
+                             creation_date=_now(), update_date=_now()))
+    # Grupo ligado a espaço público: continua "Aberto a todos", sem nome de grupo.
+    db.add(UserGroupResource(usergroup_id=m["autores"].id, resource_uuid=C_GERAL, org_id=m["org"].id,
+                             creation_date=_now(), update_date=_now()))
+    await db.commit()
+    a = await _audiencias(db, m, m["admin"])
+    assert a[C_MULHERES] == ("group", ["Homens", "Mulheres"])
+    assert a[C_GERAL] == ("open", [])
+
+
+async def test_audiencia_nao_vaza_grupo_para_quem_nao_le(db, mundo):
+    m = mundo
+    for quem in (m["anon"], m["membro"], m["estranho"], m["autora"]):
+        a = await _audiencias(db, m, quem)
+        assert C_MULHERES not in a
+        assert all(groups == [] for _, groups in a.values())
+        assert "Mulheres" not in repr(await get_communities_by_org(_req(), m["org"].id, quem, db))
+    # Visitante e conta de outra org só veem espaços abertos.
+    for quem in (m["anon"], m["estranho"]):
+        assert {k for k, _ in (await _audiencias(db, m, quem)).values()} == {"open"}
+    # Membro logado vê "Só membros", mas não o espaço do grupo nem o nome dele.
+    assert (await _audiencias(db, m, m["membro"]))[C_FECHADA] == ("members", [])
+    with pytest.raises(HTTPException) as exc:
+        await get_community(_req(), C_MULHERES, m["membro"], db)
+    assert exc.value.status_code == 403
 
 
 # ---------------------------------------------------------------------------

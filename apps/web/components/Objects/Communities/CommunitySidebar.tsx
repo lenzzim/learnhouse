@@ -6,14 +6,13 @@ import { useTranslation } from 'react-i18next'
 import {
   MessageCircle,
   Plus,
-  Globe,
-  Lock,
   Settings,
   Calendar,
   BookOpen,
   ChevronRight,
 } from 'lucide-react'
 import { Community } from '@services/communities/communities'
+import AudienciaSelo from './AudienciaSelo'
 import { getCommunityThumbnailMediaDirectory, getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -88,19 +87,7 @@ export function CommunitySidebar({
             )}
             <div className="min-w-0">
               <h2 className="font-semibold text-gray-900 truncate">{community.name}</h2>
-              <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                {community.public ? (
-                  <>
-                    <Globe size={12} className="text-[var(--text-3)]" />
-                    <span>{t('communities.public')}</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock size={12} className="text-gray-400" />
-                    <span>{t('communities.private')}</span>
-                  </>
-                )}
-              </div>
+              <AudienciaSelo community={community} className="max-w-full text-xs text-gray-600" />
             </div>
           </div>
         </div>

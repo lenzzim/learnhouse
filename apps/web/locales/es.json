@@ -955,6 +955,13 @@
     "sort_label": "Ordenar por",
     "sort_name": "Nombre (A–Z)",
     "fixado": "Fijado",
+    "audiencia": {
+      "open": "Abierto a todos",
+      "members": "Solo miembros",
+      "group": "Solo {{grupos}}"
+    },
+    "secao_comunidade": "Comunidad",
+    "area_discipulos": "Área de los Discípulos",
     "sort_recent": "Más recientes",
     "view_grid": "Ver en cuadrícula",
     "view_list": "Ver en lista",

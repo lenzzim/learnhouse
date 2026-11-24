@@ -965,6 +965,13 @@
     "sort_label": "ترتيب حسب",
     "sort_name": "الاسم (أ–ي)",
     "fixado": "مثبّت",
+    "audiencia": {
+      "open": "مفتوح للجميع",
+      "members": "للأعضاء فقط",
+      "group": "فقط {{grupos}}"
+    },
+    "secao_comunidade": "المجتمع",
+    "area_discipulos": "منطقة التلاميذ",
     "sort_recent": "الأحدث",
     "view_grid": "عرض شبكي",
     "view_list": "عرض قائمة",

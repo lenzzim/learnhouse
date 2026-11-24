@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { CalendarCheck, CaretRight, ChatsCircle, GraduationCap, Hash, Lock, MagnifyingGlass, Plus } from '@phosphor-icons/react'
+import { CalendarCheck, CaretRight, ChatsCircle, GraduationCap, Hash, Lock, MagnifyingGlass, Plus, Users } from '@phosphor-icons/react'
 import { getUriWithOrg } from '@services/config/config'
 import { useIdiomaDiscipulei } from '../useIdioma'
 import {
@@ -18,6 +18,8 @@ import {
 } from '@/lib/discipulei/nav'
 import { avisarAgendamento } from '@/lib/discipulei/convitesEstudo'
 import { useDadosNav } from './useDadosNav'
+import { agruparEmSecoes, audienciaDe } from '@/lib/communities/audiencia'
+import { rotuloAudiencia, tituloSecao } from '@components/Objects/Communities/AudienciaSelo'
 import { MenuAvatar } from './MenuAvatar'
 import { Logo } from './Logo'
 import { ICONE_ABA } from './icones'
@@ -71,10 +73,11 @@ export function BarraLateral({
   topo: number
   aoBuscar: () => void
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const idioma = useIdiomaDiscipulei()
   const pathname = usePathname()
   const { autenticado, status, comunidades, notasRecentes, carregandoNotas } = useDadosNav()
+  const secoesComunidades = agruparEmSecoes(comunidades)
   const { expandidos, alternar } = useExpandidos()
   const [atalho, setAtalho] = useState('Ctrl K')
   useEffect(() => setAtalho(rotuloAtalhoBusca()), [])
@@ -188,26 +191,45 @@ export function BarraLateral({
 
                 {item.id === 'comunidades' && aberto && (
                   <ul id={idLista} className="ms-5 mt-0.5 flex flex-col gap-px border-s border-[var(--line)] ps-2">
-                    {comunidades.map((c) => {
-                      const atual = comunidadeAberta === c.community_uuid
-                      return (
-                        <li key={c.community_uuid}>
-                          <Link
-                            href={getUriWithOrg(orgslug, `/community/${semPrefixo(c.community_uuid, 'community_')}`)}
-                            aria-current={atual ? 'page' : undefined}
-                            className={`${SUBITEM} ${atual ? 'bg-[var(--surface)] text-[var(--text)]' : 'text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]'}`}
+                    {/* Seções: "Comunidade" e uma por grupo restrito que a
+                        pessoa lê (ex.: "Área dos Discípulos"); a API já não
+                        devolve espaços de grupos alheios. Título só com mais
+                        de uma seção; fixados no topo de cada uma. */}
+                    {secoesComunidades.map((secao, i) => (
+                      <li key={secao.chave}>
+                        {secoesComunidades.length > 1 && (
+                          <p
+                            id={`nav-secao-${i}`}
+                            className="px-3 pb-0.5 pt-2 text-xs font-semibold text-[var(--text-3)]"
                           >
-                            {c.public ? (
-                              <Hash size={14} aria-hidden="true" className="shrink-0 text-[var(--text-3)]" />
-                            ) : (
-                              <Lock size={14} className="shrink-0 text-[var(--text-3)]" aria-hidden="true" />
-                            )}
-                            <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                            {!c.public && <span className="sr-only">({t('nav.restrita')})</span>}
-                          </Link>
-                        </li>
-                      )
-                    })}
+                            {tituloSecao(secao.grupos, t, i18n.language)}
+                          </p>
+                        )}
+                        <ul
+                          aria-labelledby={secoesComunidades.length > 1 ? `nav-secao-${i}` : undefined}
+                          className="flex flex-col gap-px"
+                        >
+                          {secao.itens.map((c) => {
+                            const atual = comunidadeAberta === c.community_uuid
+                            const aud = audienciaDe(c)
+                            const Icone = aud.kind === 'open' ? Hash : aud.kind === 'members' ? Users : Lock
+                            return (
+                              <li key={c.community_uuid}>
+                                <Link
+                                  href={getUriWithOrg(orgslug, `/community/${semPrefixo(c.community_uuid, 'community_')}`)}
+                                  aria-current={atual ? 'page' : undefined}
+                                  className={`${SUBITEM} ${atual ? 'bg-[var(--surface)] text-[var(--text)]' : 'text-[var(--text-2)] hover:bg-[var(--surface)] hover:text-[var(--text)]'}`}
+                                >
+                                  <Icone size={14} aria-hidden="true" className="shrink-0 text-[var(--text-3)]" />
+                                  <span className="min-w-0 flex-1 truncate">{c.name}</span>
+                                  <span className="sr-only">({rotuloAudiencia(aud, t, i18n.language)})</span>
+                                </Link>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </li>
+                    ))}
                   </ul>
                 )}
               </li>

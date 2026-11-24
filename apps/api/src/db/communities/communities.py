@@ -59,6 +59,16 @@ class CommunityUpdate(SQLModel):
     moderation_settings: Optional[Dict[str, Any]] = None
 
 
+class CommunityAudience(SQLModel):
+    """Para quem o espaço é, derivado do acesso real (nunca configurado à mão).
+
+    ``open``: público, visitantes leem; ``members``: privado sem grupo, só
+    membros logados; ``group``: privado ligado a grupo(s) de usuários.
+    """
+    kind: str
+    groups: List[str] = []
+
+
 class CommunityRead(CommunityBase):
     id: int
     org_id: int = Field(default=None, foreign_key="organization.id")
@@ -68,3 +78,4 @@ class CommunityRead(CommunityBase):
     moderation_settings: Optional[Dict[str, Any]] = None
     creation_date: str
     update_date: str
+    audience: Optional[CommunityAudience] = None

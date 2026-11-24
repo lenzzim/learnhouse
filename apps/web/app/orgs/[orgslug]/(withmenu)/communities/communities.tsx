@@ -9,10 +9,11 @@ import CommunityCard from '@components/Objects/Communities/CommunityCard'
 import { CreateCommunityModal } from '@components/Objects/Modals/Communities/CreateCommunityModal'
 import { EditCommunityModal } from '@components/Objects/Modals/Communities/EditCommunityModal'
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder'
-import { Users, Plus, Search, LayoutGrid, List, Globe, Lock, ChevronRight, NotebookPen, Pin } from 'lucide-react'
+import { Users, Plus, Search, LayoutGrid, List, ChevronRight, NotebookPen, Pin } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
-import { Community, fixadoEm, ordenarComFixados } from '@services/communities/communities'
+import { Community, agruparEmSecoes, fixadoEm, ordenarComFixados } from '@services/communities/communities'
+import AudienciaSelo, { tituloSecao } from '@components/Objects/Communities/AudienciaSelo'
 import { getUriWithOrg } from '@services/config/config'
 import FeatureGate from '@components/Dashboard/Shared/FeatureGate/FeatureGate'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
@@ -31,7 +32,7 @@ const CHAVE_VISUALIZACAO = 'lh_communities_view'
 const semPrefixo = (uuid: string) => uuid.replace('community_', '')
 
 const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientProps) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(null)
@@ -68,6 +69,14 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
       ? a.name.localeCompare(b.name)
       : new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime())
   }, [communities, busca, ordem])
+
+  // Com busca ativa: uma lista só (as etiquetas dizem para quem é cada espaço).
+  const secoes = useMemo(
+    () => (busca.trim()
+      ? [{ chave: 'busca', grupos: [] as string[], itens: visiveis }]
+      : agruparEmSecoes(visiveis)),
+    [visiveis, busca]
+  )
 
   const botaoNova = (
     <AuthenticatedClientElement
@@ -161,53 +170,69 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
           </div>
         )}
 
-        {visualizacao === 'lista' && visiveis.length > 0 && (
-          <div className="bg-white rounded-xl nice-shadow overflow-hidden">
-            {visiveis.map((community: Community) => (
-              <Link
-                key={community.community_uuid}
-                href={getUriWithOrg(orgslug, `/community/${semPrefixo(community.community_uuid)}`)}
-                className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
-              >
-                <span className="shrink-0 text-gray-400">
-                  {community.public ? <Globe size={16} aria-hidden="true" /> : <Lock size={16} aria-label={t('nav.restrita')} />}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-gray-900 truncate">{community.name}</span>
-                  {community.description && (
-                    <span className="block text-xs text-gray-500 truncate">{community.description}</span>
-                  )}
-                </span>
-                {fixadoEm(community) && (
-                  <span
-                    role="img"
-                    aria-label={t('communities.fixado', 'Fixado')}
-                    title={t('communities.fixado', 'Fixado')}
-                    className="shrink-0 text-gray-500"
-                  >
-                    <Pin size={14} aria-hidden="true" />
-                  </span>
-                )}
-                <ChevronRight size={16} className="shrink-0 text-gray-300" />
-              </Link>
-            ))}
-          </div>
-        )}
+        {/* Seções: "Comunidade" (abertos + só membros) e uma por grupo
+            restrito que a pessoa lê (ex.: "Área dos Discípulos"). Com busca
+            ativa, lista plana com as etiquetas. Só mostra títulos quando há
+            mais de uma seção. */}
+        {visiveis.length > 0 && secoes.map((secao, i) => (
+          <section
+            key={secao.chave}
+            aria-labelledby={secoes.length > 1 ? `secao-espacos-${i}` : undefined}
+            className="space-y-3 pb-4"
+          >
+            {secoes.length > 1 && (
+              <h2 id={`secao-espacos-${i}`} className="text-base font-semibold text-gray-900">
+                {tituloSecao(secao.grupos, t, i18n.language)}
+              </h2>
+            )}
 
-        {visualizacao === 'grade' && visiveis.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {visiveis.map((community: Community) => (
-              <div key={community.community_uuid}>
-                <CommunityCard
-                  community={community}
-                  orgslug={orgslug}
-                  org_id={org_id}
-                  variant="public"
-                />
+            {visualizacao === 'lista' && (
+              <div className="bg-white rounded-xl nice-shadow overflow-hidden">
+                {secao.itens.map((community: Community) => (
+                  <Link
+                    key={community.community_uuid}
+                    href={getUriWithOrg(orgslug, `/community/${semPrefixo(community.community_uuid)}`)}
+                    className="flex min-h-11 items-center gap-4 px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold text-gray-900 truncate">{community.name}</span>
+                      {community.description && (
+                        <span className="block text-xs text-gray-500 truncate">{community.description}</span>
+                      )}
+                      <AudienciaSelo community={community} className="mt-0.5 max-w-full text-xs text-gray-600" />
+                    </span>
+                    {fixadoEm(community) && (
+                      <span
+                        role="img"
+                        aria-label={t('communities.fixado', 'Fixado')}
+                        title={t('communities.fixado', 'Fixado')}
+                        className="shrink-0 text-gray-500"
+                      >
+                        <Pin size={14} aria-hidden="true" />
+                      </span>
+                    )}
+                    <ChevronRight size={16} className="shrink-0 text-gray-300 rtl:rotate-180" aria-hidden="true" />
+                  </Link>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
+
+            {visualizacao === 'grade' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {secao.itens.map((community: Community) => (
+                  <div key={community.community_uuid}>
+                    <CommunityCard
+                      community={community}
+                      orgslug={orgslug}
+                      org_id={org_id}
+                      variant="public"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
 
         {/* Busca sem resultado: a organização tem comunidades, o filtro é que não achou. */}
         {communities.length > 0 && visiveis.length === 0 && (

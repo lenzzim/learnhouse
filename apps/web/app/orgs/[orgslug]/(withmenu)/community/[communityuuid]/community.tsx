@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { CommunitySidebar } from '@components/Objects/Communities/CommunitySidebar'
-import { MessageCircle, Plus, Settings, Lock } from 'lucide-react'
+import { MessageCircle, Plus, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
@@ -13,6 +13,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { DiscussionList } from '@components/Objects/Communities/DiscussionList'
 import { CreateDiscussionModal } from '@components/Objects/Modals/Communities/CreateDiscussionModal'
 import { Community } from '@services/communities/communities'
+import AudienciaSelo from '@components/Objects/Communities/AudienciaSelo'
 import { DiscussionWithAuthor } from '@services/communities/discussions'
 import { useTrackView, AnalyticsEvent } from '@services/analytics'
 
@@ -68,10 +69,10 @@ const CommunityClient = ({
             {/* Celular: nome, descrição e ações no fluxo da página (sem barra
                 fixa, que brigaria com a barra de abas do app). */}
             <div className="md:hidden mb-4">
-              <h1 className="text-2xl leading-tight text-gray-900 flex items-center gap-2">
-                {!community.public && <Lock size={18} className="shrink-0 text-gray-500" aria-label={t('nav.restrita')} />}
+              <h1 className="text-2xl leading-tight text-gray-900">
                 {community.name}
               </h1>
+              <AudienciaSelo community={community} className="mt-1 max-w-full text-xs font-medium text-gray-600" />
               {community.description && (
                 <p className="mt-1 text-sm text-gray-500 line-clamp-3">
                   {community.description}

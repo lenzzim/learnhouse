@@ -5,6 +5,7 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests'
+import type { Audiencia } from '@/lib/communities/audiencia'
 
 export interface CommunityModerationSettings {
   block_links?: boolean
@@ -39,6 +40,8 @@ export interface Community {
   thumbnail_image: string | null
   creation_date: string
   update_date: string
+  /** Para quem é o espaço, derivado do acesso real no servidor. */
+  audience?: Audiencia | null
 }
 
 export interface CommunityCreate {
@@ -84,6 +87,8 @@ export interface CommunityRights {
 }
 
 export { fixadoEm, ordenarComFixados } from '@/lib/communities/fixados'
+export { audienciaDe, agruparEmSecoes } from '@/lib/communities/audiencia'
+export type { Audiencia } from '@/lib/communities/audiencia'
 
 export async function getCommunities(
   org_id: number,

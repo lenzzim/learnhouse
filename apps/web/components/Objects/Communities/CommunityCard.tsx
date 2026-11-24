@@ -9,9 +9,10 @@ import { getCommunityThumbnailMediaDirectory } from '@services/media/media'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '@/lib/query/keys'
-import { MoreVertical, Trash2, Edit, MessageCircle, ExternalLink, Lock, Pin } from 'lucide-react'
+import { MoreVertical, Trash2, Edit, ExternalLink, Pin } from 'lucide-react'
 import Link from 'next/link'
 import { CapaAutomatica } from './CapaAutomatica'
+import AudienciaSelo from './AudienciaSelo'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -102,25 +103,21 @@ function CommunityCard(props: PropsType) {
           </p>
         )}
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          <div className="flex items-center gap-1.5 text-gray-500">
-            {props.community.public ? <MessageCircle size={12} aria-hidden="true" /> : <Lock size={12} aria-hidden="true" />}
-            <span className="text-xs font-medium">
-              {props.community.public ? t('courses.public') : t('courses.private')}
-            </span>
-          </div>
+        <div className="pt-1.5 flex items-center justify-between gap-2 border-t border-gray-100">
+          {/* Para quem é: derivado do acesso real (público, só membros, grupo). */}
+          <AudienciaSelo community={props.community} className="text-xs font-medium text-gray-600" />
 
           {variant === 'dashboard' ? (
             <Link
               href={getUriWithOrg(props.orgslug, `/dash/communities/${communityId}/general`)}
-              className="inline-flex min-h-9 items-center text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors"
+              className="inline-flex min-h-9 shrink-0 items-center text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors"
             >
               {t('dashboard.courses.communities.card.open_settings')}
             </Link>
           ) : (
             <Link
               href={communityLink}
-              className="inline-flex min-h-9 items-center text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors"
+              className="inline-flex min-h-9 shrink-0 items-center text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors"
             >
               {t('dashboard.courses.communities.card.view_community')}
             </Link>

@@ -28,6 +28,7 @@ from src.security.rbac import (
     is_enrolled_in_course,
 )
 from src.security.org_auth import is_org_member
+from src.services.communities.audiencia import read_with_audience, with_audience
 
 
 async def create_community(
@@ -79,7 +80,7 @@ async def create_community(
     await db_session.commit()
     await db_session.refresh(community)
 
-    return CommunityRead.model_validate(community.model_dump())
+    return await read_with_audience(db_session, community)
 
 
 async def get_community(
@@ -101,7 +102,7 @@ async def get_community(
     # RBAC check
     await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.READ)
 
-    return CommunityRead.model_validate(community.model_dump())
+    return await read_with_audience(db_session, community)
 
 
 async def get_communities_by_org(
@@ -141,14 +142,14 @@ async def get_communities_by_org(
         )
         query = query.order_by(*pinned_first_order(), Community.creation_date.desc(), Community.id.desc()).offset(offset).limit(limit)  # type: ignore
         communities = (await db_session.execute(query)).scalars().all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+        return await with_audience(db_session, communities)
 
     # Superadmins bypass admin check — they can see all communities
     if await is_user_superadmin(acting_user_id, db_session):
         query = select(Community).where(Community.org_id == org_id)
         query = query.order_by(*pinned_first_order(), Community.creation_date.desc(), Community.id.desc()).offset(offset).limit(limit)  # type: ignore
         communities = (await db_session.execute(query)).scalars().all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+        return await with_audience(db_session, communities)
 
     # Check if user has admin-level permissions (can read all communities)
     # First check role-based permissions, then fall back to org admin status.
@@ -177,7 +178,7 @@ async def get_communities_by_org(
         query = select(Community).where(Community.org_id == org_id)
         query = query.order_by(*pinned_first_order(), Community.creation_date.desc(), Community.id.desc()).offset(offset).limit(limit)  # type: ignore
         communities = (await db_session.execute(query)).scalars().all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+        return await with_audience(db_session, communities)
 
     # Regular users: the same READ rule ``check_resource_access`` applies to a
     # single community (public; usergroup-linked → group members only; no
@@ -195,7 +196,7 @@ async def get_communities_by_org(
     )
 
     communities = (await db_session.execute(query)).scalars().all()
-    return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+    return await with_audience(db_session, communities)
 
 
 async def get_community_by_course(
@@ -231,7 +232,7 @@ async def get_community_by_course(
     if not decision.allowed:
         return None
 
-    return CommunityRead.model_validate(community.model_dump())
+    return await read_with_audience(db_session, community)
 
 
 async def update_community(
@@ -289,7 +290,7 @@ async def update_community(
     await db_session.commit()
     await db_session.refresh(community)
 
-    return CommunityRead.model_validate(community.model_dump())
+    return await read_with_audience(db_session, community)
 
 
 async def delete_community(
@@ -375,7 +376,7 @@ async def link_community_to_course(
     await db_session.commit()
     await db_session.refresh(community)
 
-    return CommunityRead.model_validate(community.model_dump())
+    return await read_with_audience(db_session, community)
 
 
 async def unlink_community_from_course(
@@ -406,7 +407,7 @@ async def unlink_community_from_course(
     await db_session.commit()
     await db_session.refresh(community)
 
-    return CommunityRead.model_validate(community.model_dump())
+    return await read_with_audience(db_session, community)
 
 
 async def get_community_user_rights(
