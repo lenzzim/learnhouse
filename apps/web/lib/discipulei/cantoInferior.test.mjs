@@ -57,3 +57,13 @@ test('seleção de versículos toma o canto do convite e devolve depois', () => 
   soltarCanto('instalar')
   assert.equal(donoDoCanto(), null)
 })
+
+test('painel do Strong também tira o convite do canto enquanto está aberto', () => {
+  pedirCanto('instalar')
+  pedirCanto('selecao')
+  assert.equal(pedirCanto('verbete'), true)
+  soltarCanto('verbete')
+  assert.equal(donoDoCanto(), 'selecao')
+  soltarCanto('selecao')
+  assert.equal(donoDoCanto(), 'instalar')
+})

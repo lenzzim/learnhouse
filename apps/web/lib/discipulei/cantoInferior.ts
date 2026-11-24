@@ -10,13 +10,14 @@
  *
  * A barra de seleção de versículos do leitor (`selecao`) usa o mesmo espaço e
  * é uma ação da pessoa: ela toma o canto na hora (os convites somem) e, quando
- * a seleção acaba, a vez volta para quem estava esperando.
+ * a seleção acaba, a vez volta para quem estava esperando. O painel do
+ * verbete (Strong, `verbete`) faz o mesmo enquanto está aberto.
  */
 
-export type DonoCanto = 'whatsapp' | 'instalar' | 'estudo' | 'selecao'
+export type DonoCanto = 'whatsapp' | 'instalar' | 'estudo' | 'selecao' | 'verbete'
 
 /** Donos que tomam o canto mesmo com outro aviso já visível. */
-const PREEMPTA: readonly DonoCanto[] = ['selecao']
+const PREEMPTA: readonly DonoCanto[] = ['verbete', 'selecao']
 
 // O passo do grupo do WhatsApp (N42) é o da primeira entrada: vem antes.
 const PRIORIDADE: readonly DonoCanto[] = ['whatsapp', 'instalar', 'estudo']

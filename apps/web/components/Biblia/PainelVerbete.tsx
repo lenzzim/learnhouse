@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
+import { useCantoInferior } from '@components/Discipulei/useCantoInferior'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import {
@@ -24,6 +25,8 @@ type Estado = { tipo: 'carregando' } | { tipo: 'erro' } | { tipo: 'pronto'; verb
 export function PainelVerbete({ palavra, onFechar }: { palavra: PalavraOriginal; onFechar: () => void }) {
   const { t } = useTranslation()
   const [estado, setEstado] = useState<Estado>({ tipo: 'carregando' })
+  // Aberto, o painel ocupa o canto inferior: o convite de instalar sai.
+  useCantoInferior('verbete', true)
   const fecharRef = useRef<HTMLButtonElement | null>(null)
   const strong = palavra[2]
   // narrowing explícito: só o NT tem glosa em espanhol [5] e marca [6]
