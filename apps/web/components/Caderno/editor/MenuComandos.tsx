@@ -27,6 +27,8 @@ import {
   TextHFour,
   TextHThree,
   TextHTwo,
+  TextIndent,
+  TextOutdent,
   TextT,
   VideoCamera,
 } from '@phosphor-icons/react'
@@ -58,6 +60,8 @@ const ICONES: Record<IdComando, typeof TextT> = {
   modelo: FileDashed,
   propriedade: SlidersHorizontal,
   guia: Question,
+  recuo_mais: TextIndent,
+  recuo_menos: TextOutdent,
 }
 
 export interface TextosMenuComandos {
