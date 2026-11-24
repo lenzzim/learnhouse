@@ -6550,7 +6550,11 @@
     "mencao": "Solo la referencia",
     "mencao_desc": "\"Jn 3:16 (NVI)\" en el texto, con enlace",
     "limite_versiculos_aberta": "Para incrustar el texto, cita hasta {{max}} versículos a la vez o el capítulo entero (ej.: “Sal 23”). “Solo la referencia” no tiene límite.",
-    "capitulo_inteiro_n": "Capítulo entero ({{n}} versículos)."
+    "capitulo_inteiro_n": "Capítulo entero ({{n}} versículos).",
+    "textos_biblicos": "Textos bíblicos:",
+    "ver_creditos_completos": "ver créditos completos",
+    "creditos_rotulo": "Créditos de las traducciones de la Biblia",
+    "dominio_publico_curto": "dominio público"
   },
   "nav": {
     "inicio": "Inicio",

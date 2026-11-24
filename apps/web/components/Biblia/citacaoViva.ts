@@ -4,8 +4,9 @@
  * Os termos da API.Bible e da YouVersion não permitem guardar o texto
  * licenciado de forma permanente. Por isso o post guarda só a citação — um blockquote cujo texto é
  * "— João 3:16-18 (ARA)" — e, ao exibir, este widget (decoração do
- * ProseMirror, fora do documento salvo) busca o texto pelo proxy e o mostra
- * com o copyright, reportando o FUMS. Sem sessão (visitante, link /n/), no
+ * ProseMirror, fora do documento salvo) busca o texto pelo proxy e o mostra,
+ * reportando o FUMS. O copyright vai para o rodapé único da nota ou do post
+ * (decisão N43, RodapeCreditos.tsx), pelos atributos data-credito-*. Sem sessão (visitante, link /n/), no
  * limite diário ou com a versão desligada, mostra o texto da aberta do idioma
  * (BLIVRE) com o aviso ("Entre para ler na NVI. Mostrando a BLIVRE.").
  *
@@ -65,7 +66,9 @@ export function criarCitacaoViva({ codigo, versao }: CitacaoLicenciada): HTMLEle
         p.appendChild(document.createTextNode(`${v.texto} `))
       }
       raiz.appendChild(p)
-      if (capitulo.copyrightCurto) raiz.appendChild(el('p', ESTILO_NOTA, capitulo.copyrightCurto))
+      // crédito: no rodapé único da nota/post (decisão N43), não em cada citação
+      raiz.dataset.creditoVersao = capitulo.versao
+      if (capitulo.copyright) raiz.dataset.creditoCompleto = capitulo.copyright
       if (recuo) {
         const para = versaoPorId(recuo.para)?.sigla ?? recuo.para.toUpperCase()
         const chave =

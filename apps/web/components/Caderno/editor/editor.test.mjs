@@ -737,3 +737,25 @@ test('recuo: menu "/" aplica o recuo no lugar do "/consulta"', async () => {
   assert.ok(!ed.state.doc.textContent.includes('/'))
   ed.destroy()
 })
+
+/* ------------------------------------------- créditos (decisão N43) */
+
+test('créditos: lê do DOM só o texto bíblico exibido (citação viva e aberta embutida)', async () => {
+  const { lerTextosExibidos, montarCreditos } = await import('../../../lib/biblia/creditos.ts')
+  const raiz = document.createElement('div')
+  raiz.innerHTML = `
+    <blockquote><div class="biblia-citacao-viva" data-credito-versao="nvi" data-credito-completo="NVI DA API"><p>texto</p></div><p>— João 3:16 (NVI)</p></blockquote>
+    <blockquote><div class="biblia-citacao-viva"><p>Carregando…</p></div><p>— Sl 23 (ARA)</p></blockquote>
+    <blockquote><p>¹ No princípio… ² A terra…</p><p>— Gênesis 1:1-2 (BLIVRE)</p></blockquote>
+    <blockquote><p>— Gênesis 1:3 (BLIVRE)</p></blockquote>
+    <blockquote><p>Uma citação qualquer</p><p>— Agostinho</p></blockquote>
+    <p>Menção: Jo 3:16 (ARC)</p>`
+  const textos = lerTextosExibidos(raiz)
+  assert.deepEqual(textos, [{ versao: 'nvi', completo: 'NVI DA API' }, { versao: 'blivre' }])
+  const linhas = montarCreditos(textos)
+  assert.deepEqual(linhas.map((l) => l.curto), ['NVI © Biblica, Inc.', 'BLIVRE (CC BY 4.0 BR)'])
+  // sem texto bíblico exibido: sem rodapé
+  const vazio = document.createElement('div')
+  vazio.innerHTML = '<p>Jo 3:16 (NVI)</p><blockquote><p>— Sl 23 (NVI)</p></blockquote>'
+  assert.equal(montarCreditos(lerTextosExibidos(vazio)).length, 0)
+})

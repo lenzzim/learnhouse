@@ -6545,7 +6545,11 @@
     "mencao": "Reference only",
     "mencao_desc": "\"Jn 3:16 (NIV)\" in the text, clickable",
     "limite_versiculos_aberta": "To embed the text, quote up to {{max}} verses at a time or the whole chapter (e.g. “Ps 23”). “Reference only” has no limit.",
-    "capitulo_inteiro_n": "Whole chapter ({{n}} verses)."
+    "capitulo_inteiro_n": "Whole chapter ({{n}} verses).",
+    "textos_biblicos": "Bible texts:",
+    "ver_creditos_completos": "see full credits",
+    "creditos_rotulo": "Bible translation credits",
+    "dominio_publico_curto": "public domain"
   },
   "nav": {
     "inicio": "Home",
