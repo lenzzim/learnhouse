@@ -27,8 +27,10 @@ lida automaticamente):
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
+import re
 import time
 from typing import Any
 
@@ -264,3 +266,39 @@ async def obter_versiculos(versao_id: str, livro: str, capitulo: int, ini: int, 
     versos, titulos = recortar(res.dados["versos"], res.dados["titulos"], ini, fim)
     dados = {**res.dados, "versos": versos, "titulos": titulos, "ini": ini, "fim": fim}
     return Resultado(dados, res.origem)
+
+
+# ---------------------------------------------------------------------------
+# Busca (GET /v1/search-verses): devolve SÓ referências, nunca texto.
+# ---------------------------------------------------------------------------
+CACHE_BUSCA = CACHE_FRESCO  # 7 dias; nunca passa de CACHE_MAXIMO (14 dias)
+_REF_USFM = re.compile(r"^([1-3]?[A-Z]{2,3})\.(\d{1,3})\.(\d{1,3})$")
+
+
+async def buscar_referencias(versao_id: str, consulta: str) -> list[str]:
+    """Até 99 referências USFM ("JHN.3.16") para a consulta, na ordem da YouVersion.
+
+    Uma chamada por consulta (page_size=99), em cache por 7 dias. O texto NÃO
+    vem daqui: a doc manda resolver o texto pelo endpoint de passagens; aqui
+    mostramos o texto de uma versão aberta e o clique abre a passagem na NVI.
+    """
+    versao = _versao_ou_erro(versao_id)
+    _chave()
+    q = " ".join((consulta or "").split())[:100]
+    if not q:
+        return []
+    chave = f"{PREFIXO}:yv:busca:{versao.api_id}:{hashlib.sha256(q.lower().encode()).hexdigest()[:32]}"
+    em_cache = _cache_ler(chave)
+    if em_cache and time.time() - em_cache["salvo_em"] < CACHE_BUSCA:
+        return list(em_cache["refs"])
+    corpo = _corpo(await _get_api(
+        "/v1/search-verses",
+        {"query": q, "bible_id": versao.api_id, "user_intent": "text", "page_size": "99"},
+    ))
+    refs: list[str] = []
+    for item in corpo.get("verses") or []:
+        ref = str((item or {}).get("reference") or "").upper() if isinstance(item, dict) else ""
+        if _REF_USFM.match(ref) and ref not in refs:
+            refs.append(ref)
+    _cache_gravar(chave, {"salvo_em": time.time(), "refs": refs}, CACHE_BUSCA)
+    return refs

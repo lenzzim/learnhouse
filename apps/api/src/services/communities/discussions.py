@@ -179,6 +179,11 @@ async def create_discussion(
     await db_session.commit()
     await db_session.refresh(discussion)
 
+    # Busca por passagem: refaz o índice de referências bíblicas do post.
+    from src.services.search.passagens import indexar_discussao_seguro
+
+    await indexar_discussao_seguro(db_session, discussion)
+
     # Caderno privado: nada sai para analytics/webhooks (o título iria para
     # integrações externas). O anúncio acontece se/quando for publicada.
     if not is_private(discussion):
@@ -543,6 +548,11 @@ async def update_discussion(
     db_session.add(discussion)
     await db_session.commit()
     await db_session.refresh(discussion)
+
+    # Busca por passagem: refaz o índice de referências bíblicas do post.
+    from src.services.search.passagens import indexar_discussao_seguro
+
+    await indexar_discussao_seguro(db_session, discussion)
 
     if just_published:
         await announce_publication(discussion, community, current_user)

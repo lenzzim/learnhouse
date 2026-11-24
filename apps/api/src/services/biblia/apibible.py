@@ -19,9 +19,11 @@ Licença / termos (ver docs.api.bible):
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -31,6 +33,7 @@ import httpx
 from src.core.redis import get_redis_client
 from src.services.biblia.normalizar import normalizar_conteudo, recortar
 from src.services.biblia.versoes import (
+    CAPITULOS_POR_LIVRO,
     VersaoLicenciada,
     id_capitulo_api,
     versao_por_id,
@@ -347,3 +350,75 @@ async def obter_versiculos(versao_id: str, livro: str, capitulo: int, ini: int, 
     versos, titulos = recortar(res.dados["versos"], res.dados["titulos"], ini, fim)
     dados = {**res.dados, "versos": versos, "titulos": titulos, "ini": ini, "fim": fim}
     return Resultado(dados, res.origem)
+
+
+# ---------------------------------------------------------------------------
+# Busca (GET /v1/bibles/{id}/search)
+# ---------------------------------------------------------------------------
+CACHE_BUSCA = CACHE_FRESCO  # 7 dias; nunca passa de CACHE_MAXIMO (14 dias)
+_TAG = re.compile(r"<[^>]+>")
+_ID_VERSO = re.compile(r"^([1-3]?[A-Z]{2,3})\.(\d{1,3})\.(\d{1,3})$")
+# filtro de testamento no parâmetro `range` da API.Bible
+RANGE_TESTAMENTO = {"AT": "GEN-MAL", "NT": "MAT-REV"}
+
+
+async def buscar(
+    versao_id: str,
+    consulta: str,
+    *,
+    livro: str | None = None,
+    testamento: str | None = None,
+    offset: int = 0,
+    limit: int = 20,
+    ordem: str = "relevancia",
+) -> dict[str, Any]:
+    """Busca de texto numa versão licenciada da API.Bible.
+
+    Uma chamada por página (conta na cota diária), em cache por 7 dias (o
+    limite do projeto para texto licenciado é 14). Devolve
+    ``{"total", "versos": [{livro, capitulo, verso, texto}], "fums"}``.
+    """
+    versao = _versao_ou_erro(versao_id)
+    _chave()
+    q = " ".join((consulta or "").split())[:200]
+    if not q:
+        return {"total": 0, "versos": [], "fums": None}
+    params = {
+        "query": q,
+        "limit": str(max(1, min(limit, 50))),
+        "offset": str(max(0, offset)),
+        "sort": "canonical" if ordem == "canonica" else "relevance",
+    }
+    if livro and livro.upper() in CAPITULOS_POR_LIVRO:
+        params["range"] = livro.upper()
+    elif testamento in RANGE_TESTAMENTO:
+        params["range"] = RANGE_TESTAMENTO[testamento]
+    assinatura = hashlib.sha256(json.dumps(params, sort_keys=True).lower().encode()).hexdigest()[:32]
+    chave = f"{PREFIXO}:busca:{versao.api_id}:{assinatura}"
+    em_cache = _cache_ler(chave)
+    if em_cache and time.time() - em_cache["salvo_em"] < CACHE_BUSCA:
+        return em_cache["dados"]
+
+    corpo = await _get_api(f"/v1/bibles/{versao.api_id}/search", params)
+    dados_api = corpo.get("data") or {}
+    meta = corpo.get("meta") or {}
+    versos = []
+    for item in dados_api.get("verses") or []:
+        m = _ID_VERSO.match(str((item or {}).get("id") or ""))
+        if not m:
+            continue
+        texto = " ".join(_TAG.sub(" ", str(item.get("text") or "")).split())
+        versos.append({"livro": m.group(1), "capitulo": int(m.group(2)), "verso": int(m.group(3)), "texto": texto})
+    meta_versao = None
+    try:
+        meta_versao = await _metadados(versao)
+    except ErroBiblia:
+        pass
+    dados = {
+        "total": int(dados_api.get("total") or len(versos)),
+        "versos": versos,
+        "fums": meta.get("fumsToken") or meta.get("fumsId"),
+        "copyright": (meta_versao or {}).get("copyright_curto"),
+    }
+    _cache_gravar(chave, {"salvo_em": time.time(), "dados": dados}, CACHE_BUSCA)
+    return dados
