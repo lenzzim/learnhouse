@@ -1,9 +1,11 @@
 'use client'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, Languages } from 'lucide-react'
+import { BookmarkSimple, Highlighter } from '@phosphor-icons/react'
+import toast from 'react-hot-toast'
 import {
   LIVROS,
   capituloVizinho,
@@ -13,7 +15,21 @@ import {
   livroPorId,
   type Referencia,
 } from '@/lib/biblia/referencias'
-import { versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
+import { VERSOES, versaoPorId, type VersaoInfo } from '@/lib/biblia/versoes'
+import {
+  alternarVerso as alternarSelecao,
+  codigoSelecao,
+  copiaPermitida,
+  estenderSelecao,
+  limiteCopia,
+  referenciasDosTrechos,
+  rotuloSelecao,
+  textoCopia,
+} from '@/lib/biblia/selecao'
+import { blocoCitacao, textoDoBloco } from '@/lib/biblia/citacao'
+import { guardarCitacaoPendente } from '@/lib/caderno/citacaoPendente'
+import { dataLocal } from '@/lib/caderno/conteudo'
+import type { Cor } from '@/lib/caderno/cores'
 import { CREDITO_STEPBIBLE, URL_STEPBIBLE, type CapituloOriginal, type PalavraOriginal } from '@/lib/biblia/original'
 import { carregarOriginal } from '@/lib/biblia/dados'
 import { ErroFonte, getChapterComRecuo, rotuloVerso, versoIncluidoEm, type Capitulo, type Recuo } from '@/lib/biblia/fontes'
@@ -25,6 +41,9 @@ import { OutrasTraducoes } from './OutrasTraducoes'
 import { OriginalVerso } from './OriginalVerso'
 import { PainelVerbete } from './PainelVerbete'
 import { ConviteEstudo } from '@components/Discipulei/ChamadaEstudo'
+import { BarraVersiculos } from './BarraVersiculos'
+import { MeusDestaques } from './MeusDestaques'
+import { useMarcas } from './useMarcas'
 import { CHAVE_ULTIMO_CAPITULO } from '@/lib/discipulei/nav'
 
 /**
@@ -36,6 +55,13 @@ import { CHAVE_ULTIMO_CAPITULO } from '@/lib/discipulei/nav'
  *   &c=web                         modo comparar com uma segunda versão
  * Cada versículo tem âncora #v<n>. Sem `ref`/`v`, usa o último capítulo e a
  * última versão escolhidos (localStorage) ou Gênesis 1 na versão do idioma.
+ *
+ * Seleção (P0 do plano do leitor): tocar no texto ou no número do versículo
+ * liga e desliga a seleção (vários, fora de sequência); Shift+clique estende;
+ * no teclado, os números são uma lista (setas, Home/End; Espaço/Enter
+ * seleciona; Shift+seta estende; Esc limpa). A barra de ações (BarraVersiculos)
+ * destaca, copia, compartilha, anota, favorita, compara e abre o original.
+ * Destaques e favoritos ficam na conta (useMarcas), independentes da versão.
  */
 
 // Também lida pela tela Hoje ("Continue lendo").
@@ -228,6 +254,70 @@ export default function LeitorBiblia() {
   const fim = atual.versoFim ?? atual.versoIni
   const destacado = (n: number) => ini !== undefined && fim !== undefined && n >= ini && n <= fim
 
+  // ---- seleção de versículos, destaques e favoritos (P0 do plano do leitor)
+  const [selecao, setSelecao] = useState<number[]>([])
+  const [ancora, setAncora] = useState<number | null>(null)
+  const [foco, setFoco] = useState<number | null>(null)
+  const [listaAberta, setListaAberta] = useState(false)
+  const artigoRef = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    setSelecao([])
+    setAncora(null)
+    setFoco(null)
+  }, [livroInfo.id, atual.capitulo])
+  const marcas = useMarcas(livroInfo.id, atual.capitulo, acesso)
+  const existeVerso = (n: number) => !!versosA[n - 1] || (!!versaoB && !!versosB[n - 1])
+  const selecionado = (n: number) => selecao.includes(n)
+  const tocarVerso = (n: number, estender: boolean) => {
+    setSelecao((sel) => (estender ? estenderSelecao(sel, ancora, n, existeVerso) : alternarSelecao(sel, n)))
+    setAncora(n)
+    setFoco(n)
+  }
+  const limparSelecao = () => {
+    setSelecao([])
+    setAncora(null)
+  }
+  const primeiroVerso = versosA.findIndex(Boolean) + 1 || 1
+  const focoAtual = foco ?? (ini !== undefined && existeVerso(ini) ? ini : primeiroVerso)
+  /** Setas/Home/End nos números (lista com um só ponto de Tab); Shift+seta estende. */
+  const teclaVerso = (n: number) => (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    const botoes = Array.from(artigoRef.current?.querySelectorAll<HTMLButtonElement>('button[data-verso]') ?? [])
+    const i = botoes.findIndex((b) => Number(b.dataset.verso) === n)
+    let j = -1
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') j = Math.min(botoes.length - 1, i + 1)
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') j = Math.max(0, i - 1)
+    else if (e.key === 'Home') j = 0
+    else if (e.key === 'End') j = botoes.length - 1
+    else if (e.key === 'Escape' && selecao.length) {
+      e.preventDefault()
+      limparSelecao()
+      return
+    }
+    if (j < 0 || i < 0) return
+    e.preventDefault()
+    const alvo = botoes[j]
+    const m = Number(alvo.dataset.verso)
+    setFoco(m)
+    alvo.focus()
+    if (e.shiftKey && (e.key.startsWith('Arrow'))) {
+      setSelecao((sel) => estenderSelecao(sel, ancora ?? n, m, existeVerso))
+      if (ancora === null) setAncora(n)
+    }
+  }
+  /** Clique no texto do versículo (não em botão/link nem arrastando para selecionar texto). */
+  const cliqueNoVerso = (n: number) => (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button, a')) return
+    const sel = typeof window !== 'undefined' ? window.getSelection() : null
+    if (sel && !sel.isCollapsed) return
+    tocarVerso(n, e.shiftKey)
+  }
+  const corDe = (n: number): Cor | null => marcas.mapa.get(n)?.color ?? null
+  const favoritoDe = (n: number) => !!marcas.mapa.get(n)?.favorite
+  const estiloMarca = (n: number): React.CSSProperties | undefined => {
+    const cor = corDe(n)
+    return cor ? { backgroundColor: `var(--marca-${cor})` } : undefined
+  }
+
   // Depois de carregar: rola até o versículo destacado (ou o #v<n> da URL), se não estiver visível
   useEffect(() => {
     if (!prontoA) return
@@ -247,20 +337,31 @@ export default function LeitorBiblia() {
   const proximo = capituloVizinho(livroInfo.id, atual.capitulo, 1)
 
   const numeroVerso = (n: number, cap: Capitulo | null = prontoA) => {
-    const alvo: Referencia =
-      destacado(n) && ini === fim
-        ? { livroId: livroInfo.id, capitulo: atual.capitulo }
-        : { livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: n }
+    const cor = corDe(n)
+    const descricao = [
+      formatarReferencia({ livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: n }, false, nomes),
+      cor ? t('biblia.destaque_cor', { cor: t(`caderno_editor.cores.${cor}`) }) : '',
+      favoritoDe(n) ? t('biblia.favorito') : '',
+    ]
+      .filter(Boolean)
+      .join(', ')
     return (
-      <Link
-        href={montarHref(alvo)}
-        replace
-        scroll={false}
-        aria-label={formatarReferencia({ livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: n }, false, nomes)}
-        className="-my-2 me-0.5 inline-block select-none rounded px-1 py-2 align-super font-sans text-xs font-medium leading-none text-[var(--text-3)] no-underline hover:text-[var(--text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]"
+      <button
+        type="button"
+        data-verso={n}
+        tabIndex={n === focoAtual ? 0 : -1}
+        aria-pressed={selecionado(n)}
+        aria-label={descricao}
+        onClick={(e) => tocarVerso(n, e.shiftKey)}
+        onKeyDown={teclaVerso(n)}
+        onFocus={() => setFoco(n)}
+        className={`-my-2 me-0.5 inline-block select-none rounded px-1 py-2 align-super font-sans text-xs font-medium leading-none no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] ${
+          selecionado(n) ? 'text-[var(--text)]' : 'text-[var(--text-3)] hover:text-[var(--text)]'
+        }`}
       >
         {rotuloVerso(cap, n)}
-      </Link>
+        {favoritoDe(n) && <BookmarkSimple size={10} weight="fill" aria-hidden="true" className="ms-0.5 inline-block align-baseline" />}
+      </button>
     )
   }
   const blocoOriginal = (n: number) => {
@@ -287,8 +388,12 @@ export default function LeitorBiblia() {
       </span>
     )
   }
-  const classeDestaque = (n: number) =>
-    destacado(n) ? 'rounded-[3px] bg-[var(--surface)] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]' : ''
+  const classeDestaque = (n: number) => {
+    const partes = ['cursor-pointer rounded-[3px] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]']
+    if (selecionado(n)) partes.push('underline decoration-[var(--text)] decoration-2 underline-offset-[6px]')
+    if (!corDe(n) && (destacado(n) || selecionado(n))) partes.push('bg-[var(--surface)]')
+    return partes.join(' ')
+  }
 
   // ---- texto: uma versão (parágrafo corrido, quebrado onde o original abre)
   const textoSimples = () => {
@@ -311,7 +416,7 @@ export default function LeitorBiblia() {
         )
       }
       trecho.push(
-        <span key={n} id={`v${n}`} className={`scroll-mt-28 ${classeDestaque(n)}`}>
+        <span key={n} id={`v${n}`} className={`scroll-mt-28 ${classeDestaque(n)}`} style={estiloMarca(n)} onClick={cliqueNoVerso(n)}>
           {numeroVerso(n)}
           {texto}
           {destacado(n) && !mostrarOriginal && (
@@ -351,7 +456,15 @@ export default function LeitorBiblia() {
         )
       }
       linhas.push(
-        <div key={n} id={`v${n}`} className={`scroll-mt-28 border-b border-[var(--line-2)] py-2 ${destacado(n) ? 'bg-[var(--surface)]' : ''}`}>
+        <div
+          key={n}
+          id={`v${n}`}
+          onClick={cliqueNoVerso(n)}
+          style={estiloMarca(n)}
+          className={`scroll-mt-28 cursor-pointer border-b border-[var(--line-2)] py-2 ${!corDe(n) && (destacado(n) || selecionado(n)) ? 'bg-[var(--surface)]' : ''} ${
+            selecionado(n) ? 'shadow-[inset_3px_0_0_var(--text)] rtl:shadow-[inset_-3px_0_0_var(--text)]' : ''
+          }`}
+        >
           <div className="grid gap-x-8 gap-y-1 md:grid-cols-2">
             <p lang={versaoA.idioma}>
               {numeroVerso(n)}
@@ -390,8 +503,126 @@ export default function LeitorBiblia() {
   const temLicenciada = versaoA.fonte === 'licenciada' || versaoB?.fonte === 'licenciada'
   const refPassagem: Referencia = { livroId: livroInfo.id, capitulo: atual.capitulo, versoIni: ini, versoFim: fim !== ini ? fim : undefined }
 
+  // ---- ações da seleção
+  const infoExibida = versaoPorId(prontoA?.recuo?.para) ?? versaoA
+  const rotuloSel = rotuloSelecao(livroInfo.id, atual.capitulo, selecao, nomes)
+  const hrefEntrar = `/login?next=${encodeURIComponent(`/biblia${montarHref(atual)}`)}`
+  const linkSelecao = (versao: string) => {
+    const q = new URLSearchParams({ ref: codigoSelecao(livroInfo.id, atual.capitulo, selecao), v: versao })
+    return `${typeof window !== 'undefined' ? window.location.origin : ''}/biblia?${q.toString()}`
+  }
+  const versosSelecionados = (lista: number[] = selecao) =>
+    lista.filter((n) => !!versosA[n - 1]).map((n) => ({ numero: n, texto: versosA[n - 1], rotulo: rotuloVerso(prontoA, n) }))
+  const cores = selecao.map(corDe)
+  const corComum = cores.length && cores.every((c) => c && c === cores[0]) ? cores[0] : null
+  const todosFavoritos = selecao.length > 0 && selecao.every(favoritoDe)
+  const originalAberto = mostrarOriginal || (selecao.length > 0 && selecao.every((n) => abertos.has(n)))
+
+  const copiar = async () => {
+    const versos = versosSelecionados()
+    if (!versos.length) return
+    if (!copiaPermitida(infoExibida.id, versos.length)) {
+      toast.error(t('biblia.limite_copia', { max: limiteCopia(infoExibida.id), sigla: infoExibida.sigla }))
+      return
+    }
+    const texto = textoCopia({ versos, referencia: rotuloSel, sigla: infoExibida.sigla, link: linkSelecao(infoExibida.id) })
+    try {
+      await navigator.clipboard.writeText(texto)
+      toast.success(t('biblia.copiado'))
+    } catch {
+      toast.error(t('biblia.erro_copiar'))
+    }
+  }
+  const compartilhar = async () => {
+    // só o link da passagem (nunca o texto licenciado)
+    const url = linkSelecao(versaoA.id)
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ title: `${rotuloSel} (${versaoA.sigla})`, url })
+        return
+      }
+      await navigator.clipboard.writeText(url)
+      toast.success(t('biblia.link_copiado'))
+    } catch (e) {
+      if ((e as Error)?.name !== 'AbortError') toast.error(t('biblia.erro_copiar'))
+    }
+  }
+  const destacar = async (cor: Cor | null) => {
+    const ok = await marcas.aplicar(selecao, { color: cor ?? '' })
+    if (!ok) toast.error(t('biblia.erro_salvar_marca'))
+    else limparSelecao()
+  }
+  const favoritar = async () => {
+    const ok = await marcas.aplicar(selecao, { favorite: !todosFavoritos })
+    if (!ok) toast.error(t('biblia.erro_salvar_marca'))
+    else limparSelecao()
+  }
+  const anotar = (destino: 'nota' | 'tcd') => {
+    // uma citação por trecho contíguo; licenciada guarda só a referência
+    const licenciada = versaoA.fonte === 'licenciada'
+    const blocos = referenciasDosTrechos(livroInfo.id, atual.capitulo, selecao).map((r) => {
+      const de = r.versoIni ?? 0
+      const ate = r.versoFim ?? de
+      return blocoCitacao({
+        referencia: formatarReferencia(r, false, nomes),
+        sigla: versaoA.sigla,
+        licenciada,
+        texto: licenciada ? undefined : textoDoBloco(versosSelecionados(selecao.filter((n) => n >= de && n <= ate))),
+      })
+    })
+    let armazenamento: Storage | null = null
+    try {
+      armazenamento = window.sessionStorage
+    } catch {
+      armazenamento = null
+    }
+    const hoje = dataLocal()
+    const ok = guardarCitacaoPendente(armazenamento, {
+      destino: destino === 'tcd' ? { tipo: 'tcd', data: hoje } : { tipo: 'nota' },
+      blocos,
+      titulo: rotuloSel,
+    })
+    if (!ok) {
+      toast.error(t('biblia.erro_anotar'))
+      return
+    }
+    router.push(destino === 'tcd' ? `/caderno/tcd/${hoje}` : `/caderno/new?titulo=${encodeURIComponent(rotuloSel)}`)
+  }
+  const comparar = () => {
+    const ordenada = [...selecao].sort((a, b) => a - b)
+    const alvo: Referencia = {
+      livroId: livroInfo.id,
+      capitulo: atual.capitulo,
+      versoIni: ordenada[0],
+      versoFim: ordenada.length > 1 ? ordenada[ordenada.length - 1] : undefined,
+    }
+    if (versaoB) {
+      router.replace(montarHref(alvo, versaoA.id, ''), { scroll: false })
+      return
+    }
+    const segunda =
+      versaoA.fonte === 'licenciada'
+        ? versaoAberta
+        : logado && idioma === 'pt'
+          ? 'nvi'
+          : VERSOES.find((v) => v.idioma === versaoA.idioma && v.id !== versaoA.id)?.id ?? 'kjv'
+    router.replace(montarHref(alvo, versaoA.id, segunda), { scroll: false })
+  }
+  const alternarOriginalSelecao = () => {
+    setAbertos((s) => {
+      const novo = new Set(s)
+      if (selecao.every((n) => novo.has(n))) selecao.forEach((n) => novo.delete(n))
+      else selecao.forEach((n) => novo.add(n))
+      return novo
+    })
+  }
+
   return (
-    <div className={`mx-auto w-full px-4 pb-16 pt-6 text-[var(--text)] sm:pt-10 ${versaoB ? 'max-w-[1040px]' : 'max-w-[680px]'}`}>
+    <div
+      className={`mx-auto w-full px-4 pt-6 text-[var(--text)] sm:pt-10 ${versaoB ? 'max-w-[1040px]' : 'max-w-[680px]'} ${
+        selecao.length ? 'pb-72 lg:pb-32' : 'pb-16'
+      }`}
+    >
       <header className="mb-6 flex flex-col gap-4">
         <h1 className="text-3xl">
           {nomeLivro(livroInfo)} {atual.capitulo}
@@ -459,8 +690,17 @@ export default function LeitorBiblia() {
             <Languages size={16} aria-hidden="true" />
             {t('biblia.mostrar_original')}
           </button>
-          <OutrasTraducoes referencia={refPassagem} flutuante />
+          <div className="flex flex-wrap items-center gap-2">
+            {montado && logado && (
+              <button type="button" onClick={() => setListaAberta(true)} className={botaoClasse}>
+                <Highlighter size={16} aria-hidden="true" />
+                {t('biblia.meus_destaques')}
+              </button>
+            )}
+            <OutrasTraducoes referencia={refPassagem} flutuante />
+          </div>
         </div>
+        <p className="-mt-1 text-xs text-[var(--text-3)]">{t('biblia.dica_selecionar')}</p>
         {temLicenciada && <p className="-mt-1 text-xs text-[var(--text-3)]">{t('biblia.nota_licenciadas')}</p>}
         <DicaEntrarNvi
           className="-mt-1"
@@ -476,8 +716,12 @@ export default function LeitorBiblia() {
       )}
 
       <article
+        ref={artigoRef}
         lang={versaoA.idioma}
         aria-busy={estadoTexto?.tipo === 'carregando'}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape' && selecao.length) limparSelecao()
+        }}
         className="min-h-[50vh] text-[1.1875rem] leading-[1.8]"
         style={{ fontFamily: FONTE_TEXTO }}
       >
@@ -543,6 +787,40 @@ export default function LeitorBiblia() {
       </>)}
 
       {palavra && <PainelVerbete palavra={palavra} onFechar={fecharPalavra} />}
+
+      {selecao.length > 0 && estadoTexto?.tipo === 'pronto' && (
+        <BarraVersiculos
+          rotulo={rotuloSel}
+          quantidade={selecao.length}
+          corAtual={corComum}
+          algumDestaque={cores.some(Boolean)}
+          todosFavoritos={todosFavoritos}
+          logado={logado}
+          hrefEntrar={hrefEntrar}
+          comparando={!!versaoB}
+          originalAberto={originalAberto}
+          aoDestacar={destacar}
+          aoCopiar={copiar}
+          aoCompartilhar={compartilhar}
+          aoAnotar={anotar}
+          aoFavoritar={favoritar}
+          aoComparar={comparar}
+          aoOriginal={alternarOriginalSelecao}
+          aoFechar={limparSelecao}
+        />
+      )}
+      {logado && (
+        <MeusDestaques
+          aberto={listaAberta}
+          aoMudar={setListaAberta}
+          token={acesso.token}
+          nomes={nomes}
+          hrefVerso={(codigo) => {
+            const r = lerCodigoReferencia(codigo)
+            return r ? montarHref(r) : '?'
+          }}
+        />
+      )}
     </div>
   )
 }

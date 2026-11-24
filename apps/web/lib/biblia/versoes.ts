@@ -247,12 +247,15 @@ export function urlYouVersion(ref: Referencia, versao: VersaoExterna): string {
 }
 
 // ---------------------------------------------------------------------------
-// Política de cópia/compartilhamento por versão (P0 do leitor; ainda NÃO usada
-// pela interface além do que já existe: inserir versículo licenciado já grava
-// só a referência). Valores conservadores até a leitura completa dos termos:
+// Política de cópia/compartilhamento por versão (P0 do leitor: "Copiar" da
+// seleção de versículos). Valores conservadores até a leitura completa dos
+// termos:
 //  - abertas (CC BY, CC BY-SA, domínio público): cópia livre, imagem permitida;
 //  - API.Bible: no máximo 25 versículos por cópia (placeholder), sem imagem;
-//  - YouVersion (NVI): no máximo 25 versículos por cópia, sem imagem.
+//  - YouVersion (NVI): no máximo 25 versículos por cópia, sem imagem (a regra
+//    da Biblica permite até 500 com a sigla; ficamos bem abaixo).
+// O limite das licenciadas é configurável no build por
+// NEXT_PUBLIC_BIBLIA_LIMITE_COPIA (1 a 500; padrão 25).
 // `siglaObrigatoria`: toda cópia leva a sigla da versão (e, nas licenciadas,
 // o copyright).
 // ---------------------------------------------------------------------------
@@ -272,9 +275,28 @@ export const POLITICA_ABERTA: Readonly<PoliticaCopia> = Object.freeze({
   siglaObrigatoria: true as const,
 })
 
+/** Limite padrão de versículos por cópia nas licenciadas. */
+export const LIMITE_COPIA_PADRAO = 25
+
+/** "40" -> 40; vazio, inválido ou fora de 1..500 -> o padrão. */
+export function lerLimiteCopia(valor: string | number | null | undefined): number {
+  const n = Number(valor)
+  return Number.isInteger(n) && n >= 1 && n <= 500 ? n : LIMITE_COPIA_PADRAO
+}
+
+// escrito por extenso para o Next embutir o valor no build (process.env.NEXT_PUBLIC_*)
+function limiteDoAmbiente(): string | undefined {
+  try {
+    return process.env.NEXT_PUBLIC_BIBLIA_LIMITE_COPIA
+  } catch {
+    return undefined // sem `process` (navegador sem o valor embutido)
+  }
+}
+const LIMITE_COPIA_LICENCIADA = lerLimiteCopia(limiteDoAmbiente())
+
 export const POLITICA_POR_PROVEDOR: Readonly<Record<ProvedorLicenciada, Readonly<PoliticaCopia>>> = Object.freeze({
-  apibible: Object.freeze({ permiteCopiar: true, maxVersiculosCopia: 25, permiteImagem: false, siglaObrigatoria: true as const }),
-  youversion: Object.freeze({ permiteCopiar: true, maxVersiculosCopia: 25, permiteImagem: false, siglaObrigatoria: true as const }),
+  apibible: Object.freeze({ permiteCopiar: true, maxVersiculosCopia: LIMITE_COPIA_LICENCIADA, permiteImagem: false, siglaObrigatoria: true as const }),
+  youversion: Object.freeze({ permiteCopiar: true, maxVersiculosCopia: LIMITE_COPIA_LICENCIADA, permiteImagem: false, siglaObrigatoria: true as const }),
 })
 
 /** Política de cópia da versão; id desconhecido cai na regra mais restrita (licenciada). */

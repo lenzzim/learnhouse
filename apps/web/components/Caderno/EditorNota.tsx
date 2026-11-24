@@ -62,6 +62,7 @@ import { BarraFormatacao } from './editor/BarraFormatacao'
 import { renderizadorMenuComandos } from './editor/MenuComandos'
 import { extensoesConteudoCaderno } from './editor/extensoesConteudo'
 import { podeRecuar, RecuoListas } from './editor/recuo'
+import { consumirCitacaoPendente } from '@/lib/caderno/citacaoPendente'
 import { criarCarregadorAnexos } from './editor/carregadorAnexos'
 import { DialogoImagem, DialogoVideo } from './DialogosMidia'
 import { BlocoPropriedades } from './Propriedades'
@@ -643,6 +644,35 @@ export function EditorNota({
     return () => c.registrarInsercao(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editor, somenteLeitura])
+
+  // "Anotar" do leitor bíblico: a nota nova ou o TCD de hoje abre com as
+  // citações da seleção no fim. Conta como edição da pessoa (salva normalmente;
+  // o TCD ainda não salvo é criado no primeiro salvamento).
+  useEffect(() => {
+    if (!editor || somenteLeitura) return
+    let armazenamento: Storage | null = null
+    try {
+      armazenamento = window.sessionStorage
+    } catch {
+      return
+    }
+    const pendente = consumirCitacaoPendente(armazenamento, {
+      kind: notaInicial.kind,
+      tcd_date: notaInicial.tcd_date,
+      vazia: editor.isEmpty,
+    })
+    if (!pendente) return
+    interagiu.current = true
+    setSemModelo(true)
+    const vazio = editor.isEmpty
+    const fim = editor.state.doc.content.size
+    editor
+      .chain()
+      .insertContentAt(vazio ? { from: 0, to: fim } : fim, [...pendente.blocos, { type: 'paragraph' }] as any)
+      .focus('end')
+      .run()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor])
 
   // Pop-up de uma referência escrita na nota (item 2.3): "Inserir passagem
   // completa" (a menção vira citação no lugar) e "Trocar versão". A linha de
