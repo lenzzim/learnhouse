@@ -216,10 +216,15 @@ async def get_community_by_course(
     if not community:
         return None
 
-    # Check if user can read the community
-    await check_resource_access(
-        request, db_session, current_user, community.community_uuid, AccessAction.READ
+    # Discipulei (auditoria v4): quem não pode ler a comunidade do curso (ex.:
+    # desafio sem inscrição) recebe ``null``, como se o curso não tivesse
+    # comunidade. Não revela nada e tira o 403 do console da página do curso.
+    decision = await check_resource_access(
+        request, db_session, current_user, community.community_uuid, AccessAction.READ,
+        raise_on_deny=False,
     )
+    if not decision.allowed:
+        return None
 
     return CommunityRead.model_validate(community.model_dump())
 
@@ -256,7 +261,22 @@ async def update_community(
     if community_object.moderation_words is not None:
         community.moderation_words = community_object.moderation_words
     if community_object.moderation_settings is not None:
-        community.moderation_settings = community_object.moderation_settings
+        from src.services.communities.publicacao import (
+            SPACE_SETTING_KEYS,
+            validate_space_settings,
+            validate_space_usergroup,
+        )
+
+        incoming = dict(community_object.moderation_settings)
+        # As regras v5 (quem publica, comentários, não compartilhável) moram no
+        # mesmo JSON; um PUT só de moderação não pode apagá-las.
+        previous = community.moderation_settings or {}
+        for key in SPACE_SETTING_KEYS:
+            if key not in incoming and key in previous:
+                incoming[key] = previous[key]
+        incoming = validate_space_settings(incoming)
+        await validate_space_usergroup(db_session, community.org_id, incoming)
+        community.moderation_settings = incoming
 
     community.update_date = str(datetime.now())
 
@@ -416,6 +436,7 @@ async def get_community_user_rights(
             "update": False,
             "delete": False,
             "create_discussion": False,
+            "comment": False,
         },
         "ownership": {
             "is_admin": False,
@@ -496,7 +517,12 @@ async def get_community_user_rights(
 
     if has_access:
         rights["permissions"]["read"] = True
-        rights["permissions"]["create_discussion"] = True
+        # Blog só para autores (N45) e comentários desligáveis pelo admin.
+        from src.services.communities.publicacao import can_comment, can_post, post_policy
+
+        rights["permissions"]["create_discussion"] = await can_post(db_session, acting_user_id, community)
+        rights["permissions"]["comment"] = await can_comment(db_session, acting_user_id, community)
+        rights["access"]["post_policy"] = post_policy(community)
 
     if is_admin_or_maintainer:
         rights["ownership"]["is_admin"] = True

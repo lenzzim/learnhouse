@@ -15,6 +15,8 @@ import { useBibliaIdioma, useNomesLivros } from '@components/Biblia/useBibliaIdi
 import { primeiroNome, useDadosNav } from '@components/Discipulei/Navegacao/useDadosNav'
 import { useEscrever } from '@components/Discipulei/Navegacao/EscreverContexto'
 import { CartaoDesafio } from '@components/Discipulei/Aprender/CartaoDesafio'
+import { CartaoWhatsapp } from '@components/Discipulei/WhatsApp/CartaoWhatsapp'
+import { CartaoProximoBatepapo } from '@components/Discipulei/Batepapos/CartaoProximoBatepapo'
 import { ConviteEstudo } from '@components/Discipulei/ChamadaEstudo'
 import { feedSeguindo } from '@services/communities/social'
 import { ROTA_PESSOAS } from '@components/Discipulei/Social/comum'
@@ -260,6 +262,14 @@ export default function HojeClient({ orgslug }: { orgslug: string }) {
           </section>
         </div>
       )}
+
+      {/* Grupo do WhatsApp (N42) e próximo bate-papo (N45). O cartão do
+          WhatsApp tem altura fixa e vem primeiro; o do bate-papo só aparece
+          quando há encontro, sem empurrar o que já está na tela. */}
+      <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-start [&>*]:md:flex-1">
+        <CartaoWhatsapp />
+        <CartaoProximoBatepapo orgslug={orgslug} />
+      </div>
 
       {/* Convite discreto para agendar estudo (N40): a cada 3 dias de uso. */}
       <ConviteEstudo lugar="hoje" className="mt-8" />

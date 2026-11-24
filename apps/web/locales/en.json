@@ -1785,7 +1785,7 @@
     "next": "Next",
     "types": {
       "all": "All",
-      "courses": "Courses",
+      "courses": "Learn",
       "users": "Members",
       "communities": "Communities",
       "discussions": "Discussions",
@@ -2673,7 +2673,8 @@
             "thumbnail": "Thumbnail",
             "access": "Access",
             "course": "Linked Course",
-            "moderation": "Moderation"
+            "moderation": "Moderation",
+            "regras": "Rules"
           },
           "general": {
             "title": "General Settings",
@@ -2694,6 +2695,10 @@
           "moderation": {
             "title": "Moderation",
             "subtitle": "Configure content moderation settings"
+          },
+          "regras": {
+            "title": "Space rules",
+            "subtitle": "Who posts, comments and sharing"
           }
         },
         "course": {
@@ -2882,6 +2887,23 @@
           "deleting": "Deleting community...",
           "delete_success": "Community deleted successfully",
           "delete_error": "Failed to delete community"
+        },
+        "regras_espaco": {
+          "publicar_titulo": "Who can post",
+          "publicar_descricao": "Everyone can read. Admins and maintainers can always post.",
+          "politica_all": "All members",
+          "politica_group": "Only one user group (e.g. Authors group)",
+          "grupo_rotulo": "Group that can post",
+          "grupo_escolher": "Choose a group",
+          "grupo_ajuda": "Other members read and comment, but don't see the \"New post\" button.",
+          "comentarios_rotulo": "Allow comments",
+          "comentarios_descricao": "When off, only admins and maintainers can comment in this space.",
+          "nao_compartilhavel_rotulo": "Not shareable",
+          "nao_compartilhavel_descricao": "Posts in this space never get a public link. Use it for spaces like Prayer requests.",
+          "salvar": "Save rules",
+          "salvo": "Rules saved",
+          "erro": "Couldn't save the rules.",
+          "falta_grupo": "Choose the group that can post."
         }
       },
       "structure": {
@@ -6586,13 +6608,13 @@
     "erro_anotar": "Could not send the passage to the Notebook."
   },
   "nav": {
-    "inicio": "Home",
+    "inicio": "Today",
     "biblia": "Bible",
     "caderno": "Notebook",
     "comunidades": "Communities",
     "aprender": "Learn",
     "navegacao_principal": "Main navigation",
-    "ir_inicio": "{{nome}}: go to home",
+    "ir_inicio": "{{nome}}: go to Today",
     "fechar": "Close",
     "buscar": "Search",
     "busca": {
@@ -6626,7 +6648,8 @@
       "pergunta_descricao": "Pick a community and ask. Everyone there can see it.",
       "pergunta_modal_descricao": "Your question is visible to everyone in the community.",
       "pergunta_comunidade_dica": "The question shows up in this community."
-    }
+    },
+    "batepapos": "Online talks"
   },
   "hoje": {
     "ola": "Hello, {{nome}}",
@@ -7355,14 +7378,24 @@
       "orando": "Praying",
       "contagem": "{{count}}",
       "erro": "Couldn't react. Please try again.",
-      "devagar": "Easy there: too many actions in a short time. Try again shortly."
+      "devagar": "Easy there: too many actions in a short time. Try again shortly.",
+      "obrigado": "Thank you",
+      "tocou": "Touched me"
     },
     "resposta_util": {
       "selo": "Helpful answer",
       "marcar": "Mark as helpful answer",
       "desmarcar": "Unmark helpful answer",
       "erro": "Couldn't mark the answer."
-    }
+    },
+    "salvar": {
+      "salvar": "Save",
+      "salvo": "Saved",
+      "salvo_toast": "Post saved. It's in Saved, visible only to you.",
+      "removido_toast": "Post removed from saved",
+      "erro": "Couldn't save the post."
+    },
+    "comentarios_desligados": "Comments are turned off in this space."
   },
   "acesso": {
     "curso_titulo": "You do not have access to this course",
@@ -7378,5 +7411,164 @@
     "entrar": "Sign in",
     "voltar_aprender": "Back to Learn",
     "voltar_curso": "Back to course"
+  },
+  "batepapos": {
+    "nav": "Bible talks",
+    "titulo": "Bible talks",
+    "descricao": "Online gatherings to talk about the Bible. Confirm you are coming and join through the link at the time.",
+    "novo": "New Bible talk",
+    "proximos": "Upcoming",
+    "passados": "Past",
+    "vazio_proximos": "No Bible talk scheduled yet.",
+    "vazio_passados": "No past Bible talks yet.",
+    "erro": "Could not finish that. Please try again.",
+    "ao_vivo": "Live",
+    "encerrado": "Ended",
+    "duracao": "{{min}} min",
+    "no_fuso": "{{hora}} in {{fuso}}",
+    "conduz": "Led by {{nome}}",
+    "quem_conduz": "Led by",
+    "passagens": "Passages",
+    "entrar": "Join",
+    "entrar_agora": "Join now",
+    "nova_aba": "opens in a new tab",
+    "entre_para_link": "Sign in to see the meeting link",
+    "sem_link": "The meeting link will appear here once it is set.",
+    "adicionar_agenda": "Add to calendar",
+    "voltar": "Bible talks",
+    "nao_encontrado": "This Bible talk was not found.",
+    "ver_post": "See the announcement post",
+    "editar": "Edit",
+    "apagar": "Delete",
+    "confirmar_apagar": "Confirm: delete",
+    "apagado": "Bible talk deleted.",
+    "form": {
+      "titulo": "Title",
+      "tema": "Theme",
+      "descricao": "Description",
+      "quando": "Date and time",
+      "fuso": "Time zone",
+      "duracao": "Duration",
+      "conduz": "Led by",
+      "link": "Meeting link (Meet, Zoom)",
+      "link_dica": "Only signed-in members see the link.",
+      "link_invalido": "The link must start with https://",
+      "passagens": "Passages (optional)",
+      "passagens_exemplo": "E.g. Romans 8:1-17",
+      "divulgar": "Announce in a space (optional)",
+      "nao_divulgar": "Do not announce",
+      "divulgar_dica": "Creates a post with the date and invitation, without the meeting link.",
+      "obrigatorios": "Fill in the title, date and time.",
+      "cancelar": "Cancel",
+      "criar": "Create Bible talk",
+      "salvar": "Save",
+      "criado": "Bible talk created.",
+      "salvo": "Changes saved."
+    },
+    "presenca": {
+      "vou": "Going",
+      "talvez": "Maybe",
+      "contagem": "Going: {{vou}} · Maybe: {{talvez}}",
+      "confirmada": "You are going.",
+      "talvez_ok": "Marked as maybe.",
+      "cancelada": "Attendance cancelled."
+    },
+    "confirmados": {
+      "titulo": "Who is coming",
+      "so_voce": "Only admins and authors see names; other members see just the count.",
+      "vao": "Going",
+      "talvez": "Maybe",
+      "ninguem": "No one yet."
+    },
+    "hoje": {
+      "titulo": "Next Bible talk",
+      "agora": "Bible talk now",
+      "ver_agenda": "See schedule"
+    },
+    "notificacao": {
+      "amanha": "Tomorrow: {{titulo}} at {{hora}}",
+      "em_15": "Starts in 15 minutes: {{titulo}}",
+      "comecou": "It has started! Join now: {{titulo}}",
+      "lembrete": "Reminder: {{titulo}}, {{quando}}"
+    }
+  },
+  "whatsapp": {
+    "titulo": "Join your WhatsApp group",
+    "descricao": "There is one group for men and one for women. Choose yours.",
+    "sou_homem": "I'm a man",
+    "sou_mulher": "I'm a woman",
+    "entrar_homens": "Join the men's group",
+    "entrar_mulheres": "Join the women's group",
+    "aprovacao": "A leader of the same gender approves each request.",
+    "agora_nao": "Not now",
+    "fechar": "Close",
+    "trocar": "Change group",
+    "nova_aba": "opens in a new tab",
+    "privacidade": "Only you and the admins can see this choice.",
+    "erro": "Couldn't save. Please try again.",
+    "cartao_titulo": "WhatsApp group",
+    "cartao_pergunta": "Choose your group to get the link.",
+    "conta_homens": "Men",
+    "conta_mulheres": "Women",
+    "conta_nenhum": "Prefer not to say",
+    "conta_salvo": "Choice saved."
+  },
+  "salvos": {
+    "titulo": "Saved",
+    "privado": "Only you can see this list.",
+    "vazio": "No saved posts yet. Tap Save on a post to keep it here.",
+    "remover": "Remove \"{{titulo}}\" from saved",
+    "remover_curto": "Remove from saved",
+    "erro_remover": "Couldn't remove from saved.",
+    "mais": "Show more"
+  },
+  "admin_comunidade": {
+    "titulo": "Community settings",
+    "descricao": "These apply to the whole organization.",
+    "grupo_autores": "Authors group",
+    "grupo_autores_ajuda": "The team that publishes in author-only spaces (such as the Blog) and creates online talks. Admins and maintainers can always do it.",
+    "nenhum_grupo": "None",
+    "grupo_homens": "\"Men\" user group",
+    "grupo_mulheres": "\"Women\" user group",
+    "grupos_genero_ajuda": "Used only to suggest below which group each person should join. Nobody is added automatically: a leader approves each request.",
+    "link_homens": "WhatsApp link — men",
+    "link_mulheres": "WhatsApp link — women",
+    "link_padrao": "Empty = default: {{url}}",
+    "salvar": "Save",
+    "salvando": "Saving…",
+    "salvo": "Settings saved.",
+    "erro": "Couldn't save.",
+    "erro_carregar": "Couldn't load the settings.",
+    "escolhas_titulo": "WhatsApp group choices",
+    "escolhas_ajuda": "Visible to admins only. Use it to help approve group requests.",
+    "escolhas_vazio": "Nobody has chosen yet.",
+    "escolhas_fim": "No more choices.",
+    "escolheu_homens": "Men",
+    "escolheu_mulheres": "Women",
+    "sugerido": "Suggested: add to the {{grupo}} group",
+    "ja_no_grupo": "Already in the {{grupo}} group",
+    "sem_grupo_configurado": "Set the user group above to see the suggestion",
+    "anterior": "Previous",
+    "proxima": "Next",
+    "abrir_grupos": "Open user groups"
+  },
+  "compartilhar": {
+    "acoes": "Post actions",
+    "compartilhar": "Share",
+    "copiar_link": "Copy link",
+    "copiado": "Link copied",
+    "erro_copiar": "Couldn't copy the link.",
+    "permitir": "Allow sharing outside the community",
+    "permitir_ajuda": "People with the link see the title, your name and an excerpt. The full post is only for those who sign in.",
+    "erro_permissao": "Couldn't change sharing.",
+    "publico": {
+      "rotulo": "Community post",
+      "por": "by {{nome}}",
+      "cta": "Sign in or create your account to read the full post",
+      "entrar": "Sign in",
+      "criar_conta": "Create account",
+      "logado_titulo": "You're already signed in.",
+      "ler_completo": "Read the full post"
+    }
   }
 }

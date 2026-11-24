@@ -17,13 +17,23 @@ interface UserCertificatesProps {
   orgslug: string
 }
 
-const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
+const UserCertificates: React.FC<UserCertificatesProps> = (props) => (
+  // Altura mínima igual em todos os estados (carregando, vazio, erro, lista).
+  <div className="min-h-[19rem]">
+    <UserCertificatesConteudo {...props} />
+  </div>
+)
+
+const UserCertificatesConteudo: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
 
-  const { data: certificates, error, isLoading } = useQuery({
+  // isPending (e não isLoading): sem token ainda, a query fica desligada e
+  // isLoading é false, o que mostrava "nenhum certificado" e depois o
+  // esqueleto, empurrando a página (CLS do Progresso, auditoria v4).
+  const { data: certificates, error, isPending: isLoading } = useQuery({
     queryKey: queryKeys.certifications.detail(`user_all_${org?.id}`),
     queryFn: () => getAllUserCertificates(org.id, access_token),
     select: (res: any) => asArray(res),
@@ -37,8 +47,8 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
     return (
       <div className="flex flex-col space-y-2">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-yellow-50 rounded-lg">
-            <Award className="w-5 h-5 text-yellow-500" />
+          <div className="p-2 bg-gray-100 rounded-lg">
+            <Award className="w-5 h-5 text-gray-700" />
           </div>
           <h2 className="text-lg font-bold text-gray-900">{t('certificate.my_certificates')}</h2>
         </div>
@@ -61,8 +71,8 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
     return (
       <div className="flex flex-col space-y-2">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-yellow-50 rounded-lg">
-            <Award className="w-5 h-5 text-yellow-500" />
+          <div className="p-2 bg-gray-100 rounded-lg">
+            <Award className="w-5 h-5 text-gray-700" />
           </div>
           <h2 className="text-lg font-bold text-gray-900">{t('certificate.my_certificates')}</h2>
         </div>
@@ -80,8 +90,8 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
     return (
       <div className="flex flex-col space-y-2">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-yellow-50 rounded-lg">
-            <Award className="w-5 h-5 text-yellow-500" />
+          <div className="p-2 bg-gray-100 rounded-lg">
+            <Award className="w-5 h-5 text-gray-700" />
           </div>
           <h2 className="text-lg font-bold text-gray-900">{t('certificate.my_certificates')}</h2>
         </div>
@@ -103,11 +113,11 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
   return (
     <div className="flex flex-col space-y-2">
       <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 bg-yellow-50 rounded-lg">
-          <Award className="w-5 h-5 text-yellow-500" />
+        <div className="p-2 bg-gray-100 rounded-lg">
+          <Award className="w-5 h-5 text-gray-700" />
         </div>
         <h2 className="text-lg font-bold text-gray-900">{t('certificate.my_certificates')}</h2>
-        <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+        <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
           {certificatesData.length}
         </span>
       </div>
@@ -131,7 +141,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                 href={verificationLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block relative aspect-video overflow-hidden bg-gradient-to-br from-yellow-50 to-amber-100"
+                className="block relative aspect-video overflow-hidden bg-gray-100"
               >
                 {certificate.course?.thumbnail_image && org?.org_uuid ? (
                   <img
@@ -146,7 +156,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
                 ) : null}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg">
-                    <Award className="w-8 h-8 text-yellow-500" />
+                    <Award className="w-8 h-8 text-gray-700" />
                   </div>
                 </div>
               </Link>

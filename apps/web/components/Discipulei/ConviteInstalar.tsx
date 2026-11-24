@@ -247,7 +247,9 @@ export default function ConviteInstalar() {
   return (
     <aside
       aria-label={t('instalar.rotulo')}
-      className="fixed inset-x-0 mx-auto w-auto max-w-md"
+      // No computador (auditoria v4): encostado no canto e menor, para não
+      // cobrir o centro inferior da tela.
+      className="fixed inset-x-0 mx-auto w-auto max-w-md lg:inset-x-auto lg:end-4 lg:mx-0 lg:max-w-xs"
       style={{
         bottom: `calc(max(var(--altura-barra-inferior, 0px), env(safe-area-inset-bottom, 0px)) + ${recuoExtra} + 12px)`,
         // Físico de propósito (rtl-ok): os recuos de área segura são físicos.
@@ -269,7 +271,7 @@ export default function ConviteInstalar() {
           alt=""
           width={40}
           height={40}
-          className="flex-shrink-0 rounded-xl"
+          className="flex-shrink-0 rounded-xl lg:hidden"
         />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-tight" style={{ color: 'var(--text)' }}>

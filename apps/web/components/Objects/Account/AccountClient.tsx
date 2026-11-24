@@ -14,6 +14,7 @@ import AccountGeneral from '@components/Objects/Account/subpages/AccountGeneral'
 import AccountProfile from '@components/Objects/Account/subpages/AccountProfile'
 import AccountSecurity from '@components/Objects/Account/subpages/AccountSecurity'
 import AccountPurchases from '@components/Objects/Account/subpages/AccountPurchases'
+import SecaoWhatsappConta from '@components/Discipulei/WhatsApp/SecaoWhatsappConta'
 import { useLHAnalytics, AnalyticsEvent } from '@services/analytics'
 
 interface AccountClientProps {
@@ -52,7 +53,13 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
   const renderSubpage = () => {
     switch (subpage) {
       case 'general':
-        return <AccountGeneral />
+        // Discipulei (N42): grupo do WhatsApp, visível só à pessoa e aos admins.
+        return (
+          <>
+            <AccountGeneral />
+            <SecaoWhatsappConta />
+          </>
+        )
       case 'profile':
         return <AccountProfile />
       case 'security':

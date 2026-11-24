@@ -77,6 +77,10 @@ class Discussion(DiscussionBase, table=True):
     # para discussion; a FK circular complicaria o create_all); ao apagar o
     # comentário, o service limpa este campo.
     accepted_comment_id: Optional[int] = Field(default=None, sa_column=Column(Integer, nullable=True))
+    # Compartilhar fora da comunidade (N44): o autor pode desligar no próprio post.
+    share_disabled: bool = Field(
+        default=False, sa_column=Column(Boolean, nullable=False, default=False, server_default="false")
+    )
     creation_date: str = ""
     update_date: str = ""
 
@@ -128,7 +132,12 @@ class DiscussionRead(SQLModel):
     is_pinned: bool = False
     is_locked: bool = False
     visibility: str = DISCUSSION_VISIBILITY_PUBLIC
-    accepted_comment_id: Optional[int] = None
+    # Só o uuid do comentário sai no JSON (o id numérico é interno). Preenchido
+    # na leitura de uma discussão (``get_discussion``).
+    accepted_comment_uuid: Optional[str] = None
+    share_disabled: bool = False
+    # Contagem de comentários na lista do espaço (evita N+1 no front).
+    comment_count: Optional[int] = None
     creation_date: str
     update_date: str
 

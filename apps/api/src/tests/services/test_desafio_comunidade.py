@@ -280,7 +280,8 @@ class TestLeituraDireta:
         await _negado(get_community(_req(), C_DESAFIO, u, db))
         await _negado(get_discussion(_req(), D_DESAFIO, u, db))
         await _negado(get_discussions_by_community(_req(), C_DESAFIO, u, db))
-        await _negado(get_community_by_course(_req(), CURSO_CONJUNTO, u, db))
+        # Pela página do curso: null, como curso sem comunidade (sem 403 no console).
+        assert await get_community_by_course(_req(), CURSO_CONJUNTO, u, db) is None
 
     @pytest.mark.asyncio
     async def test_visitante_nao_le_mesmo_com_public_true(self, db, world):

@@ -1,7 +1,8 @@
 'use client'
 
 /**
- * "Amém" e "Orando" (decisão N39) no post e nos comentários.
+ * "Amém", "Orando", "Obrigado" e "Me tocou" (N39 e N44) no post e nos
+ * comentários.
  *
  * Um único pedido por discussão (react-query compartilha entre o post e os
  * comentários). A contagem só chega para o autor do post/comentário (N22);
@@ -12,7 +13,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { HandsPraying, Check } from '@phosphor-icons/react'
+import { HandsPraying, Check, HandHeart, HeartStraight } from '@phosphor-icons/react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import {
   REACOES_FE,
@@ -41,6 +42,16 @@ export function useReacoesFe(discussionUuid: string, ativo = true) {
 const VAZIO: Record<ReacaoFe, EstadoReacao> = {
   amem: { reacted: false, count: null },
   orando: { reacted: false, count: null },
+  obrigado: { reacted: false, count: null },
+  tocou: { reacted: false, count: null },
+}
+
+/** Ícone sóbrio de cada reação (Amém só mostra o visto quando marcado). */
+function IconeReacao({ tipo, marcado, tamanho }: { tipo: ReacaoFe; marcado: boolean; tamanho: number }) {
+  if (tipo === 'orando') return <HandsPraying size={tamanho} aria-hidden="true" />
+  if (tipo === 'obrigado') return <HandHeart size={tamanho} aria-hidden="true" />
+  if (tipo === 'tocou') return <HeartStraight size={tamanho} aria-hidden="true" />
+  return marcado ? <Check size={tamanho} aria-hidden="true" /> : null
 }
 
 export function BotoesReacaoFe({
@@ -77,7 +88,7 @@ export function BotoesReacaoFe({
       const base: DadosReacoes = d ?? { discussion: { ...VAZIO }, comments: {} }
       if (commentUuid) {
         const atual = base.comments[commentUuid] ?? VAZIO
-        return { ...base, comments: { ...base.comments, [commentUuid]: { ...atual, [tipo]: inverter(atual[tipo]) } } }
+        return { ...base, comments: { ...base.comments, [commentUuid]: { ...atual, [tipo]: inverter(atual[tipo] ?? VAZIO[tipo]) } } }
       }
       return { ...base, discussion: { ...base.discussion, [tipo]: inverter(base.discussion[tipo] ?? VAZIO[tipo]) } }
     })
@@ -91,7 +102,7 @@ export function BotoesReacaoFe({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('social.reacoes.rotulo')}>
+    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2" role="group" aria-label={t('social.reacoes.rotulo')}>
       {REACOES_FE.map((tipo) => {
         const e = estados[tipo] ?? VAZIO[tipo]
         return (
@@ -108,11 +119,7 @@ export function BotoesReacaoFe({
                 : 'border-[var(--line)] text-[var(--text-2)] hover:border-[var(--line-strong)] hover:text-[var(--text)]'
             }`}
           >
-            {tipo === 'orando' ? (
-              <HandsPraying size={compacto ? 14 : 16} aria-hidden="true" />
-            ) : e.reacted ? (
-              <Check size={compacto ? 14 : 16} aria-hidden="true" />
-            ) : null}
+            <IconeReacao tipo={tipo} marcado={e.reacted} tamanho={compacto ? 14 : 16} />
             <span>{t(`social.reacoes.${tipo}`)}</span>
             {e.count !== null && e.count > 0 && (
               <span className="tabular-nums opacity-80">

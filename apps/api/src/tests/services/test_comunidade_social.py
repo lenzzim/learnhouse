@@ -423,9 +423,10 @@ async def test_resposta_util_so_em_pergunta_e_pelo_autor_ou_admin(db, mundo, sem
     assert exc.value.status_code == 403
 
     r = await social.set_accepted_answer(_req(), db, m["inscrito"], "discussion_pergunta", c.comment_uuid)
-    assert r["accepted_comment_id"] == c.id
+    assert r["accepted_comment_uuid"] == c.comment_uuid
+    assert "accepted_comment_id" not in r
     r = await social.set_accepted_answer(_req(), db, m["admin"], "discussion_pergunta", None)
-    assert r["accepted_comment_id"] is None
+    assert r["accepted_comment_uuid"] is None
 
     with pytest.raises(HTTPException) as exc:
         await social.set_accepted_answer(_req(), db, m["inscrito"], "discussion_geral_inscrito", None)

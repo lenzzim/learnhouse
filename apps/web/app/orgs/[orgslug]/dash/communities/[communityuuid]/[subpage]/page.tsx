@@ -1,7 +1,7 @@
 'use client'
 import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { getUriWithOrg } from '@services/config/config'
-import { Image as ImageIcon, Link2, Shield, MessagesSquare, Users } from 'lucide-react'
+import { Image as ImageIcon, Link2, Shield, MessagesSquare, Users, PenLine } from 'lucide-react'
 import React, { useEffect, use } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
@@ -11,6 +11,7 @@ import CommunityEditThumbnail from '@components/Dashboard/Pages/Community/Commun
 import CommunityEditCourse from '@components/Dashboard/Pages/Community/CommunityEditCourse'
 import CommunityEditModeration from '@components/Dashboard/Pages/Community/CommunityEditModeration'
 import CommunityEditAccess from '@components/Dashboard/Pages/Community/CommunityEditAccess'
+import CommunityEditRegras from '@components/Dashboard/Pages/Community/CommunityEditRegras'
 import { DashTabBar, DashTabItem } from '@components/Dashboard/Shared/DashTabBar/DashTabBar'
 
 export type CommunityParams = {
@@ -43,6 +44,9 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
     } else if (params.subpage === 'moderation') {
       setH1Label(t('dashboard.courses.communities.settings.moderation.title'))
       setH2Label(t('dashboard.courses.communities.settings.moderation.subtitle'))
+    } else if (params.subpage === 'regras') {
+      setH1Label(t('dashboard.courses.communities.settings.regras.title'))
+      setH2Label(t('dashboard.courses.communities.settings.regras.subtitle'))
     }
   }
 
@@ -88,6 +92,13 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
       href: getUriWithOrg(params.orgslug, '') + `/dash/communities/${params.communityuuid}/moderation`,
       active: params.subpage === 'moderation',
     },
+    {
+      key: 'regras',
+      label: t('dashboard.courses.communities.settings.tabs.regras'),
+      icon: <PenLine size={16} />,
+      href: getUriWithOrg(params.orgslug, '') + `/dash/communities/${params.communityuuid}/regras`,
+      active: params.subpage === 'regras',
+    },
   ]
 
   return (
@@ -120,6 +131,7 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
         {params.subpage === 'access' && <CommunityEditAccess />}
         {params.subpage === 'course' && <CommunityEditCourse />}
         {params.subpage === 'moderation' && <CommunityEditModeration />}
+        {params.subpage === 'regras' && <CommunityEditRegras />}
       </motion.div>
     </div>
   )

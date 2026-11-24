@@ -1,6 +1,7 @@
 /**
- * O canto inferior da tela (acima da barra de abas) é dividido por dois
- * avisos: o convite de instalar o app e o convite de estudo. Os dois usam o
+ * O canto inferior da tela (acima da barra de abas) é dividido por três
+ * avisos: o passo do grupo do WhatsApp (N42), o convite de instalar o app e
+ * o convite de estudo. Os dois usam o
  * mesmo lugar, então nunca podem aparecer juntos: quem pediu e recebeu o
  * canto fica com ele até soltar; o outro espera e aparece em seguida.
  *
@@ -8,9 +9,10 @@
  * Módulo puro (sem React) para ser testado no Node.
  */
 
-export type DonoCanto = 'instalar' | 'estudo'
+export type DonoCanto = 'whatsapp' | 'instalar' | 'estudo'
 
-const PRIORIDADE: readonly DonoCanto[] = ['instalar', 'estudo']
+// O passo do grupo do WhatsApp (N42) é o da primeira entrada: vem antes.
+const PRIORIDADE: readonly DonoCanto[] = ['whatsapp', 'instalar', 'estudo']
 
 let atual: DonoCanto | null = null
 const querem = new Set<DonoCanto>()

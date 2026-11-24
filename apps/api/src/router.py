@@ -32,6 +32,8 @@ from src.routers.courses import migration as migration_router_module
 from src.routers.communities import communities as communities_router_module
 from src.routers.communities import discussions as discussions_router_module
 from src.routers.communities import social as social_router_module
+from src.routers.communities import membros as membros_router_module
+from src.routers.communities import batepapos as batepapos_router_module
 # Discipulei: Caderno Bíblico (notas pessoais, separadas das discussions)
 from src.routers import notes as notes_router_module
 from src.routers.courses.activities import activities, blocks
@@ -247,6 +249,21 @@ v1_router.include_router(
     social_router_module.router,
     prefix="/social",
     tags=["social"],
+    dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
+)
+# Comunidade v5: WhatsApp na entrada, grupo de autores, salvos e compartilhar
+# (N42, N44, N45), no mesmo prefixo do social.
+v1_router.include_router(
+    membros_router_module.router,
+    prefix="/social",
+    tags=["social"],
+    dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
+)
+# Bate-papo Online (Bible Talk, N45).
+v1_router.include_router(
+    batepapos_router_module.router,
+    prefix="/batepapos",
+    tags=["batepapos"],
     dependencies=[Depends(require_plan_for_community("standard", "Communities"))]
 )
 # Caderno Bíblico: sem gate de plano. Cada rota exige sessão de pessoa (exceto

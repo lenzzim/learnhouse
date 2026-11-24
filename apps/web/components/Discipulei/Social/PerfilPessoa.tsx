@@ -137,6 +137,15 @@ export default function PerfilPessoa({ id, orgslug }: { id: string; orgslug: str
           {p.is_self && (
             <p className="mt-4 text-xs text-[var(--text-3)]">{t('social.perfil.como_os_outros_veem')}</p>
           )}
+          {p.is_self && (
+            // Salvos (N44): privado, só o próprio dono vê o atalho.
+            <Link
+              href={getUriWithOrg(orgslug, '/salvos')}
+              className={`mt-3 inline-flex min-h-11 items-center text-sm font-medium text-[var(--text)] underline underline-offset-2 ${FOCO}`}
+            >
+              {t('salvos.titulo')}
+            </Link>
+          )}
         </section>
       )}
 

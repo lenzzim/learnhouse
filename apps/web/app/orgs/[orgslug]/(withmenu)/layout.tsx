@@ -17,6 +17,7 @@ import { usePlan } from '@components/Hooks/usePlan'
 import { getGoogleFontUrl, DEFAULT_FONT } from '@/lib/fonts'
 import ConviteInstalar from '@components/Discipulei/ConviteInstalar'
 import ConvitesEstudoGlobais from '@components/Discipulei/ConvitesEstudoGlobais'
+import PassoWhatsapp from '@components/Discipulei/WhatsApp/PassoWhatsapp'
 // Discipulei: shell de app (barra lateral / barra de abas) no lugar do OrgMenu.
 import ShellDiscipulei from '@components/Discipulei/Navegacao/ShellDiscipulei'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
@@ -154,6 +155,8 @@ function LayoutContent({ children, orgslug }: { children: ReactNode; orgslug: st
       {!chromeless && <ConviteInstalar />}
       {/* Discipulei (N40): convites de estudo do fim do TCD e da 1ª nota publicada. */}
       {!chromeless && <ConvitesEstudoGlobais />}
+      {/* Discipulei (N42): passo único do grupo do WhatsApp na primeira entrada. */}
+      {!chromeless && <PassoWhatsapp />}
     </div>
   )
 }

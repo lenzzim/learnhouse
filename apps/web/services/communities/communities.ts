@@ -17,6 +17,11 @@ export interface CommunityModerationSettings {
   require_email_verified?: boolean
   disable_reactions?: boolean
   auto_lock_days?: number
+  // Regras do espaço (v5): quem publica, comentários e "não compartilhável".
+  post_policy?: 'all' | 'group'
+  post_usergroup_uuid?: string | null
+  comments_disabled?: boolean
+  not_shareable?: boolean
 }
 
 export interface Community {

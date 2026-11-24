@@ -696,37 +696,85 @@ async def mention_candidates(
 async def _notifications_query(request, db, current_user, org_id):
     viewer_id = await _require_member(db, current_user, org_id)
     org = await _get_org(db, org_id)
+    # Lembretes de bate-papo (v5) são gerados sob demanda, aqui: não há fila
+    # nem cron no LearnHouse (ver services/communities/batepapos.py).
+    from src.services.communities.batepapos import generate_due_reminders
+
+    try:
+        await generate_due_reminders(db, viewer_id, org_id)
+    except Exception as exc:  # nunca derruba a lista de notificações
+        logger.warning("Lembretes de bate-papo não gerados: %s", exc)
+        await db.rollback()
     clause = await readable_communities_clause(request, db, current_user, org, is_member=True)
-    base = (
-        select(CommunityNotification, Discussion, Community.community_uuid)
-        .join(Discussion, Discussion.id == CommunityNotification.discussion_id)
+    readable_discussions = (
+        select(Discussion.id)
         .join(Community, Community.id == Discussion.community_id)
         .where(
-            CommunityNotification.user_id == viewer_id,
-            CommunityNotification.org_id == org_id,
             # Nunca revela o título de algo que a pessoa deixou de poder ler.
             Discussion.visibility == DISCUSSION_VISIBILITY_PUBLIC,
             clause,
         )
     )
+    base = select(CommunityNotification).where(
+        CommunityNotification.user_id == viewer_id,
+        CommunityNotification.org_id == org_id,
+        or_(
+            CommunityNotification.discussion_id.in_(readable_discussions),  # type: ignore[union-attr]
+            CommunityNotification.event_id.is_not(None),  # type: ignore[union-attr]
+        ),
+    )
     return viewer_id, base
 
 
 async def list_notifications(request, db, current_user, org_id: int, limit: int = 30) -> List[NotificationRead]:
+    from src.db.communities.batepapos import CommunityEvent
+
     _viewer, base = await _notifications_query(request, db, current_user, org_id)
     rows = (await db.execute(
         base.order_by(CommunityNotification.creation_date.desc()).limit(max(1, min(limit, 50)))  # type: ignore[union-attr]
-    )).all()
-    actor_ids = {n.actor_id for n, _, _ in rows}
+    )).scalars().all()
+    discussion_ids = {n.discussion_id for n in rows if n.discussion_id}
+    discussions = {
+        d.id: (d, cu) for d, cu in (await db.execute(
+            select(Discussion, Community.community_uuid)
+            .join(Community, Community.id == Discussion.community_id)
+            .where(Discussion.id.in_(discussion_ids))  # type: ignore[attr-defined]
+        )).all()
+    } if discussion_ids else {}
+    event_ids = {n.event_id for n in rows if n.event_id}
+    events = {
+        e.id: e for e in (await db.execute(
+            select(CommunityEvent).where(CommunityEvent.id.in_(event_ids))  # type: ignore[attr-defined]
+        )).scalars().all()
+    } if event_ids else {}
+    actor_ids = {n.actor_id for n in rows if n.discussion_id}
     actors = {
         u.id: u for u in (await db.execute(select(User).where(User.id.in_(actor_ids)))).scalars().all()  # type: ignore[attr-defined]
     } if actor_ids else {}
-    comment_ids = {n.comment_id for n, _, _ in rows if n.comment_id}
+    comment_ids = {n.comment_id for n in rows if n.comment_id}
     comments = dict((await db.execute(
         select(DiscussionComment.id, DiscussionComment.comment_uuid).where(DiscussionComment.id.in_(comment_ids))  # type: ignore[attr-defined]
     )).all()) if comment_ids else {}
     out = []
-    for n, d, cu in rows:
+    for n in rows:
+        if n.event_id:
+            ev = events.get(n.event_id)
+            if not ev:
+                continue
+            out.append(NotificationRead(
+                notification_uuid=n.notification_uuid,
+                kind=n.kind,
+                creation_date=n.creation_date,
+                read=n.read_at is not None,
+                event_uuid=ev.event_uuid,
+                event_title=ev.title,
+                event_starts_at=ev.starts_at,
+            ))
+            continue
+        pair = discussions.get(n.discussion_id)
+        if not pair:
+            continue
+        d, cu = pair
         a = actors.get(n.actor_id)
         out.append(NotificationRead(
             notification_uuid=n.notification_uuid,
@@ -832,7 +880,23 @@ async def get_faith_reactions(request, db, current_user, discussion_uuid: str) -
                     count=len(users) if viewer_id and viewer_id == author_id else None,
                 )
             by_comment[cuuid] = states
-    return FaithReactionsRead(discussion=disc, comments=by_comment)
+
+    # v5: salvo por mim e compartilhamento (N44).
+    from src.db.communities.social import FaithShareState
+    from src.services.communities.membros import is_saved
+    from src.services.communities.publicacao import discussion_share_eligible
+
+    share = FaithShareState(
+        eligible=await discussion_share_eligible(db, d, _c),
+        disabled_by_author=bool(d.share_disabled),
+        can_toggle=bool(viewer_id) and viewer_id == d.author_id,
+    )
+    return FaithReactionsRead(
+        discussion=disc,
+        comments=by_comment,
+        saved=await is_saved(db, viewer_id, d.id),
+        share=share,
+    )
 
 
 def _ensure_reactions_enabled(community: Community) -> None:
@@ -934,4 +998,5 @@ async def set_accepted_answer(request, db, current_user, discussion_uuid: str, c
         d.accepted_comment_id = None
     db.add(d)
     await db.commit()
-    return {"accepted_comment_id": d.accepted_comment_id, "accepted_comment_uuid": comment_uuid or None}
+    # Só o uuid sai (o id numérico é interno).
+    return {"accepted_comment_uuid": comment_uuid or None}

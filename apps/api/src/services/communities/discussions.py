@@ -21,6 +21,8 @@ from src.db.communities.discussions import (
     DISCUSSION_VISIBILITY_PUBLIC,
 )
 from src.db.communities.discussion_votes import DiscussionVote
+from src.db.communities.discussion_comments import DiscussionComment
+from sqlalchemy import func
 from src.security.rbac import (
     check_resource_access,
     AccessAction,
@@ -32,6 +34,7 @@ from src.services.communities.moderation import (
     enforce_posting_limits,
 )
 from src.services.communities.social import notify_mentions
+from src.services.communities.publicacao import ensure_can_post
 from src.services.communities.visibility import (
     apply_visibility,
     announce_publication,
@@ -122,6 +125,11 @@ async def create_discussion(
 
     if not community:
         raise HTTPException(status_code=404, detail="Community not found")
+
+    # Blog só para autores (N45): espaço com "quem pode publicar" = grupo.
+    # Notas privadas do Caderno não publicam nada, então só o público conta.
+    if visibility == DISCUSSION_VISIBILITY_PUBLIC:
+        await ensure_can_post(db_session, current_user.id, community)
 
     # Apply per-user posting limits (slow mode, daily caps, account age, email)
     await enforce_posting_limits(current_user.id, community, db_session)
@@ -254,10 +262,20 @@ async def get_discussion(
         vote = (await db_session.execute(vote_statement)).scalars().first()
         has_voted = vote is not None
 
+    accepted_uuid = None
+    if discussion.accepted_comment_id:
+        accepted_uuid = (await db_session.execute(
+            select(DiscussionComment.comment_uuid).where(
+                DiscussionComment.id == discussion.accepted_comment_id,
+                DiscussionComment.discussion_id == discussion.id,
+            )
+        )).scalars().first()
+
     return DiscussionReadWithVoteStatus(
         **discussion.model_dump(),
         author=UserReadAuthor.model_validate(author.model_dump()) if author else None,
         has_voted=has_voted,
+        accepted_comment_uuid=accepted_uuid,
     )
 
 
@@ -384,6 +402,15 @@ async def get_discussions_by_community(
         votes = (await db_session.execute(votes_query)).scalars().all()
         user_votes = {v.discussion_id for v in votes}
 
+    # Contagem de comentários em lote (antes o front pedia uma por post).
+    comment_counts: dict = {}
+    if discussion_ids:
+        comment_counts = dict((await db_session.execute(
+            select(DiscussionComment.discussion_id, func.count(DiscussionComment.id))
+            .where(DiscussionComment.discussion_id.in_(discussion_ids))  # type: ignore[attr-defined]
+            .group_by(DiscussionComment.discussion_id)
+        )).all())
+
     # Build response
     result = []
     for discussion in discussions:
@@ -395,6 +422,7 @@ async def get_discussions_by_community(
                 **discussion.model_dump(),
                 author=UserReadAuthor.model_validate(author.model_dump()) if author else None,
                 has_voted=has_voted,
+                comment_count=int(comment_counts.get(discussion.id, 0)),
             )
         )
 
@@ -456,6 +484,9 @@ async def update_discussion(
                 status_code=403,
                 detail="Only the author can change the visibility of this discussion",
             )
+
+    if new_visibility == DISCUSSION_VISIBILITY_PUBLIC and is_private(discussion):
+        await ensure_can_post(db_session, acting_user_id, community)
 
     # Check edit limit for authors (admins can edit unlimited)
     is_author = discussion.author_id == acting_user_id

@@ -22,6 +22,7 @@ from src.services.communities.visibility import (
 from src.services.communities.moderation import validate_comment_content, enforce_auto_lock
 from src.services.webhooks.dispatch import dispatch_webhooks
 from src.services.communities.social import notify_mentions
+from src.services.communities.publicacao import ensure_can_comment
 
 
 async def create_comment(
@@ -73,6 +74,9 @@ async def create_comment(
     await check_resource_access(
         request, db_session, current_user, community.community_uuid, AccessAction.READ
     )
+
+    # Comentários continuam abertos, a menos que o admin desligue (N45).
+    await ensure_can_comment(db_session, current_user.id, community)
 
     # Check content moderation
     await validate_comment_content(content, community.id, db_session)

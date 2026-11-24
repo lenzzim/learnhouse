@@ -19,9 +19,13 @@ from typing import Dict, List, Optional
 from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
+# A FK de ``community_notification.event_id`` precisa da tabela registrada.
+from src.db.communities import batepapos as _batepapos  # noqa: F401
 
-# Reações de fé, nos posts e nos comentários.
-FAITH_REACTIONS = ("amem", "orando")
+
+# Reações de fé, nos posts e nos comentários. "Obrigado" e "Me tocou" entraram
+# na v5 (N44); as contagens continuam só para o autor (N22).
+FAITH_REACTIONS = ("amem", "orando", "obrigado", "tocou")
 
 PROFILE_BIO_MAX = 280
 
@@ -68,6 +72,8 @@ class CommunityNotification(SQLModel, table=True):
     __tablename__ = "community_notification"
     __table_args__ = (
         Index("ix_community_notification_user", "user_id", "org_id", "read_at"),
+        # Um lembrete de cada tipo por pessoa e encontro (gerados sob demanda).
+        UniqueConstraint("user_id", "event_id", "kind", name="uq_community_notification_event"),
     )
 
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -78,12 +84,19 @@ class CommunityNotification(SQLModel, table=True):
     )
     actor_id: int = Field(sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False))
     kind: str = Field(default=NOTIFICATION_MENTION, sa_column=Column(String(20), nullable=False))
-    discussion_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("discussion.id", ondelete="CASCADE"), nullable=False)
+    # Menções apontam para a discussão; lembretes de bate-papo (v5), para o
+    # encontro. Um dos dois sempre vem preenchido.
+    discussion_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("discussion.id", ondelete="CASCADE"), nullable=True),
     )
     comment_id: Optional[int] = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("discussioncomment.id", ondelete="CASCADE"), nullable=True),
+    )
+    event_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("community_event.id", ondelete="CASCADE"), nullable=True),
     )
     creation_date: str = ""
     read_at: Optional[str] = Field(default=None, sa_column=Column(String(40), nullable=True))
@@ -149,10 +162,14 @@ class NotificationRead(SQLModel):
     creation_date: str
     read: bool
     actor: Optional[MentionCandidate] = None
-    discussion_uuid: str
-    discussion_title: str
-    community_uuid: str
+    discussion_uuid: str = ""
+    discussion_title: str = ""
+    community_uuid: str = ""
     comment_uuid: Optional[str] = None
+    # Lembretes de bate-papo (v5).
+    event_uuid: Optional[str] = None
+    event_title: Optional[str] = None
+    event_starts_at: Optional[str] = None
 
 
 class FaithReactionState(SQLModel):
@@ -161,9 +178,18 @@ class FaithReactionState(SQLModel):
     count: Optional[int] = None
 
 
+class FaithShareState(SQLModel):
+    eligible: bool = False
+    disabled_by_author: bool = False
+    can_toggle: bool = False
+
+
 class FaithReactionsRead(SQLModel):
     discussion: Dict[str, FaithReactionState] = {}
     comments: Dict[str, Dict[str, FaithReactionState]] = {}
+    # v5: salvo por mim e estado do compartilhamento (N44).
+    saved: bool = False
+    share: FaithShareState = FaithShareState()
 
 
 class AcceptedAnswerUpdate(SQLModel):

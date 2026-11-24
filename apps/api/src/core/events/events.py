@@ -80,6 +80,11 @@ def startup_app(app: FastAPI) -> Callable:
         from src.services.demo.scheduler import start_scheduler as start_demo_scheduler
         start_demo_scheduler()
 
+        # Discipulei: lembretes de bate-papo por e-mail (N45). No-op sem
+        # DISCIPULEI_LEMBRETES_EMAIL=1; os do app são gerados sob demanda.
+        from src.services.communities.batepapos_scheduler import start_scheduler as start_batepapo_scheduler
+        start_batepapo_scheduler()
+
         # Start the in-app HLS transcoding consumer (drains the Redis queue as a
         # background task; no separate worker). No-op unless LEARNHOUSE_HLS_ENABLED.
         from src.services.utils.hls_jobs import start_consumer
@@ -121,6 +126,8 @@ def shutdown_app(app: FastAPI) -> Callable:
         # Stop the demo refresh tick.
         from src.services.demo.scheduler import stop_scheduler as stop_demo_scheduler
         await stop_demo_scheduler()
+        from src.services.communities.batepapos_scheduler import stop_scheduler as stop_batepapo_scheduler
+        await stop_batepapo_scheduler()
         await close_database(app)
 
     return close_app
