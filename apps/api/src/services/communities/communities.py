@@ -216,10 +216,15 @@ async def get_community_by_course(
     if not community:
         return None
 
-    # Check if user can read the community
-    await check_resource_access(
-        request, db_session, current_user, community.community_uuid, AccessAction.READ
+    # Discipulei (auditoria v4): quem não pode ler a comunidade do curso (ex.:
+    # desafio sem inscrição) recebe ``null``, como se o curso não tivesse
+    # comunidade. Não revela nada e tira o 403 do console da página do curso.
+    decision = await check_resource_access(
+        request, db_session, current_user, community.community_uuid, AccessAction.READ,
+        raise_on_deny=False,
     )
+    if not decision.allowed:
+        return None
 
     return CommunityRead.model_validate(community.model_dump())
 
