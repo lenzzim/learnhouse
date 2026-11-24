@@ -52,7 +52,7 @@ export default function ComunidadeConfigOrg({ orgId }: { orgId: number }) {
     enabled: !!orgId && !!token,
   })
 
-  const grupos = useQuery<Grupo[]>({
+  const grupos = useQuery<any, Error, Grupo[]>({
     queryKey: ['discipulei', 'admin', 'usergroups', orgId],
     queryFn: () => getUserGroups(orgId, token as string),
     select: (res: any) => {

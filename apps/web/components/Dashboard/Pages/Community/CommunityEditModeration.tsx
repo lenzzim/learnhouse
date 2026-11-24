@@ -34,7 +34,10 @@ import { Button } from '@components/ui/button'
 import { Label } from '@components/ui/label'
 import { Switch } from '@components/ui/switch'
 
-type Settings = Required<CommunityModerationSettings>
+// Só as chaves de moderação; as regras v5 do espaço ficam na aba Regras.
+type Settings = Required<
+  Omit<CommunityModerationSettings, 'post_policy' | 'post_usergroup_uuid' | 'comments_disabled' | 'not_shareable'>
+>
 
 const DEFAULT_SETTINGS: Settings = {
   block_links: false,
