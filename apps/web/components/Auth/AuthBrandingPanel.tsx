@@ -1,8 +1,6 @@
 'use client'
 import React from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
 import { MARCA_LEARNHOUSE_SO_ADMIN } from '@/lib/discipulei/nav'
 import { getOrgLogoMediaDirectory, getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import { getUriWithOrg } from '@services/config/config'
@@ -192,14 +190,7 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
                           className="w-full h-full object-contain p-3"
                         />
                       ) : (
-                        <Image
-                          quality={100}
-                          width={96}
-                          height={96}
-                          src={learnhouseIcon}
-                          alt="LearnHouse"
-                          className="object-contain"
-                        />
+                        <img src="/icons/icone-192.png" width={96} height={96} alt="Discipulei" className="h-full w-full object-cover" />
                       )}
                     </div>
                   </Link>

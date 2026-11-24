@@ -1,8 +1,6 @@
 'use client'
 import React from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
-import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
 import { getOrgLogoMediaDirectory, getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import { getUriWithOrg } from '@services/config/config'
 
@@ -67,14 +65,7 @@ export default function AuthMobileHeader({ org }: AuthMobileHeaderProps) {
               className="w-full h-full object-contain p-1.5"
             />
           ) : (
-            <Image
-              quality={100}
-              width={40}
-              height={40}
-              src={learnhouseIcon}
-              alt="LearnHouse"
-              className="object-contain"
-            />
+            <img src="/icons/icone-192.png" width={40} height={40} alt="Discipulei" className="h-full w-full object-cover" />
           )}
         </div>
       </Link>
