@@ -26,6 +26,7 @@ import { OriginalVerso } from './OriginalVerso'
 import { PainelVerbete } from './PainelVerbete'
 import { ConviteEstudo } from '@components/Discipulei/ChamadaEstudo'
 import { CHAVE_ULTIMO_CAPITULO } from '@/lib/discipulei/nav'
+import { CampoBuscaBiblia } from '@components/Busca/CampoBuscaBiblia'
 
 /**
  * Leitor da Bíblia. Esquema de URL único em todo o app:
@@ -395,6 +396,7 @@ export default function LeitorBiblia() {
         <h1 className="text-3xl">
           {nomeLivro(livroInfo)} {atual.capitulo}
         </h1>
+        <CampoBuscaBiblia versao={versaoA.id} />
         <div className="flex flex-wrap gap-2">
           <select
             aria-label={t('biblia.livro')}
