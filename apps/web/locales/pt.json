@@ -1340,7 +1340,7 @@
     "next": "Próximo",
     "types": {
       "all": "Tudo",
-      "courses": "Cursos",
+      "courses": "Aprender",
       "users": "Membros",
       "communities": "Comunidades",
       "discussions": "Discussões",
@@ -2157,7 +2157,8 @@
             "thumbnail": "Miniatura",
             "course": "Curso vinculado",
             "moderation": "Moderação",
-            "access": "Acesso"
+            "access": "Acesso",
+            "regras": "Regras"
           },
           "general": {
             "title": "Configurações gerais",
@@ -2178,6 +2179,10 @@
           "access": {
             "subtitle": "Controle quem pode acessar esta comunidade",
             "title": "Configurações de acesso"
+          },
+          "regras": {
+            "title": "Regras do espaço",
+            "subtitle": "Quem publica, comentários e compartilhamento"
           }
         },
         "course": {
@@ -2366,6 +2371,23 @@
               "unlink_success": "Acesso do grupo removido com sucesso"
             }
           }
+        },
+        "regras_espaco": {
+          "publicar_titulo": "Quem pode publicar",
+          "publicar_descricao": "Todos leem. Admins e mantenedores sempre podem publicar.",
+          "politica_all": "Todos os membros",
+          "politica_group": "Só um grupo de usuários (ex.: Grupo de autores)",
+          "grupo_rotulo": "Grupo que pode publicar",
+          "grupo_escolher": "Escolha um grupo",
+          "grupo_ajuda": "Os outros membros leem e comentam, mas não veem o botão \"Novo post\".",
+          "comentarios_rotulo": "Permitir comentários",
+          "comentarios_descricao": "Desligado, só admins e mantenedores comentam neste espaço.",
+          "nao_compartilhavel_rotulo": "Não compartilhável",
+          "nao_compartilhavel_descricao": "Posts deste espaço nunca geram link público. Use em espaços como Pedidos de oração.",
+          "salvar": "Salvar regras",
+          "salvo": "Regras salvas",
+          "erro": "Não foi possível salvar as regras.",
+          "falta_grupo": "Escolha o grupo que pode publicar."
         }
       },
       "structure": {
@@ -6546,13 +6568,13 @@
     "mencao_desc": "\"Jo 3:16 (NVI)\" no texto, clicável"
   },
   "nav": {
-    "inicio": "Início",
+    "inicio": "Hoje",
     "biblia": "Bíblia",
     "caderno": "Caderno",
     "comunidades": "Comunidades",
     "aprender": "Aprender",
     "navegacao_principal": "Navegação principal",
-    "ir_inicio": "{{nome}}: ir para o início",
+    "ir_inicio": "{{nome}}: ir para Hoje",
     "fechar": "Fechar",
     "buscar": "Buscar",
     "busca": {
@@ -6586,7 +6608,8 @@
       "pergunta_descricao": "Escolha uma comunidade e pergunte. Todos de lá veem.",
       "pergunta_modal_descricao": "Sua pergunta fica visível para quem participa da comunidade.",
       "pergunta_comunidade_dica": "A pergunta aparece nesta comunidade."
-    }
+    },
+    "batepapos": "Bate-papos"
   },
   "hoje": {
     "ola": "Olá, {{nome}}",
@@ -7307,14 +7330,24 @@
       "orando": "Orando",
       "contagem": "{{count}}",
       "erro": "Não foi possível reagir. Tente de novo.",
-      "devagar": "Calma: muitas ações em pouco tempo. Tente daqui a pouco."
+      "devagar": "Calma: muitas ações em pouco tempo. Tente daqui a pouco.",
+      "obrigado": "Obrigado",
+      "tocou": "Me tocou"
     },
     "resposta_util": {
       "selo": "Resposta útil",
       "marcar": "Marcar como resposta útil",
       "desmarcar": "Desmarcar resposta útil",
       "erro": "Não foi possível marcar a resposta."
-    }
+    },
+    "salvar": {
+      "salvar": "Salvar",
+      "salvo": "Salvo",
+      "salvo_toast": "Post salvo. Ele fica em Salvos, só para você.",
+      "removido_toast": "Post tirado dos salvos",
+      "erro": "Não foi possível salvar o post."
+    },
+    "comentarios_desligados": "Comentários desligados neste espaço."
   },
   "acesso": {
     "curso_titulo": "Você não tem acesso a este curso",
@@ -7330,5 +7363,164 @@
     "entrar": "Entrar",
     "voltar_aprender": "Voltar ao Aprender",
     "voltar_curso": "Voltar ao curso"
+  },
+  "batepapos": {
+    "nav": "Bate-papos",
+    "titulo": "Bate-papos",
+    "descricao": "Encontros online para conversar sobre a Bíblia. Confirme presença e entre pelo link na hora.",
+    "novo": "Novo bate-papo",
+    "proximos": "Próximos",
+    "passados": "Passados",
+    "vazio_proximos": "Nenhum bate-papo marcado por enquanto.",
+    "vazio_passados": "Nenhum bate-papo passado ainda.",
+    "erro": "Não foi possível concluir. Tente de novo.",
+    "ao_vivo": "Ao vivo",
+    "encerrado": "Encerrado",
+    "duracao": "{{min}} min",
+    "no_fuso": "{{hora}} no fuso {{fuso}}",
+    "conduz": "Conduz: {{nome}}",
+    "quem_conduz": "Quem conduz",
+    "passagens": "Passagens",
+    "entrar": "Entrar",
+    "entrar_agora": "Entrar agora",
+    "nova_aba": "abre em nova aba",
+    "entre_para_link": "Entre para ver o link da reunião",
+    "sem_link": "O link da reunião aparece aqui quando for definido.",
+    "adicionar_agenda": "Adicionar à agenda",
+    "voltar": "Bate-papos",
+    "nao_encontrado": "Este bate-papo não foi encontrado.",
+    "ver_post": "Ver o post de divulgação",
+    "editar": "Editar",
+    "apagar": "Apagar",
+    "confirmar_apagar": "Confirmar: apagar",
+    "apagado": "Bate-papo apagado.",
+    "form": {
+      "titulo": "Título",
+      "tema": "Tema",
+      "descricao": "Descrição",
+      "quando": "Data e hora",
+      "fuso": "Fuso horário",
+      "duracao": "Duração",
+      "conduz": "Quem conduz",
+      "link": "Link da reunião (Meet, Zoom)",
+      "link_dica": "Só membros logados veem o link.",
+      "link_invalido": "O link precisa começar com https://",
+      "passagens": "Passagens (opcional)",
+      "passagens_exemplo": "Ex.: Romanos 8:1-17",
+      "divulgar": "Divulgar num espaço (opcional)",
+      "nao_divulgar": "Não divulgar",
+      "divulgar_dica": "Cria um post com a data e o convite, sem o link da reunião.",
+      "obrigatorios": "Preencha o título, a data e a hora.",
+      "cancelar": "Cancelar",
+      "criar": "Criar bate-papo",
+      "salvar": "Salvar",
+      "criado": "Bate-papo criado.",
+      "salvo": "Alterações salvas."
+    },
+    "presenca": {
+      "vou": "Vou",
+      "talvez": "Talvez",
+      "contagem": "Vão: {{vou}} · Talvez: {{talvez}}",
+      "confirmada": "Presença confirmada.",
+      "talvez_ok": "Marcado como talvez.",
+      "cancelada": "Presença cancelada."
+    },
+    "confirmados": {
+      "titulo": "Quem confirmou",
+      "so_voce": "Só admins e autores veem os nomes; os outros membros veem só a contagem.",
+      "vao": "Vão",
+      "talvez": "Talvez",
+      "ninguem": "Ninguém ainda."
+    },
+    "hoje": {
+      "titulo": "Próximo bate-papo",
+      "agora": "Bate-papo agora",
+      "ver_agenda": "Ver agenda"
+    },
+    "notificacao": {
+      "amanha": "Amanhã: {{titulo}} às {{hora}}",
+      "em_15": "Começa em 15 minutos: {{titulo}}",
+      "comecou": "Começou! Entrar agora: {{titulo}}",
+      "lembrete": "Lembrete: {{titulo}}, {{quando}}"
+    }
+  },
+  "whatsapp": {
+    "titulo": "Entre no seu grupo do WhatsApp",
+    "descricao": "Um grupo para homens e outro para mulheres. Escolha o seu.",
+    "sou_homem": "Sou homem",
+    "sou_mulher": "Sou mulher",
+    "entrar_homens": "Entrar no grupo dos homens",
+    "entrar_mulheres": "Entrar no grupo das mulheres",
+    "aprovacao": "Um líder do mesmo gênero aprova cada entrada.",
+    "agora_nao": "Agora não",
+    "fechar": "Fechar",
+    "trocar": "Trocar de grupo",
+    "nova_aba": "abre em nova aba",
+    "privacidade": "Só você e os admins veem esta escolha.",
+    "erro": "Não foi possível salvar. Tente de novo.",
+    "cartao_titulo": "Grupo do WhatsApp",
+    "cartao_pergunta": "Escolha o seu grupo para receber o link.",
+    "conta_homens": "Homens",
+    "conta_mulheres": "Mulheres",
+    "conta_nenhum": "Não informar",
+    "conta_salvo": "Escolha salva."
+  },
+  "salvos": {
+    "titulo": "Salvos",
+    "privado": "Só você vê esta lista.",
+    "vazio": "Nenhum post salvo ainda. Toque em Salvar num post para guardá-lo aqui.",
+    "remover": "Tirar \"{{titulo}}\" dos salvos",
+    "remover_curto": "Tirar dos salvos",
+    "erro_remover": "Não foi possível tirar dos salvos.",
+    "mais": "Ver mais"
+  },
+  "admin_comunidade": {
+    "titulo": "Configurações da comunidade",
+    "descricao": "Valem para a organização inteira.",
+    "grupo_autores": "Grupo de autores",
+    "grupo_autores_ajuda": "A equipe que publica nos espaços restritos a autores (como o Blog) e cria bate-papos. Admins e mantenedores sempre podem.",
+    "nenhum_grupo": "Nenhum",
+    "grupo_homens": "Grupo de usuários \"Homens\"",
+    "grupo_mulheres": "Grupo de usuários \"Mulheres\"",
+    "grupos_genero_ajuda": "Usados só para sugerir abaixo em que grupo cada pessoa deveria entrar. Ninguém é adicionado automaticamente: um líder aprova cada entrada.",
+    "link_homens": "Link do WhatsApp — homens",
+    "link_mulheres": "Link do WhatsApp — mulheres",
+    "link_padrao": "Vazio = padrão: {{url}}",
+    "salvar": "Salvar",
+    "salvando": "Salvando…",
+    "salvo": "Configurações salvas.",
+    "erro": "Não foi possível salvar.",
+    "erro_carregar": "Não foi possível carregar as configurações.",
+    "escolhas_titulo": "Escolhas do grupo do WhatsApp",
+    "escolhas_ajuda": "Visível só para admins. Use como apoio para aprovar as entradas nos grupos.",
+    "escolhas_vazio": "Ninguém escolheu ainda.",
+    "escolhas_fim": "Não há mais escolhas.",
+    "escolheu_homens": "Homens",
+    "escolheu_mulheres": "Mulheres",
+    "sugerido": "Sugerido: adicionar ao grupo {{grupo}}",
+    "ja_no_grupo": "Já está no grupo {{grupo}}",
+    "sem_grupo_configurado": "Configure o grupo de usuários acima para ver a sugestão",
+    "anterior": "Anterior",
+    "proxima": "Próxima",
+    "abrir_grupos": "Abrir grupos de usuários"
+  },
+  "compartilhar": {
+    "acoes": "Ações do post",
+    "compartilhar": "Compartilhar",
+    "copiar_link": "Copiar link",
+    "copiado": "Link copiado",
+    "erro_copiar": "Não foi possível copiar o link.",
+    "permitir": "Permitir compartilhar fora da comunidade",
+    "permitir_ajuda": "Quem receber o link vê o título, seu nome e um trecho. O post completo só para quem entrar.",
+    "erro_permissao": "Não foi possível mudar o compartilhamento.",
+    "publico": {
+      "rotulo": "Post da comunidade",
+      "por": "por {{nome}}",
+      "cta": "Entre ou crie sua conta para ler o post completo",
+      "entrar": "Entrar",
+      "criar_conta": "Criar conta",
+      "logado_titulo": "Você já está na sua conta.",
+      "ler_completo": "Ler o post completo"
+    }
   }
 }

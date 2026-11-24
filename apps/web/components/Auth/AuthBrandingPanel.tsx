@@ -3,6 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import learnhouseIcon from 'public/learnhouse_bigicon_1.png'
+import { MARCA_LEARNHOUSE_SO_ADMIN } from '@/lib/discipulei/nav'
 import { getOrgLogoMediaDirectory, getOrgAuthBackgroundMediaDirectory } from '@services/media/media'
 import { getUriWithOrg } from '@services/config/config'
 import { cn } from '@/lib/utils'
@@ -143,7 +144,9 @@ export default function AuthBrandingPanel({ org, welcomeText, title, subtitle }:
         <div className="relative z-10 flex flex-col h-full p-10">
           {/* Top bar with LearnHouse lrn.svg logo - hidden for enterprise users
               and for the no-org apex panel (platform shows no logo on the image). */}
-          {!isEnterprise && !noOrg && (
+          {/* Discipulei: a marca LearnHouse só aparece para admin, e a tela de
+              login é pública (ninguém está logado), então ela some aqui. */}
+          {!isEnterprise && !noOrg && !MARCA_LEARNHOUSE_SO_ADMIN && (
             <div className="login-topbar">
               <Link prefetch href="https://learnhouse.app" target="_blank">
                 <img

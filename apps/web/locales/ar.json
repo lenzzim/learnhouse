@@ -1350,7 +1350,7 @@
     "next": "التالي",
     "types": {
       "all": "الكل",
-      "courses": "دورات",
+      "courses": "Learn",
       "users": "أعضاء",
       "communities": "مجتمعات",
       "discussions": "مناقشات",
@@ -2167,7 +2167,8 @@
             "thumbnail": "الصورة المصغرة",
             "course": "الدورة المرتبطة",
             "moderation": "الإشراف",
-            "access": "الوصول"
+            "access": "الوصول",
+            "regras": "القواعد"
           },
           "general": {
             "title": "الإعدادات العامة",
@@ -2188,6 +2189,10 @@
           "access": {
             "subtitle": "التحكم في من يمكنه الوصول إلى هذا المجتمع",
             "title": "إعدادات الوصول"
+          },
+          "regras": {
+            "title": "قواعد المساحة",
+            "subtitle": "من ينشر، والتعليقات، والمشاركة"
           }
         },
         "course": {
@@ -2376,6 +2381,23 @@
               "unlink_success": "تم إزالة وصول مجموعة المستخدمين بنجاح"
             }
           }
+        },
+        "regras_espaco": {
+          "publicar_titulo": "من يمكنه النشر",
+          "publicar_descricao": "الجميع يقرأ. المشرفون والقائمون على الصيانة يمكنهم النشر دائمًا.",
+          "politica_all": "جميع الأعضاء",
+          "politica_group": "مجموعة مستخدمين واحدة فقط (مثل مجموعة الكتّاب)",
+          "grupo_rotulo": "المجموعة التي يمكنها النشر",
+          "grupo_escolher": "اختر مجموعة",
+          "grupo_ajuda": "يقرأ باقي الأعضاء ويعلّقون، لكن لا يرون زر \"منشور جديد\".",
+          "comentarios_rotulo": "السماح بالتعليقات",
+          "comentarios_descricao": "عند الإيقاف، يعلّق المشرفون والقائمون على الصيانة فقط في هذه المساحة.",
+          "nao_compartilhavel_rotulo": "غير قابل للمشاركة",
+          "nao_compartilhavel_descricao": "منشورات هذه المساحة لا تحصل أبدًا على رابط عام. استخدمه لمساحات مثل طلبات الصلاة.",
+          "salvar": "حفظ القواعد",
+          "salvo": "تم حفظ القواعد",
+          "erro": "تعذّر حفظ القواعد.",
+          "falta_grupo": "اختر المجموعة التي يمكنها النشر."
         }
       },
       "structure": {
@@ -6561,13 +6583,13 @@
     }
   },
   "nav": {
-    "inicio": "Home",
+    "inicio": "اليوم",
     "biblia": "Bible",
     "caderno": "Notebook",
     "comunidades": "Communities",
     "aprender": "Learn",
     "navegacao_principal": "Main navigation",
-    "ir_inicio": "{{nome}}: go to home",
+    "ir_inicio": "{{nome}}: الانتقال إلى اليوم",
     "fechar": "Close",
     "buscar": "Search",
     "busca": {
@@ -6601,7 +6623,8 @@
       "pergunta_descricao": "Pick a community and ask. Everyone there can see it.",
       "pergunta_modal_descricao": "Your question is visible to everyone in the community.",
       "pergunta_comunidade_dica": "The question shows up in this community."
-    }
+    },
+    "batepapos": "اللقاءات عبر الإنترنت"
   },
   "hoje": {
     "ola": "Hello, {{nome}}",
@@ -7322,14 +7345,24 @@
       "orando": "أصلّي",
       "contagem": "{{count}}",
       "erro": "تعذّر التفاعل. حاول مرة أخرى.",
-      "devagar": "مهلًا: إجراءات كثيرة في وقت قصير. حاول بعد قليل."
+      "devagar": "مهلًا: إجراءات كثيرة في وقت قصير. حاول بعد قليل.",
+      "obrigado": "شكرًا",
+      "tocou": "لمسني"
     },
     "resposta_util": {
       "selo": "إجابة مفيدة",
       "marcar": "تعيين كإجابة مفيدة",
       "desmarcar": "إلغاء الإجابة المفيدة",
       "erro": "تعذّر تعيين الإجابة."
-    }
+    },
+    "salvar": {
+      "salvar": "حفظ",
+      "salvo": "محفوظ",
+      "salvo_toast": "تم حفظ المنشور. تجده في المحفوظات، ولا يراه غيرك.",
+      "removido_toast": "أُزيل المنشور من المحفوظات",
+      "erro": "تعذّر حفظ المنشور."
+    },
+    "comentarios_desligados": "التعليقات مغلقة في هذه المساحة."
   },
   "acesso": {
     "curso_titulo": "ليس لديك وصول إلى هذه الدورة",
@@ -7345,5 +7378,164 @@
     "entrar": "تسجيل الدخول",
     "voltar_aprender": "العودة إلى التعلّم",
     "voltar_curso": "العودة إلى الدورة"
+  },
+  "batepapos": {
+    "nav": "لقاءات الحوار",
+    "titulo": "لقاءات الحوار",
+    "descricao": "لقاءات عبر الإنترنت للحديث عن الكتاب المقدس. أكّد حضورك وادخل عبر الرابط في الموعد.",
+    "novo": "لقاء جديد",
+    "proximos": "القادمة",
+    "passados": "السابقة",
+    "vazio_proximos": "لا توجد لقاءات مجدولة حاليًا.",
+    "vazio_passados": "لا توجد لقاءات سابقة بعد.",
+    "erro": "تعذّر الإكمال. حاول مرة أخرى.",
+    "ao_vivo": "مباشر",
+    "encerrado": "انتهى",
+    "duracao": "{{min}} دقيقة",
+    "no_fuso": "{{hora}} بتوقيت {{fuso}}",
+    "conduz": "يقدّمه: {{nome}}",
+    "quem_conduz": "من يقدّم",
+    "passagens": "المقاطع",
+    "entrar": "دخول",
+    "entrar_agora": "ادخل الآن",
+    "nova_aba": "يفتح في علامة تبويب جديدة",
+    "entre_para_link": "سجّل الدخول لرؤية رابط الاجتماع",
+    "sem_link": "سيظهر رابط الاجتماع هنا عند تحديده.",
+    "adicionar_agenda": "أضف إلى التقويم",
+    "voltar": "لقاءات الحوار",
+    "nao_encontrado": "لم يتم العثور على هذا اللقاء.",
+    "ver_post": "عرض منشور الإعلان",
+    "editar": "تعديل",
+    "apagar": "حذف",
+    "confirmar_apagar": "تأكيد: حذف",
+    "apagado": "تم حذف اللقاء.",
+    "form": {
+      "titulo": "العنوان",
+      "tema": "الموضوع",
+      "descricao": "الوصف",
+      "quando": "التاريخ والوقت",
+      "fuso": "المنطقة الزمنية",
+      "duracao": "المدة",
+      "conduz": "من يقدّم",
+      "link": "رابط الاجتماع (Meet أو Zoom)",
+      "link_dica": "يرى الرابط الأعضاء المسجّلون فقط.",
+      "link_invalido": "يجب أن يبدأ الرابط بـ https://",
+      "passagens": "المقاطع (اختياري)",
+      "passagens_exemplo": "مثال: رومية 8: 1-17",
+      "divulgar": "الإعلان في مساحة (اختياري)",
+      "nao_divulgar": "بدون إعلان",
+      "divulgar_dica": "ينشئ منشورًا بالموعد والدعوة، دون رابط الاجتماع.",
+      "obrigatorios": "املأ العنوان والتاريخ والوقت.",
+      "cancelar": "إلغاء",
+      "criar": "إنشاء لقاء",
+      "salvar": "حفظ",
+      "criado": "تم إنشاء اللقاء.",
+      "salvo": "تم حفظ التغييرات."
+    },
+    "presenca": {
+      "vou": "سأحضر",
+      "talvez": "ربما",
+      "contagem": "سيحضر: {{vou}} · ربما: {{talvez}}",
+      "confirmada": "تم تأكيد حضورك.",
+      "talvez_ok": "تم التحديد: ربما.",
+      "cancelada": "تم إلغاء الحضور."
+    },
+    "confirmados": {
+      "titulo": "من أكّد الحضور",
+      "so_voce": "يرى المشرفون والمؤلفون الأسماء فقط؛ ويرى باقي الأعضاء العدد فقط.",
+      "vao": "سيحضرون",
+      "talvez": "ربما",
+      "ninguem": "لا أحد بعد."
+    },
+    "hoje": {
+      "titulo": "اللقاء القادم",
+      "agora": "لقاء الآن",
+      "ver_agenda": "عرض الجدول"
+    },
+    "notificacao": {
+      "amanha": "غدًا: {{titulo}} الساعة {{hora}}",
+      "em_15": "يبدأ بعد 15 دقيقة: {{titulo}}",
+      "comecou": "بدأ اللقاء! ادخل الآن: {{titulo}}",
+      "lembrete": "تذكير: {{titulo}}، {{quando}}"
+    }
+  },
+  "whatsapp": {
+    "titulo": "انضم إلى مجموعتك على واتساب",
+    "descricao": "هناك مجموعة للرجال وأخرى للنساء. اختر مجموعتك.",
+    "sou_homem": "أنا رجل",
+    "sou_mulher": "أنا امرأة",
+    "entrar_homens": "الانضمام إلى مجموعة الرجال",
+    "entrar_mulheres": "الانضمام إلى مجموعة النساء",
+    "aprovacao": "يوافق قائد من الجنس نفسه على كل طلب انضمام.",
+    "agora_nao": "ليس الآن",
+    "fechar": "إغلاق",
+    "trocar": "تغيير المجموعة",
+    "nova_aba": "يفتح في علامة تبويب جديدة",
+    "privacidade": "أنت والمشرفون فقط ترون هذا الاختيار.",
+    "erro": "تعذّر الحفظ. حاول مرة أخرى.",
+    "cartao_titulo": "مجموعة واتساب",
+    "cartao_pergunta": "اختر مجموعتك لتحصل على الرابط.",
+    "conta_homens": "رجال",
+    "conta_mulheres": "نساء",
+    "conta_nenhum": "أفضّل عدم الإفصاح",
+    "conta_salvo": "تم حفظ الاختيار."
+  },
+  "salvos": {
+    "titulo": "المحفوظات",
+    "privado": "أنت فقط ترى هذه القائمة.",
+    "vazio": "لا توجد منشورات محفوظة بعد. اضغط «حفظ» في أي منشور ليظهر هنا.",
+    "remover": "إزالة «{{titulo}}» من المحفوظات",
+    "remover_curto": "إزالة من المحفوظات",
+    "erro_remover": "تعذّرت الإزالة من المحفوظات.",
+    "mais": "عرض المزيد"
+  },
+  "admin_comunidade": {
+    "titulo": "إعدادات المجتمع",
+    "descricao": "تنطبق على المؤسسة كلها.",
+    "grupo_autores": "مجموعة المؤلفين",
+    "grupo_autores_ajuda": "الفريق الذي ينشر في المساحات المخصصة للمؤلفين (مثل المدونة) وينشئ اللقاءات عبر الإنترنت. يستطيع المشرفون والمسؤولون ذلك دائمًا.",
+    "nenhum_grupo": "لا شيء",
+    "grupo_homens": "مجموعة المستخدمين «رجال»",
+    "grupo_mulheres": "مجموعة المستخدمين «نساء»",
+    "grupos_genero_ajuda": "تُستخدم فقط لاقتراح المجموعة التي ينبغي أن ينضم إليها كل شخص. لا يُضاف أحد تلقائيًا: يوافق قائد على كل طلب.",
+    "link_homens": "رابط واتساب — الرجال",
+    "link_mulheres": "رابط واتساب — النساء",
+    "link_padrao": "فارغ = الافتراضي: {{url}}",
+    "salvar": "حفظ",
+    "salvando": "جارٍ الحفظ…",
+    "salvo": "تم حفظ الإعدادات.",
+    "erro": "تعذّر الحفظ.",
+    "erro_carregar": "تعذّر تحميل الإعدادات.",
+    "escolhas_titulo": "اختيارات مجموعة واتساب",
+    "escolhas_ajuda": "مرئية للمشرفين فقط. استخدمها للمساعدة في الموافقة على طلبات الانضمام.",
+    "escolhas_vazio": "لم يختر أحد بعد.",
+    "escolhas_fim": "لا مزيد من الاختيارات.",
+    "escolheu_homens": "رجال",
+    "escolheu_mulheres": "نساء",
+    "sugerido": "مقترح: إضافته إلى مجموعة {{grupo}}",
+    "ja_no_grupo": "موجود بالفعل في مجموعة {{grupo}}",
+    "sem_grupo_configurado": "اضبط مجموعة المستخدمين أعلاه لرؤية الاقتراح",
+    "anterior": "السابق",
+    "proxima": "التالي",
+    "abrir_grupos": "فتح مجموعات المستخدمين"
+  },
+  "compartilhar": {
+    "acoes": "إجراءات المنشور",
+    "compartilhar": "مشاركة",
+    "copiar_link": "نسخ الرابط",
+    "copiado": "تم نسخ الرابط",
+    "erro_copiar": "تعذّر نسخ الرابط.",
+    "permitir": "السماح بالمشاركة خارج المجتمع",
+    "permitir_ajuda": "من يتلقى الرابط يرى العنوان واسمك ومقتطفًا. المنشور الكامل لمن يسجّل الدخول فقط.",
+    "erro_permissao": "تعذّر تغيير إعداد المشاركة.",
+    "publico": {
+      "rotulo": "منشور من المجتمع",
+      "por": "بقلم {{nome}}",
+      "cta": "سجّل الدخول أو أنشئ حسابك لقراءة المنشور كاملًا",
+      "entrar": "تسجيل الدخول",
+      "criar_conta": "إنشاء حساب",
+      "logado_titulo": "أنت مسجّل الدخول بالفعل.",
+      "ler_completo": "اقرأ المنشور كاملًا"
+    }
   }
 }
